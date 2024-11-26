@@ -7,10 +7,6 @@ export default function Feed () {
         <Surface mode={'flat'} style={{backgroundColor: 'white', height: '100%'}}>
             <ProductDisplayCardCustomerFeed/>
             <ProductDisplayCardCustomerFeed/>
-            <ProductDisplayCardCustomerFeed/>
-            <ProductDisplayCardCustomerFeed/>
-            <ProductDisplayCardCustomerFeed/>
-            <ProductDisplayCardCustomerFeed/>
         </Surface>
     </ScrollView>
 }

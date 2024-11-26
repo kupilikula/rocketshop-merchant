@@ -65,6 +65,7 @@ export default function FlatListSlider (props) {
                     showsHorizontalScrollIndicator={false}
                     renderItem={({item, i}) => {
                         return React.cloneElement(props.component, {
+                            mediaType: item['mediaType'],
                             width: size.width,
                             orientation: props.orientation,
                             item: item,
@@ -91,7 +92,7 @@ export default function FlatListSlider (props) {
                     maxToRenderPerBatch={1}
                     removeClippedSubviews={true}
                 />
-                {props.indicator && (
+                {props.indicator && (props.data.length > 1) && (
                     <Indicator
                         itemCount={props.data.length}
                         currentIndex={index % props.data.length}

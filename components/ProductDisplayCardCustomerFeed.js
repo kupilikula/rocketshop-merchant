@@ -4,28 +4,37 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FlatListSlider from "./MediaSlider/FlatListSlider";
 import MediaItem from "./MediaSlider/MediaItem";
 import { Rating } from '@kolking/react-native-rating';
+import {Image} from 'expo-image';
 
-const StoreLogo = props => <Avatar.Icon {...props} icon="folder" size={50} />
+const StoreLogo = props => <Image source={'https://picsum.photos/400'} style={{height: 60, width: 60, borderRadius: 30, borderWidth:1, borderColor: 'black', margin:0, padding: 0}}/>
 
 const imageData = [
     {
+        mediaType: 'image',
         image:
             'https://picsum.photos/700',
         desc:
             'Sample Description below the image for representation purpose only',
     },
     {
+        mediaType: 'image',
         image:
             'https://picsum.photos/500',
         desc:
             'Sample Description below the image for representation purpose only',
-    }];
+    },
+    {
+        mediaType: 'video',
+        video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        desc: 'Test Video'
+    }
+    ];
 
 export default function ProductDisplayCardCustomerFeed (props) {
 
     // console.log('size:', size);
     return <Card mode={'elevated'} style={{width: '100%', borderRadius: 0, marginTop: 10, marginBottom: 10, backgroundColor: 'white'}}>
-        <Card.Title title="Product Name ABCD adsfew we3lk efwekm dflkmlk" titleNumberOfLines={3} titleVariant={'titleLarge'} subtitle="Store Name" subtitleVariant={'bodyLarge'} subtitleNumberOfLines={2} left={StoreLogo}/>
+        <Card.Title title="Product Name ABCD adsfew we3lk efwekm dflkmlk" titleNumberOfLines={3} titleVariant={'titleLarge'} subtitle="Store Name" subtitleVariant={'bodyLarge'} subtitleNumberOfLines={2} left={StoreLogo} leftStyle={{width: 70, marginLeft: 10, paddingLeft: 0, marginRight: 0, paddingRight: 0}} style={{marginLeft: 0, paddingLeft: 0}} titleStyle={{paddingLeft:0, marginLeft: 0}}/>
         {/*<Image style={{borderRadius: 0, width:'100%', aspectRatio: '1.91'}} source={{ uri: "https://picsum.photos/700"}} />*/}
         <FlatListSlider
             data={imageData}
@@ -34,7 +43,7 @@ export default function ProductDisplayCardCustomerFeed (props) {
             orientation={'landscape'}
             separator={0}
             currentIndexCallback={index => console.log('Index', index)}
-            onPress={item => {}}
+            onPress={item => { console.log('pressed')}}
             indicator
             indicatorStyle={{}}
             indicatorContainerStyle={{}}
