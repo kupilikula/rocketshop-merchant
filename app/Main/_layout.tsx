@@ -1,16 +1,8 @@
-// import { createNativeStackNavigator } from "@react-navigation/native-stack";
-// import {NavigationContainer} from "@react-navigation/native";
-// import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-// import Index from './Index';
-// import Index from './Index';
-// import {View, Text} from "react-native";
-import {Stack, Tabs} from "expo-router";
-// import {IconSymbol} from "@/app-example/components/ui/IconSymbol";
+import {Tabs} from "expo-router";
 import React from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {TouchableOpacity} from "react-native";
 
-// const Tabs = createBottomTabNavigator();
 
 export default function TabsComponent() {
   return <Tabs screenOptions={{

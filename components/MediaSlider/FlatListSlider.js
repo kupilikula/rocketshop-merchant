@@ -48,7 +48,7 @@ export default function FlatListSlider (props) {
     };
 
     const viewabilityConfig = {
-        viewAreaCoveragePercentThreshold: 20,
+        itemVisiblePercentThreshold: 50,
     };
 
     return (

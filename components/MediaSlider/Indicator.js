@@ -32,11 +32,9 @@ export const renderIndicator = (
     indicatorInActiveColor,
     indicatorActiveWidth,
 ) => {
-    console.log('currentIndex:', currentIndex);
 
     let indicators = [];
     for (let i = 0; i < count; i++) {
-        console.log('i:', i);
         indicators.push(
             <View
                 style={[
