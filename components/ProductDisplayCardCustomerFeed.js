@@ -1,13 +1,50 @@
 import {View, Text} from "react-native";
 import {Card, Button, Avatar} from "react-native-paper";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import {Image} from 'expo-image';
+import FlatListSlider from "./MediaSlider/FlatListSlider";
+import MediaItem from "./MediaSlider/MediaItem";
+import {useCallback, useState} from "react";
+const StoreLogo = props => <Avatar.Icon {...props} icon="folder" />
 
-const LeftContent = props => <Avatar.Icon {...props} icon="folder" />
+const imageData = [
+    {
+        image:
+            'https://picsum.photos/700',
+        desc:
+            'Sample Description below the image for representation purpose only',
+    },
+    {
+        image:
+            'https://picsum.photos/700',
+        desc:
+            'Sample Description below the image for representation purpose only',
+    }];
 
 export default function ProductDisplayCardCustomerFeed (props) {
-    return   <Card mode={'elevated'} style={{borderRadius: 0, marginTop: 10, marginBottom: 10}}>
-        <Card.Title title="Product Name" subtitle="Store Name" left={LeftContent}/>
-        <Card.Cover style={{borderRadius: 0}} source={{uri: 'https://picsum.photos/700'}} />
+
+    // console.log('size:', size);
+    return <View  >
+    <Card mode={'elevated'} style={{width: '100%', borderRadius: 0, marginTop: 10, marginBottom: 10}}>
+        <Card.Title title="Product Name" subtitle="Store Name" left={StoreLogo}/>
+        {/*<Image style={{borderRadius: 0, width:'100%', aspectRatio: '1.91'}} source={{ uri: "https://picsum.photos/700"}} />*/}
+        <FlatListSlider
+            data={imageData}
+            imageKey={'image'}
+            local={false}
+            orientation={'portrait'}
+            separator={0}
+            currentIndexCallback={index => console.log('Index', index)}
+            onPress={item => {}}
+            indicator
+            indicatorStyle={{}}
+            indicatorContainerStyle={{}}
+            indicatorActiveColor='#3498db'
+            indicatorInActiveColor='#bdc3c7'
+            indicatorActiveWidth={6}
+            contentContainerStyle={{}}
+            component = {<MediaItem />}
+            />
         <Card.Content>
             <View style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: 10}}>
                 <View>
@@ -22,4 +59,5 @@ export default function ProductDisplayCardCustomerFeed (props) {
             </View>
         </Card.Content>
     </Card>
+</View>
 }

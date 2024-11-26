@@ -17,7 +17,7 @@ export default function TabsComponent() {
       headerShown: false, tabBarShowLabel: false, animation: 'fade',
       tabBarActiveTintColor: 'green',
       tabBarInactiveTintColor: 'black',
-      tabBarButton: (props) => {return <TouchableOpacity activeOpacity={1} {...props} />} }}>
+      tabBarButton: (props) => {return (<TouchableOpacity activeOpacity={1} {...props} />)} }}>
     <Tabs.Screen
         name="Feed"
         options={{
@@ -40,19 +40,18 @@ export default function TabsComponent() {
           }}
       />
       <Tabs.Screen
-          name="StoreFront"
-          options={{
-              title: 'Store Front',
-              tabBarIcon: ({ color }) => <MaterialIcons name={'storefront'} size={28} color={color}/>,
-          }}
-      />
-      <Tabs.Screen
           name="ShoppingCart"
           options={{
               title: 'Shopping Cart',
               tabBarIcon: ({ color }) => <MaterialIcons name={'shopping-cart'} size={28} color={color}/>,
           }}
       />
-
+      <Tabs.Screen
+          name="StoreFront"
+          options={{
+              title: 'Store Front',
+              tabBarIcon: ({ color }) => <MaterialIcons name={'storefront'} size={28} color={color}/>,
+          }}
+      />
   </Tabs>
 }
