@@ -5,8 +5,9 @@ import FlatListSlider from "./MediaSlider/FlatListSlider";
 import MediaItem from "./MediaSlider/MediaItem";
 import { Rating } from '@kolking/react-native-rating';
 import {Image} from 'expo-image';
+import {Colors} from "../styles/Colors";
 
-const StoreLogo = props => <Image source={'https://picsum.photos/400'} style={{height: 60, width: 60, borderRadius: 30, borderStyle: 'solid', borderWidth:2, borderColor: 'white', margin:0, padding: 0}}/>
+const StoreLogo = props => <Image source={'https://picsum.photos/400'} style={{height: 60, width: 60, borderRadius: 30, borderStyle: 'solid', borderWidth:2, borderColor: Colors.vividSkyBlue, margin:0, padding: 0}}/>
 
 const imageData = [
     {
@@ -46,11 +47,11 @@ export default function ProductDisplayCardCustomerFeed (props) {
             // onPress={item => { console.log('pressed')}}
             indicator
             indicatorStyle={{}}
-            indicatorContainerStyle={{}}
+            indicatorContainerStyle={{position: 'absolute', bottom: 10}}
             indicatorActiveColor='#3498db'
             indicatorInActiveColor='#bdc3c7'
             indicatorActiveWidth={6}
-            contentContainerStyle={{backgroundColor: '#f6effc'}}
+            contentContainerStyle={{backgroundColor: 'white'}}
             component = {<MediaItem />}
             />
         <Card.Content style={{backgroundColor: 'white',}}>

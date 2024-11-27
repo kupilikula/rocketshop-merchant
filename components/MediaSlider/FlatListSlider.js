@@ -52,7 +52,7 @@ export default function FlatListSlider (props) {
     };
 
     return (
-            <View onLayout={onLayout}>
+            <View onLayout={onLayout} style={{position: 'relative'}}>
                 <FlatList
                     ref={slider}
                     horizontal={true}

@@ -2,12 +2,13 @@ import {Tabs} from "expo-router";
 import React from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {TouchableOpacity} from "react-native";
-
+import {Colors} from '@/styles/Colors';
 
 export default function TabsComponent() {
   return <Tabs screenOptions={{
       headerShown: false, tabBarShowLabel: false, animation: 'fade',
-      tabBarActiveTintColor: 'green',
+      tabBarStyle: {backgroundColor: 'white'},
+      tabBarActiveTintColor: Colors.shamrockGreen,
       tabBarInactiveTintColor: 'black',
       tabBarButton: (props) => {return (<TouchableOpacity activeOpacity={1} {...props} />)} }}>
     <Tabs.Screen

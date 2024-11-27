@@ -36,7 +36,7 @@ export default function MediaItem ({
         <Pressable style={styles.container} onPress={() => onPress(item)}>
             {item['mediaType']==='image' ?
             (<Image
-                style={{width: width, aspectRatio: orientation==='landscape' ? '1.33' : '0.8', resizeMode: 'stretch'}}
+                style={{width: width, aspectRatio: orientation==='landscape' ? '1.33' : '0.8'}}
                 source={local ? item['uri'] : {uri: item['uri']}}
             />) :
                 ( (isPlaying || videoPlayer.currentTime > 0 || !item['thumbnail']) ?
@@ -46,7 +46,7 @@ export default function MediaItem ({
                         <View style={{position: 'relative'}}>
                             <MaterialIcons name={'play-circle'} size={50} color={'white'}
                                            style={{opacity: 0.8, position: 'absolute', zIndex: 10, top: '50%', left: '50%', transform: "translate(-50%, -50%)"}}/>
-                            <Image source={{uri: item['thumbnail']}} style={{width: width, aspectRatio: orientation==='landscape' ? '1.33' : '0.8', resizeMode: 'stretch'}} />
+                            <Image source={{uri: item['thumbnail']}} style={{width: width, aspectRatio: orientation==='landscape' ? '1.33' : '0.8'}} />
                         </View>
                 )
             }
