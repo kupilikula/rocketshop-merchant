@@ -14,7 +14,7 @@ export default function Layout() {
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <Drawer screenOptions={{drawerPosition: 'right', headerLeft: () => false,
-                headerRight: () => <DrawerToggleButton />,
+                headerRight: () => <DrawerToggleButton/>,
                 headerShadowVisible: false,
                 headerTitle: '',
                 drawerStyle: { borderTopLeftRadius: 0, borderBottomLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0},

@@ -39,7 +39,7 @@ export default function MediaItem ({
                 style={{width: width, aspectRatio: orientation==='landscape' ? '1.33' : '0.8', resizeMode: 'stretch'}}
                 source={local ? item['uri'] : {uri: item['uri']}}
             />) :
-                ( (isPlaying || videoPlayer.currentTime > 0) ?
+                ( (isPlaying || videoPlayer.currentTime > 0 || !item['thumbnail']) ?
                 <VideoView contentFit={'contain'}
                            style={{width: width, aspectRatio: orientation === 'landscape' ? '1.5' : '0.8', alignSelf: 'center', marginVertical: 'auto'}}
                            player={videoPlayer} allowsFullscreen allowsPictureInPicture nativeControls={true}/> :

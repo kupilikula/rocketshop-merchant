@@ -6,7 +6,7 @@ import MediaItem from "./MediaSlider/MediaItem";
 import { Rating } from '@kolking/react-native-rating';
 import {Image} from 'expo-image';
 
-const StoreLogo = props => <Image source={'https://picsum.photos/400'} style={{height: 60, width: 60, borderRadius: 30, borderWidth:1, borderColor: 'black', margin:0, padding: 0}}/>
+const StoreLogo = props => <Image source={'https://picsum.photos/400'} style={{height: 60, width: 60, borderRadius: 30, borderStyle: 'solid', borderWidth:2, borderColor: 'white', margin:0, padding: 0}}/>
 
 const imageData = [
     {
@@ -34,8 +34,8 @@ const imageData = [
 export default function ProductDisplayCardCustomerFeed (props) {
 
     // console.log('size:', size);
-    return <Card mode={'elevated'} style={{width: '100%', borderRadius: 0, marginTop: 10, marginBottom: 10, backgroundColor: 'white'}}>
-        <Card.Title title="Product Name ABCD adsfew we3lk efwekm dflkmlk" titleNumberOfLines={3} titleVariant={'titleLarge'} subtitle="Store Name" subtitleVariant={'bodyLarge'} subtitleNumberOfLines={2} left={StoreLogo} leftStyle={{width: 70, marginLeft: 10, paddingLeft: 0, marginRight: 0, paddingRight: 0}} style={{marginLeft: 0, paddingLeft: 0}} titleStyle={{paddingLeft:0, marginLeft: 0}}/>
+    return <Card mode={'elevated'} style={{width: '100%', borderRadius: 0, marginTop: 5, marginBottom: 5, backgroundColor: 'white'}}>
+        <Card.Title title="Product Name ABCD adsfew we3lk efwekm dflkmlk" titleNumberOfLines={3} titleVariant={'titleLarge'} subtitle="Store Name" subtitleVariant={'bodyLarge'} subtitleNumberOfLines={2} left={StoreLogo} leftStyle={{width: 70, marginLeft: 10, paddingLeft: 0, marginRight: 0, paddingRight: 0}} style={{backgroundColor: 'black', marginLeft: 0, paddingLeft: 0}} titleStyle={{color: 'white', paddingLeft:0, marginLeft: 0}} subtitleStyle={{color: 'white'}}/>
         {/*<Image style={{borderRadius: 0, width:'100%', aspectRatio: '1.91'}} source={{ uri: "https://picsum.photos/700"}} />*/}
         <FlatListSlider
             data={imageData}
@@ -50,10 +50,10 @@ export default function ProductDisplayCardCustomerFeed (props) {
             indicatorActiveColor='#3498db'
             indicatorInActiveColor='#bdc3c7'
             indicatorActiveWidth={6}
-            contentContainerStyle={{}}
+            contentContainerStyle={{backgroundColor: '#f6effc'}}
             component = {<MediaItem />}
             />
-        <Card.Content>
+        <Card.Content style={{backgroundColor: 'white',}}>
             <View style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: 10}}>
                 <View>
                     <Text variant="titleLarge">₹375</Text>
