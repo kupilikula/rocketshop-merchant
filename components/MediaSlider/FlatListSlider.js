@@ -65,12 +65,10 @@ export default function FlatListSlider (props) {
                     showsHorizontalScrollIndicator={false}
                     renderItem={({item, i}) => {
                         return React.cloneElement(props.component, {
-                            mediaType: item['mediaType'],
                             width: size.width,
                             orientation: props.orientation,
                             item: item,
-                            imageKey: props.imageKey,
-                            onPress: props.onPress,
+                            // onPress: props.onPress,
                             index: i % props.data.length,
                             active: i === index,
                             local: props.local,
@@ -115,7 +113,6 @@ export default function FlatListSlider (props) {
 const styles = StyleSheet.create({
     image: {
         height: 230,
-        resizeMode: 'stretch',
     },
     indicatorContainerStyle: {
         marginTop: 18,

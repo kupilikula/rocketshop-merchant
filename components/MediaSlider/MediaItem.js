@@ -1,37 +1,54 @@
 import React from 'react';
-import {Image, StyleSheet, Pressable} from 'react-native';
+import {Image, StyleSheet, Pressable, View} from 'react-native';
 import { useVideoPlayer, VideoView } from 'expo-video';
+import {useEvent} from "expo";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 ;
 export default function MediaItem ({
-                                 mediaType,
                                  item,
-                                 onPress,
                                  index,
-                                 imageKey,
                                  local,
                                  orientation,
                                  width
                              }) {
 
     let videoPlayer;
-    if (mediaType==='video') {
-        videoPlayer = useVideoPlayer(item['video'], player => {
+    let isPlaying;
+    if (item['mediaType']==='video') {
+        videoPlayer = useVideoPlayer(item['uri'], player => {
             player.loop = true;
-            // player.play();
+            player.play();
         });
+        ({isPlaying} = useEvent(videoPlayer, 'playingChange', { isPlaying: videoPlayer.playing }));
     }
 
+    const onPress = (item) => {
+        if (item['mediaType']==='video') {
+            if (isPlaying) {
+                videoPlayer.pause();
+            } else {
+                videoPlayer.play();
+            }
+        }
+    }
 
     return (
-        <Pressable
-            style={styles.container}
-            onPress={() => onPress(index)}>
-            {mediaType==='image' ?
+        <Pressable style={styles.container} onPress={() => onPress(item)}>
+            {item['mediaType']==='image' ?
             (<Image
                 style={{width: width, aspectRatio: orientation==='landscape' ? '1.33' : '0.8', resizeMode: 'stretch'}}
-                source={local ? item[imageKey] : {uri: item[imageKey]}}
+                source={local ? item['uri'] : {uri: item['uri']}}
             />) :
-                <VideoView contentFit={'contain'} style={{width: width, aspectRatio: orientation==='landscape' ? '1.5' : '0.8'}} player={videoPlayer} allowsFullscreen allowsPictureInPicture />
+                ( (isPlaying || videoPlayer.currentTime > 0) ?
+                <VideoView contentFit={'contain'}
+                           style={{width: width, aspectRatio: orientation === 'landscape' ? '1.5' : '0.8', alignSelf: 'center', marginVertical: 'auto'}}
+                           player={videoPlayer} allowsFullscreen allowsPictureInPicture nativeControls={true}/> :
+                        <View style={{position: 'relative'}}>
+                            <MaterialIcons name={'play-circle'} size={50} color={'white'}
+                                           style={{opacity: 0.8, position: 'absolute', zIndex: 10, top: '50%', left: '50%', transform: "translate(-50%, -50%)"}}/>
+                            <Image source={{uri: item['thumbnail']}} style={{width: width, aspectRatio: orientation==='landscape' ? '1.33' : '0.8', resizeMode: 'stretch'}} />
+                        </View>
+                )
             }
         </Pressable>
     );
@@ -39,7 +56,5 @@ export default function MediaItem ({
 
 const styles = StyleSheet.create({
     container: {margin: 0, padding: 0},
-    image: {
-        resizeMode: 'stretch',
-    },
+    image: {},
 });

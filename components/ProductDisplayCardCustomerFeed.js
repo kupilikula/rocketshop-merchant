@@ -11,21 +11,22 @@ const StoreLogo = props => <Image source={'https://picsum.photos/400'} style={{h
 const imageData = [
     {
         mediaType: 'image',
-        image:
+        uri:
             'https://picsum.photos/700',
         desc:
             'Sample Description below the image for representation purpose only',
     },
     {
         mediaType: 'image',
-        image:
+        uri:
             'https://picsum.photos/500',
         desc:
             'Sample Description below the image for representation purpose only',
     },
     {
         mediaType: 'video',
-        video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        thumbnail: 'https://picsum.photos/400',
         desc: 'Test Video'
     }
     ];
@@ -38,12 +39,11 @@ export default function ProductDisplayCardCustomerFeed (props) {
         {/*<Image style={{borderRadius: 0, width:'100%', aspectRatio: '1.91'}} source={{ uri: "https://picsum.photos/700"}} />*/}
         <FlatListSlider
             data={imageData}
-            imageKey={'image'}
             local={false}
             orientation={'landscape'}
             separator={0}
             currentIndexCallback={index => console.log('Index', index)}
-            onPress={item => { console.log('pressed')}}
+            // onPress={item => { console.log('pressed')}}
             indicator
             indicatorStyle={{}}
             indicatorContainerStyle={{}}
@@ -58,7 +58,7 @@ export default function ProductDisplayCardCustomerFeed (props) {
                 <View>
                     <Text variant="titleLarge">₹375</Text>
                     <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
-                    <Rating disabled={true} variant={'stars-outline'} fillColor={'#faaf00'} baseColor={'black'} size={18} rating={3.5} onChange={()=>{}} /><Text style={{marginLeft: 5}} variant={'bodyMedium'}>3.5/5</Text>
+                    <Rating disabled={true} variant={'stars-outline'} fillColor={'#faaf00'} baseColor={'black'} size={18} rating={3.5} onChange={()=>{}} /><Text style={{marginLeft: 10}} variant={'bodyLarge'}>3.5/5</Text>
                     </View>
                 </View>
                 <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', alignContent: 'center'}}>
