@@ -1,6 +1,6 @@
-import {ScrollView} from "react-native";
+import {FlatList, ScrollView} from "react-native";
 import {Surface} from 'react-native-paper';
-import ProductDisplayCardCustomerStore from "../../../components/ProductDisplayCardCustomerStore";
+import ProductDisplayCardCustomerStore from "../../../../components/ProductDisplayCardCustomerStore";
 
 const productForCustomerStore = {
     storeName: 'Store Name',
@@ -36,16 +36,18 @@ const productForCustomerStore = {
         }
     ]
 }
+
+const products= [
+    productForCustomerStore,
+    productForCustomerStore,
+    productForCustomerStore,
+    productForCustomerStore,
+    productForCustomerStore,
+    productForCustomerStore
+]
+
 export default function Products () {
-    return <ScrollView>
-    <Surface mode={'flat'} style={{backgroundColor: 'white', height: '100%'}}>
-        <ProductDisplayCardCustomerStore product={productForCustomerStore}/>
-        {/*<ProductDisplayCardCustomerFeed/>*/}
-        {/*<ProductDisplayCardCustomerFeed/>*/}
-        {/*<ProductDisplayCardCustomerFeed/>*/}
-        {/*<ProductDisplayCardCustomerFeed/>*/}
-        {/*<ProductDisplayCardCustomerFeed/>*/}
-        {/*<ProductDisplayCardCustomerFeed/>*/}
+    return <Surface mode={'flat'} style={{backgroundColor: 'white', height: '100%'}}>
+        <FlatList data={products} renderItem={({item}) => <ProductDisplayCardCustomerStore product={item}/>}/>
     </Surface>
-    </ScrollView>
 }

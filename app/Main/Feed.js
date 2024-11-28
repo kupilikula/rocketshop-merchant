@@ -38,15 +38,17 @@ const productForCustomerFeed = {
 }
 
 const products = [
-    <ProductDisplayCardCustomerFeed product={productForCustomerFeed}/>,
-    <ProductDisplayCardCustomerFeed product={productForCustomerFeed}/>,
-    <ProductDisplayCardCustomerFeed product={productForCustomerFeed}/>,
-    <ProductDisplayCardCustomerFeed product={productForCustomerFeed}/>,
-    <ProductDisplayCardCustomerFeed product={productForCustomerFeed}/>,
+    productForCustomerFeed,
+    productForCustomerFeed,
+    productForCustomerFeed,
+    productForCustomerFeed,
+    productForCustomerFeed,
+    productForCustomerFeed,
+    productForCustomerFeed,
 ]
 
 export default function Feed () {
     return <Surface mode={'flat'} style={{backgroundColor: 'white', height: '100%'}}>
-    <FlatList data={products} renderItem={({item}) => item}/>
+    <FlatList data={products} renderItem={({item}) => <ProductDisplayCardCustomerFeed product={item}/> }/>
     </Surface>
 }
