@@ -40,5 +40,7 @@ yarn-error.*
 
 #build
 *.apk
+ios
+
 
 app-example

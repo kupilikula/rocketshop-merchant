@@ -1,5 +1,5 @@
-import {View} from "react-native";
-import {Card, Avatar, Text} from "react-native-paper";
+import {View, StyleSheet} from "react-native";
+import {Card, Text} from "react-native-paper";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FlatListSlider from "./MediaSlider/FlatListSlider";
 import MediaItem from "./MediaSlider/MediaItem";
@@ -7,39 +7,25 @@ import { Rating } from '@kolking/react-native-rating';
 import {Image} from 'expo-image';
 import {Colors} from "../styles/Colors";
 
-const StoreLogo = props => <Image source={'https://picsum.photos/400'} style={{height: 60, width: 60, borderRadius: 30, borderStyle: 'solid', borderWidth:2, borderColor: Colors.vividSkyBlue, margin:0, padding: 0}}/>
-
-const imageData = [
-    {
-        mediaType: 'image',
-        uri:
-            'https://picsum.photos/700',
-        desc:
-            'Sample Description below the image for representation purpose only',
-    },
-    {
-        mediaType: 'image',
-        uri:
-            'https://picsum.photos/500',
-        desc:
-            'Sample Description below the image for representation purpose only',
-    },
-    {
-        mediaType: 'video',
-        uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-        thumbnail: 'https://picsum.photos/400',
-        desc: 'Test Video'
-    }
-    ];
+const StoreLogo = (_) => <Image source={_.logoImage} style={styles.logo}/>
 
 export default function ProductDisplayCardCustomerFeed (props) {
 
     // console.log('size:', size);
-    return <Card mode={'elevated'} style={{width: '100%', borderRadius: 0, marginTop: 5, marginBottom: 5, backgroundColor: 'white'}}>
-        <Card.Title title="Product Name ABCD adsfew we3lk efwekm dflkmlk" titleNumberOfLines={3} titleVariant={'titleLarge'} subtitle="Store Name" subtitleVariant={'bodyLarge'} subtitleNumberOfLines={2} left={StoreLogo} leftStyle={{width: 70, marginLeft: 10, paddingLeft: 0, marginRight: 0, paddingRight: 0}} style={{backgroundColor: 'black', marginLeft: 0, paddingLeft: 0}} titleStyle={{color: 'white', paddingLeft:0, marginLeft: 0}} subtitleStyle={{color: 'white'}}/>
-        {/*<Image style={{borderRadius: 0, width:'100%', aspectRatio: '1.91'}} source={{ uri: "https://picsum.photos/700"}} />*/}
+    return <Card mode={'elevated'} style={styles.card}>
+        <Card.Title title={props.product.productName}
+                    titleNumberOfLines={3}
+                    titleVariant={'titleLarge'}
+                    subtitle={props.product.storeName}
+                    subtitleVariant={'bodyLarge'}
+                    subtitleNumberOfLines={2}
+                    left={() => StoreLogo({logoImage: props.product.storeLogoImage})}
+                    leftStyle={styles.titleLogoLeftStyle}
+                    style={styles.titleComponentStyle}
+                    titleStyle={styles.titleTextStyle}
+                    subtitleStyle={styles.subtitleTextStyle}/>
         <FlatListSlider
-            data={imageData}
+            data={props.product.mediaItems}
             local={false}
             orientation={'landscape'}
             separator={0}
@@ -54,20 +40,89 @@ export default function ProductDisplayCardCustomerFeed (props) {
             contentContainerStyle={{backgroundColor: 'white'}}
             component = {<MediaItem />}
             />
-        <Card.Content style={{backgroundColor: 'white',}}>
-            <View style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', marginTop: 10}}>
+        <Card.Content style={styles.cardContent}>
+            <View style={styles.cardContentView}>
                 <View>
-                    <Text variant="titleLarge">₹375</Text>
-                    <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
-                    <Rating disabled={true} variant={'stars-outline'} fillColor={'#faaf00'} baseColor={'black'} size={18} rating={3.5} onChange={()=>{}} /><Text style={{marginLeft: 10}} variant={'bodyLarge'}>3.5/5</Text>
+                    <Text variant="titleLarge">{'₹' + props.product.price.toString()}</Text>
+                    <View style={styles.rating}>
+                        <Rating disabled={true} variant={'stars-outline'} fillColor={'#faaf00'} baseColor={'black'} size={18} rating={props.product.rating} onChange={()=>{}} />
+                        <Text style={styles.ratingText} variant={'bodyLarge'}>
+                            {props.product.rating.toString() + '/5'}
+                        </Text>
                     </View>
                 </View>
-                <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', alignContent: 'center'}}>
-                    <MaterialIcons name={'favorite-border'} size={28} style={{margin: 10}}/>
-                    <MaterialIcons name={'share'} size={28} style={{margin: 10}}/>
-                    <MaterialIcons name={'add-shopping-cart'} size={28} style={{margin: 10}}/>
+                <View style={styles.actionButtonsContainer}>
+                    <MaterialIcons name={'favorite-border'} size={28} style={styles.actionButton}/>
+                    <MaterialIcons name={'share'} size={28} style={styles.actionButton}/>
+                    <MaterialIcons name={'add-shopping-cart'} size={28} style={styles.actionButton}/>
                 </View>
             </View>
         </Card.Content>
     </Card>
 }
+
+const styles = StyleSheet.create({
+    card: {
+        width: '100%',
+        borderRadius: 0,
+        marginBottom: 10,
+        backgroundColor: 'white'
+    },
+    logo: {
+        height: 60,
+        width: 60,
+        borderRadius: 30,
+        borderStyle: 'solid',
+        borderWidth: 2,
+        borderColor: Colors.vividSkyBlue,
+        margin:0,
+        padding: 0
+    },
+    titleComponentStyle: {
+        backgroundColor: 'black',
+        marginLeft: 0,
+        paddingLeft: 0
+    },
+    titleLogoLeftStyle: {
+        width: 70,
+        marginLeft: 10,
+        paddingLeft: 0,
+        marginRight: 0,
+        paddingRight: 0
+    },
+    titleTextStyle: {
+        color: 'white',
+        paddingLeft:0,
+        marginLeft: 0
+    },
+    subtitleTextStyle: {
+        color: 'white'
+    },
+    cardContent: {
+        backgroundColor: 'white'
+    },
+    cardContentView: {
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 10
+    },
+    rating: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'flex-start'
+    },
+    ratingText: {
+        marginLeft: 10
+    },
+    actionButtonsContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignContent: 'center'
+    },
+    actionButton: {
+        margin: 10
+    }
+})

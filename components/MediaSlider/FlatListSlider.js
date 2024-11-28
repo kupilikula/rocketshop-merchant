@@ -61,12 +61,11 @@ export default function FlatListSlider (props) {
                     decelerationRate={0.99}
                     bounces={false}
                     contentContainerStyle={props.contentContainerStyle}
-                    data={data}
+                    data={props.data}
                     showsHorizontalScrollIndicator={false}
                     renderItem={({item, i}) => {
                         return React.cloneElement(props.component, {
                             width: size.width,
-                            orientation: props.orientation,
                             item: item,
                             // onPress: props.onPress,
                             index: i % props.data.length,
