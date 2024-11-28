@@ -38,7 +38,7 @@ export default function MediaItem ({
             />) :
                 ( (isPlaying || videoPlayer.currentTime > 0 || !item['thumbnail']) ?
                 <VideoView contentFit={'contain'}
-                           style={{width: width, aspectRatio: item.orientation === 'landscape' ? '1.5' : '0.8', alignSelf: 'center', marginVertical: 'auto'}}
+                           style={{width: width, aspectRatio: item.orientation === 'landscape' ? '1.78' : '0.8', alignSelf: 'center', marginVertical: 'auto'}}
                            player={videoPlayer} allowsFullscreen allowsPictureInPicture nativeControls={true}/> :
                         <View style={{display: 'flex', position: 'relative', flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                             <MaterialIcons name={'play-circle'} size={50} color={'white'}
