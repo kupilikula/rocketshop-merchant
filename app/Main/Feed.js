@@ -23,7 +23,7 @@ const productForCustomerFeed = {
             mediaType: 'image',
             uri:
                 'https://picsum.photos/500',
-            orientation: 'portrait',
+            orientation: 'landscape',
             desc:
                 'Sample Description below the image for representation purpose only',
         },
