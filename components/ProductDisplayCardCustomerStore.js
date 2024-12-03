@@ -36,7 +36,7 @@ export default function ProductDisplayCardCustomerStore (props) {
                     <View style={styles.rating}>
                         <Rating disabled={true} variant={'stars-outline'} fillColor={'#faaf00'} baseColor={'black'} size={18} rating={props.product.rating} onChange={()=>{}} />
                         <Text style={styles.ratingText} variant={'bodyLarge'}>
-                            {props.product.rating.toString() + '/5'}
+                            {props.product.rating.toString() + '/5 ' + '(' + props.product.numberOfRatings.toString() + ')'}
                         </Text>
                     </View>
                 </View>

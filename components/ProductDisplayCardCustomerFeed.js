@@ -6,10 +6,12 @@ import MediaItem from "./MediaSlider/MediaItem";
 import { Rating } from '@kolking/react-native-rating';
 import {Image} from 'expo-image';
 import {Colors} from "../styles/Colors";
-
-const StoreLogo = (_) => <Image source={_.logoImage} style={styles.logo}/>
+import {foregroundColor} from "../utils/foregroundColor";
+import {StoreLogo} from "./StoreLogo";
 
 export default function ProductDisplayCardCustomerFeed (props) {
+
+    const {textColor, oppositeColor} = foregroundColor(props.product.storeBrandColor)
 
     // console.log('size:', size);
     return <Card mode={'elevated'} style={styles.card}>
@@ -19,11 +21,11 @@ export default function ProductDisplayCardCustomerFeed (props) {
                     subtitle={props.product.storeName}
                     subtitleVariant={'bodyLarge'}
                     subtitleNumberOfLines={2}
-                    left={() => StoreLogo({logoImage: props.product.storeLogoImage})}
+                    left={() => StoreLogo({logoImage: props.product.storeLogoImage, size: 60})}
                     leftStyle={styles.titleLogoLeftStyle}
-                    style={styles.titleComponentStyle}
-                    titleStyle={styles.titleTextStyle}
-                    subtitleStyle={styles.subtitleTextStyle}/>
+                    style={{...styles.titleComponentStyle, backgroundColor: props.product.storeBrandColor }}
+                    titleStyle={{...styles.titleTextStyle, color: textColor}}
+                    subtitleStyle={{...styles.subtitleTextStyle, color: textColor}}/>
         <FlatListSlider
             data={props.product.mediaItems}
             local={false}
@@ -47,7 +49,7 @@ export default function ProductDisplayCardCustomerFeed (props) {
                     <View style={styles.rating}>
                         <Rating disabled={true} variant={'stars-outline'} fillColor={'#faaf00'} baseColor={'black'} size={18} rating={props.product.rating} onChange={()=>{}} />
                         <Text style={styles.ratingText} variant={'bodyLarge'}>
-                            {props.product.rating.toString() + '/5'}
+                            {props.product.rating.toString() + '/5 (' + props.product.numberOfRatings + ')'}
                         </Text>
                     </View>
                 </View>
@@ -68,18 +70,8 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         backgroundColor: 'white'
     },
-    logo: {
-        height: 60,
-        width: 60,
-        borderRadius: 30,
-        borderStyle: 'solid',
-        borderWidth: 2,
-        borderColor: Colors.vividSkyBlue,
-        margin:0,
-        padding: 0
-    },
     titleComponentStyle: {
-        backgroundColor: 'black',
+        // backgroundColor: 'black',
         marginLeft: 0,
         paddingLeft: 0
     },
@@ -91,12 +83,12 @@ const styles = StyleSheet.create({
         paddingRight: 0
     },
     titleTextStyle: {
-        color: 'white',
+        // color: 'white',
         paddingLeft:0,
         marginLeft: 0
     },
     subtitleTextStyle: {
-        color: 'white'
+        // color: 'white'
     },
     cardContent: {
         backgroundColor: 'white'

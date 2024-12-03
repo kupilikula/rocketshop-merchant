@@ -1,17 +1,31 @@
-// import { createNativeStackNavigator } from "@react-navigation/native-stack";
-// import {NavigationContainer} from "@react-navigation/native";
-// import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-// import Index from './Index';
-// import Index from './Index';
-// import {View, Text} from "react-native";
-import {Redirect, Stack} from "expo-router";
-import TabsLayout from "@/app/Main/_layout";
+import {Stack} from "expo-router";
 import {PaperProvider} from "react-native-paper";
+import {SafeAreaProvider, useSafeAreaInsets} from "react-native-safe-area-context";
+import {View} from "react-native";
+import {StatusBar} from "expo-status-bar";
+import * as NavigationBar from 'expo-navigation-bar';
+import {useEffect} from "react";
 
 // const Tabs = createBottomTabNavigator();
 const isLoggedIn = true;
 export default function RootLayout() {
-  return (<PaperProvider>
-    <Stack screenOptions={{headerShown: false}}/>
-  </PaperProvider>);
+
+    const insets = useSafeAreaInsets();
+
+    useEffect( () => {
+        (async () => {
+            await NavigationBar.setBackgroundColorAsync("white")
+        })();
+    },[])
+
+
+    return ( <SafeAreaProvider>
+      <PaperProvider>
+          <StatusBar style="dark" backgroundColor={'white'} />
+          {/*<NavigationBar backgroundColor={'white'}/>*/}
+    <View style={{paddingTop: insets.top, width: '100%', height: '100%'}}>
+      <Stack screenOptions={{headerShown: false}}/>
+    </View>
+  </PaperProvider>
+  </SafeAreaProvider>);
 }

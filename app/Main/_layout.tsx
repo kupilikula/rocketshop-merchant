@@ -1,12 +1,13 @@
 import {Tabs} from "expo-router";
 import React from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import {TouchableOpacity} from "react-native";
+import {TouchableOpacity, View, Text} from "react-native";
 import {Colors} from '@/styles/Colors';
-
+import FeedHeader from '../../components/FeedHeader';
 export default function TabsComponent() {
-  return <Tabs screenOptions={{
-      headerShown: false, tabBarShowLabel: false, animation: 'fade',
+
+  return <Tabs backBehavior={'history'} initialRouteName={'Feed'} screenOptions={{
+      header: () => null, tabBarShowLabel: false, animation: 'fade',
       tabBarStyle: {backgroundColor: 'white', paddingBottom: 0, paddingTop: 3},
       tabBarActiveTintColor: Colors.shamrockGreen,
       tabBarInactiveTintColor: 'black',
@@ -14,8 +15,11 @@ export default function TabsComponent() {
     <Tabs.Screen
         name="Feed"
         options={{
-          title: 'Feed',
+            header: () => <FeedHeader />,
+            headerShadowVisible: true,
+            title:'',
           tabBarIcon: ({ color }) => <MaterialIcons name={'feed'} size={30} color={color}/>,
+            headerShown: true,
         }}
     />
     <Tabs.Screen

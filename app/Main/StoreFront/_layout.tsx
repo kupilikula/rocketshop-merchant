@@ -1,66 +1,111 @@
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Drawer } from 'expo-router/drawer';
-import {useNavigation} from "expo-router";
-import {Pressable, TouchableOpacity, View} from "react-native";
-import {DrawerActions} from "@react-navigation/native";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {DrawerToggleButton} from "@react-navigation/drawer";
-
+import KadaiLogo from "@/components/KadaiLogo";
+import StoreFrontDrawer from '../../../components/StoreFrontDrawer';
+import {Pressable, View} from "react-native";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import {usePathname, useRouter} from "expo-router";
+import {Text} from 'react-native-paper';
+import {getFocusedRouteNameFromRoute} from "@react-navigation/core";
 
 export default function Layout() {
-    // const navigation = useNavigation();
-    const navigation = useNavigation();
+
+    const router = useRouter();
+    const pathName = usePathname();
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
-            <Drawer screenOptions={{drawerPosition: 'right', headerLeft: () => false,
+            <Drawer initialRouteName={'LandingPage'} backBehavior={'history'} screenOptions={({route}) =>  ({drawerPosition: 'right',
+                headerLeft: () => {
+                    if (pathName.startsWith('/Main/StoreFront/Collections/Collection/')) {
+                        return <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                            <Pressable onPress={router.back}>
+                                <MaterialIcons name={'arrow-back'} size={36} style={{margin: 10}}/>
+                            </Pressable>
+                            <Text variant={'titleLarge'} style={{marginLeft: 15}}>Collection</Text>
+                        </View>
+                    } else if (pathName.startsWith('/Main/StoreFront/Products/Product/')) {
+                        return <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                            <Pressable onPress={router.back} style={{margin: 10}}>
+                                <MaterialIcons name={'arrow-back'} size={36}/>
+                            </Pressable>
+                            <Text variant={'titleLarge'} style={{marginLeft: 15}}>Product</Text>
+                        </View>
+                    } else if (pathName==='/Main/StoreFront/Products') {
+                        return <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                            <Pressable onPress={router.back} style={{margin: 10}}>
+                                <MaterialIcons name={'arrow-back'} size={36}/>
+                            </Pressable>
+                            <Text variant={'titleLarge'} style={{marginLeft: 15}}>Products</Text>
+                        </View>
+                    } else if (pathName==='/Main/StoreFront/Collections') {
+                        return <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                            <Pressable onPress={router.back} style={{margin: 10}}>
+                                <MaterialIcons name={'arrow-back'} size={36}/>
+                            </Pressable>
+                            <Text variant={'titleLarge'} style={{marginLeft: 15}}>Collections</Text>
+                        </View>
+                    } else
+                    {
+                        return <KadaiLogo/>
+                    }
+
+                },
                 headerRight: () => <DrawerToggleButton/>,
-                headerShadowVisible: false,
+                headerShadowVisible: true,
                 headerTitle: '',
                 drawerStyle: { borderTopLeftRadius: 0, borderBottomLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0},
-            }}
-            // drawerContent={() =>
-            //     (<Pressable style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} onPress={() => navigation.dispatch(DrawerActions.closeDrawer())}>
-            //         <MaterialIcons name={'close'}/>
-            //     </Pressable>)
-            // }
-            >
-                <Drawer.Screen
-                    name="Products" // This is the name of the page and must match the url from root
-                    options={{
-                        drawerLabel: 'Products',
-                    }}
-                />
-                <Drawer.Screen
-                    name="Collections" // This is the name of the page and must match the url from root
-                    options={{
-                        drawerLabel: 'Collections',
-                    }}
-                />
-                <Drawer.Screen
-                    name="Orders" // This is the name of the page and must match the url from root
-                    options={{
-                        drawerLabel: 'Orders',
-                    }}
-                />
-                <Drawer.Screen
-                    name="Customers" // This is the name of the page and must match the url from root
-                    options={{
-                        drawerLabel: 'Customers',
-                    }}
-                />
-                <Drawer.Screen
-                    name="Offers" // This is the name of the page and must match the url from root
-                    options={{
-                        drawerLabel: 'Offers',
-                    }}
-                />
-                <Drawer.Screen
-                    name="Settings" // This is the name of the page and must match the url from root
-                    options={{
-                        drawerLabel: 'Settings',
-                    }}
-                />
+            })}
+            drawerContent={(props) => <StoreFrontDrawer {...props}/>}>
+                {/*<Drawer.Screen*/}
+                {/*    name="LandingPage" // This is the name of the page and must match the url from root*/}
+                {/*    options={{*/}
+                {/*        drawerLabel: 'StoreFront',*/}
+                {/*    }}*/}
+                {/*/>*/}
+                {/*<Drawer.Screen*/}
+                {/*    name="Products" // This is the name of the page and must match the url from root*/}
+                {/*    options={{*/}
+                {/*        drawerLabel: 'Products',*/}
+                {/*    }}*/}
+                {/*/>*/}
+                {/*<Drawer.Screen*/}
+                {/*    name="Collections" // This is the name of the page and must match the url from root*/}
+                {/*    options={{*/}
+                {/*        drawerLabel: 'Collections',*/}
+                {/*    }}*/}
+                {/*/>*/}
+                {/*<Drawer.Screen*/}
+                {/*    name="Collection/[collectionId]" // This is the name of the page and must match the url from root*/}
+                {/*    options={{*/}
+                {/*        drawerLabel: () => null,*/}
+                {/*    }}*/}
+                {/*/>*/}
+                {/*<Drawer.Screen*/}
+                {/*    name="Orders" // This is the name of the page and must match the url from root*/}
+                {/*    options={{*/}
+                {/*        drawerLabel: 'Orders',*/}
+                {/*    }}*/}
+                {/*/>*/}
+                {/*<Drawer.Screen*/}
+                {/*    name="Customers" // This is the name of the page and must match the url from root*/}
+                {/*    options={{*/}
+                {/*        drawerLabel: 'Customers',*/}
+                {/*    }}*/}
+                {/*/>*/}
+                {/*<Drawer.Screen*/}
+                {/*    name="Offers" // This is the name of the page and must match the url from root*/}
+                {/*    options={{*/}
+                {/*        drawerLabel: 'Offers',*/}
+                {/*    }}*/}
+                {/*/>*/}
+                {/*<Drawer.Screen*/}
+                {/*    name="Settings" // This is the name of the page and must match the url from root*/}
+                {/*    options={{*/}
+                {/*        drawerLabel: 'Settings',*/}
+                {/*    }}*/}
+                {/*/>*/}
             </Drawer>
         </GestureHandlerRootView>
     );
