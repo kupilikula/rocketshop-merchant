@@ -7,6 +7,7 @@ import StoreFrontCollectionCard from "../../../components/StoreFrontCollectionCa
 import {getStoreFullData} from "../../../utils/fakeDataMethods";
 import Fuse from 'fuse.js';
 import debounce from 'lodash.debounce';
+import {SearchResultProduct} from "../../../components/SearchResultProduct";
 
 const getUniqueProducts = (storeData) => {
     const allProducts= storeData.collections.reduce( (A,c) => A.concat(c.products), []);
@@ -72,9 +73,6 @@ export default function StoreFront(props) {
         }
     }
 
-    console.log('textColor:', textColor);
-    console.log('oppColor:', oppositeColor);
-
     return storeFullData && <Surface mode={'flat'} style={{
         backgroundColor: 'white',
         height: '100%',
@@ -128,8 +126,8 @@ export default function StoreFront(props) {
                 value={searchQuery}
                 style={{borderRadius: 5, marginTop: 10, backgroundColor: '#efefef', elevation: 5}}
             />
-            {searchQuery!=='' && <View style={{width: '100%', height: filteredProducts.length*40}}>
-                <FlatList scrollEnabled={false} data={filteredProducts} renderItem={({item}) => (<View style={{height: 40, borderStyle: 'solid', borderWidth: 1}}><Text>{item.productName}</Text></View>)}/>
+            {searchQuery!=='' && filteredProducts.length > 0 && <View style={{width: '100%', height: Math.min(300, filteredProducts.length*60)}}>
+                <FlatList scrollEnabled={false} data={filteredProducts} renderItem={({item}) => (<SearchResultProduct product={item}/>)}/>
             </View>
             }
             <View style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%'}}>
