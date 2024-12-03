@@ -6,6 +6,7 @@ export const getProductForStore = () => {
         productId: faker.string.uuid(),
         price: faker.number.int({ min: 100, max: 5000 }),
         rating: faker.number.float({ multipleOf: 0.5, min: 0, max:5 }),
+        productDescription: faker.lorem.text(),
         numberOfRatings: faker.number.int({min:0, max: 3000}),
         mediaItems: [
             {
@@ -43,6 +44,7 @@ export const getProductForCustomerFeed = () => {
         storeBrandColor: faker.color.rgb(),
         productName: faker.commerce.productName(),
         productId: faker.string.uuid(),
+        productDescription: faker.lorem.text(),
         price: faker.number.int({ min: 100, max: 5000 }),
         rating: faker.number.float({ multipleOf: 0.5, min: 0, max:5 }),
         numberOfRatings: faker.number.int({min: 0, max: 3000}),

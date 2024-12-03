@@ -17,7 +17,7 @@ export default function ProductPage (props) {
 
     // const productQuery = useQuery({ queryKey: ['getProduct', productId], queryFn: () => getProduct(productId) })
     // console.log('size:', size);
-    return <ProductDisplayCardCustomerStore product={getProductForStore()}/>
+    return <ProductDisplayCardCustomerStore product={getProductForStore()} showProductDescription={true}/>
 }
 
 const styles = StyleSheet.create({

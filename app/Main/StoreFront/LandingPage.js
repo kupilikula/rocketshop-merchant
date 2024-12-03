@@ -1,15 +1,16 @@
-import {ScrollView, View} from "react-native";
+import {FlatList, ScrollView, View} from "react-native";
 import {Image} from 'expo-image';
-import {Card, Surface, Text, Button, Searchbar} from "react-native-paper";
+import {Button, Card, Searchbar, Surface, Text} from "react-native-paper";
 import {foregroundColor} from "../../../utils/foregroundColor";
 import {useEffect, useState} from "react";
 import StoreFrontCollectionCard from "../../../components/StoreFrontCollectionCard";
 import {getStoreFullData} from "../../../utils/fakeDataMethods";
+import Fuse from 'fuse.js';
+import debounce from 'lodash.debounce';
 
-const totalNumberOfUniqueProducts = (storeData) => {
+const getUniqueProducts = (storeData) => {
     const allProducts= storeData.collections.reduce( (A,c) => A.concat(c.products), []);
-    const uniqueProducts =  new Set(allProducts);
-    return uniqueProducts.size;
+    return [...new Set(allProducts)];
 }
 
 export default function StoreFront(props) {
@@ -21,11 +22,23 @@ export default function StoreFront(props) {
     const [followButtonText, setFollowButtonText] = useState('Follow');
     const [followButtonLoading, setFollowButtonLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-
+    const [uniqueProducts, setUniqueProducts] = useState([])
+    const [filteredProducts, setFilteredProducts] = useState([]);
 
     useEffect(() => {
-        setStoreFullData(getStoreFullData());
+        let d = getStoreFullData();
+        setStoreFullData(d);
+        setUniqueProducts(getUniqueProducts(d));
     },[])
+
+    useEffect(() => {
+        if (searchQuery === '') {
+            setFilteredProducts(uniqueProducts);
+        } else {
+            const result = fuse.search(searchQuery).map(({ item }) => item);
+            setFilteredProducts(result);
+        }
+    }, [searchQuery, uniqueProducts]);
 
     useEffect( () => {
         if (storeFullData) {
@@ -34,6 +47,17 @@ export default function StoreFront(props) {
             setOppositeColor(o);
         }
     }, [storeFullData])
+
+    const onSearchQueryChange = (query) => {
+        setSearchQuery(query);
+    };  // 300ms debounce delay
+
+    const fuse = new Fuse(uniqueProducts, {
+        keys: ['productName', 'productDescription'],  // Specify fields to search
+        includeScore: true,
+        threshold: 0.3,  // You can adjust this for fuzziness
+    });
+
 
     const onFollowButtonPress = () => {
         if (followButtonText==='Follow') {
@@ -90,7 +114,7 @@ export default function StoreFront(props) {
                         <Text variant={'displaySmall'} style={{marginTop: 10, color: textColor}}>{storeFullData.storeName}</Text>
                     </View>
                     <View>
-                        <Text variant={'titleMedium'} style={{color: textColor}}>{totalNumberOfUniqueProducts(storeFullData).toString() + ' Products ' +
+                        <Text variant={'titleMedium'} style={{color: textColor}}>{uniqueProducts.length.toString() + ' Products ' +
                             + storeFullData.collections.length + ' Collections'}</Text>
                     </View>
                     <View style={{marginTop: 10}}>
@@ -99,11 +123,15 @@ export default function StoreFront(props) {
                 </View>
             </Card>
             <Searchbar
-                placeholder="Search"
-                onChangeText={setSearchQuery}
+                placeholder="Search Products"
+                onChangeText={onSearchQueryChange}
                 value={searchQuery}
                 style={{borderRadius: 5, marginTop: 10, backgroundColor: '#efefef', elevation: 5}}
             />
+            {searchQuery!=='' && <View style={{width: '100%', height: filteredProducts.length*40}}>
+                <FlatList scrollEnabled={false} data={filteredProducts} renderItem={({item}) => (<View style={{height: 40, borderStyle: 'solid', borderWidth: 1}}><Text>{item.productName}</Text></View>)}/>
+            </View>
+            }
             <View style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%'}}>
                 {storeFullData.collections.map( (c) => {
                     return <StoreFrontCollectionCard collection={c} key={c.collectionId}/>

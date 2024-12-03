@@ -46,6 +46,9 @@ export default function ProductDisplayCardCustomerStore (props) {
                     <MaterialIcons name={'add-shopping-cart'} size={28} style={styles.actionButton}/>
                 </View>
             </View>
+            {props.showProductDescription && <View>
+                <Text>{props.product.productDescription}</Text>
+            </View>}
         </Card.Content>
     </Card>
 }
