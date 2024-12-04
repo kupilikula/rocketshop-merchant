@@ -8,6 +8,9 @@ import {getStoreFullData} from "../../../utils/fakeDataMethods";
 import Fuse from 'fuse.js';
 import debounce from 'lodash.debounce';
 import {SearchResultProduct} from "../../../components/SearchResultProduct";
+import {Colors} from "../../../styles/Colors";
+import {useRouter} from "expo-router";
+import ProductSearch from "../../../components/ProductSearch";
 
 const getUniqueProducts = (storeData) => {
     const allProducts= storeData.collections.reduce( (A,c) => A.concat(c.products), []);
@@ -18,13 +21,15 @@ export default function StoreFront(props) {
 
     // const results = useQuery({ queryKey: ['storeDataFull', storeId], queryFn: getStoreDataFull });
     const [storeFullData, setStoreFullData] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [uniqueProducts, setUniqueProducts] = useState([])
+    const [filteredProducts, setFilteredProducts] = useState([]);
     const [textColor, setTextColor] = useState(null);
     const [oppositeColor, setOppositeColor] = useState(null);
     const [followButtonText, setFollowButtonText] = useState('Follow');
     const [followButtonLoading, setFollowButtonLoading] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [uniqueProducts, setUniqueProducts] = useState([])
-    const [filteredProducts, setFilteredProducts] = useState([]);
+
+    const router = useRouter();
 
     useEffect(() => {
         let d = getStoreFullData();
@@ -120,16 +125,7 @@ export default function StoreFront(props) {
                     </View>
                 </View>
             </Card>
-            <Searchbar
-                placeholder="Search Products"
-                onChangeText={onSearchQueryChange}
-                value={searchQuery}
-                style={{borderRadius: 5, marginTop: 10, backgroundColor: '#efefef', elevation: 5}}
-            />
-            {searchQuery!=='' && filteredProducts.length > 0 && <View style={{width: '100%', height: Math.min(300, filteredProducts.length*60)}}>
-                <FlatList scrollEnabled={false} data={filteredProducts} renderItem={({item}) => (<SearchResultProduct product={item}/>)}/>
-            </View>
-            }
+            <ProductSearch uniqueProducts={uniqueProducts} limitedResults={true} resultsLimit={5} initialSearchQuery={''} style={{marginTop: 10}}/>
             <View style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%'}}>
                 {storeFullData.collections.map( (c) => {
                     return <StoreFrontCollectionCard collection={c} key={c.collectionId}/>
