@@ -1,9 +1,9 @@
 import {View, Text} from "react-native";
 
-export default function Search () {
+export default function Orders () {
     return <View>
         <Text>
-            Search
+            Orders
         </Text>
     </View>
 }

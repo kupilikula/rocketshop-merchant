@@ -1,9 +1,9 @@
 import {View, Text} from "react-native";
 
-export default function ShoppingCart () {
+export default function Dashboard () {
     return <View>
         <Text>
-            ShoppingCart
+            Dashboard
         </Text>
     </View>
 }

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "marketplace",
-    "slug": "marketplace",
+    "name": "merchant",
+    "slug": "merchant",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -10,14 +10,14 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kadai.marketplace"
+      "bundleIdentifier": "com.kadai.merchant"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.kadai.marketplace"
+      "package": "com.kadai.merchant"
     },
     "web": {
       "bundler": "metro",
@@ -29,7 +29,25 @@
       [
         "expo-font",
         {
-          "fonts": ["./assets/fonts/CaveatBrush-Regular.ttf"]
+          "fonts": [
+            "./assets/fonts/CaveatBrush-Regular.ttf"
+          ]
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "recordAudioAndroid": true
         }
       ],
       [
@@ -52,7 +70,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "f3fcbe93-3612-4991-abcd-ca6133cef0b7"
+        "projectId": "bde2d7cd-f9f9-4c0a-8902-d1c9aa3556b0"
       }
     }
   }

@@ -1,5 +1,5 @@
 {
-  "name": "marketplace",
+  "name": "merchant",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
@@ -51,7 +51,10 @@
     "react-native-screens": "~4.1.0",
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.2",
-    "react-query": "^3.39.3"
+    "react-query": "^3.39.3",
+    "expo-media-library": "~17.0.3",
+    "expo-camera": "~16.0.9",
+    "expo-video-thumbnails": "~9.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

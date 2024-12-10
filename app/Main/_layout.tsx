@@ -6,27 +6,27 @@ import {Colors} from '@/styles/Colors';
 import FeedHeader from '../../components/FeedHeader';
 export default function TabsComponent() {
 
-  return <Tabs backBehavior={'history'} initialRouteName={'Feed'} screenOptions={{
+  return <Tabs backBehavior={'history'} initialRouteName={'Dashboard'} screenOptions={{
       header: () => null, tabBarShowLabel: false, animation: 'fade',
       tabBarStyle: {backgroundColor: 'white', paddingBottom: 0, paddingTop: 3},
       tabBarActiveTintColor: Colors.shamrockGreen,
       tabBarInactiveTintColor: 'black',
       tabBarButton: (props) => {return (<TouchableOpacity activeOpacity={1} {...props} />)} }}>
     <Tabs.Screen
-        name="Feed"
+        name="Dashboard"
         options={{
-            header: () => <FeedHeader />,
+            // header: () => <FeedHeader />,
             headerShadowVisible: true,
             title:'',
-          tabBarIcon: ({ color }) => <MaterialIcons name={'feed'} size={30} color={color}/>,
+          tabBarIcon: ({ color }) => <MaterialIcons name={'dashboard'} size={30} color={color}/>,
             headerShown: true,
         }}
     />
     <Tabs.Screen
-        name="Search"
+        name="Analytics"
         options={{
-          title: 'Search',
-          tabBarIcon: ({ color }) => <MaterialIcons name={'search'} size={30} color={color}/>,
+          title: 'Products',
+          tabBarIcon: ({ color }) => <MaterialIcons name={'assessment'} size={30} color={color}/>,
         }}
     />
       <Tabs.Screen
@@ -37,10 +37,10 @@ export default function TabsComponent() {
           }}
       />
       <Tabs.Screen
-          name="ShoppingCart"
+          name="Orders"
           options={{
-              title: 'Shopping Cart',
-              tabBarIcon: ({ color }) => <MaterialIcons name={'shopping-cart'} size={30} color={color}/>,
+              title: 'Orders',
+              tabBarIcon: ({ color }) => <MaterialIcons name={'receipt-long'} size={30} color={color}/>,
           }}
       />
       <Tabs.Screen

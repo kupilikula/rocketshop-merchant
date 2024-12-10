@@ -1,4 +1,4 @@
-import React, {Component, createRef, useCallback, useEffect, useState} from 'react';
+import React, {Component, createRef, forwardRef, useCallback, useEffect, useImperativeHandle, useState} from 'react';
 import {
     FlatList,
     View,
@@ -14,7 +14,7 @@ import MediaItem from './MediaItem';
 
 
 
-export default function FlatListSlider (props) {
+const FlatListSlider = forwardRef( (props, ref) =>{
     const slider = createRef();
     const useComponentSize = () => {
         const [size, setSize] = useState({width: 400, height:300});
@@ -27,7 +27,6 @@ export default function FlatListSlider (props) {
         return [size, onLayout];
     };
 
-    const [data, setData] = useState(props.data);
     const [size, onLayout] = useComponentSize();
     const [index, setIndex] = useState(0);
 
@@ -37,6 +36,21 @@ export default function FlatListSlider (props) {
         }
     }, [])
 
+    const scrollToIndex = (index) => {
+        if (slider.current) {
+            slider.current.scrollToIndex({ index, animated: true });
+        }
+    };
+
+    useImperativeHandle(ref, () =>{
+        return {
+            scrollToIndex
+        };
+    });
+
+    useEffect(() => {
+            scrollToIndex(props.data.length-1);
+        }, [props.data])
     const onViewableItemsChanged = ({viewableItems, changed}) => {
         if (viewableItems.length > 0) {
             let currentIndex = viewableItems[0].index;
@@ -67,6 +81,7 @@ export default function FlatListSlider (props) {
                         return React.cloneElement(props.component, {
                             width: size.width,
                             item: item,
+                            orientation: props.orientation,
                             // onPress: props.onPress,
                             index: i % props.data.length,
                             active: i === index,
@@ -107,7 +122,7 @@ export default function FlatListSlider (props) {
             </View>
         );
 
-}
+})
 
 const styles = StyleSheet.create({
     image: {
@@ -130,3 +145,5 @@ const styles = StyleSheet.create({
         }),
     },
 });
+
+export default FlatListSlider;
