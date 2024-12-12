@@ -40,6 +40,7 @@ export default function ProductDisplayCardCustomerFeed (props) {
             indicatorInActiveColor='#bdc3c7'
             indicatorActiveWidth={6}
             contentContainerStyle={{backgroundColor: 'white'}}
+            allowPanZoom={false}
             component = {<MediaItem />}
             />
         <Card.Content style={styles.cardContent}>

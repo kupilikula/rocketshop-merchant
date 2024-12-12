@@ -1,4 +1,13 @@
-import React, {Component, createRef, forwardRef, useCallback, useEffect, useImperativeHandle, useState} from 'react';
+import React, {
+    Component,
+    createRef,
+    forwardRef,
+    useCallback,
+    useEffect,
+    useImperativeHandle,
+    useRef,
+    useState
+} from 'react';
 import {
     FlatList,
     View,
@@ -14,20 +23,19 @@ import MediaItem from './MediaItem';
 
 
 
-const FlatListSlider = forwardRef( (props, ref) =>{
-    const slider = createRef();
-    const useComponentSize = () => {
-        const [size, setSize] = useState({width: 400, height:300});
+const FlatListSlider = forwardRef( ( props, ref) =>{
+    const slider = useRef();
+    // const [isReady, setIsReady] = useState(false); // Track if the FlatList is ready
+    const [size, setSize] = useState({width: 400, height:300});
 
-        const onLayout = useCallback(event => {
-            const { width, height } = event.nativeEvent.layout;
-            setSize({ width, height });
-        }, []);
+    const onLayout = (event) => {
+        const { layout } = event.nativeEvent;
 
-        return [size, onLayout];
+        if (layout.width > 0 && layout.height > 0) {
+            setSize({ width: layout.width, height: layout.height });
+        }
     };
 
-    const [size, onLayout] = useComponentSize();
     const [index, setIndex] = useState(0);
 
     useEffect(() => {
@@ -38,7 +46,7 @@ const FlatListSlider = forwardRef( (props, ref) =>{
 
     const scrollToIndex = (index) => {
         if (slider.current) {
-            slider.current.scrollToIndex({ index, animated: true });
+            slider?.current.scrollToIndex({ index: index, animated: true });
         }
     };
 
@@ -48,9 +56,35 @@ const FlatListSlider = forwardRef( (props, ref) =>{
         };
     });
 
-    useEffect(() => {
-            scrollToIndex(props.data.length-1);
-        }, [props.data])
+    // useEffect(() => {
+    //         scrollToIndex(props.data.length-1);
+    //     }, [props.data])
+
+    // useEffect(() => {
+    //     // Use scrollToEnd to scroll to the last item
+    //     if (slider.current && props.data.length > 0) {
+    //         setTimeout(() => {slider.current.scrollToEnd({ animated: true })}, 100 );
+    //     }
+    // }, [props.data]);
+
+    // Use effect to listen to data changes and trigger scroll
+    // useEffect(() => {
+    //     if (isReady && props.data.length > 0) {
+    //         // After content size change, scroll to the last item
+    //         const lastIndex = props.data.length - 1;
+    //         console.log('lastIndex:', lastIndex);
+    //         scrollToIndex(lastIndex);
+    //     }
+    // }, [props.data, isReady]);
+
+    // Handle onLayout and content size changes
+    // const handleContentSizeChange = (_) => {
+    //     // setSize({ width: contentSize.width, height: contentSize.height });
+    //     setTimeout(() =>
+    //             slider?.current.scrollToEnd({animated: true})
+    //         , 100)
+    // };
+
     const onViewableItemsChanged = ({viewableItems, changed}) => {
         if (viewableItems.length > 0) {
             let currentIndex = viewableItems[0].index;
@@ -80,12 +114,14 @@ const FlatListSlider = forwardRef( (props, ref) =>{
                     renderItem={({item, i}) => {
                         return React.cloneElement(props.component, {
                             width: size.width,
+                            height: size.height,
                             item: item,
                             orientation: props.orientation,
                             // onPress: props.onPress,
                             index: i % props.data.length,
                             active: i === index,
                             local: props.local,
+                            allowPanZoom: props.allowPanZoom
                         });
                     }}
                     ItemSeparatorComponent={() => (
@@ -94,15 +130,25 @@ const FlatListSlider = forwardRef( (props, ref) =>{
                     keyExtractor={(item, index) => item.toString() + index}
                     onViewableItemsChanged={onViewableItemsChanged}
                     viewabilityConfig={viewabilityConfig}
-                    getItemLayout={(_, index) => ({
-                        length: size.width,
-                        offset: size.width * index,
-                        index,
-                    })}
+                    getItemLayout={(_, index) => {
+                        const { width, height } = size;
+
+                        // Handle initial state where size might be empty
+                        if (!width || !height) {
+                            return { length: 0, offset: 0, index };
+                        }
+
+                        return {
+                            length: width,
+                            offset: width * index,
+                            index,
+                        };
+                        }}
                     windowSize={1}
                     initialNumToRender={1}
                     maxToRenderPerBatch={1}
                     removeClippedSubviews={true}
+                    // onContentSizeChange={handleContentSizeChange}
                 />
                 {props.indicator && (props.data.length > 1) && (
                     <Indicator

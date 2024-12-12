@@ -3,13 +3,16 @@ import {Image, StyleSheet, Pressable, View} from 'react-native';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import {useEvent} from "expo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import ZoomableImage from "./ZoomableImage";
 ;
 export default function MediaItem ({
                                  item,
                                  orientation,
                                  index,
                                  local,
-                                 width
+                                 width,
+                                 height,
+                                 allowPanZoom
                              }) {
 
     let videoPlayer;
@@ -31,12 +34,18 @@ export default function MediaItem ({
     }
 
     return (
+
         <Pressable style={styles.container} onPress={() => onPress(item)}>
+            <View style={{width: width, height: height}}>
             {item.mediaType==='image' ?
-            (<Image
-                style={{width: width, aspectRatio: orientation==='landscape' ? '1.33' : '0.8'}}
+                (!allowPanZoom ?
+                <Image
+                style={{width: '100%', aspectRatio: orientation==='landscape' ? '1.33' : '0.8'}}
                 source={local ? item.uri : {uri: item.uri}}
-            />) :
+            />
+                    :
+        <ZoomableImage source={item.uri} size={{width: width, height: height}}/> )
+             :
                 ( (isPlaying || videoPlayer.currentTime > 0 || !item['thumbnail']) ?
                 <VideoView contentFit={'contain'}
                            style={{width: width, aspectRatio: orientation === 'landscape' ? '1.78' : '0.8', alignSelf: 'center', marginVertical: 'auto'}}
@@ -48,7 +57,9 @@ export default function MediaItem ({
                         </View>
                 )
             }
+            </View>
         </Pressable>
+
     );
 };
 

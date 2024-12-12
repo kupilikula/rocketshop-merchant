@@ -5,6 +5,7 @@ import {View} from "react-native";
 import {StatusBar} from "expo-status-bar";
 import * as NavigationBar from 'expo-navigation-bar';
 import {useEffect} from "react";
+import {GestureHandlerRootView} from "react-native-gesture-handler";
 
 // const Tabs = createBottomTabNavigator();
 const isLoggedIn = true;
@@ -19,7 +20,9 @@ export default function RootLayout() {
     },[])
 
 
-    return ( <SafeAreaProvider>
+    return (
+        <SafeAreaProvider>
+            <GestureHandlerRootView style={{ flex: 1 }}>
       <PaperProvider>
           <StatusBar style="dark" backgroundColor={'white'} />
           {/*<NavigationBar backgroundColor={'white'}/>*/}
@@ -27,5 +30,6 @@ export default function RootLayout() {
       <Stack screenOptions={{headerShown: false}}/>
     </View>
   </PaperProvider>
+            </GestureHandlerRootView>
   </SafeAreaProvider>);
 }

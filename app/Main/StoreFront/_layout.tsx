@@ -15,7 +15,7 @@ export default function Layout() {
     const pathName = usePathname();
 
     return (
-        <GestureHandlerRootView style={{ flex: 1 }}>
+        // <GestureHandlerRootView style={{ flex: 1 }}>
             <Drawer initialRouteName={'LandingPage'} backBehavior={'history'} screenOptions={({route}) =>  ({drawerPosition: 'right',
                 headerLeft: () => {
                     if (pathName.startsWith('/Main/StoreFront/Collections/Collection/')) {
@@ -107,6 +107,6 @@ export default function Layout() {
                 {/*    }}*/}
                 {/*/>*/}
             </Drawer>
-        </GestureHandlerRootView>
+        // </GestureHandlerRootView>
     );
 }
