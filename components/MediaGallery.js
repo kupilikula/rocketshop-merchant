@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
     View,
     FlatList,
@@ -20,9 +20,10 @@ import {CameraView, useCameraPermissions} from "expo-camera";
 import {Colors} from "../styles/Colors";
 import * as FileSystem from 'expo-file-system';  // Import FileSystem
 import {Audio} from 'expo-av';
+import {gestureHandlerRootHOC} from "react-native-gesture-handler";
 
 
-export default function MediaGallery(props) {
+const  MediaGallery = (props) => {
     const [media, setMedia] = useState([]);
     const [selectedItemsIds, setSelectedItemsIds] = useState([]);
     const [previewMediaItems, setPreviewMediaItems] = useState([]);
@@ -101,8 +102,9 @@ export default function MediaGallery(props) {
     }, [newAssetCounter]);
 
 
-    const toggleSelection = (item) => {
+    const toggleSelection = useCallback((item) => {
         console.log('line95');
+        console.log('line107, item:', item);
         setSelectedItemsIds((prev) => {
             if (prev.includes(item.id)) {
                 return prev.filter((id) => id !== item.id);
@@ -110,12 +112,12 @@ export default function MediaGallery(props) {
                 return [...prev, item.id];
             }
         });
-    };
+    }, []);
 
     useEffect(() => {
         let selectedItems = selectedItemsIds.map((id)=> media.find((item) => item.id===id))
         setPreviewMediaItems(selectedItems.map((item) => { return {...item, mediaType: item.mediaType==='photo'? 'image' : 'video', orientation: orientation} }));
-    }, [selectedItemsIds])
+    }, [selectedItemsIds, media, orientation])
 
 
     useEffect(() => {
@@ -124,32 +126,6 @@ export default function MediaGallery(props) {
         }, 100)
 
     }, [selectedItemsIds])
-
-    const renderItem = ({ item }) => {
-
-        return (<TouchableWithoutFeedback
-            style={[
-                styles.itemContainer,
-                selectedItemsIds.includes(item.id) && styles.selectedItem,
-            ]}
-            onPress={() => {
-                console.log('line126');
-                toggleSelection(item)
-            }}
-        >
-                <View style={{}}>
-            {item.mediaType === MediaLibrary.MediaType.photo ? (
-                <Image source={{ uri: item.uri }} style={styles.image} />
-            ) : (
-                <View style={{position: 'relative'}}>
-                    <Image source={{ uri: thumbnails[item.id] }} style={styles.image} />
-                    <MaterialIcons name={'videocam'} size={28} color={'white'} style={{position: 'absolute', top: 10, right: 10}}/>
-                </View>
-            )}
-            {selectedItemsIds.includes(item.id) && <View style={{width: 30, height: 30, borderRadius: 15, borderWidth: 1, borderColor: 'white',...styles.checkmark}}><Text style={{textAlign: 'center', color: 'white'}}>{ (selectedItemsIds.indexOf(item.id)+1).toString()}</Text></View>}
-                </View>
-        </TouchableWithoutFeedback>
-    )};
 
     const sliderRef = useRef();
     console.log('p:', previewMediaItems);
@@ -222,18 +198,6 @@ export default function MediaGallery(props) {
             const saveVideo = async () => {
                 console.log('rURI:', recordedUri);
                 console.log('recordedUri type:', typeof recordedUri);
-                // const fileName = recordedUri.split('/').pop();  // Get the file name
-                // const newUri = FileSystem.documentDirectory + fileName;  // Create new URI in document directory
-                // console.log('Moving video to new URI:', newUri);
-                //
-                // await FileSystem.moveAsync({
-                //     from: recordedUri,
-                //     to: newUri,
-                // });
-                //
-                // console.log('File moved successfully to:', newUri);
-                // const fileInfo = await FileSystem.getInfoAsync(newUri);
-                // console.log('fileInfo:', fileInfo);
                 if (recordedUri) {
                     console.log('line187');
                     const asset = await MediaLibrary.createAssetAsync(recordedUri);
@@ -242,7 +206,7 @@ export default function MediaGallery(props) {
                 console.log('line165');
                 closeCamera();
             }
-                console.log('line167');
+            console.log('line167');
             saveVideo();
         },
         [recordedUri])
@@ -253,6 +217,37 @@ export default function MediaGallery(props) {
     //         toggleSelection(newAsset);
     //     }
     // }, [newAsset])
+
+
+
+    const renderItem = useCallback(({ item }) => {
+        // console.log('Rendering item with ID:', item.id, 'Selected:', selectedItemsIds);
+
+        return (<TouchableWithoutFeedback
+            style={[
+                styles.itemContainer,
+                selectedItemsIds.includes(item.id) && styles.selectedItem,
+            ]}
+            // style={{ backgroundColor: 'rgba(0, 0, 255, 0.5)' }}
+            onPress={() => {
+                console.log('line126');
+                toggleSelection(item)
+            }}
+        >
+                <View>
+            {item.mediaType === MediaLibrary.MediaType.photo ? (
+                <Image source={{ uri: item.uri }} style={styles.image} />
+            ) : (
+                <View style={{position: 'relative'}}>
+                    <Image source={{ uri: thumbnails[item.id] }} style={styles.image} />
+                    <MaterialIcons name={'videocam'} size={28} color={'white'} style={{position: 'absolute', top: 10, right: 10}}/>
+                </View>
+            )}
+            {selectedItemsIds.includes(item.id) && <View style={{width: 30, height: 30, borderRadius: 15, borderWidth: 1, borderColor: 'white',...styles.checkmark}}><Text style={{textAlign: 'center', color: 'white'}}>{ (selectedItemsIds.indexOf(item.id)+1).toString()}</Text></View>}
+                </View>
+        </TouchableWithoutFeedback>
+    )}, [selectedItemsIds, toggleSelection]);
+
 
     if (!permission) {
         // Camera permissions are still loading.
@@ -308,6 +303,7 @@ export default function MediaGallery(props) {
                 renderItem={renderItem}
                 numColumns={3}
                 style={{height: 'auto'}}
+                extraData={selectedItemsIds}
             />
         </View>
                 :
@@ -505,3 +501,5 @@ const styles = StyleSheet.create({
         color: 'white',
     },
 });
+
+export default gestureHandlerRootHOC(MediaGallery);

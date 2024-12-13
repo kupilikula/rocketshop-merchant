@@ -9,10 +9,13 @@ export default function MediaItem ({
                                  item,
                                  orientation,
                                  index,
+                                 numberOfItems,
                                  local,
                                  width,
                                  height,
-                                 allowPanZoom
+                                 allowPanZoom,
+                                 simultaneousHandlers,
+                                 scrollToIndex
                              }) {
 
     let videoPlayer;
@@ -32,8 +35,25 @@ export default function MediaItem ({
             }
         }
     }
+    console.log('nI:', numberOfItems);
+    console.log('I:', index);
 
     return (
+        <View style={{position: 'relative', justifyContent: 'center', alignItems: 'center'}}>
+
+
+            {(index < numberOfItems-1) && <View style={{position: 'absolute', right: 10, zIndex: 100, justifyContent: 'center', alignItems: 'center'}}>
+                <Pressable onPress={() => scrollToIndex(index+1)}>
+                <MaterialIcons name={'arrow-forward-ios'} size={40} color={'white'}/>
+                </Pressable>
+            </View>}
+            {(index > 0) &&
+            <View style={{position: 'absolute', left: 10, zIndex: 100, justifyContent: 'center', alignItems: 'center'}}>
+                <Pressable onPress={() => scrollToIndex(index-1)}>
+                    <MaterialIcons name={'arrow-back-ios'} size={40} color={'white'}/>
+                </Pressable>
+            </View>}
+
 
         <Pressable style={styles.container} onPress={() => onPress(item)}>
             <View style={{width: width, height: height}}>
@@ -44,7 +64,7 @@ export default function MediaItem ({
                 source={local ? item.uri : {uri: item.uri}}
             />
                     :
-        <ZoomableImage source={item.uri} size={{width: width, height: height}}/> )
+        <ZoomableImage source={item.uri} size={{width: width, height: height}} simultaneousHandlers={simultaneousHandlers}/> )
              :
                 ( (isPlaying || videoPlayer.currentTime > 0 || !item['thumbnail']) ?
                 <VideoView contentFit={'contain'}
@@ -59,6 +79,7 @@ export default function MediaItem ({
             }
             </View>
         </Pressable>
+        </View>
 
     );
 };

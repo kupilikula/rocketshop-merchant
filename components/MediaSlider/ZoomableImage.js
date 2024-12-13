@@ -18,7 +18,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 // const { width, height } = Dimensions.get('window');
 const pixelRatio = PixelRatio.get(); // Get the device's pixel density
 
-export default function ZoomableImage({ source, size }) {
+export default function ZoomableImage({ source, size, simultaneousHandlers }) {
     // Shared values for scale and translation
     const scale = useSharedValue(1);
     const translateX = useSharedValue(0);
@@ -64,13 +64,33 @@ export default function ZoomableImage({ source, size }) {
             context.startY = translateY.value;
         },
         onActive: (event, context) => {
+            // Compute scaled image dimensions in container units
+            const scaledImageWidth = size.width * scale.value;
+            const scaledImageHeight = size.width * (imageHeight / imageWidth) * scale.value; // Preserve aspect ratio
+
+            // Compute max translations
+            const maxTranslateX = Math.max(0, (scaledImageWidth - size.width) / (2*scale.value));
+            const maxTranslateY = Math.max(0, (scaledImageHeight - size.height) / (2*scale.value));
+
+            // Compute new translations
+            let newTranslateX = context.startX + event.translationX;
+            let newTranslateY = context.startY + event.translationY;
+
+            // Clamp translations to within boundaries
             if (!lockFullWidth) {
-                translateX.value = context.startX + event.translationX; // Apply translation in X
+                newTranslateX = Math.min(Math.max(newTranslateX, -maxTranslateX), maxTranslateX);
+                translateX.value = newTranslateX;
             }
             if (!lockFullHeight) {
-                translateY.value = context.startY + event.translationY; // Apply translation in Y
+
+                newTranslateY = Math.min(Math.max(newTranslateY, -maxTranslateY), maxTranslateY);
+                console.log('mTY:', maxTranslateY, ' , nTY:', newTranslateY, ', s.v:', scale.value, ' ,sIH:', scaledImageHeight, ' , sH:', size.height);
+                translateY.value = newTranslateY;
             }
-        },
+            // Apply translations
+
+
+            },
         onEnd: () => {
             lastOffset.current = { x: translateX.value, y: translateY.value };
         },
@@ -143,13 +163,14 @@ export default function ZoomableImage({ source, size }) {
             <GestureHandlerRootView style={{ flex: 1, backgroundColor: 'yellow', position: 'relative'}}>
                 {/* Pan Gesture Handler */}
                 <PanGestureHandler onGestureEvent={panGestureHandler}
-                                   simultaneousHandlers={pinchGestureHandler}
+                                   simultaneousHandlers={[pinchGestureHandler, simultaneousHandlers]}
                                    minPointers={1}
                                    maxPointers={1}
                 >
                     <Animated.View style={[styles.imageContainer, animatedStyle]}>
                         {/* Pinch Gesture Handler */}
                         <PinchGestureHandler onGestureEvent={pinchGestureHandler}
+                                             simultaneousHandlers={simultaneousHandlers}
                                              minPointers={2}
                                              maxPointers={2}
                         >

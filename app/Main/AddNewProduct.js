@@ -1,10 +1,4 @@
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import {useRef, useState} from 'react';
-import {Platform, Pressable, StyleSheet, TouchableOpacity, View} from 'react-native';
-import {Card, Text, Button, Surface} from "react-native-paper";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import MediaGallery from "../../components/MediaGallery";
-import * as MediaLibrary from "expo-media-library";
 
 export default function AddNewProduct () {
 

@@ -36,7 +36,7 @@ const FlatListSlider = forwardRef( ( props, ref) =>{
         }
     };
 
-    const [index, setIndex] = useState(0);
+    const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
         if (Platform.OS === 'android') {
@@ -88,7 +88,7 @@ const FlatListSlider = forwardRef( ( props, ref) =>{
     const onViewableItemsChanged = ({viewableItems, changed}) => {
         if (viewableItems.length > 0) {
             let currentIndex = viewableItems[0].index;
-            setIndex(currentIndex);
+            setCurrentIndex(currentIndex);
             if (props.currentIndexCallback) {
                 props.currentIndexCallback(currentIndex);
             }
@@ -111,7 +111,9 @@ const FlatListSlider = forwardRef( ( props, ref) =>{
                     contentContainerStyle={props.contentContainerStyle}
                     data={props.data}
                     showsHorizontalScrollIndicator={false}
-                    renderItem={({item, i}) => {
+                    renderItem={({item, index: i}) => {
+                        console.log('i:', i);
+                        console.log('i%l:', i % props.data.length);
                         return React.cloneElement(props.component, {
                             width: size.width,
                             height: size.height,
@@ -119,9 +121,12 @@ const FlatListSlider = forwardRef( ( props, ref) =>{
                             orientation: props.orientation,
                             // onPress: props.onPress,
                             index: i % props.data.length,
-                            active: i === index,
+                            numberOfItems: props.data.length,
+                            scrollToIndex: scrollToIndex,
+                            active: i === currentIndex,
                             local: props.local,
-                            allowPanZoom: props.allowPanZoom
+                            allowPanZoom: props.allowPanZoom,
+                            simultaneousHandlers: slider,
                         });
                     }}
                     ItemSeparatorComponent={() => (
@@ -153,7 +158,7 @@ const FlatListSlider = forwardRef( ( props, ref) =>{
                 {props.indicator && (props.data.length > 1) && (
                     <Indicator
                         itemCount={props.data.length}
-                        currentIndex={index % props.data.length}
+                        currentIndex={currentIndex % props.data.length}
                         indicatorStyle={props.indicatorStyle}
                         indicatorContainerStyle={[
                             styles.indicatorContainerStyle,
