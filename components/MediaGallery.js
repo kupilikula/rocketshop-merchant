@@ -1,7 +1,6 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
     View,
-    FlatList,
     TouchableOpacity,
     Text,
     StyleSheet,
@@ -16,12 +15,13 @@ import MediaItem from "./MediaSlider/MediaItem";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import {Button, Card, Surface} from "react-native-paper";
-import {CameraView, useCameraPermissions} from "expo-camera";
+import {Camera, CameraView, useCameraPermissions} from "expo-camera";
 import {Colors} from "../styles/Colors";
 import * as FileSystem from 'expo-file-system';  // Import FileSystem
 import {Audio} from 'expo-av';
-import {gestureHandlerRootHOC} from "react-native-gesture-handler";
-
+import {gestureHandlerRootHOC, FlatList} from "react-native-gesture-handler";
+import { useMemo } from "react";
+import GalleryMediaItem from "./GalleryMediaItem";
 
 const  MediaGallery = (props) => {
     const [media, setMedia] = useState([]);
@@ -31,6 +31,8 @@ const  MediaGallery = (props) => {
     const [openCamera, setOpenCamera] = useState(false);
     const [cameraMode, setCameraMode] = useState('picture');
     const [isRecording, setIsRecording] = useState(false);
+    const [videoElapsedTime, setVideoElapsedTime] = useState(0);
+
     const [isVideo, setIsVideo] = useState(false);
     const [recordedUri, setRecordedUri] = useState(null);
     const videoUriRef = useRef(null);  // Use a ref to store video URI
@@ -39,17 +41,31 @@ const  MediaGallery = (props) => {
     const [permission, requestPermission] = useCameraPermissions();
     const cameraRef = useRef(null);
     const [newAssetCounter, setNewAssetCounter] = useState(0);
-    const [newPhotoTaken, setNewPhotoTaken] = useState(false);
+    // const [newPhotoTaken, setNewPhotoTaken] = useState(false);
     const [newAsset, setNewAsset] = useState(null);
     // const [refreshMediaGalleryTimeStamp, setRefreshMediaGalleryTimeStamp] = useState(true);
+    // const [isGalleryScrolling, setIsGalleryScrolling] = useState(false);
+    const isGalleryScrollingRef = useRef(false); // Ref for synchronous scrolling state
+
+    const scrollTimeoutRef = useRef(null);
+    const previewFlatListSliderRef = useRef();
+    const libraryFlatListRef = useRef();
+    const timerRef = useRef(null);
+
 
     function toggleCameraFacing() {
         setFacing(current => (current === 'back' ? 'front' : 'back'));
     }
 
     const savePhotoToGallery = async (photoUri) => {
-        const asset=  await MediaLibrary.createAssetAsync(photoUri);
-        setNewAssetCounter(newAssetCounter+1);
+        let asset;
+        try {
+         asset =  await MediaLibrary.createAssetAsync(photoUri);
+            setNewAssetCounter(newAssetCounter+1);
+        } catch (err) {
+            console.log('Error creating asset:', err);
+        }
+
         return asset;
     };
 
@@ -103,8 +119,6 @@ const  MediaGallery = (props) => {
 
 
     const toggleSelection = useCallback((item) => {
-        console.log('line95');
-        console.log('line107, item:', item);
         setSelectedItemsIds((prev) => {
             if (prev.includes(item.id)) {
                 return prev.filter((id) => id !== item.id);
@@ -114,36 +128,62 @@ const  MediaGallery = (props) => {
         });
     }, []);
 
+    const mediaMap = useMemo(() => {
+        return new Map(media.map((item) => [item.id, item]));
+    }, [media]);
+
+    const selectedItems = useMemo(() => {
+        return selectedItemsIds.map((id) => mediaMap.get(id));
+    }, [selectedItemsIds, mediaMap]);
+
+    const transformedItems = useMemo(() => {
+        return selectedItems.map((item) => {
+            return {
+                ...item,
+                mediaType: item?.mediaType === "photo" ? "image" : "video",
+                orientation,
+            };
+        });
+    }, [selectedItems, orientation]);
+
     useEffect(() => {
-        let selectedItems = selectedItemsIds.map((id)=> media.find((item) => item.id===id))
-        setPreviewMediaItems(selectedItems.map((item) => { return {...item, mediaType: item.mediaType==='photo'? 'image' : 'video', orientation: orientation} }));
-    }, [selectedItemsIds, media, orientation])
+        console.log("useEffect start");
+        const start = performance.now();
+
+        // Update the state with the transformed items
+        setPreviewMediaItems(transformedItems);
+
+        console.log("useEffect end:", performance.now() - start, "ms");
+    }, [transformedItems]);
+
+
+    // useEffect(() => {
+    //     console.log("Updated previewMediaItems:", previewMediaItems);
+    // }, [previewMediaItems]);
 
 
     useEffect(() => {
-        setTimeout(() => {
-            sliderRef.current?.scrollToIndex(selectedItemsIds.length-1);
-        }, 100)
+        if (selectedItemsIds.length>0) {
+            setTimeout(() => {
+                previewFlatListSliderRef.current?.scrollToIndex(selectedItemsIds.length-1);
+            }, 100)
+        }
 
     }, [selectedItemsIds])
 
-    const sliderRef = useRef();
-    console.log('p:', previewMediaItems);
-    // console.log('S:', selectedItems);
 
     const closeCamera = () => {
+        setVideoElapsedTime(0);
         setOpenCamera(false);
-        setNewPhotoTaken(false);
-        // setNewPhoto(null);
     }
 
     useEffect(() => {
 
         const getAudioPermission = async () => {
             if (cameraMode === 'video') {
-                const {audioStatus} = await Audio.getPermissionsAsync();
-                console.log('a:', audioStatus);
-                if (audioStatus !== "granted") {
+                const {status} = await Audio.getPermissionsAsync();
+                console.log('a:', status);
+                if (status !== "granted") {
                     await Audio.requestPermissionsAsync();
                 }
             }
@@ -151,20 +191,40 @@ const  MediaGallery = (props) => {
         getAudioPermission();
     }, [cameraMode])
 
+    const formatTime = (timeInSeconds) => {
+        const minutes = Math.floor(timeInSeconds / 60);
+        const seconds = timeInSeconds % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    };
+
     const startRecording = async () => {
         if (cameraRef.current) {
-            console.log('line149');
-            // const cameraStatus = await cameraRef.current.getCameraPermissionStatus();
-            // console.log('Camera permission status:', cameraStatus);
 
+            let codecs = await CameraView.getAvailableVideoCodecsAsync();
+            console.log('codecs:', codecs);
+            setVideoElapsedTime(0);
 
-            const videoRecordPromise = cameraRef.current.recordAsync();
+            let videoRecordPromise;
+            try {
+                videoRecordPromise = cameraRef.current.recordAsync({codec: 'avc1', quality: '720p'});
+            } catch (err) {
+                console.log('record Error:', err);
+            }
             if (videoRecordPromise) {
                 setIsRecording(true);
-                console.log('line 152');
-                const video = await videoRecordPromise;
-                videoUriRef.current = video.uri;  // Store the video URI in the ref
-                console.log('video.uri', video.uri);
+                timerRef.current = setInterval(() => {
+                    setVideoElapsedTime((prevTime) => prevTime + 1);
+                }, 1000);
+                console.log('line209, vRP:', videoRecordPromise);
+                let video;
+                try {
+                    video = await videoRecordPromise;
+                } catch (err) {
+                    console.log('V Error:', err);
+                }
+                console.log('video:', JSON.stringify(video, null, 2))
+                // console.log('v.l:', video.localUri);
+                console.log('v.u:', video.uri);
                 setRecordedUri(video.uri);
             }
         }
@@ -186,6 +246,7 @@ const  MediaGallery = (props) => {
                 console.log('line159');
                 cameraRef.current.stopRecording();
                 setIsRecording(false);
+                clearInterval(timerRef.current);
                 console.log('line162');
             }
         } catch (error) {
@@ -200,8 +261,29 @@ const  MediaGallery = (props) => {
                 console.log('recordedUri type:', typeof recordedUri);
                 if (recordedUri) {
                     console.log('line187');
+
+                    // Check file existence
+                    const fileInfo = await FileSystem.getInfoAsync(recordedUri);
+                    console.log('fileInfo:', fileInfo);
+                    if (!fileInfo.exists) {
+                        console.error('File does not exist:', recordedUri);
+                        return;
+                    }
+
+                    const { status, canAskAgain } = await MediaLibrary.requestPermissionsAsync();
+                    if (status !== 'granted' && canAskAgain) {
+                        const fullPermission = await MediaLibrary.requestPermissionsAsync({ writeOnly: false });
+                        console.log('Full permission status:', fullPermission.status);
+                    }
+
+
+                    try{
                     const asset = await MediaLibrary.createAssetAsync(recordedUri);
-                    setNewAssetCounter(newAssetCounter + 1);
+                    console.log('asset:', asset);
+                    setNewAssetCounter(newAssetCounter + 1);}
+                    catch (err) {
+                        console.log('Error creating asset:',JSON.stringify(err, null, 2))
+                    }
                 }
                 console.log('line165');
                 closeCamera();
@@ -212,42 +294,56 @@ const  MediaGallery = (props) => {
         [recordedUri])
 
     // useEffect(() => {
-    //     if (newAsset) {
-    //         console.log('nA:', newAsset);
-    //         toggleSelection(newAsset);
-    //     }
-    // }, [newAsset])
+    //     console.log('sIDs:', selectedItemsIds);
+    // }, [selectedItemsIds])
 
-
+    // const onViewableItemsChangedGallery = useRef(({ viewableItems }) => {
+    //     // console.log("Visible items:", viewableItems);
+    // });
 
     const renderItem = useCallback(({ item }) => {
-        // console.log('Rendering item with ID:', item.id, 'Selected:', selectedItemsIds);
+        let i = selectedItemsIds.findIndex( (id) => id===item.id);
+        let isSelected = i >=0;
+        return <GalleryMediaItem item={item} toggleSelection={toggleSelection} isSelected={isSelected} selectionIndex={i} videoThumbnails={thumbnails} isGalleryScrolling={checkIsScrolling}/>;
+    },[selectedItemsIds, toggleSelection]);
 
-        return (<TouchableWithoutFeedback
-            style={[
-                styles.itemContainer,
-                selectedItemsIds.includes(item.id) && styles.selectedItem,
-            ]}
-            // style={{ backgroundColor: 'rgba(0, 0, 255, 0.5)' }}
-            onPress={() => {
-                console.log('line126');
-                toggleSelection(item)
-            }}
-        >
-                <View>
-            {item.mediaType === MediaLibrary.MediaType.photo ? (
-                <Image source={{ uri: item.uri }} style={styles.image} />
-            ) : (
-                <View style={{position: 'relative'}}>
-                    <Image source={{ uri: thumbnails[item.id] }} style={styles.image} />
-                    <MaterialIcons name={'videocam'} size={28} color={'white'} style={{position: 'absolute', top: 10, right: 10}}/>
-                </View>
-            )}
-            {selectedItemsIds.includes(item.id) && <View style={{width: 30, height: 30, borderRadius: 15, borderWidth: 1, borderColor: 'white',...styles.checkmark}}><Text style={{textAlign: 'center', color: 'white'}}>{ (selectedItemsIds.indexOf(item.id)+1).toString()}</Text></View>}
-                </View>
-        </TouchableWithoutFeedback>
-    )}, [selectedItemsIds, toggleSelection]);
 
+    const handleGalleryScroll = () => {
+        // console.log('hGS:', isGalleryScrollingRef.current);
+        if (!isGalleryScrollingRef.current) {
+            isGalleryScrollingRef.current = true; // Set ref value immediately
+        }
+
+        // Clear existing timeout
+        if (scrollTimeoutRef.current) {
+            clearTimeout(scrollTimeoutRef.current);
+        }
+
+        // Set a timeout to reset scrolling state
+        scrollTimeoutRef.current = setTimeout(() => {
+            isGalleryScrollingRef.current = false; // Reset ref value
+        }, 500); // Delay to debounce scroll state
+    };
+
+    const handleGalleryScrollEnd = () => {
+        // console.log('hGSE:', isGalleryScrollingRef.current);
+        if (scrollTimeoutRef.current) {
+            clearTimeout(scrollTimeoutRef.current);
+        }
+        isGalleryScrollingRef.current = false;
+
+    };
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (scrollTimeoutRef.current) {
+                clearTimeout(scrollTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    // Function to check scrolling state
+    const checkIsScrolling = () => isGalleryScrollingRef.current;
 
     if (!permission) {
         // Camera permissions are still loading.
@@ -260,11 +356,11 @@ const  MediaGallery = (props) => {
             {!openCamera ?
         <View style={{justifyContent: 'center', alignItems: 'center'}}>
             <View style={{position: 'relative', justifyContent: 'center', alignItems: 'center', backgroundColor: 'black', width: '100%', aspectRatio: orientation==='landscape' ? '1.33' : '0.8'}}>
-                {/*{previewItemUri &&*/}
-                {/* <Image source={{uri: previewItemUri}} style={{width: '100%', height: 300}}/>}*/}
-                { (!previewMediaItems || previewMediaItems.length===0) && <View style={{alignItems: 'center', justifyContent: 'center', flex: 1}}><MaterialIcons name={'photo'} size={36} color={'white'} /></View>}
-                {previewMediaItems && previewMediaItems.length > 0 &&
-                <FlatListSlider ref={sliderRef}
+                {/*<View style={{backgroundColor: 'green', width: '100%', aspectRatio: '1.33'}}></View>*/}
+                { (previewMediaItems.length===0) && <View style={{alignItems: 'center', justifyContent: 'center', flex: 1, width: '100%', aspectRatio: orientation==='landscape' ? '1.33' : '0.8'}}><MaterialIcons name={'photo'} size={36} color={'white'} /></View>}
+                {/*{ (previewMediaItems.length===0) && <Text style={{color: 'black'}}>TEST</Text>}*/}
+                <FlatListSlider ref={previewFlatListSliderRef}
+                                simultaneousHandlers={[libraryFlatListRef]}
                                 data={previewMediaItems}
                                 local={false}
                                 orientation={orientation}
@@ -280,7 +376,7 @@ const  MediaGallery = (props) => {
                                 contentContainerStyle={{backgroundColor: 'black'}}
                                 allowPanZoom={true}
                                 component = {<MediaItem />}
-                />}
+                />
             </View>
             <View style={{display: 'flex', flexDirection: 'row', position: 'relative', justifyContent: 'flex-start', backgroundColor: Colors.shamrockGreen, width: '100%', alignItems: 'center'}}>
                 <View style={{position: 'absolute', left: '50%', width: 50, transform: [{ translateX: -25 }],}}>
@@ -298,12 +394,32 @@ const  MediaGallery = (props) => {
                 </View>
             </View>
             <FlatList
+                ref={libraryFlatListRef}
                 data={media}
                 keyExtractor={(item) => item.id}
                 renderItem={renderItem}
                 numColumns={3}
                 style={{height: 'auto'}}
                 extraData={selectedItemsIds}
+                keyboardShouldPersistTaps="handled"
+                disableScrollViewPanResponder={true}
+                initialNumToRender={50}
+                maxToRenderPerBatch={50}
+                viewabilityConfig={{itemVisiblePercentThreshold: 10}}
+                // onViewableItemsChanged={onViewableItemsChangedGallery.current}
+                windowSize={50}
+                scrollEnabled={true}
+                onScroll={handleGalleryScroll}
+                onMomentumScrollEnd={handleGalleryScrollEnd}
+                onScrollEndDrag={handleGalleryScrollEnd}
+                removeClippedSubviews={false}
+                // onTouchStart={() => {
+                //     console.log('FlatList Gallery touch start')
+                // }}
+                // onResponderGrant={() => console.log('FlatList onResponderGrant')}
+                // onResponderRelease={() => console.log('FlatList onResponderRelease')}
+                // onStartShouldSetResponder={() => true}
+                // onMoveShouldSetResponder={() => true}
             />
         </View>
                 :
@@ -320,17 +436,18 @@ const  MediaGallery = (props) => {
                     (
                         <View style={{flex: 1, justifyContent: 'center', position: 'relative', width: '100%'}}>
                             <View style={{position: 'absolute', top: 10, left: 10, zIndex:5}}>
-                                <Pressable onPress={() => setOpenCamera(false)}>
+                                <Pressable onPress={() => closeCamera()}>
                                     <MaterialIcons name={'close'} size={36} color={'white'}/>
                                 </Pressable>
                             </View>
-                            {/*{newPhoto ?*/}
-                            {/*    <View style={{position: 'absolute', width: '100%', height: '100%'}}>*/}
-                            {/*        <Image source={{uri: newPhoto.uri}} style={{width: '100%', height: '100%'}}/>*/}
-                            {/*    </View>*/}
-                            {/*:*/}
+                            { cameraMode==='video' &&
+                            <View style={styles.timerContainer}>
+                                <Text style={styles.timerText}>{formatTime(videoElapsedTime)}</Text>
+                            </View>
+                            }
+
                             <CameraView style={styles.camera} facing={facing} ref={cameraRef} mode={cameraMode}>
-                                {newPhotoTaken && <View style={{position: 'absolute', width: '100%', height: '100%', backgroundColor: 'black', zIndex: 100}}/>}
+                                {/*{newPhotoTaken && <View style={{position: 'absolute', width: '100%', height: '100%', backgroundColor: 'black', zIndex: 100}}/>}*/}
                                 <View style={styles.flipCameraButton}>
                                 <TouchableOpacity  onPress={toggleCameraFacing}>
                                     <MaterialIcons name={'flip-camera-ios'} size={36} color={'white'}/>
@@ -352,29 +469,37 @@ const  MediaGallery = (props) => {
                                 { cameraMode==='picture' ?
                                 <View style={styles.buttonContainer}>
                                     <TouchableOpacity style={styles.cameraClickButton} onPress={async () => {
+                                            try {
+                                                let photo = await cameraRef.current.takePictureAsync({exif: true});
+                                                const asset = await savePhotoToGallery(photo.uri);
+                                                setNewAsset(asset);
+                                                closeCamera();
+                                            } catch (error) {
+                                                console.log('Error taking pic:', error);
+                                            }
 
-                                            let photo = await cameraRef.current.takePictureAsync({exif: true});
-                                            setNewPhotoTaken(true);
-                                            const asset = await savePhotoToGallery(photo.uri);
-                                            setNewAsset(asset);
-                                            closeCamera();
                                     }}>
-                                        <View style={{width: 50, height: 50, borderRadius: 25, borderWidth: 2, borderColor: 'black', backgroundColor: 'white', alignSelf: 'center', position: 'absolute'}}/>
+                                        <View style={styles.innerCameraClickButton}/>
                                     </TouchableOpacity>
                                 </View> :
                                     (
+
                                         <View style={styles.buttonContainer}>
+                                            <View style={{position: 'relative', width: '100%', height: '100%'}}>
                                             {isRecording ? (
-                                                <TouchableOpacity style={styles.videoClickButton} onPress={stopRecording}>
-                                                    <View style={{width: 30, height: 30, borderRadius: 10, backgroundColor: 'red', alignSelf: 'center', position: 'absolute'}}/>
+                                                <TouchableOpacity style={styles.videoClickButtonOuter} onPress={stopRecording}>
+                                                    <View style={styles.videoClickButtonInnerStop}/>
                                                 </TouchableOpacity>
                                             ) : (
-                                                <TouchableOpacity style={styles.videoClickButton} onPress={startRecording}>
-                                                    <View style={{width: 50, height: 50, borderRadius: 25, borderWidth: 2, borderColor: 'black', backgroundColor: 'red', alignSelf: 'center', position: 'absolute'}}/>
+                                                <TouchableOpacity style={styles.videoClickButtonOuter} onPress={startRecording}>
+                                                    <View style={styles.videoClickButtonInnerStart}/>
                                                 </TouchableOpacity>
 
                                             )}
-                                        </View>)
+                                            </View>
+                                        </View>
+
+                                    )
                                     }
                             </CameraView>
 
@@ -393,42 +518,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'black'
-    },
-    itemContainer: {
-        margin: 0,
-        borderWidth: 1,
-        borderRadius: 0,
-        overflow: 'hidden',
-        position: 'relative',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#ddd',
-    },
-    selectedItem: {
-        borderWidth: 1,
-        borderColor: 'green',
-    },
-    image: {
-        width: 120,
-        height: 120,
-        resizeMode: 'cover',
-    },
-    videoText: {
-        fontSize: 30,
-    },
-    checkmark: {
-        position: 'absolute',
-        top: 5,
-        right: 5,
-        backgroundColor: '#0196f9',
-        display: 'flex',
-        justifyContent: 'center',
-        alignContent: 'center'
-    },
-    selectionText: {
-        textAlign: 'center',
-        marginTop: 20,
-        fontSize: 18,
     },
     cameraContainer: {
         width: '100%',
@@ -452,9 +541,12 @@ const styles = StyleSheet.create({
     buttonContainer: {
         position: 'absolute',
         bottom: 10,
-        alignSelf: 'center'
+        alignSelf: 'center',
+        width: '100%',
         // flex: 1,
-        // flexDirection: 'row',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
         // backgroundColor: 'transparent',
         // margin: 64,
     },
@@ -478,22 +570,55 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     cameraClickButton: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
+        width: 80,
+        height: 80,
+        borderRadius: 40,
         backgroundColor: 'white',
         position: 'relative',
         display: 'flex',
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
-    videoClickButton: {
+    innerCameraClickButton: {
         width: 60,
         height: 60,
         borderRadius: 30,
+        borderWidth: 2,
+        borderColor: 'black',
+        backgroundColor: 'white',
+        alignSelf: 'center',
+        position: 'absolute'
+    },
+    videoClickButtonOuter: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
         backgroundColor: 'white',
         position: 'relative',
         display: 'flex',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        // position: 'absolute',
+        left: '50%',
+        transform: [{ translateX: -40 }],
+    },
+    videoClickButtonInnerStop: {
+        width: 45, height: 45, borderRadius: 15, backgroundColor: 'red', borderWidth: 2, borderColor: 'black', alignSelf: 'center', position: 'absolute'
+    },
+    videoClickButtonInnerStart: {
+        width: 70, height: 70, borderRadius: 35, borderWidth: 2, borderColor: 'black', backgroundColor: 'red', alignSelf: 'center', position: 'absolute'
+    },
+    timerContainer: {
+        position: 'absolute',
+        top: 20,
+        right: 20,
+        zIndex: 5,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        padding: 10,
+        borderRadius: 5,
+    },
+    timerText: {
+        color: 'white',
+        fontSize: 20,
+        fontWeight: 'bold',
     },
     text: {
         fontSize: 24,

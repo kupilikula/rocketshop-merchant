@@ -7,5 +7,6 @@ orange: '#FE621Dff',
 crimson: '#D7263Dff',
 indigo: '#540D6E',
 palatinateBlue: '#473BF0ff',
-darkGreen: '#2A4D14ff'
+darkGreen: '#2A4D14ff',
+iconBlue: '#0196f9'
 }

@@ -35,8 +35,8 @@ export default function MediaItem ({
             }
         }
     }
-    console.log('nI:', numberOfItems);
-    console.log('I:', index);
+    // console.log('nI:', numberOfItems);
+    // console.log('I:', index);
 
     return (
         <View style={{position: 'relative', justifyContent: 'center', alignItems: 'center'}}>
@@ -68,7 +68,7 @@ export default function MediaItem ({
              :
                 ( (isPlaying || videoPlayer.currentTime > 0 || !item['thumbnail']) ?
                 <VideoView contentFit={'contain'}
-                           style={{width: width, aspectRatio: orientation === 'landscape' ? '1.78' : '0.8', alignSelf: 'center', marginVertical: 'auto'}}
+                           style={{width: '100%', height: '100%', alignSelf: 'center', marginVertical: 'auto'}}
                            player={videoPlayer} allowsFullscreen allowsPictureInPicture nativeControls={true}/> :
                         <View style={{display: 'flex', position: 'relative', flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                             <MaterialIcons name={'play-circle'} size={50} color={'white'}

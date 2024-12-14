@@ -1,18 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-    View,
-    Image,
-    StyleSheet,
-    Dimensions,
-    TouchableOpacity,
-    Pressable,
-    PixelRatio,
-    TouchableWithoutFeedback
-} from 'react-native';
-import { PinchGestureHandler, PanGestureHandler, GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, { useSharedValue, useAnimatedStyle, useAnimatedGestureHandler } from 'react-native-reanimated';
+import React, {useEffect, useRef, useState} from 'react';
+import {PixelRatio, StyleSheet, TouchableWithoutFeedback, View} from 'react-native';
+import {PanGestureHandler, PinchGestureHandler} from 'react-native-gesture-handler';
+import Animated, {useAnimatedGestureHandler, useAnimatedStyle, useSharedValue} from 'react-native-reanimated';
 import {Fontisto} from "@expo/vector-icons";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import {Colors} from "../../styles/Colors";
 
 
 // const { width, height } = Dimensions.get('window');
@@ -48,7 +39,21 @@ export default function ZoomableImage({ source, size, simultaneousHandlers }) {
         },
         onActive: (event, context) => {
             if (!lockFullHeight && !lockFullWidth) {
-                scale.value = context.startScale * event.scale;  // Apply scaling
+                let newScaleValue = context.startScale* event.scale;
+                let newScaledImageWidth = size.width * newScaleValue;
+                let newScaledImageHeight = size.width * (imageHeight / imageWidth) * newScaleValue; // Preserve aspect ratio
+                console.log('cSV:', context.startScale,' ,nSV:', newScaleValue, ' , nsIW:', newScaledImageWidth, ' , nsIH:', newScaledImageHeight);
+                if (newScaledImageWidth < size.width && newScaledImageHeight < size.height) {
+                    let A = [Math.abs(Math.log(newScaleValue)), Math.abs(Math.log((imageWidth/size.width)*(size.height / imageHeight))-Math.log(newScaleValue))];
+                    let A_index = A.indexOf(Math.min(...A));
+                    console.log('A:', A);
+                    console.log('A_i:', A_index);
+                    let limitedScaleValue = A_index===0 ? 1 : (imageWidth/size.width)*(size.height / imageHeight);
+                    console.log('lSV:', limitedScaleValue )
+                    scale.value = limitedScaleValue;
+                } else {
+                    scale.value = newScaleValue;  // Apply scaling
+                }
             }
 
         },
@@ -84,13 +89,12 @@ export default function ZoomableImage({ source, size, simultaneousHandlers }) {
             if (!lockFullHeight) {
 
                 newTranslateY = Math.min(Math.max(newTranslateY, -maxTranslateY), maxTranslateY);
-                console.log('mTY:', maxTranslateY, ' , nTY:', newTranslateY, ', s.v:', scale.value, ' ,sIH:', scaledImageHeight, ' , sH:', size.height);
                 translateY.value = newTranslateY;
             }
             // Apply translations
 
 
-            },
+        },
         onEnd: () => {
             lastOffset.current = { x: translateX.value, y: translateY.value };
         },
@@ -113,24 +117,6 @@ export default function ZoomableImage({ source, size, simultaneousHandlers }) {
         translateY.value = 0;
     }, []);
 
-    // Adjusting the image to fit correctly within the screen's bounds
-    const imageContainerStyle = useAnimatedStyle(() => {
-        const screenAspectRatio = size.width / size.height;
-        const imageAspectRatio = imageWidth / imageHeight;
-
-        // Calculate the initial offset
-        let initialTranslateY = 0;
-        if (imageAspectRatio < screenAspectRatio) {
-            // Image is taller than the screen
-            initialTranslateY = (size.height - (size.width / imageAspectRatio)) / 2;
-        }
-
-        return {
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: initialTranslateY, // This centers the image vertically if needed
-        };
-    });
 
     const onLockFullWidthToggled = () => {
         if (!lockFullWidth) {
@@ -140,8 +126,6 @@ export default function ZoomableImage({ source, size, simultaneousHandlers }) {
         } else {
             setLockFullWidth(false);
         }
-
-        // translateY.value = 150; // Center the image vertically
     };
 
     // Function to reset the image to the full height of the container
@@ -159,45 +143,53 @@ export default function ZoomableImage({ source, size, simultaneousHandlers }) {
     };
 
     return (
-        <View style={{...styles.container, width: size.width, height: size.height, borderWidth: 2, borderStyle: 'solid'}}>
-            <GestureHandlerRootView style={{ flex: 1, backgroundColor: 'yellow', position: 'relative'}}>
-                {/* Pan Gesture Handler */}
-                <PanGestureHandler onGestureEvent={panGestureHandler}
-                                   simultaneousHandlers={[pinchGestureHandler, simultaneousHandlers]}
-                                   minPointers={1}
-                                   maxPointers={1}
-                >
-                    <Animated.View style={[styles.imageContainer, animatedStyle]}>
-                        {/* Pinch Gesture Handler */}
-                        <PinchGestureHandler onGestureEvent={pinchGestureHandler}
-                                             simultaneousHandlers={simultaneousHandlers}
-                                             minPointers={2}
-                                             maxPointers={2}
-                        >
-                            <Animated.Image
-                                source={{ uri: source }}
-                                onLoad={onImageLoad}
-                                style={{
-                                    width: size.width,
-                                    height: (imageHeight/imageWidth)*size.width,
-                                    // height: size.height,
-                                    // height: 200, // Ensuring it uses full height
-                                    resizeMode: 'contain', // To scale without cropping
+        <View style={{...styles.container, width: size.width, height: size.height}}>
+            <PanGestureHandler onGestureEvent={panGestureHandler}
+                               simultaneousHandlers={[pinchGestureHandler,...simultaneousHandlers]}
+                               minPointers={1}
+                               maxPointers={1}
+                               requireToFail={simultaneousHandlers[0]}
+                               waitFor={simultaneousHandlers[0]}
+            >
+                <Animated.View  style={[styles.imageContainer, animatedStyle]}
+                                pointerEvents="box-none"
+                                onTouchStart={(e) => {
+                                    // e.stopPropagation(); // Explicitly allow touch propagation
+                                    // console.log('Animated.View touch detected');
                                 }}
-                            />
-                        </PinchGestureHandler>
-                    </Animated.View>
-                </PanGestureHandler>
-                {/* Reset Buttons */}
-            </GestureHandlerRootView>
+                                onResponderGrant={() => console.log('Animated.View onResponderGrant')}
+                                onResponderRelease={() => console.log('Animated.View onResponderRelease')}
+                >
+                    <PinchGestureHandler onGestureEvent={pinchGestureHandler}
+                                         simultaneousHandlers={[panGestureHandler,...simultaneousHandlers]}
+                                         minPointers={2}
+                                         maxPointers={2}
+                                         requireToFail={simultaneousHandlers[0]}
+                                         waitFor={simultaneousHandlers[0]}
+                    >
+                        <Animated.Image
+                            source={{ uri: source }}
+                            onLoad={onImageLoad}
+                            style={{
+                                width: size.width,
+                                height: (imageHeight/imageWidth)*size.width,
+                                // height: size.height,
+                                // height: 200, // Ensuring it uses full height
+                                resizeMode: 'contain', // To scale without cropping
+                            }}
+                            pointerEvents="auto"
+                        />
+                    </PinchGestureHandler>
+                </Animated.View>
+            </PanGestureHandler>
             <View style={{position: 'absolute', bottom: 0, left: 5, display: 'flex', flexDirection:'row', alignItems: 'center'}}>
                 <TouchableWithoutFeedback onPress={onLockFullWidthToggled}>
-                    <View style={{width:40, height:60, marginRight: 5, borderRadius: 15, backgroundColor: lockFullWidth ? 'blue' : 'black', opacity: lockFullWidth ? 1 : 0.5, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                        <Fontisto name="arrow-v" color="white" size={40} />
+                    <View style={{width:40, height:60, marginRight: 5, borderRadius: 15, backgroundColor: lockFullWidth ? Colors.iconBlue : 'black', opacity: lockFullWidth ? 1 : 0.5, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                        <Fontisto name="arrow-v" color="white" size={40}/>
                     </View>
                 </TouchableWithoutFeedback>
                 <TouchableWithoutFeedback onPress={onLockFullHeightToggled} >
-                    <View style={{width:60, height:40, borderRadius: 15, backgroundColor: lockFullHeight ? 'blue' : 'black', opacity: lockFullHeight ? 1 : 0.5, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                    <View style={{width:60, height:40, borderRadius: 15, backgroundColor: lockFullHeight ? Colors.iconBlue : 'black', opacity: lockFullHeight ? 1 : 0.5, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                         {/*<MaterialIcons name={'lock'} size={36}/>*/}
                         <Fontisto name="arrow-h" color="white" size={40} />
                     </View>
@@ -213,7 +205,7 @@ const styles = StyleSheet.create({
         position: 'relative',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'red', // Optional, just to ensure visibility if image doesn't take full space
+        backgroundColor: 'black', // Optional, just to ensure visibility if image doesn't take full space
         padding: 0,
         // width: 400,
         // height: 300,
@@ -221,12 +213,13 @@ const styles = StyleSheet.create({
         // height: '100%'
     },
     imageContainer: {
-        flex: 1,
+        // flex: 1,
         position: 'relative',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'green',
+        backgroundColor: 'black',
         padding: 0,
         margin: 0,
     },
 });
+

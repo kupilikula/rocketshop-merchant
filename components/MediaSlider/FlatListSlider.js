@@ -9,7 +9,6 @@ import React, {
     useState
 } from 'react';
 import {
-    FlatList,
     View,
     StyleSheet,
     LayoutAnimation,
@@ -18,6 +17,7 @@ import {
     Dimensions,
     Text
 } from 'react-native';
+import {FlatList} from 'react-native-gesture-handler';
 import Indicator from './Indicator';
 import MediaItem from './MediaItem';
 
@@ -99,10 +99,16 @@ const FlatListSlider = forwardRef( ( props, ref) =>{
         itemVisiblePercentThreshold: 50,
     };
 
-    return (
+    // useEffect(() => {
+    //     console.log("props.data updated:", props.data);
+    // }, [props.data]);
+
+
+    return ( props.data.length>0 &&
             <View onLayout={onLayout} style={{position: 'relative'}}>
                 <FlatList
                     ref={slider}
+                    simultaneousHandlers={props.simultaneousHandlers}
                     horizontal={true}
                     pagingEnabled={true}
                     snapToAlignment={'center'}
@@ -110,29 +116,30 @@ const FlatListSlider = forwardRef( ( props, ref) =>{
                     bounces={false}
                     contentContainerStyle={props.contentContainerStyle}
                     data={props.data}
+                    extraData={props.data}
                     showsHorizontalScrollIndicator={false}
                     renderItem={({item, index: i}) => {
-                        console.log('i:', i);
-                        console.log('i%l:', i % props.data.length);
-                        return React.cloneElement(props.component, {
-                            width: size.width,
-                            height: size.height,
-                            item: item,
-                            orientation: props.orientation,
+                        // return <View>
+                        //     <Text style={{color: 'white'}}>{item.id}</Text>
+                        // </View>
+                        return <MediaItem
+                            width={size.width}
+                            height={size.height}
+                            item={item}
+                            orientation={props.orientation}
                             // onPress: props.onPress,
-                            index: i % props.data.length,
-                            numberOfItems: props.data.length,
-                            scrollToIndex: scrollToIndex,
-                            active: i === currentIndex,
-                            local: props.local,
-                            allowPanZoom: props.allowPanZoom,
-                            simultaneousHandlers: slider,
-                        });
-                    }}
+                            index={i}
+                            numberOfItems={props.data.length}
+                            scrollToIndex={scrollToIndex}
+                            active={i === currentIndex}
+                            local={props.local}
+                            allowPanZoom={props.allowPanZoom}
+                            simultaneousHandlers={[slider, ...props.simultaneousHandlers]} />
+                        }}
                     ItemSeparatorComponent={() => (
                         <></>
                     )}
-                    keyExtractor={(item, index) => item.toString() + index}
+                    keyExtractor={(item, index) => item.id}
                     onViewableItemsChanged={onViewableItemsChanged}
                     viewabilityConfig={viewabilityConfig}
                     getItemLayout={(_, index) => {
@@ -149,10 +156,11 @@ const FlatListSlider = forwardRef( ( props, ref) =>{
                             index,
                         };
                         }}
-                    windowSize={1}
-                    initialNumToRender={1}
-                    maxToRenderPerBatch={1}
+                    windowSize={50}
+                    initialNumToRender={50}
+                    maxToRenderPerBatch={50}
                     removeClippedSubviews={true}
+                    scrollEnabled={false}
                     // onContentSizeChange={handleContentSizeChange}
                 />
                 {props.indicator && (props.data.length > 1) && (
