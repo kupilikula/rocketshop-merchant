@@ -1,13 +1,7 @@
-import {View, StyleSheet} from "react-native";
-import {Card, Text} from "react-native-paper";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import FlatListSlider from "../../../../../components/MediaSlider/FlatListSlider";
-import MediaItem from "../../../../../components/MediaSlider/MediaItem";
-import { Rating } from '@kolking/react-native-rating';
+import {StyleSheet} from "react-native";
 import {useLocalSearchParams} from "expo-router";
 import ProductDisplayCardCustomerStore from "../../../../../components/ProductDisplayCardCustomerStore";
 import {getProductForStore} from "../../../../../utils/fakeDataMethods";
-// import {useQuery} from "react-query";
 
 
 

@@ -8,7 +8,7 @@ export default function TabsComponent() {
 
   return <Tabs backBehavior={'history'} initialRouteName={'Dashboard'} screenOptions={{
       header: () => null, tabBarShowLabel: false, animation: 'fade',
-      tabBarStyle: {backgroundColor: 'white', paddingBottom: 0, paddingTop: 3},
+      tabBarStyle: {backgroundColor: 'white', paddingBottom: 0, paddingTop: 3, },
       tabBarActiveTintColor: Colors.shamrockGreen,
       tabBarInactiveTintColor: 'black',
       tabBarButton: (props) => {return (<TouchableOpacity activeOpacity={1} {...props} />)} }}>

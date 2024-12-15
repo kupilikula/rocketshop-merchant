@@ -41,7 +41,7 @@ export default function ProductSearch (props) {
                     placeholder="Search Products"
                     onChangeText={onSearchQueryChange}
                     value={searchQuery}
-                    style={{borderRadius: 5, backgroundColor: '#efefef', elevation: 5}}
+                    style={{borderRadius: 5, backgroundColor: '#efefef', elevation: 5, width: '100%'}}
                 />
             {searchQuery!=='' && filteredProducts.length > 0 && <View style={{flex: 1, width: '100%', ...flatListHeightStyle}}>
                 <FlatList style={{width: '100%'}} scrollEnabled={!props.limitedResults} data={filteredProducts} renderItem={({item}) => (<SearchResultProduct product={item}/>)}/>

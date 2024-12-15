@@ -42,6 +42,7 @@ yarn-error.*
 *.apk
 ios
 android
+build-*
 
 
 app-example

@@ -15,15 +15,16 @@ export default function Layout() {
     const pathName = usePathname();
 
     return (
-        // <GestureHandlerRootView style={{ flex: 1 }}>
-            <Drawer initialRouteName={'LandingPage'} backBehavior={'history'} screenOptions={({route}) =>  ({drawerPosition: 'right',
+            <Drawer initialRouteName={'LandingPage'} backBehavior={'history'} screenOptions={({route}) =>  ({
+                drawerPosition: 'right',
+                drawerType: 'front',
                 headerLeft: () => {
                     if (pathName.startsWith('/Main/StoreFront/Collections/Collection/')) {
                         return <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                             <Pressable onPress={router.back}>
                                 <MaterialIcons name={'arrow-back'} size={36} style={{margin: 10}}/>
                             </Pressable>
-                            <Text variant={'titleLarge'} style={{marginLeft: 15}}>Collection</Text>
+                            <Text variant={'titleLarge'} style={{marginLeft: 15}} >Collection</Text>
                         </View>
                     } else if (pathName.startsWith('/Main/StoreFront/Products/Product/')) {
                         return <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
@@ -55,6 +56,7 @@ export default function Layout() {
                 headerRight: () => <DrawerToggleButton/>,
                 headerShadowVisible: true,
                 headerTitle: '',
+                headerStyle: {height: 60},
                 drawerStyle: { borderTopLeftRadius: 0, borderBottomLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0},
             })}
             drawerContent={(props) => <StoreFrontDrawer {...props}/>}>
@@ -107,6 +109,6 @@ export default function Layout() {
                 {/*    }}*/}
                 {/*/>*/}
             </Drawer>
-        // </GestureHandlerRootView>
+
     );
 }

@@ -8,32 +8,15 @@ export const getProductForStore = () => {
         rating: faker.number.float({ multipleOf: 0.5, min: 0, max:5 }),
         productDescription: faker.lorem.text(),
         numberOfRatings: faker.number.int({min:0, max: 3000}),
-        mediaItems: [
-            {
-                mediaType: 'image',
-                uri:
-                    faker.image.url(),
-                orientation: 'landscape',
-                desc:
-                    faker.string.alpha(),
-            },
-            {
-                mediaType: 'image',
-                uri:
-                    faker.image.url(),
-                orientation: 'landscape',
-                desc:
-                    faker.string.alpha(),
-            },
-            {
-                mediaType: 'image',
-                uri:
-                    faker.image.url(),
-                orientation: 'landscape',
-                desc:
-                    faker.string.alpha(),
-            },
-        ]
+        mediaItems: faker.helpers.multiple( () => (            {
+            mediaId: faker.string.uuid(),
+            mediaType: 'image',
+            uri:
+                faker.image.url(),
+            orientation: 'landscape',
+            desc:
+                faker.string.alpha(),
+        }), 3)
     }}
 
 export const getProductForCustomerFeed = () => {

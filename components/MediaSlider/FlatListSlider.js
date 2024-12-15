@@ -108,7 +108,7 @@ const FlatListSlider = forwardRef( ( props, ref) =>{
             <View onLayout={onLayout} style={{position: 'relative'}}>
                 <FlatList
                     ref={slider}
-                    simultaneousHandlers={props.simultaneousHandlers}
+                    simultaneousHandlers={props.simultaneousHandlers || []}
                     horizontal={true}
                     pagingEnabled={true}
                     snapToAlignment={'center'}
@@ -134,12 +134,12 @@ const FlatListSlider = forwardRef( ( props, ref) =>{
                             active={i === currentIndex}
                             local={props.local}
                             allowPanZoom={props.allowPanZoom}
-                            simultaneousHandlers={[slider, ...props.simultaneousHandlers]} />
+                            simultaneousHandlers={props.simultaneousHandlers ? [slider, ...props.simultaneousHandlers] : [slider]} />
                         }}
                     ItemSeparatorComponent={() => (
                         <></>
                     )}
-                    keyExtractor={(item, index) => item.id}
+                    keyExtractor={props.keyExtractor}
                     onViewableItemsChanged={onViewableItemsChanged}
                     viewabilityConfig={viewabilityConfig}
                     getItemLayout={(_, index) => {

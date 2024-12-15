@@ -2,7 +2,6 @@ import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
     View,
     TouchableOpacity,
-    Text,
     StyleSheet,
     Image,
     Pressable,
@@ -14,7 +13,7 @@ import FlatListSlider from "./MediaSlider/FlatListSlider";
 import MediaItem from "./MediaSlider/MediaItem";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as VideoThumbnails from "expo-video-thumbnails";
-import {Button, Card, Surface} from "react-native-paper";
+import {Button, Card, Surface, Text, useTheme} from "react-native-paper";
 import {Camera, CameraView, useCameraPermissions} from "expo-camera";
 import {Colors} from "../styles/Colors";
 import * as FileSystem from 'expo-file-system';  // Import FileSystem
@@ -52,6 +51,7 @@ const  MediaGallery = (props) => {
     const libraryFlatListRef = useRef();
     const timerRef = useRef(null);
 
+    const theme = useTheme();
 
     function toggleCameraFacing() {
         setFacing(current => (current === 'back' ? 'front' : 'back'));
@@ -366,6 +366,7 @@ const  MediaGallery = (props) => {
                                 orientation={orientation}
                                 separator={0}
                                 currentIndexCallback={index => console.log('Index', index)}
+                                keyExtractor={(item) => item.id}
                     // onPress={item => { console.log('pressed')}}
                                 indicator
                                 indicatorStyle={{}}
@@ -378,18 +379,18 @@ const  MediaGallery = (props) => {
                                 component = {<MediaItem />}
                 />
             </View>
-            <View style={{display: 'flex', flexDirection: 'row', position: 'relative', justifyContent: 'flex-start', backgroundColor: Colors.shamrockGreen, width: '100%', alignItems: 'center'}}>
+            <View style={{display: 'flex', flexDirection: 'row', position: 'relative', justifyContent: 'flex-start', backgroundColor: theme.colors.secondary, width: '100%', alignItems: 'center'}}>
                 <View style={{position: 'absolute', left: '50%', width: 50, transform: [{ translateX: -25 }],}}>
                 <Pressable onPress={() => setOpenCamera(true)}>
-                    <MaterialIcons name={'camera-alt'} color={'white'} size={28} style={{margin: 10}}/>
+                    <MaterialIcons name={'camera-alt'} color={'black'} size={28} style={{margin: 10}}/>
                 </Pressable>
                 </View>
                 <View style={{display: 'flex', flexDirection: 'row', marginLeft: 'auto'}}>
                 <Pressable onPress={() => setOrientation('landscape')}>
-                <MaterialIcons name={'stay-current-landscape'} color={'white'} size={28} style={{margin: 10}}/>
+                <MaterialIcons name={'stay-current-landscape'} color={'black'} size={28} style={{margin: 10}}/>
                 </Pressable>
                 <Pressable onPress={() => setOrientation('portrait')}>
-                <MaterialIcons name={'stay-current-portrait'} color={'white'} size={28} style={{margin: 10}}/>
+                <MaterialIcons name={'stay-current-portrait'} color={'black'} size={28} style={{margin: 10}}/>
                 </Pressable>
                 </View>
             </View>
@@ -442,7 +443,7 @@ const  MediaGallery = (props) => {
                             </View>
                             { cameraMode==='video' &&
                             <View style={styles.timerContainer}>
-                                <Text style={styles.timerText}>{formatTime(videoElapsedTime)}</Text>
+                                <Text style={styles.timerText} variant={'bodyLarge'}>{formatTime(videoElapsedTime)}</Text>
                             </View>
                             }
 

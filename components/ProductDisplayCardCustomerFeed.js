@@ -33,6 +33,7 @@ export default function ProductDisplayCardCustomerFeed (props) {
             separator={0}
             currentIndexCallback={index => console.log('Index', index)}
             // onPress={item => { console.log('pressed')}}
+            keyExtractor={(item) => item.mediaId}
             indicator
             indicatorStyle={{}}
             indicatorContainerStyle={{position: 'absolute', bottom: 10}}
