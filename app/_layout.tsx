@@ -7,6 +7,8 @@ import * as NavigationBar from 'expo-navigation-bar';
 import {useEffect} from "react";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
 import { DefaultTheme } from 'react-native-paper';
+import {Provider} from "react-redux";
+import { store } from "@/store/store";
 
 // const Tabs = createBottomTabNavigator();
 const isLoggedIn = true;
@@ -42,8 +44,10 @@ export default function RootLayout() {
     };
 
     return (
+
         <SafeAreaProvider>
             <GestureHandlerRootView style={{ flex: 1 }}>
+                <Provider store={store}>
       <PaperProvider theme={customTheme}>
           <StatusBar style="dark" backgroundColor={'white'} />
           {/*<NavigationBar backgroundColor={'white'}/>*/}
@@ -51,6 +55,7 @@ export default function RootLayout() {
       <Stack screenOptions={{headerShown: false}}/>
     </View>
   </PaperProvider>
+                </Provider>
             </GestureHandlerRootView>
   </SafeAreaProvider>);
 }

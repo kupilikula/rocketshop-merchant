@@ -1,47 +1,223 @@
-import React, {useRef, useState} from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
     View,
     StyleSheet,
     TouchableOpacity,
-    FlatList,
     KeyboardAvoidingView,
     Platform,
-    ScrollView,
+    ScrollView, Keyboard, TouchableWithoutFeedback, Pressable, Alert,
 } from "react-native";
 import {
     TextInput,
     Button,
     Text,
-    IconButton, useTheme,
+    IconButton,
+    useTheme, Checkbox, Dialog, Portal, Menu, Chip,
 } from "react-native-paper";
+import { useSelector, useDispatch } from "react-redux";
+import { useIsFocused } from "@react-navigation/native";
+import _ from "lodash";
+import { updateField } from "../../../store/newProductSlice";
+import {useNavigation} from "expo-router";
 
 const AddProductInfoScreen = () => {
+    const dispatch = useDispatch();
+    const productData = useSelector((state) => state.newProduct);
+    const navigation = useNavigation();
+
     const [productName, setProductName] = useState("");
     const [price, setPrice] = useState("");
     const [description, setDescription] = useState("");
     const [stock, setStock] = useState("");
     const [attributes, setAttributes] = useState([]);
+    const [filteredSuggestions, setFilteredSuggestions] = useState([]);
+    const [filteredValueSuggestions, setFilteredValueSuggestions] = useState([]);
+    const [currentFocusedIndex, setCurrentFocusedIndex] = useState(null);
+    const [currentFocusedValueIndex, setCurrentFocusedValueIndex] = useState(null);
+    const [inputWidths, setInputWidths] = useState({});
     const [attributeSuggestions, setAttributeSuggestions] = useState([
         { key: "Color", values: ["Red", "Blue", "Green"] },
         { key: "Material", values: ["Cotton", "Leather", "Plastic"] },
         { key: "Size", values: ["Small", "Medium", "Large"] },
     ]);
-    const [filteredSuggestions, setFilteredSuggestions] = useState([]);
-    const [filteredValueSuggestions, setFilteredValueSuggestions] = useState([]); // For value suggestions
-    const [currentFocusedIndex, setCurrentFocusedIndex] = useState(null);
-    const [currentFocusedValueIndex, setCurrentFocusedValueIndex] = useState(null); // Track focus for Value inputs
-    const [inputWidths, setInputWidths] = useState({}); // Store widths of inputs by index
+    const [attributesData, setAttributesData] = useState([
+        { key: "Color", values: ["Red", "Blue", "Green"] },
+        { key: "Size", values: ["S", "M", "L"] },
+    ]); // Example attributes
+    const [collections, setCollections] = useState(["Electronics", "Clothing", "Home Appliances", "Best Sellers"]); // Existing collections
+    const [selectedCollections, setSelectedCollections] = useState([]); // Selected collections
+    // const [newCollectionName, setNewCollectionName] = useState(""); // Name for new collection
+    const [isDialogVisible, setIsDialogVisible] = useState(false); // Dialog visibility
+    const [tags, setTags] = useState([]); // Selected tags
+    const [tagSuggestions, setTagSuggestions] = useState([
+        "Electronics",
+        "Clothing",
+        "New Arrival",
+        "Discount",
+        "Popular",
+    ]); // Existing tags
+    const [filteredTagSuggestions, setFilteredTagSuggestions] = useState([]);
+    const [tagInput, setTagInput] = useState(""); // Tag input
+
+    const [variants, setVariants] = useState([]); // Generated variants
+    const [variantSelectedAttributes, setVariantSelectedAttributes] = useState([]); // Selected attributes for variant generation
+    const [gstRate, setGstRate] = useState(18); // Default GST Rate
+    const [gstMenuVisible, setGstMenuVisible] = useState(false); // For Dropdown visibility
+    const [errorMessages, setErrorMessages] = useState({}); // Error messages for validation
+
+    const gstRates = [0, 5, 12, 18, 28]; // GST Rates
+
+    // const newCollectionRef = useRef(null); // Uncontrolled TextInput reference
+    const isFocused = useIsFocused();
+    const isRestored = useRef(false);
+    const stateRef = useRef({
+        productName: "",
+        price: "",
+        description: "",
+        stock: "",
+        attributes: [],
+    });
+    const gstInputContainerRef = useRef(null); // Reference to the GST TextInput
+    const [gstDropdownPosition, setGstDropdownPosition] = useState({
+        x: 0,
+        y: 0,
+        width: 0,
+    });
+
+    const isSelectingSuggestion = useRef(false); // Tracks if a suggestion is being clicked
+
 
     const theme = useTheme();
     const styles = makeStyles(theme);
+
+    useEffect(() => {
+        console.log('update state ref effect');
+        stateRef.current = {
+            productName,
+            price,
+            description,
+            stock,
+            attributes,
+        };
+    }, [productName, price, description, stock, attributes]);
+
+
+    // Restore state from Redux when the screen gains focus for the first time
+    useEffect(() => {
+
+        console.log('restore data from store to local effect, isF:', isFocused, ', isR:', isRestored.current);
+        if (isFocused && !isRestored.current) {
+            console.log('restoring from store: ', productData);
+            setProductName(productData.productName);
+            setPrice(productData.price);
+            setDescription(productData.description);
+            setStock(productData.stock);
+            setAttributes(productData.attributes);
+
+            isRestored.current = true; // Mark as restored
+        }
+    }, [isFocused]);
+
+    const saveStateToRedux = () => {
+        const currentState = stateRef.current;
+
+        if (!_.isEqual(currentState, productData)) {
+            console.log('saving state to redux, currentState:', currentState);
+            dispatch(updateField({ field: "all", value: currentState }));
+        }
+
+        isRestored.current = false; // Reset for next navigation
+    };
+
+    // Add `beforeRemove` listener for back navigation
+    useEffect(() => {
+        console.log('adding beforeRemove listener')
+        const unsubscribe = navigation.addListener("beforeRemove", saveStateToRedux);
+        return unsubscribe; // Cleanup listener
+    }, [navigation, productData, dispatch]);
+
+    // Add `state` listener for other navigation transitions
+    useEffect(() => {
+        console.log('adding state listener')
+        const unsubscribe = navigation.addListener("state", saveStateToRedux);
+        return unsubscribe; // Cleanup listener
+    }, [navigation, productData, dispatch]);
+
+    // Handle selection of collections
+    const toggleCollectionSelection = (collection) => {
+        if (selectedCollections.includes(collection)) {
+            setSelectedCollections(
+                selectedCollections.filter((item) => item !== collection)
+            );
+        } else {
+            setSelectedCollections([...selectedCollections, collection]);
+        }
+    };
+
+    const validateForm = () => {
+        const errors = {};
+
+        // Validate Product Name
+        if (!productName.trim()) {
+            errors.productName = "Product Name is required.";
+        }
+        console.log('line164')
+        // Validate Price
+        if (!price.trim() || isNaN(price) || parseFloat(price) <= 0) {
+            errors.price = "Price must be a valid positive number.";
+        }
+
+        // Validate Stock
+        if (!stock.trim() || isNaN(stock) || parseInt(stock, 10) < 0) {
+            errors.stock = "Stock must be a valid non-negative number.";
+        }
+        console.log('line174')
+        // Validate GST
+        if (!gstRates.includes(gstRate)) {
+            errors.gstRate = "GST rate is required.";
+        }
+        console.log('line179')
+        // Validate Description
+        if (!description.trim()) {
+            errors.description = "Description is required.";
+        }
+        console.log('line184, col:', collections);
+        // Validate Collections
+        if (selectedCollections.length === 0) {
+            errors.collections = "At least one collection must be selected.";
+        }
+        console.log('e.c:', errors.collections);
+        // Validate Attributes
+        attributes.forEach((attr, index) => {
+            if (!attr.key.trim()) {
+                errors[`attributeName-${index}`] = `Attribute Name is required for row ${index + 1}.`;
+            }
+            if (!attr.value.trim()) {
+                errors[`attributeValue-${index}`] = `Attribute Value is required for row ${index + 1}.`;
+            }
+        });
+        console.log('errors:', errors);
+        setErrorMessages(errors);
+
+        // Return true if no errors
+        return Object.keys(errors).length === 0;
+    };
+
 
     const addAttribute = () => {
         setAttributes([...attributes, { key: "", value: "" }]);
     };
 
     const updateAttribute = (index, field, value) => {
-        const updatedAttributes = [...attributes];
-        updatedAttributes[index][field] = value;
+        // Create a new copy of the attribute object at the specified index
+        const updatedAttribute = { ...attributes[index], [field]: value };
+
+        // Create a new array with the updated attribute
+        const updatedAttributes = [
+            ...attributes.slice(0, index),
+            updatedAttribute,
+            ...attributes.slice(index + 1),
+        ];
         setAttributes(updatedAttributes);
 
         if (field === "key") {
@@ -54,7 +230,10 @@ const AddProductInfoScreen = () => {
 
         if (field === "value") {
             const attribute = attributes[index];
-            const values = attributeSuggestions.find((item) => item.key === attribute.key)?.values || [];
+            const values =
+                attributeSuggestions.find(
+                    (item) => item.key === attribute.key
+                )?.values || [];
             const suggestions = values.filter((val) =>
                 val.toLowerCase().startsWith(value.toLowerCase())
             );
@@ -88,41 +267,52 @@ const AddProductInfoScreen = () => {
         setInputWidths((prev) => ({ ...prev, [index]: width }));
     };
 
-    const renderAttributeInput = (index, attr) => {
-        return (
-            <View key={index} style={styles.attributeRow}>
-                {/* Attribute Name Input */}
-                <TextInput
-                    style={styles.attributeInput}
-                    mode={'outlined'}
-                    label="Name"
-                    value={attr.key}
-                    onChangeText={(value) => updateAttribute(index, "key", value)}
-                    onFocus={() => setCurrentFocusedIndex(index)} // Show suggestions only when focused
-                    onBlur={() => setFilteredSuggestions([])} // Hide suggestions when blurred
-                    onLayout={(event) => handleInputLayout(index, event)} // Capture width for Name input
-                    dense
-                />
+    const handleInputBlur = () => {
+            setFilteredSuggestions([]);
+            setCurrentFocusedIndex(null);
+    };
 
-                {/* Attribute Value Input */}
-                <TextInput
-                    style={styles.attributeInput}
-                    mode={'outlined'}
-                    label="Value"
-                    value={attr.value}
-                    onChangeText={(value) => updateAttribute(index, "value", value)}
-                    onFocus={() => setCurrentFocusedValueIndex(index)} // Show suggestions only when focused
-                    onBlur={() => setFilteredValueSuggestions([])} // Hide suggestions when blurred
-                    dense
-                    onLayout={(event) => handleInputLayout(`value-${index}`, event)} // Capture layout for Value input
-                />
+    const renderAttributeInput = (index, attr) => (
+        <View key={index} style={styles.attributeRow}>
+            <TextInput
+                style={styles.attributeInput}
+                mode="outlined"
+                label="Name"
+                value={attr.key}
+                onChangeText={(value) => updateAttribute(index, "key", value)}
+                onFocus={() => {
+                    console.log('onFocus name');
+                    setCurrentFocusedIndex(index);
+                }
+            }
+                onBlur={handleInputBlur} // Delay clearing suggestions
+                onLayout={(event) => handleInputLayout(index, event)}
+                dense
+                error={!!errorMessages[`attributeName-${index}`]}
+            />
 
-                {/* Delete Button */}
-                <IconButton
-                    icon="delete"
-                    onPress={() => removeAttribute(index)}
-                    style={styles.removeButton}
-                />
+            <TextInput
+                style={styles.attributeInput}
+                mode="outlined"
+                label="Value"
+                value={attr.value}
+                onChangeText={(value) => updateAttribute(index, "value", value)}
+                onFocus={() => {
+                    console.log('onFocus value');
+                    setCurrentFocusedValueIndex(index)
+                }}
+                onBlur={() => setTimeout(() => setFilteredValueSuggestions([]), 100)}
+                dense
+                onLayout={(event) => handleInputLayout(`value-${index}`, event)}
+                error={!!errorMessages[`attributeValue-${index}`]}
+
+            />
+
+            <IconButton
+                icon="delete"
+                onPress={() => removeAttribute(index)}
+                style={styles.removeButton}
+            />
 
                 {/* Suggestions for Attribute Name */}
                 {currentFocusedIndex === index && filteredSuggestions.length > 0 && (
@@ -137,29 +327,35 @@ const AddProductInfoScreen = () => {
                         {filteredSuggestions.map((item) => (
                             <TouchableOpacity
                                 key={item.key}
-                                onPress={() => applySuggestion(index, item.key)}
+                                onPressIn={() => applySuggestion(index, item.key)}
                                 style={styles.suggestionItem}
                             >
-                                <Text>{item.key}</Text>
+                                <Text variant={'bodyLarge'}>{item.key}</Text>
                             </TouchableOpacity>
                         ))}
                     </View>
                 )}
 
-                {/* Suggestions for Attribute Value */}
-                {currentFocusedValueIndex === index && filteredValueSuggestions.length > 0 && (
-                    <View style={[
-                        styles.suggestionsContainer,
-                        {
-                            width: inputWidths[`value-${index}`] || "100%", // Match Value input width
-                            left: inputWidths[index] + 4 || 0, // Position to align with Value input
-                            top: 50, // Position below the Value input
-                        },
-                    ]}>
+            {currentFocusedValueIndex === index &&
+                filteredValueSuggestions.length > 0 && (
+                    <View
+                        style={[
+                            styles.suggestionsContainer,
+                            {
+                                width: inputWidths[`value-${index}`] || "100%",
+                                left: inputWidths[index] + 4 || 0,
+                                top: 50,
+                            },
+                        ]}
+                    >
                         {filteredValueSuggestions.map((item, idx) => (
                             <TouchableOpacity
                                 key={idx}
-                                onPress={() => applyValueSuggestion(index, item)}
+                                onPress={() => {
+                                    applyValueSuggestion(index, item);
+                                    setTimeout(() => Keyboard.dismiss(), 50);
+                                }
+                                }
                                 style={styles.suggestionItem}
                             >
                                 <Text>{item}</Text>
@@ -167,15 +363,123 @@ const AddProductInfoScreen = () => {
                         ))}
                     </View>
                 )}
-            </View>
+        </View>
+    );
+
+    const saveChanges = async () => {
+        console.log('save');
+        let v = validateForm();
+        console.log('v:', v);
+        if (v) {
+            // const productData = {
+            //     productName,
+            //     price,
+            //     stock,
+            //     gstRate,
+            //     description,
+            //     tags,
+            //     attributes,
+            //     collections,
+            // };
+            console.log("Product saved:", productData);
+            Alert.alert("Success", "Product saved successfully!");
+        } else {
+            Alert.alert("Validation Error", "Please fix the highlighted errors.");
+        }
+        const productData = { productName, price, description, stock, attributes };
+
+
+        console.log("Product saved:", productData);
+    };
+    const publishProduct = async () => {
+        const productData = { productName, price, description, stock, attributes };
+        console.log("Product Published:", productData);
+    };
+
+    // Generate all combinations of variants
+    const generateVariants = () => {
+        if (variantSelectedAttributes.length === 0) {
+            alert("Please select at least one attribute.");
+            return;
+        }
+        console.log('vSA:', variantSelectedAttributes);
+        const attributeValues = variantSelectedAttributes.map((attr) =>
+            attributesData.find((a) => a.key === attr)?.values || []
+        );
+        console.log('aV:', attributeValues);
+        // Generate combinations
+        const combinations = cartesianProduct(attributeValues).map((combo) => ({
+            options: combo,
+            price: "",
+            stock: "",
+        }));
+        console.log('variants:', combinations);
+        setVariants(combinations);
+    };
+
+    // Cartesian product utility
+    const cartesianProduct = (arrays) => {
+        return arrays.reduce(
+            (acc, curr) =>
+                acc.flatMap((a) => curr.map((b) => [...a, b])),
+            [[]]
         );
     };
 
+    const updateVariant = (index, field, value) => {
+        const updatedVariants = [...variants];
+        updatedVariants[index][field] = value;
+        setVariants(updatedVariants);
+    };
 
+    const toggleAttributeSelection = (attributeKey) => {
+        if (variantSelectedAttributes.includes(attributeKey)) {
+            setVariantSelectedAttributes(
+                variantSelectedAttributes.filter((attr) => attr !== attributeKey)
+            );
+        } else {
+            setVariantSelectedAttributes([...variantSelectedAttributes, attributeKey]);
+        }
+    };
+    const openGstMenu = () => {
+        console.log('line375, open');
+        gstInputContainerRef.current.measureInWindow((x, y, width, height) => {
+            setGstDropdownPosition({ x, y: y + 2*height, width });
+            setGstMenuVisible(true);
+            console.log('opened')
+        });
+    };
 
-    const saveProduct = async () => {
-        const productData = { productName, price, description, stock, attributes };
-        console.log("Product saved:", productData);
+    // Add a tag
+    const addTag = (tag) => {
+        if (!tags.includes(tag)) {
+            setTags([...tags, tag]);
+        }
+        setTagInput("");
+        setFilteredTagSuggestions([]);
+    };
+
+    // Remove a tag
+    const removeTag = (tag) => {
+        setTags(tags.filter((t) => t !== tag));
+    };
+
+    // Handle tag input changes
+    const handleTagInputChange = (input) => {
+        setTagInput(input);
+
+        // Filter suggestions based on input
+        const filtered = tagSuggestions.filter((tag) =>
+            tag.toLowerCase().includes(input.toLowerCase())
+        );
+        setFilteredTagSuggestions(filtered);
+    };
+
+    // Handle adding a tag when pressing enter
+    const handleTagInputSubmit = () => {
+        if (tagInput.trim()) {
+            addTag(tagInput.trim());
+        }
     };
 
     return (
@@ -185,48 +489,141 @@ const AddProductInfoScreen = () => {
             keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
         >
             <ScrollView contentContainerStyle={styles.scrollContainer}>
+                <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, width: '100%'}}>
+                    <View style={{display: 'flex', flexDirection:'row', justifyContent: 'center'}}>
+                        <Button
+                            mode="contained"
+                            onPress={publishProduct}
+                            style={styles.publishButton}
+                        >
+                            Publish Product
+                        </Button>
+                    </View>
+                    <View style={{display: 'flex', flexDirection:'row', justifyContent: 'center'}}>
+                        <Button
+                            mode="contained"
+                            onPress={saveChanges}
+                            style={styles.saveButton}
+                        >
+                            Save Changes
+                        </Button>
+                    </View>
+
+                </View>
                 <TextInput
                     label="Product Name"
-                    mode={'outlined'}
+                    mode="outlined"
                     value={productName}
                     onChangeText={setProductName}
                     style={styles.textInput}
-                    multiline={true}
+                    multiline
+                    error={!!errorMessages.productName}
                 />
-
                 <View style={styles.row}>
                     <TextInput
                         label="Price"
-                        mode={'outlined'}
+                        mode="outlined"
                         value={price}
                         onChangeText={setPrice}
-                        style={[styles.halfWidthInput, { marginRight: 8 }]} // Add spacing
+                        style={[styles.halfWidthInput, { marginRight: 8 }]}
+                        error={!!errorMessages.price}
                         keyboardType="numeric"
                     />
                     <TextInput
                         label="Stock"
-                        mode={'outlined'}
+                        mode="outlined"
                         value={stock}
                         onChangeText={setStock}
                         style={styles.halfWidthInput}
+                        error={!!errorMessages.stock}
                         keyboardType="numeric"
                     />
+                    <View ref={gstInputContainerRef} style={styles.gstInputContainer}>
+                        <TextInput
+                            label="GST (%)"
+                            mode="outlined"
+                            value={gstRate.toString() + '%'}
+                            editable={false} // Make it read-only
+                            style={styles.gstInput}
+                            right={
+                                <TextInput.Icon
+                                    icon="chevron-down"
+                                    onPress={openGstMenu}
+                                />
+                            }
+                        />
+                    </View>
+                    {/* GST Dropdown */}
+                        {/* GST Rate Dropdown */}
+                        <Menu
+                            visible={gstMenuVisible}
+                            onDismiss={() =>setGstMenuVisible(false)}
+                            anchor={{ x: gstDropdownPosition.x, y: gstDropdownPosition.y }}
+                            style={{ width: gstDropdownPosition.width }} // Match width of the TextInput
+                        >
+                            {gstRates.map((rate) => (
+                                <Button
+                                    key={rate}
+                                    mode="text"
+                                    onPress={() => {
+                                        setGstRate(rate);
+                                        setGstMenuVisible(false);
+                                    }}
+                                    contentStyle={{
+                                        justifyContent: "flex-start",
+                                        width: gstDropdownPosition.width, // Match dropdown width
+                                    }}
+                                    labelStyle={{color: 'black', fontSize: 16}}
+                                    style={styles.gstDropdownItem}
+                                >
+                                    {rate.toString() + '%'}
+                                </Button>
+                            ))}
+                        </Menu>
                 </View>
 
                 <TextInput
                     label="Description"
-                    mode={'outlined'}
+                    mode="outlined"
                     value={description}
                     onChangeText={setDescription}
                     style={[styles.textInput, styles.textArea]}
                     multiline
                     dense
+                    error={!!errorMessages.description}
                 />
+                {/* Collections Section */}
+                <Text style={styles.header}>Collections</Text>
+                <View style={{display: 'flex', flexWrap: 'wrap', flexDirection: 'row'}}>
+                    {collections.map((collection, idx) => (
+                        <View key={idx} style={styles.checkboxContainer}>
+                            <Checkbox
+                                status={
+                                    selectedCollections.includes(collection)
+                                        ? "checked"
+                                        : "unchecked"
+                                }
+                                onPress={() => toggleCollectionSelection(collection)}
+                            />
+                            <Text>{collection}</Text>
+                        </View>
+                    ))}
+                    {/*<Button*/}
+                    {/*    mode="text"*/}
+                    {/*    onPress={() => setIsDialogVisible(true)}*/}
+                    {/*    style={styles.addNewButton}*/}
+                    {/*>*/}
+                    {/*    Add New Collection*/}
+                    {/*</Button>*/}
+                </View>
+                {errorMessages.collections && (
+                    <Text  style={styles.errorText}>{errorMessages.collections}</Text>
+                )}
 
                 <Text style={styles.header}>Attributes</Text>
                 {attributes.map((attr, index) => renderAttributeInput(index, attr))}
 
-                <View style={{display: 'flex', flexDirection:'row', justifyContent: 'center'}}>
+                <View style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                     <Button
                         icon="plus"
                         mode="contained"
@@ -236,22 +633,165 @@ const AddProductInfoScreen = () => {
                         Add Attribute
                     </Button>
                 </View>
-                <View style={{display: 'flex', flexDirection:'row', justifyContent: 'center'}}>
-                    <Button
-                        mode="contained"
-                        onPress={saveProduct}
-                        style={styles.saveButton}
-                    >
-                        Save Product
-                    </Button>
+
+                {/* Tags Section */}
+                <Text style={styles.header}>Tags</Text>
+                <View style={styles.tagsContainer}>
+                    {/* Display Selected Tags */}
+                    {tags.map((tag) => (
+                        <Chip
+                            key={tag}
+                            onClose={() => removeTag(tag)}
+                            style={styles.tagChip}
+                        >
+                            {tag}
+                        </Chip>
+                    ))}
                 </View>
+
+                {/* Tag Input */}
+                <View style={styles.tagInputContainer}>
+                    <TextInput
+                        label="Add Tag"
+                        mode="outlined"
+                        value={tagInput}
+                        onChangeText={handleTagInputChange}
+                        onSubmitEditing={handleTagInputSubmit} // Handle enter key
+                        right={
+                            <TextInput.Icon
+                                icon="plus"
+                                onPress={handleTagInputSubmit} // Handle button press
+                            />
+                        }
+                        style={styles.tagInput}
+                    />
+
+                    {/* Tag Suggestions */}
+                    {filteredTagSuggestions.length > 0 && (
+                        <View style={styles.suggestionsContainer}>
+                            {filteredTagSuggestions.map((suggestion) => (
+                                <TouchableOpacity
+                                    key={suggestion}
+                                    style={styles.suggestionItem}
+                                    onPress={() => addTag(suggestion)}
+                                >
+                                    <Text style={styles.suggestionText}>
+                                        {suggestion}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    )}
+                </View>
+
+                {/* Attribute Selection */}
+                <Text style={styles.header}>Manage Variants</Text>
+                <View style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap'}}>
+                    {attributes.map((attribute, idx) => (
+                        <View key={idx} style={styles.checkboxContainer}>
+                            <Checkbox
+                                status={
+                                    variantSelectedAttributes.includes(attribute.key)
+                                        ? "checked"
+                                        : "unchecked"
+                                }
+                                onPress={() =>
+                                    toggleAttributeSelection(attribute.key)
+                                }
+                            />
+                            <Text>{attribute.key}</Text>
+                        </View>
+                    ))}
+                </View>
+
+                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center'}}>
+                <Button
+                    icon="plus"
+                    mode="contained"
+                    onPress={generateVariants}
+                    style={styles.generateButton}
+                >
+                    Generate Variants
+                </Button>
+                </View>
+
+                {/* Variant List */}
+                {variants.length > 0 && (
+                    <View>
+                        <Text style={styles.subHeader}>Generated Variants</Text>
+                        {variants.map((variant, idx) => (
+                            <View key={idx} style={styles.variantRow}>
+                                <Text style={styles.variantText}>
+                                    {variant.options.join(", ")}
+                                </Text>
+                                <TextInput
+                                    label="Price"
+                                    mode="outlined"
+                                    value={variant.price}
+                                    onChangeText={(value) =>
+                                        updateVariant(idx, "price", value)
+                                    }
+                                    style={styles.variantInput}
+                                    keyboardType="numeric"
+                                />
+                                <TextInput
+                                    label="Stock"
+                                    mode="outlined"
+                                    value={variant.stock}
+                                    onChangeText={(value) =>
+                                        updateVariant(idx, "stock", value)
+                                    }
+                                    style={styles.variantInput}
+                                    keyboardType="numeric"
+                                />
+                                <IconButton
+                                    icon="delete"
+                                    onPress={() =>
+                                        setVariants(
+                                            variants.filter((_, i) => i !== idx)
+                                        )
+                                    }
+                                />
+                            </View>
+                        ))}
+                    </View>
+                )}
+
+
+                {/* Dialog for Adding New Collection */}
+                {/*<Portal>*/}
+                {/*    <Dialog*/}
+                {/*        visible={isDialogVisible}*/}
+                {/*        onDismiss={() => setIsDialogVisible(false)}*/}
+                {/*    >*/}
+                {/*        <Dialog.Title>Add New Collection</Dialog.Title>*/}
+                {/*        <Dialog.Content>*/}
+                {/*            <TextInput*/}
+                {/*                label="Collection Name"*/}
+                {/*                mode="outlined"*/}
+                {/*                style={styles.textInput}*/}
+                {/*                onChangeText={(text) => {*/}
+                {/*                    console.log('text:', text);*/}
+                {/*                    console.log('ref:', newCollectionRef.current);*/}
+                {/*                    (newCollectionRef.current = text)*/}
+                {/*                }*/}
+                {/*            } // Store value in ref*/}
+                {/*            />*/}
+                {/*        </Dialog.Content>*/}
+                {/*        <Dialog.Actions>*/}
+                {/*            <Button onPress={() => setIsDialogVisible(false)}>*/}
+                {/*                Cancel*/}
+                {/*            </Button>*/}
+                {/*            <Button onPress={addNewCollection}>Add</Button>*/}
+                {/*        </Dialog.Actions>*/}
+                {/*    </Dialog>*/}
+                {/*</Portal>*/}
             </ScrollView>
         </KeyboardAvoidingView>
     );
 };
 
-const makeStyles = ({colors}: Theme) =>
-
+const makeStyles = ({ colors }) =>
     StyleSheet.create({
         container: {
             flex: 1,
@@ -266,6 +806,41 @@ const makeStyles = ({colors}: Theme) =>
         textArea: {
             minHeight: 80,
         },
+        gstInputContainer: {
+            flex: 0.7,
+            position: "relative",
+            marginLeft: 8
+        },
+        gstInput: {
+            flex: 1,
+        },
+        gstDropdownContainer: {
+            position: "absolute",
+            zIndex: 10,
+            backgroundColor: "#fff",
+            borderWidth: 1,
+            borderColor: "#ccc",
+            borderRadius: 4,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.2,
+            shadowRadius: 4,
+            elevation: 5,
+        },
+        gstDropdownItem: {
+            padding: 0,
+            borderRadius: 0,
+            borderBottomWidth: 1,
+            borderBottomColor: "#eee",
+            color: 'black'
+        },
+        gstDropdownText: {
+            fontSize: 26,
+        },
+        menuItemContainer: {
+            justifyContent: "center",
+            alignItems: "flex-start",
+        },
         header: {
             fontSize: 18,
             fontWeight: "bold",
@@ -275,45 +850,99 @@ const makeStyles = ({colors}: Theme) =>
             flexDirection: "row",
             alignItems: "center",
             marginBottom: 16,
-            position: "relative",
         },
         attributeInput: {
-            flex: 1, // Ensure inputs share available space equally
-            marginRight: 4, // Add spacing between the inputs
+            flex: 1,
+            marginRight: 4,
         },
         suggestionsContainer: {
             position: "absolute",
-            top: 50, // Position below the input
+            top: 50,
             left: 0,
             zIndex: 10,
-            backgroundColor: "#fff",
-            borderWidth: 1,
+            backgroundColor: "white",
             borderColor: "#ccc",
+            borderWidth: 1,
             borderRadius: 4,
-            maxHeight: 150, // Limit height for scrolling
+            maxHeight: 150,
         },
         suggestionItem: {
+            width: '100%',
+            margin: 0,
             padding: 10,
+            borderRadius: 0,
             borderBottomWidth: 1,
             borderBottomColor: "#eee",
         },
         removeButton: {
-            // borderWidth: 1,
             marginLeft: 0,
         },
         addButton: {
             marginVertical: 16,
-            backgroundColor: colors.secondary
+            backgroundColor: colors.secondary,
         },
         saveButton: {
-            marginTop: 16,
+            backgroundColor: colors.primary,
+            borderRadius: 0
+        },
+        publishButton: {
+            backgroundColor: colors.success,
+            borderRadius: 0
         },
         row: {
-            flexDirection: "row", // Align inputs horizontally
+            flexDirection: "row",
             marginBottom: 16,
         },
         halfWidthInput: {
-            flex: 1, // Allow inputs to share the space equally
+            flex: 1,
+        },
+        subHeader: {
+            fontSize: 16,
+            fontWeight: "bold",
+            marginTop: 16,
+        },
+        checkboxContainer: {
+            flexDirection: "row",
+            alignItems: "center",
+            marginVertical: 4,
+        },
+        generateButton: {
+            marginVertical: 16,
+            backgroundColor: colors.secondary,
+        },
+        variantRow: {
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 8,
+        },
+        variantText: {
+            flex: 1,
+        },
+        variantInput: {
+            flex: 1,
+            marginRight: 8,
+        },
+        tagsContainer: {
+            flexDirection: "row",
+            flexWrap: "wrap",
+            marginBottom: 16,
+        },
+        tagChip: {
+            marginRight: 8,
+            marginBottom: 8,
+        },
+        tagInputContainer: {
+            position: "relative",
+            marginBottom: 16,
+        },
+        tagInput: {
+            flex: 1,
+        },
+        errorText: {
+            color: "red",
+            fontSize: 12,
+            marginBottom: 8,
         },
     });
+
 export default AddProductInfoScreen;
