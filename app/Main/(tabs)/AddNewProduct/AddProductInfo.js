@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, {useEffect, useState, useRef, useCallback} from "react";
 import {
     View,
     StyleSheet,
@@ -12,13 +12,13 @@ import {
     Button,
     Text,
     IconButton,
-    useTheme, Checkbox, Dialog, Portal, Menu, Chip,
+    useTheme, Checkbox, Dialog, Portal, Menu, Chip, Card,
 } from "react-native-paper";
 import { useSelector, useDispatch } from "react-redux";
 import { useIsFocused } from "@react-navigation/native";
 import _ from "lodash";
-import { updateField } from "../../../store/newProductSlice";
-import {useNavigation} from "expo-router";
+import { updateField } from "../../../../store/newProductSlice";
+import {useNavigation, useRouter} from "expo-router";
 
 const AddProductInfoScreen = () => {
     const dispatch = useDispatch();
@@ -44,7 +44,7 @@ const AddProductInfoScreen = () => {
         { key: "Color", values: ["Red", "Blue", "Green"] },
         { key: "Size", values: ["S", "M", "L"] },
     ]); // Example attributes
-    const [collections, setCollections] = useState(["Electronics", "Clothing", "Home Appliances", "Best Sellers"]); // Existing collections
+    const [existingCollections, setExistingCollections] = useState(["Electronics", "Clothing", "Home Appliances", "Best Sellers"]); // Existing collections
     const [selectedCollections, setSelectedCollections] = useState([]); // Selected collections
     // const [newCollectionName, setNewCollectionName] = useState(""); // Name for new collection
     const [isDialogVisible, setIsDialogVisible] = useState(false); // Dialog visibility
@@ -76,6 +76,9 @@ const AddProductInfoScreen = () => {
         description: "",
         stock: "",
         attributes: [],
+        selectedCollections: [],
+        tags: [],
+        gstRate: 18
     });
     const gstInputContainerRef = useRef(null); // Reference to the GST TextInput
     const [gstDropdownPosition, setGstDropdownPosition] = useState({
@@ -85,10 +88,11 @@ const AddProductInfoScreen = () => {
     });
 
     const isSelectingSuggestion = useRef(false); // Tracks if a suggestion is being clicked
-
+    const router = useRouter();
 
     const theme = useTheme();
     const styles = makeStyles(theme);
+
 
     useEffect(() => {
         console.log('update state ref effect');
@@ -97,7 +101,11 @@ const AddProductInfoScreen = () => {
             price,
             description,
             stock,
+            gstRate,
+            selectedCollections,
             attributes,
+            tags
+
         };
     }, [productName, price, description, stock, attributes]);
 
@@ -154,9 +162,18 @@ const AddProductInfoScreen = () => {
         }
     };
 
-    const validateForm = () => {
+    const validateForm = useCallback((formState) => {
         const errors = {};
-
+        const {
+            productName,
+            price,
+            stock,
+            gstRate,
+            description,
+            selectedCollections,
+            attributes,
+        } = formState;
+        console.log('productName:', productName);
         // Validate Product Name
         if (!productName.trim()) {
             errors.productName = "Product Name is required.";
@@ -168,7 +185,9 @@ const AddProductInfoScreen = () => {
         }
 
         // Validate Stock
+        console.log('stock:', stock);
         if (!stock.trim() || isNaN(stock) || parseInt(stock, 10) < 0) {
+            console.log('inside stock')
             errors.stock = "Stock must be a valid non-negative number.";
         }
         console.log('line174')
@@ -176,14 +195,17 @@ const AddProductInfoScreen = () => {
         if (!gstRates.includes(gstRate)) {
             errors.gstRate = "GST rate is required.";
         }
-        console.log('line179')
+        console.log('line179', description);
         // Validate Description
         if (!description.trim()) {
+            console.log('line190, description')
             errors.description = "Description is required.";
         }
-        console.log('line184, col:', collections);
+        console.log('line184, col:', existingCollections);
+        console.log('selectedCol:', selectedCollections);
         // Validate Collections
         if (selectedCollections.length === 0) {
+            console.log('inside selC error');
             errors.collections = "At least one collection must be selected.";
         }
         console.log('e.c:', errors.collections);
@@ -200,8 +222,8 @@ const AddProductInfoScreen = () => {
         setErrorMessages(errors);
 
         // Return true if no errors
-        return Object.keys(errors).length === 0;
-    };
+        return errors;
+    }, [productName, price, stock, description, attributes, selectedCollections, tags]);
 
 
     const addAttribute = () => {
@@ -366,36 +388,37 @@ const AddProductInfoScreen = () => {
         </View>
     );
 
-    const saveChanges = async () => {
+    const saveAndNavigateToPreview = async () => {
         console.log('save');
-        let v = validateForm();
-        console.log('v:', v);
-        if (v) {
-            // const productData = {
-            //     productName,
-            //     price,
-            //     stock,
-            //     gstRate,
-            //     description,
-            //     tags,
-            //     attributes,
-            //     collections,
-            // };
-            console.log("Product saved:", productData);
-            Alert.alert("Success", "Product saved successfully!");
+        const currentState = stateRef.current; // Access the latest state directly
+        console.log('cS:', currentState);
+        const errors = validateForm(currentState); // Pass the current state to validation
+        console.log('line395, errors:', errors);
+        if (Object.keys(errors).length === 0) {
+            console.log("Validation passed. Saving product and navigating...");
+            setErrorMessages({}); // Clear error messages
+            router.push("/Main/(tabs)/AddNewProduct/Preview");
         } else {
-            Alert.alert("Validation Error", "Please fix the highlighted errors.");
+            console.log("Validation failed. Errors:", errors);
+            setErrorMessages(errors); // Update the error messages
+            // Alert.alert("Validation Error", "Please fix the highlighted errors.");
         }
-        const productData = { productName, price, description, stock, attributes };
-
-
-        console.log("Product saved:", productData);
     };
+
+    useEffect(() => {
+        navigation.setOptions({ headerRight: () => <Button contentStyle={{flexDirection: 'row-reverse'}} icon={'arrow-right'} mode={'contained'} style={{borderRadius: 0, backgroundColor: theme.colors.success}} onPressIn={saveAndNavigateToPreview}>
+                Preview
+            </Button>});
+    },[navigation])
+
     const publishProduct = async () => {
         const productData = { productName, price, description, stock, attributes };
         console.log("Product Published:", productData);
     };
 
+    const markAsVariant = () => {
+
+    }
     // Generate all combinations of variants
     const generateVariants = () => {
         if (variantSelectedAttributes.length === 0) {
@@ -489,27 +512,8 @@ const AddProductInfoScreen = () => {
             keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
         >
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, width: '100%'}}>
-                    <View style={{display: 'flex', flexDirection:'row', justifyContent: 'center'}}>
-                        <Button
-                            mode="contained"
-                            onPress={publishProduct}
-                            style={styles.publishButton}
-                        >
-                            Publish Product
-                        </Button>
-                    </View>
-                    <View style={{display: 'flex', flexDirection:'row', justifyContent: 'center'}}>
-                        <Button
-                            mode="contained"
-                            onPress={saveChanges}
-                            style={styles.saveButton}
-                        >
-                            Save Changes
-                        </Button>
-                    </View>
-
-                </View>
+                {/*<Card mode={'elevated'} style={{width: '100%', backgroundColor: 'white', margin: 0,}}>*/}
+                <Text style={styles.header}>Details</Text>
                 <TextInput
                     label="Product Name"
                     mode="outlined"
@@ -592,10 +596,13 @@ const AddProductInfoScreen = () => {
                     dense
                     error={!!errorMessages.description}
                 />
+
+                {/*</Card>*/}
+
                 {/* Collections Section */}
                 <Text style={styles.header}>Collections</Text>
                 <View style={{display: 'flex', flexWrap: 'wrap', flexDirection: 'row'}}>
-                    {collections.map((collection, idx) => (
+                    {existingCollections.map((collection, idx) => (
                         <View key={idx} style={styles.checkboxContainer}>
                             <Checkbox
                                 status={
@@ -686,8 +693,10 @@ const AddProductInfoScreen = () => {
 
                 {/* Attribute Selection */}
                 <Text style={styles.header}>Manage Variants</Text>
+                <Text variant={'bodyMedium'}>Variant Attributes</Text>
                 <View style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap'}}>
                     {attributes.map((attribute, idx) => (
+                        attribute.key.trim()!=='' &&
                         <View key={idx} style={styles.checkboxContainer}>
                             <Checkbox
                                 status={
@@ -704,14 +713,21 @@ const AddProductInfoScreen = () => {
                     ))}
                 </View>
 
-                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center'}}>
+                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+                    <Button
+                        mode="outlined"
+                        onPress={markAsVariant}
+                        style={styles.markAsVariantButton}
+                    >
+                        Mark As Variant
+                    </Button>
                 <Button
                     icon="plus"
                     mode="contained"
                     onPress={generateVariants}
-                    style={styles.generateButton}
+                    style={styles.generateVariantButton}
                 >
-                    Generate Variants
+                    Generate Variant
                 </Button>
                 </View>
 
@@ -757,7 +773,6 @@ const AddProductInfoScreen = () => {
                     </View>
                 )}
 
-
                 {/* Dialog for Adding New Collection */}
                 {/*<Portal>*/}
                 {/*    <Dialog*/}
@@ -787,6 +802,28 @@ const AddProductInfoScreen = () => {
                 {/*    </Dialog>*/}
                 {/*</Portal>*/}
             </ScrollView>
+            {/*<View style={[styles.stickyActionContainer, {display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, width: '100%'}]}>*/}
+            {/*    <View style={{display: 'flex', flexDirection:'row', justifyContent: 'center'}}>*/}
+            {/*        <Button*/}
+            {/*            mode="contained"*/}
+            {/*            onPress={publishProduct}*/}
+            {/*            style={styles.publishButton}*/}
+            {/*        >*/}
+            {/*            Preview Product*/}
+            {/*        </Button>*/}
+            {/*    </View>*/}
+            {/*    <View style={{display: 'flex', flexDirection:'row', justifyContent: 'center'}}>*/}
+            {/*        <Button*/}
+            {/*            mode="outlined"*/}
+            {/*            onPress={saveChanges}*/}
+            {/*            style={styles.saveButton}*/}
+            {/*        >*/}
+            {/*            Save As Draft*/}
+            {/*        </Button>*/}
+            {/*    </View>*/}
+
+            {/*</View>*/}
+
         </KeyboardAvoidingView>
     );
 };
@@ -798,8 +835,17 @@ const makeStyles = ({ colors }) =>
             backgroundColor: "white",
         },
         scrollContainer: {
+            // marginTop: 60,
+            // paddingTop: 80,
             padding: 16,
         },
+        // stickyActionContainer: {
+        //     backgroundColor: 'silver',
+        //     borderBottomWidth: 1,
+        //     padding: 16,
+        //     top: 0,
+        //     position: 'absolute'
+        // },
         textInput: {
             marginBottom: 8,
         },
@@ -844,7 +890,7 @@ const makeStyles = ({ colors }) =>
         header: {
             fontSize: 18,
             fontWeight: "bold",
-            marginVertical: 16,
+            marginVertical: 8,
         },
         attributeRow: {
             flexDirection: "row",
@@ -878,12 +924,13 @@ const makeStyles = ({ colors }) =>
             marginLeft: 0,
         },
         addButton: {
-            marginVertical: 16,
+            marginVertical: 0,
             backgroundColor: colors.secondary,
         },
         saveButton: {
-            backgroundColor: colors.primary,
-            borderRadius: 0
+            backgroundColor: 'white',
+            borderRadius: 0,
+            borderWidth: 2,
         },
         publishButton: {
             backgroundColor: colors.success,
@@ -906,9 +953,17 @@ const makeStyles = ({ colors }) =>
             alignItems: "center",
             marginVertical: 4,
         },
-        generateButton: {
+        generateVariantButton: {
             marginVertical: 16,
             backgroundColor: colors.secondary,
+            borderRadius: 0,
+        },
+        markAsVariantButton: {
+            marginVertical: 16,
+            color: colors.primary,
+            borderRadius: 0,
+            borderColor: colors.primary
+            // backgroundColor: colors.tertiary,
         },
         variantRow: {
             flexDirection: "row",
@@ -925,7 +980,7 @@ const makeStyles = ({ colors }) =>
         tagsContainer: {
             flexDirection: "row",
             flexWrap: "wrap",
-            marginBottom: 16,
+            marginBottom: 8,
         },
         tagChip: {
             marginRight: 8,
@@ -933,7 +988,7 @@ const makeStyles = ({ colors }) =>
         },
         tagInputContainer: {
             position: "relative",
-            marginBottom: 16,
+            marginBottom: 8,
         },
         tagInput: {
             flex: 1,

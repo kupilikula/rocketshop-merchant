@@ -1,4 +1,4 @@
-import MediaGallery from "../../../components/MediaGallery";
+import MediaGallery from "../../../../components/MediaGallery";
 
 export default function AddMediaItems () {
 
