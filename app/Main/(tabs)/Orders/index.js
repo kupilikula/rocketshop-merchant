@@ -120,7 +120,7 @@ const Orders = () => {
 
 
     const renderOrderItem = ({ item }) => (
-        <Card style={styles.orderCard} onPress={() => router.push('./Orders/Order/'+ item.orderId)}>
+        <Card style={styles.orderCard} onPress={() => router.push('/Main/(tabs)/Orders/Order/'+ item.orderId)}>
 
             <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start'}}>
                 <View style={{margin: 10}}>
