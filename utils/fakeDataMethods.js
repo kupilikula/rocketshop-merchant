@@ -93,7 +93,7 @@ export const getOrder = () => {
     return {
         orderId: fakerIndian.string.numeric({length: 10, allowLeadingZeros: false}),
         orderDate: fakerIndian.date.recent(),
-        orderItems: fakerIndian.helpers.multiple(getProductForStore, {count: 3}),
+        orderItems: fakerIndian.helpers.multiple( () => ({product: getProductForStore, quantity: fakerIndian.number.int({min: 1, max: 10})}), {count: fakerIndian.number.int({min: 1, max: 7})}),
         customer: getCustomer(),
         orderStatus: fakerIndian.helpers.arrayElement(["Submitted", "Payment Received", "Shipped", "Delivered"]),
         orderTotal: fakerIndian.number.int({min:30, max: 5000}),
