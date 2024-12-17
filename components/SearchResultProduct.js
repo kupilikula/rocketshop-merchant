@@ -8,7 +8,7 @@ export const SearchResultProduct = (props) => {
 
     const router = useRouter();
 
-     return <Pressable onPress={() => router.push(`/Main/StoreFront/Products/Product/${props.product.productId}`)}>
+     return <Pressable onPress={() => router.push(`/Main/(tabs)/Store/Products/Product/${props.product.productId}`)}>
     <View style={{height: 60, borderStyle: 'solid', borderBottomWidth: 1, borderRightWidth: 1, display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
          <Image source={props.product.mediaItems[0].uri} style={{width: 60, height: 60}}/>
          <View style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start', height: '100%', marginLeft: 5}}>

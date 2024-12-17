@@ -48,7 +48,7 @@ export default function ProductSearch (props) {
                 </View>
             }
         {props.limitedResults && searchQuery!=='' && filteredProducts.length > props.resultsLimit && <View style={{marginTop: 10, display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
-            <Button mode={'contained'} buttonColor={'black'} textColor={'white'} onPress={() => router.push({pathname: '/Main/StoreFront/StoreSearch', params: {initialSearchQuery: searchQuery}})}>See More Results</Button>
+            <Button mode={'contained'} buttonColor={'black'} textColor={'white'} onPress={() => router.push({pathname: '/Main/(tabs)/Store/StoreSearch', params: {initialSearchQuery: searchQuery}})}>See More Results</Button>
         </View>}
 
     </View>

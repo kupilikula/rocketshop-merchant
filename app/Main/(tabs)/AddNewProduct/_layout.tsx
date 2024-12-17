@@ -1,8 +1,8 @@
 import {Stack, useRouter} from "expo-router";
-import {Pressable} from "react-native";
+import {Pressable, TouchableOpacity} from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {Colors} from "@/styles/Colors";
-import {useTheme} from "react-native-paper";
+import {Button, useTheme} from "react-native-paper";
 
 
 export default function AddNewProductStack() {
@@ -10,11 +10,11 @@ export default function AddNewProductStack() {
     const router = useRouter();
     const theme = useTheme(); // Access the theme here
 
-    return <Stack initialRouteName={'AddMediaItems'}>
+    return <Stack initialRouteName={'AddMediaItems'} >
         <Stack.Screen
             name={'AddMediaItems'}
             options={{
-                title: 'Add Product Media',
+                title: 'Product Media',
                 headerStyle: { backgroundColor: theme.colors.secondary },
                 headerTintColor: 'white',
                 headerTitleStyle: {
@@ -25,15 +25,26 @@ export default function AddNewProductStack() {
         />
         <Stack.Screen
             name={'AddProductInfo'}
-            options={{
-                title: 'Add Product Info',
+            options={({navigation}) => ({
+                title: 'Product Info',
                 headerStyle: { backgroundColor: theme.colors.secondary },
+                headerLeft: () => (
+                    <Pressable
+                        onPressIn={() => {
+                            console.log('back')
+                            router.back()
+                        }
+                    }
+                        style={{ marginRight: 10 }}
+                    >
+                        <MaterialIcons name="arrow-back" size={36} color="white" />
+                    </Pressable>
+                ),
                 headerTintColor: '#fff',
                 headerTitleStyle: {
                     // fontWeight: 'bold',
                 },
-                // headerRight: () => <Pressable onPress={() => router.push('./AddProductInfo')}><MaterialIcons name={'arrow-forward'} size={36}/></Pressable>
-            }}
+            })}
         />
 
     </Stack>

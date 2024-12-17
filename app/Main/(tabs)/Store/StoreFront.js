@@ -1,16 +1,16 @@
 import {FlatList, ScrollView, View} from "react-native";
 import {Image} from 'expo-image';
 import {Button, Card, Searchbar, Surface, Text} from "react-native-paper";
-import {foregroundColor} from "../../../utils/foregroundColor";
+import {foregroundColor} from "../../../../utils/foregroundColor";
 import {useEffect, useState} from "react";
-import StoreFrontCollectionCard from "../../../components/StoreFrontCollectionCard";
-import {getStoreFullData} from "../../../utils/fakeDataMethods";
+import StoreFrontCollectionCard from "../../../../components/StoreFrontCollectionCard";
+import {getStoreFullData} from "../../../../utils/fakeDataMethods";
 import Fuse from 'fuse.js';
 import debounce from 'lodash.debounce';
-import {SearchResultProduct} from "../../../components/SearchResultProduct";
-import {Colors} from "../../../styles/Colors";
+import {SearchResultProduct} from "../../../../components/SearchResultProduct";
+import {Colors} from "../../../../styles/Colors";
 import {useRouter} from "expo-router";
-import ProductSearch from "../../../components/ProductSearch";
+import ProductSearch from "../../../../components/ProductSearch";
 
 const getUniqueProducts = (storeData) => {
     const allProducts= storeData.collections.reduce( (A,c) => A.concat(c.products), []);

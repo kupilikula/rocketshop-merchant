@@ -31,7 +31,8 @@
         "expo-font",
         {
           "fonts": [
-            "./assets/fonts/CaveatBrush-Regular.ttf"
+            "./assets/fonts/CaveatBrush-Regular.ttf",
+            "node_modules/@expo-google-fonts/atma/Atma_600SemiBold.ttf"
           ]
         }
       ],
@@ -61,7 +62,6 @@
         }
       ],
       "expo-video",
-      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true

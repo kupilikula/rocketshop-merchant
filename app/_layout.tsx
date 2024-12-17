@@ -52,7 +52,7 @@ export default function RootLayout() {
           <StatusBar style="dark" backgroundColor={'white'} />
           {/*<NavigationBar backgroundColor={'white'}/>*/}
     <View style={{paddingTop: insets.top, width: '100%', height: '100%'}}>
-      <Stack screenOptions={{headerShown: false}}/>
+      <Stack screenOptions={{header: () => null}}/>
     </View>
   </PaperProvider>
                 </Provider>

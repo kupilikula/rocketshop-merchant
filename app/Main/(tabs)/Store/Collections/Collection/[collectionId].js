@@ -2,9 +2,9 @@ import {Card, Surface} from "react-native-paper";
 import {useLocalSearchParams} from "expo-router";
 import {Text} from 'react-native-paper';
 import {FlatList, View} from "react-native";
-import ProductDisplayCardCustomerStore from "../../../../../components/ProductDisplayCardCustomerStore";
+import ProductDisplayCardCustomerStore from "../../../../../../components/ProductDisplayCardCustomerStore";
 import {faker} from "@faker-js/faker";
-import {getFakeCollection, getProductForStore} from "../../../../../utils/fakeDataMethods";
+import {getFakeCollection, getProductForStore} from "../../../../../../utils/fakeDataMethods";
 export default function CollectionPage(props) {
 
     const {collectionId} = useLocalSearchParams();

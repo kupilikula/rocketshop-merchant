@@ -9,7 +9,7 @@ import {View} from "react-native";
 import {StoreLogo} from "@/components/StoreLogo";
 import {faker} from '@faker-js/faker';
 
-export default function StoreFrontDrawer(props) {
+export default function DrawerMenu(props) {
     const router = useRouter();
     const storeLogoImage = faker.image.url();
 
@@ -22,31 +22,47 @@ export default function StoreFrontDrawer(props) {
             </View>
             <Drawer.Item label={<Text variant={'titleLarge'}>Store Front</Text>}
                          style={{padding: 0, borderRadius: 5, marginLeft: 0}}
-                         onPress={() => router.push('/Main/StoreFront/LandingPage')}
+                         onPress={() => {
+                             console.log('LP');
+                             try {
+                                 router.push('/Main/(tabs)/Store/StoreFront')
+                             } catch (err) {
+                                 console.log('err:', err);
+                             }
+                         }
+            }
                          icon={({size, color}) => <MaterialIcons name={'store'} size={size}/>}/>
             <Drawer.Item label={<Text variant={'titleLarge'}>Products</Text>}
                          style={{padding: 0, borderRadius: 5, marginLeft: 0}}
-                         onPress={() => router.push('/Main/StoreFront/Products')}
+                         onPress={() => router.push('/Main/(tabs)/Store/Products')}
                          icon={({size, color}) => <MaterialIcons name={'shopping-bag'} size={size}/>}/>
             <Drawer.Item label={<Text variant={'titleLarge'}>Collections</Text>}
                          style={{padding: 0, borderRadius: 5, marginLeft: 0}}
-                         onPress={() => router.push('/Main/StoreFront/Collections')}
+                         onPress={() => {
+                             console.log('routing to Collections')
+                             try {
+                                 router.push('/Main/(tabs)/Store/Collections')
+                             } catch (err) {
+                                 console.log('rerror:', err);
+                             }
+                         }
+            }
                          icon={({size, color}) => <MaterialIcons name={'category'} size={size}/>}/>
             <Drawer.Item label={<Text variant={'titleLarge'}>Orders</Text>}
                          style={{padding: 0, borderRadius: 5, marginLeft: 0}}
-                         onPress={() => router.push('/Main/StoreFront/Orders')}
+                         onPress={() => router.push('/Main/(tabs)/Orders')}
                          icon={({size, color}) => <MaterialIcons name={'receipt-long'} size={size}/>}/>
             <Drawer.Item label={<Text variant={'titleLarge'}>Customers</Text>}
                          style={{padding: 0, borderRadius: 5, marginLeft: 0}}
-                         onPress={() => router.push('/Main/StoreFront/Customers')}
+                         onPress={() => router.push('/Main/(tabs)/Store/Customers')}
                          icon={({size, color}) => <MaterialIcons name={'hail'} size={size}/>}/>
             <Drawer.Item label={<Text variant={'titleLarge'}>Offers</Text>}
                          style={{padding: 0, borderRadius: 5, marginLeft: 0}}
-                         onPress={() => router.push('/Main/StoreFront/Offers')}
+                         onPress={() => router.push('/Main/(tabs)/Store/Offers')}
                          icon={({size, color}) => <MaterialIcons name={'discount'} size={size}/>}/>
             <Drawer.Item label={<Text variant={'titleLarge'}>Settings</Text>}
                          style={{padding: 0, borderRadius: 5, marginLeft: 0}}
-                         onPress={() => router.push('/Main/StoreFront/Settings')}
+                         onPress={() => router.push('/Main/(tabs)/Store/Settings')}
                          icon={({size, color}) => <MaterialIcons name={'settings'} size={size}/>}/>
         </DrawerContentScrollView>
     );

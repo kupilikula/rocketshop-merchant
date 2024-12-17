@@ -1,11 +1,11 @@
 import {Button, Searchbar, Surface} from "react-native-paper";
 import {useEffect, useState} from "react";
-import {getStoreFullData} from "../../../utils/fakeDataMethods";
+import {getStoreFullData} from "../../../../utils/fakeDataMethods";
 import Fuse from "fuse.js";
 import {FlatList, SafeAreaView, View} from "react-native";
-import {SearchResultProduct} from "../../../components/SearchResultProduct";
+import {SearchResultProduct} from "../../../../components/SearchResultProduct";
 import {useLocalSearchParams} from "expo-router";
-import ProductSearch from "../../../components/ProductSearch";
+import ProductSearch from "../../../../components/ProductSearch";
 
 const getUniqueProducts = (storeData) => {
     const allProducts= storeData.collections.reduce( (A,c) => A.concat(c.products), []);

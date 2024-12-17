@@ -1,7 +1,7 @@
 import {StyleSheet} from "react-native";
 import {useLocalSearchParams} from "expo-router";
-import ProductDisplayCardCustomerStore from "../../../../../components/ProductDisplayCardCustomerStore";
-import {getProductForStore} from "../../../../../utils/fakeDataMethods";
+import ProductDisplayCardCustomerStore from "../../../../../../components/ProductDisplayCardCustomerStore";
+import {getProductForStore} from "../../../../../../utils/fakeDataMethods";
 
 
 
