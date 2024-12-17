@@ -15,12 +15,12 @@ export default function AddNewProductStack() {
             name={'AddMediaItems'}
             options={{
                 title: 'Product Media',
-                headerStyle: { backgroundColor: theme.colors.secondary },
-                headerTintColor: 'white',
-                headerTitleStyle: {
-                    // fontWeight: 'bold',
-                },
-                headerRight: () => <Pressable onPressIn={() => {console.log('press'); router.push('./AddProductInfo')}}><MaterialIcons name={'arrow-forward'} size={36} style={{color: 'white'}}/></Pressable>
+                // headerStyle: { backgroundColor: theme.colors.secondary },
+                // headerTintColor: 'white',
+                // headerTitleStyle: {
+                //     // fontWeight: 'bold',
+                // },
+                // headerRight: () => <Pressable onPressIn={() => {console.log('press'); router.push('./AddProductInfo')}}><MaterialIcons name={'arrow-forward'} size={36} style={{color: 'white'}}/></Pressable>
             }}
         />
         <Stack.Screen

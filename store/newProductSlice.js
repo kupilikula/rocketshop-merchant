@@ -9,6 +9,7 @@ const initialState = {
     attributes: [],
     collections: [],
     tags: [],
+    mediaItems: []
 
 };
 

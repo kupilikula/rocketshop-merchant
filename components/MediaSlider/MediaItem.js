@@ -28,7 +28,7 @@ export default function MediaItem ({
         ({isPlaying} = useEvent(videoPlayer, 'playingChange', { isPlaying: videoPlayer.playing }));
     }
 
-    const onPress = (item) => {
+    const playVideo = (item) => {
         if (item.mediaType==='video') {
             if (!isPlaying && !(videoPlayer.currentTime > 0)) {
                 videoPlayer.play()
@@ -55,7 +55,7 @@ export default function MediaItem ({
             </View>}
 
 
-        <Pressable style={styles.container} onPress={() => onPress(item)}>
+        <View style={styles.container}>
             <View style={{width: width, height: height}}>
             {item.mediaType==='image' ?
                 (!allowPanZoom ?
@@ -66,6 +66,7 @@ export default function MediaItem ({
                     :
         <ZoomableImage source={item.uri} size={{width: width, height: height}} simultaneousHandlers={simultaneousHandlers}/> )
              :
+                <Pressable onPress={() => playVideo()}>
                 ( (isPlaying || videoPlayer.currentTime > 0 || !item['thumbnail']) ?
                 <VideoView contentFit={'contain'}
                            style={{width: '100%', height: '100%', alignSelf: 'center', marginVertical: 'auto'}}
@@ -76,9 +77,10 @@ export default function MediaItem ({
                             <Image source={{uri: item.thumbnail}} style={{width: width, aspectRatio: orientation==='landscape' ? '1.33' : '0.8'}} />
                         </View>
                 )
+                </Pressable>
             }
             </View>
-        </Pressable>
+        </View>
         </View>
 
     );

@@ -1,78 +1,101 @@
-import {faker} from "@faker-js/faker";
+import {en, en_IN, en_US, Faker} from "@faker-js/faker";
+
+
+const fakerIndian = new Faker({locale: [en]});
 
 export const getProductForStore = () => {
     return {
-        productName: faker.commerce.productName(),
-        productId: faker.string.uuid(),
-        price: faker.number.int({ min: 100, max: 5000 }),
-        rating: faker.number.float({ multipleOf: 0.5, min: 0, max:5 }),
-        productDescription: faker.lorem.text(),
-        numberOfRatings: faker.number.int({min:0, max: 3000}),
-        mediaItems: faker.helpers.multiple( () => (            {
-            mediaId: faker.string.uuid(),
+        productName: fakerIndian.commerce.productName(),
+        productId: fakerIndian.string.uuid(),
+        price: fakerIndian.number.int({ min: 100, max: 5000 }),
+        rating: fakerIndian.number.float({ multipleOf: 0.5, min: 0, max:5 }),
+        productDescription: fakerIndian.lorem.text(),
+        numberOfRatings: fakerIndian.number.int({min:0, max: 3000}),
+        mediaItems: fakerIndian.helpers.multiple( () => (            {
+            mediaId: fakerIndian.string.uuid(),
             mediaType: 'image',
             uri:
-                faker.image.url(),
+                fakerIndian.image.url(),
             orientation: 'landscape',
             desc:
-                faker.string.alpha(),
+                fakerIndian.string.alpha(),
         }), 3)
     }}
 
 export const getProductForCustomerFeed = () => {
     return {
-        storeName: faker.company.name(),
-        storeId: faker.string.uuid(),
-        storeLogoImage: faker.image.url(),
-        storeBrandColor: faker.color.rgb(),
-        productName: faker.commerce.productName(),
-        productId: faker.string.uuid(),
-        productDescription: faker.lorem.text(),
-        price: faker.number.int({ min: 100, max: 5000 }),
-        rating: faker.number.float({ multipleOf: 0.5, min: 0, max:5 }),
-        numberOfRatings: faker.number.int({min: 0, max: 3000}),
+        storeName: fakerIndian.company.name(),
+        storeId: fakerIndian.string.uuid(),
+        storeLogoImage: fakerIndian.image.url(),
+        storeBrandColor: fakerIndian.color.rgb(),
+        productName: fakerIndian.commerce.productName(),
+        productId: fakerIndian.string.uuid(),
+        productDescription: fakerIndian.lorem.text(),
+        price: fakerIndian.number.int({ min: 100, max: 5000 }),
+        rating: fakerIndian.number.float({ multipleOf: 0.5, min: 0, max:5 }),
+        numberOfRatings: fakerIndian.number.int({min: 0, max: 3000}),
         mediaItems: [
             {
                 mediaType: 'image',
                 uri:
-                    faker.image.url(),
+                    fakerIndian.image.url(),
                 orientation: 'landscape',
                 desc:
-                    faker.string.alpha(),
+                    fakerIndian.string.alpha(),
             },
             {
                 mediaType: 'image',
                 uri:
-                    faker.image.url(),
+                    fakerIndian.image.url(),
                 orientation: 'landscape',
                 desc:
-                    faker.string.alpha(),
+                    fakerIndian.string.alpha(),
             },
             {
                 mediaType: 'image',
                 uri:
-                    faker.image.url(),
+                    fakerIndian.image.url(),
                 orientation: 'landscape',
                 desc:
-                    faker.string.alpha(),
+                    fakerIndian.string.alpha(),
             },
         ]
     }}
 export const getFakeCollection = () => {
     return {
-        collectionName: faker.helpers.arrayElement(['Featured', 'Best Sellers', 'New Arrivals', 'AARI Work Blouses', 'Silk Sarees', 'T Shirts', 'Jeans']),
-        collectionId: faker.string.uuid(),
-        storeFrontDisplayNumberOfItems: faker.helpers.arrayElement([2,4,6,8]),
-        products: faker.helpers.multiple(getProductForStore, {count: faker.number.int({min: 8, max: 60})})
+        collectionName: fakerIndian.helpers.arrayElement(['Featured', 'Best Sellers', 'New Arrivals', 'AARI Work Blouses', 'Silk Sarees', 'T Shirts', 'Jeans']),
+        collectionId: fakerIndian.string.uuid(),
+        storeFrontDisplayNumberOfItems: fakerIndian.helpers.arrayElement([2,4,6,8]),
+        products: fakerIndian.helpers.multiple(getProductForStore, {count: fakerIndian.number.int({min: 8, max: 60})})
     }
 }
 
 export const getStoreFullData = () => {
     return {
         storeName: 'Store Name',
-        storeId: faker.string.uuid(),
-        storeLogoImage: faker.image.url(),
-        storeBrandColor: faker.color.rgb(),
-        collections: faker.helpers.uniqueArray(getFakeCollection, 5)
+        storeId: fakerIndian.string.uuid(),
+        storeLogoImage: fakerIndian.image.url(),
+        storeBrandColor: fakerIndian.color.rgb(),
+        collections: fakerIndian.helpers.uniqueArray(getFakeCollection, 5)
+    }
+}
+
+export const getCustomer = () => {
+    return {
+        customerId: fakerIndian.string.uuid(),
+        fullName: fakerIndian.person.fullName(),
+        customerAddress: fakerIndian.location.streetAddress({useFullAddress: true}),
+        phone: fakerIndian.phone.number(),
+        email: fakerIndian.internet.email()
+    }
+}
+export const getOrder = () => {
+    return {
+        orderId: fakerIndian.string.numeric({length: 10, allowLeadingZeros: false}),
+        orderDate: fakerIndian.date.recent(),
+        orderItems: fakerIndian.helpers.multiple(getProductForStore, {count: 3}),
+        customer: getCustomer(),
+        orderStatus: fakerIndian.helpers.arrayElement(["Submitted", "Payment Received", "Shipped", "Delivered"]),
+        orderTotal: fakerIndian.number.int({min:30, max: 5000}),
     }
 }

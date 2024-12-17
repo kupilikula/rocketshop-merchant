@@ -9,7 +9,7 @@ export default function StoreFrontProductCard(props) {
 
     const router = useRouter();
 
-    return <Pressable onPress={() => router.push(`/Main/(tabs)/Store/Products/Product/${props.product.productId}`)}>
+    return <Pressable onPress={() => router.push(`/Main/(tabs)/Products/Product/${props.product.productId}`)}>
     <Card elevation={1} style={{margin: 10, width: 150, height: 250, display: 'flex', flexDirection: 'column', alignItems: 'center', borderRadius: 0, backgroundColor: 'white'}}>
         <Image source={props.product.mediaItems[0].uri} style={{width: 150, height: 150, alignSelf: 'center'}}/>
         <View style={{padding: 10}}>

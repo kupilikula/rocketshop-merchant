@@ -1,15 +1,21 @@
-import {View, StyleSheet} from "react-native";
+import {View, StyleSheet, Pressable} from "react-native";
 import {Card, Text} from "react-native-paper";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FlatListSlider from "./MediaSlider/FlatListSlider";
 import MediaItem from "./MediaSlider/MediaItem";
 import { Rating } from '@kolking/react-native-rating';
 import {Colors} from "../styles/Colors";
+import {useRouter} from "expo-router";
 
 export default function ProductDisplayCardCustomerStore (props) {
 
+    const router = useRouter();
+    console.log('props:', props.product.productId);
     // console.log('size:', size);
-    return <Card mode={'elevated'} style={styles.card}>
+    return <Pressable onPress={() => {
+        console.log('pushing');
+        router.push(`/Main/(tabs)/Products/Product/${props.product.productId}`)}}>
+    <Card mode={'elevated'} style={styles.card}>
         <FlatListSlider
             data={props.product.mediaItems}
             local={false}
@@ -53,6 +59,7 @@ export default function ProductDisplayCardCustomerStore (props) {
             </View>}
         </Card.Content>
     </Card>
+    </Pressable>
 }
 
 const styles = StyleSheet.create({

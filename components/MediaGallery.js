@@ -21,6 +21,11 @@ import {Audio} from 'expo-av';
 import {gestureHandlerRootHOC, FlatList} from "react-native-gesture-handler";
 import { useMemo } from "react";
 import GalleryMediaItem from "./GalleryMediaItem";
+import {useNavigation, useRouter} from "expo-router";
+import {useIsFocused} from "@react-navigation/native";
+import {updateField} from "../store/newProductSlice";
+import {useDispatch, useSelector} from "react-redux";
+import _ from "lodash";
 
 const  MediaGallery = (props) => {
     const [media, setMedia] = useState([]);
@@ -52,7 +57,13 @@ const  MediaGallery = (props) => {
     const timerRef = useRef(null);
 
     const theme = useTheme();
+    const navigation = useNavigation();
+    const router = useRouter();
 
+    const isFocused = useIsFocused();
+    const dispatch = useDispatch();
+
+    const productDataMediaItems = useSelector((state) => state.newProduct.mediaItems);
     function toggleCameraFacing() {
         setFacing(current => (current === 'back' ? 'front' : 'back'));
     }
@@ -68,6 +79,17 @@ const  MediaGallery = (props) => {
 
         return asset;
     };
+
+    const MediaHeader = ({cameraOpen}) => {
+        if (cameraOpen) { return null}
+        else {
+            return <View style={{height: 60, paddingHorizontal: 15, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: theme.colors.secondary, color: 'white'}}>
+                <Text variant={'titleLarge'} style={{ color: 'white'}}>Product Media</Text>
+                <Pressable onPressIn={() => {console.log('press'); router.push('./AddProductInfo')}}><MaterialIcons name={'arrow-forward'} size={36} style={{color: 'white'}}/></Pressable>
+            </View>;
+
+        }
+    }
 
     const generateThumbnails = async (assets) => {
         console.log('generate:', assets.length);
@@ -190,6 +212,11 @@ const  MediaGallery = (props) => {
         };
         getAudioPermission();
     }, [cameraMode])
+
+    useEffect(() => {
+        console.log('effect: cameraMode:', openCamera);
+            navigation.setOptions({header: () => <MediaHeader cameraOpen={openCamera}/>})
+    },[navigation, openCamera])
 
     const formatTime = (timeInSeconds) => {
         const minutes = Math.floor(timeInSeconds / 60);
@@ -344,6 +371,18 @@ const  MediaGallery = (props) => {
 
     // Function to check scrolling state
     const checkIsScrolling = () => isGalleryScrollingRef.current;
+
+    useEffect(() => {
+        console.log("preview Media Items", previewMediaItems);
+        if (!isFocused){
+            // Save state to Redux when screen loses focus
+            dispatch(updateField( {field:"mediaItems", value: _.cloneDeep(previewMediaItems)}));
+        } else {
+            console.log('previewitems:', previewMediaItems, ' storeMitems:', productDataMediaItems);
+            setPreviewMediaItems(productDataMediaItems);
+        }
+    }, [isFocused]);
+
 
     if (!permission) {
         // Camera permissions are still loading.

@@ -26,10 +26,10 @@ export default function TabsComponent() {
         }}
     />
     <Tabs.Screen
-        name="Analytics"
+        name="Products"
         options={{
           title: 'Products',
-          tabBarIcon: ({ color }) => <MaterialIcons name={'assessment'} size={30} color={color}/>,
+          tabBarIcon: ({ color }) => <MaterialIcons name={'shopping-bag'} size={30} color={color}/>,
         }}
     />
       <Tabs.Screen
