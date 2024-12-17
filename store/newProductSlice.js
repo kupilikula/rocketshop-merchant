@@ -5,7 +5,11 @@ const initialState = {
     price: "",
     description: "",
     stock: "",
+    gstRate: 18,
     attributes: [],
+    collections: [],
+    tags: [],
+
 };
 
 const newProductSlice = createSlice({

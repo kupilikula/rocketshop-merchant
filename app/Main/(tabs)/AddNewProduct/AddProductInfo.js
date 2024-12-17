@@ -5,31 +5,29 @@ import {
     TouchableOpacity,
     KeyboardAvoidingView,
     Platform,
-    ScrollView, Keyboard, TouchableWithoutFeedback, Pressable, Alert,
+    ScrollView,
 } from "react-native";
 import {
     TextInput,
     Button,
     Text,
     IconButton,
-    useTheme, Checkbox, Dialog, Portal, Menu, Chip, Card,
+    useTheme, Checkbox, Menu, Chip,
 } from "react-native-paper";
 import { useSelector, useDispatch } from "react-redux";
 import { useIsFocused } from "@react-navigation/native";
 import _ from "lodash";
 import { updateField } from "../../../../store/newProductSlice";
 import {useNavigation, useRouter} from "expo-router";
+import * as yup from "yup";
+import {Controller, useFieldArray, useForm} from "react-hook-form";
+import {yupResolver} from "@hookform/resolvers/yup";
 
 const AddProductInfoScreen = () => {
     const dispatch = useDispatch();
     const productData = useSelector((state) => state.newProduct);
     const navigation = useNavigation();
 
-    const [productName, setProductName] = useState("");
-    const [price, setPrice] = useState("");
-    const [description, setDescription] = useState("");
-    const [stock, setStock] = useState("");
-    const [attributes, setAttributes] = useState([]);
     const [filteredSuggestions, setFilteredSuggestions] = useState([]);
     const [filteredValueSuggestions, setFilteredValueSuggestions] = useState([]);
     const [currentFocusedIndex, setCurrentFocusedIndex] = useState(null);
@@ -45,10 +43,7 @@ const AddProductInfoScreen = () => {
         { key: "Size", values: ["S", "M", "L"] },
     ]); // Example attributes
     const [existingCollections, setExistingCollections] = useState(["Electronics", "Clothing", "Home Appliances", "Best Sellers"]); // Existing collections
-    const [selectedCollections, setSelectedCollections] = useState([]); // Selected collections
-    // const [newCollectionName, setNewCollectionName] = useState(""); // Name for new collection
-    const [isDialogVisible, setIsDialogVisible] = useState(false); // Dialog visibility
-    const [tags, setTags] = useState([]); // Selected tags
+    const [collections, setCollections] = useState([]); // Selected collections
     const [tagSuggestions, setTagSuggestions] = useState([
         "Electronics",
         "Clothing",
@@ -63,23 +58,10 @@ const AddProductInfoScreen = () => {
     const [variantSelectedAttributes, setVariantSelectedAttributes] = useState([]); // Selected attributes for variant generation
     const [gstRate, setGstRate] = useState(18); // Default GST Rate
     const [gstMenuVisible, setGstMenuVisible] = useState(false); // For Dropdown visibility
-    const [errorMessages, setErrorMessages] = useState({}); // Error messages for validation
 
     const gstRates = [0, 5, 12, 18, 28]; // GST Rates
 
-    // const newCollectionRef = useRef(null); // Uncontrolled TextInput reference
     const isFocused = useIsFocused();
-    const isRestored = useRef(false);
-    const stateRef = useRef({
-        productName: "",
-        price: "",
-        description: "",
-        stock: "",
-        attributes: [],
-        selectedCollections: [],
-        tags: [],
-        gstRate: 18
-    });
     const gstInputContainerRef = useRef(null); // Reference to the GST TextInput
     const [gstDropdownPosition, setGstDropdownPosition] = useState({
         x: 0,
@@ -93,155 +75,114 @@ const AddProductInfoScreen = () => {
     const theme = useTheme();
     const styles = makeStyles(theme);
 
+    // Validation schema using Yup
+    const schema = yup.object().shape({
+        productName: yup.string().required("Product Name is required."),
+        price: yup
+            .number()
+            .typeError("Price must be a valid number.")
+            .positive("Price must be greater than zero.")
+            .required("Price is required."),
+        stock: yup
+            .number()
+            .typeError("Stock must be a valid number.")
+            .min(0, "Stock cannot be negative.")
+            .required("Stock is required."),
+        description: yup.string().required("Description is required."),
+        collections: yup.array().min(1, "At least one collection must be selected."),
+    });
 
-    useEffect(() => {
-        console.log('update state ref effect');
-        stateRef.current = {
-            productName,
-            price,
-            description,
-            stock,
-            gstRate,
-            selectedCollections,
-            attributes,
-            tags
+    // react-hook-form setup
+    const {
+        control,
+        handleSubmit,
+        reset,
+        setValue,
+        getValues,
+        watch,
+        formState: { errors },
+    } = useForm({
+        defaultValues: {
+            productName: productData.productName || "",
+            price: productData.price || "",
+            stock: productData.stock || "",
+            description: productData.description || "",
+            collections: productData.collections || [],
+            gstRate: productData.gstRate,
+            attributes: productData.attributes || [],
+            tags: productData.tags || []
 
-        };
-    }, [productName, price, description, stock, attributes]);
+        },
+        shouldUnregister: false,
+        resolver: yupResolver(schema),
+    });
 
+    const { fields: attributeFields, append: appendAttribute, update: updateAttribute, remove: deleteAttribute, replace: replaceAttributes } = useFieldArray({
+        control,
+        name: "attributes", // Ties this to "attributes" in form state
+    });
+
+    const tags = watch("tags", []); // Watch the tags array
 
     // Restore state from Redux when the screen gains focus for the first time
+    // Handle screen focus and restoration of state
     useEffect(() => {
-
-        console.log('restore data from store to local effect, isF:', isFocused, ', isR:', isRestored.current);
-        if (isFocused && !isRestored.current) {
-            console.log('restoring from store: ', productData);
-            setProductName(productData.productName);
-            setPrice(productData.price);
-            setDescription(productData.description);
-            setStock(productData.stock);
-            setAttributes(productData.attributes);
-
-            isRestored.current = true; // Mark as restored
+        console.log("Fields in useFieldArray:", attributeFields);
+        if (productData && isFocused) {
+            // Restore state from Redux when screen regains focus
+            reset({
+                productName: productData.productName || "",
+                price: productData.price || "",
+                description: productData.description || "",
+                stock: productData.stock || "",
+                gstRate: productData.gstRate || 18,
+                collections: productData.collections || [],
+                tags: productData.tags || [],
+            });
+            //attributes does not need a reset or replace since useFieldArray does it automatically
+        } else if (!isFocused){
+            // Save state to Redux when screen loses focus
+            saveStateToRedux();
         }
     }, [isFocused]);
 
     const saveStateToRedux = () => {
-        const currentState = stateRef.current;
-
-        if (!_.isEqual(currentState, productData)) {
-            console.log('saving state to redux, currentState:', currentState);
-            dispatch(updateField({ field: "all", value: currentState }));
-        }
-
-        isRestored.current = false; // Reset for next navigation
+        const currentState = getValues(); // Get the latest form values
+        dispatch(updateField({ field: "all", value: currentState }));
     };
 
     // Add `beforeRemove` listener for back navigation
     useEffect(() => {
-        console.log('adding beforeRemove listener')
         const unsubscribe = navigation.addListener("beforeRemove", saveStateToRedux);
         return unsubscribe; // Cleanup listener
     }, [navigation, productData, dispatch]);
 
     // Add `state` listener for other navigation transitions
     useEffect(() => {
-        console.log('adding state listener')
         const unsubscribe = navigation.addListener("state", saveStateToRedux);
         return unsubscribe; // Cleanup listener
     }, [navigation, productData, dispatch]);
 
     // Handle selection of collections
     const toggleCollectionSelection = (collection) => {
-        if (selectedCollections.includes(collection)) {
-            setSelectedCollections(
-                selectedCollections.filter((item) => item !== collection)
+        if (collections.includes(collection)) {
+            setCollections(
+                collections.filter((item) => item !== collection)
             );
         } else {
-            setSelectedCollections([...selectedCollections, collection]);
+            setCollections([...collections, collection]);
         }
     };
-
-    const validateForm = useCallback((formState) => {
-        const errors = {};
-        const {
-            productName,
-            price,
-            stock,
-            gstRate,
-            description,
-            selectedCollections,
-            attributes,
-        } = formState;
-        console.log('productName:', productName);
-        // Validate Product Name
-        if (!productName.trim()) {
-            errors.productName = "Product Name is required.";
-        }
-        console.log('line164')
-        // Validate Price
-        if (!price.trim() || isNaN(price) || parseFloat(price) <= 0) {
-            errors.price = "Price must be a valid positive number.";
-        }
-
-        // Validate Stock
-        console.log('stock:', stock);
-        if (!stock.trim() || isNaN(stock) || parseInt(stock, 10) < 0) {
-            console.log('inside stock')
-            errors.stock = "Stock must be a valid non-negative number.";
-        }
-        console.log('line174')
-        // Validate GST
-        if (!gstRates.includes(gstRate)) {
-            errors.gstRate = "GST rate is required.";
-        }
-        console.log('line179', description);
-        // Validate Description
-        if (!description.trim()) {
-            console.log('line190, description')
-            errors.description = "Description is required.";
-        }
-        console.log('line184, col:', existingCollections);
-        console.log('selectedCol:', selectedCollections);
-        // Validate Collections
-        if (selectedCollections.length === 0) {
-            console.log('inside selC error');
-            errors.collections = "At least one collection must be selected.";
-        }
-        console.log('e.c:', errors.collections);
-        // Validate Attributes
-        attributes.forEach((attr, index) => {
-            if (!attr.key.trim()) {
-                errors[`attributeName-${index}`] = `Attribute Name is required for row ${index + 1}.`;
-            }
-            if (!attr.value.trim()) {
-                errors[`attributeValue-${index}`] = `Attribute Value is required for row ${index + 1}.`;
-            }
-        });
-        console.log('errors:', errors);
-        setErrorMessages(errors);
-
-        // Return true if no errors
-        return errors;
-    }, [productName, price, stock, description, attributes, selectedCollections, tags]);
 
 
     const addAttribute = () => {
-        setAttributes([...attributes, { key: "", value: "" }]);
+        appendAttribute({ key: "", value: "" });
     };
 
-    const updateAttribute = (index, field, value) => {
-        // Create a new copy of the attribute object at the specified index
-        const updatedAttribute = { ...attributes[index], [field]: value };
+    const updateAttributeSuggestions = (index, field, value) => {
+        const currentAttribute = attributeFields[index] || null;
 
-        // Create a new array with the updated attribute
-        const updatedAttributes = [
-            ...attributes.slice(0, index),
-            updatedAttribute,
-            ...attributes.slice(index + 1),
-        ];
-        setAttributes(updatedAttributes);
-
+        // Handle suggestions for key and value fields
         if (field === "key") {
             const suggestions = attributeSuggestions.filter((item) =>
                 item.key.toLowerCase().startsWith(value.toLowerCase())
@@ -249,13 +190,11 @@ const AddProductInfoScreen = () => {
             setFilteredSuggestions(suggestions);
             setCurrentFocusedIndex(index);
         }
-
+        console.log('238')
         if (field === "value") {
-            const attribute = attributes[index];
+            // const currentAttribute = currentAttributes[index];
             const values =
-                attributeSuggestions.find(
-                    (item) => item.key === attribute.key
-                )?.values || [];
+                attributeSuggestions.find((item) => item.key === currentAttribute?.key)?.values || [];
             const suggestions = values.filter((val) =>
                 val.toLowerCase().startsWith(value.toLowerCase())
             );
@@ -264,22 +203,20 @@ const AddProductInfoScreen = () => {
         }
     };
 
+
     const removeAttribute = (index) => {
-        setAttributes(attributes.filter((_, i) => i !== index));
+        deleteAttribute(index);
     };
 
+
     const applySuggestion = (index, suggestion) => {
-        const updatedAttributes = [...attributes];
-        updatedAttributes[index].key = suggestion;
-        setAttributes(updatedAttributes);
+        updateAttribute(index, {...attributeFields[index], key: suggestion})
         setFilteredSuggestions([]);
         setCurrentFocusedIndex(null);
     };
-
+    //
     const applyValueSuggestion = (index, suggestion) => {
-        const updatedAttributes = [...attributes];
-        updatedAttributes[index].value = suggestion;
-        setAttributes(updatedAttributes);
+        updateAttribute(index, {...attributeFields[index], value: suggestion})
         setFilteredValueSuggestions([]);
         setCurrentFocusedValueIndex(null);
     };
@@ -294,126 +231,132 @@ const AddProductInfoScreen = () => {
             setCurrentFocusedIndex(null);
     };
 
-    const renderAttributeInput = (index, attr) => (
-        <View key={index} style={styles.attributeRow}>
-            <TextInput
-                style={styles.attributeInput}
-                mode="outlined"
-                label="Name"
-                value={attr.key}
-                onChangeText={(value) => updateAttribute(index, "key", value)}
-                onFocus={() => {
-                    console.log('onFocus name');
-                    setCurrentFocusedIndex(index);
-                }
-            }
-                onBlur={handleInputBlur} // Delay clearing suggestions
-                onLayout={(event) => handleInputLayout(index, event)}
-                dense
-                error={!!errorMessages[`attributeName-${index}`]}
-            />
-
-            <TextInput
-                style={styles.attributeInput}
-                mode="outlined"
-                label="Value"
-                value={attr.value}
-                onChangeText={(value) => updateAttribute(index, "value", value)}
-                onFocus={() => {
-                    console.log('onFocus value');
-                    setCurrentFocusedValueIndex(index)
+    const renderAttributeInput = (index, attr) => {
+        return <View key={attributeFields[index]?.id} style={styles.attributeRow}>
+            {/* Attribute Name */}
+            <Controller
+                name={`attributes.${index}.key`}
+                control={control}
+                rules={{
+                    required: `Attribute Name is required for row ${index + 1}.`,
                 }}
-                onBlur={() => setTimeout(() => setFilteredValueSuggestions([]), 100)}
-                dense
-                onLayout={(event) => handleInputLayout(`value-${index}`, event)}
-                error={!!errorMessages[`attributeValue-${index}`]}
-
+                render={({ field: { value, onChange }, fieldState: { error } }) => (
+                    <TextInput
+                        style={styles.attributeInput}
+                        mode="outlined"
+                        label="Name"
+                        value={value}
+                        onChangeText={(value) => {
+                            onChange(value);
+                            // updateAttributeSuggestions(index, "key", value); // Optional for suggestions
+                        }}
+                        onFocus={() => setCurrentFocusedIndex(index)}
+                        onBlur={handleInputBlur}
+                        onLayout={(event) => handleInputLayout(index, event)}
+                        dense
+                        error={!!error}
+                    />
+                )}
             />
 
+            {/* Attribute Value */}
+            <Controller
+                name={`attributes.${index}.value`}
+                control={control}
+                rules={{
+                    required: `Attribute Value is required for row ${index + 1}.`,
+                }}
+                render={({ field: { value, onChange }, fieldState: { error } }) => (
+                    <TextInput
+                        style={styles.attributeInput}
+                        mode="outlined"
+                        label="Value"
+                        value={value}
+                        onChangeText={(value) => {
+                            onChange(value);
+                            // updateAttributeSuggestions(index, "value", value); // Optional for suggestions
+                        }}
+                        onFocus={() => setCurrentFocusedValueIndex(index)}
+                        onBlur={handleInputBlur}
+                        onLayout={(event) => handleInputLayout(`value-${index}`, event)}
+                        dense
+                        error={!!error}
+                    />
+                )}
+            />
+
+            {/* Remove Button */}
             <IconButton
                 icon="delete"
-                onPress={() => removeAttribute(index)}
+                onPress={() => removeAttribute(index)} // Remove the row using useFieldArray
                 style={styles.removeButton}
             />
 
-                {/* Suggestions for Attribute Name */}
-                {currentFocusedIndex === index && filteredSuggestions.length > 0 && (
-                    <View style={[
+                     {/* Suggestions for Attribute Name */}
+            {currentFocusedIndex === index && filteredSuggestions.length > 0 && (
+                <View
+                    style={[
                         styles.suggestionsContainer,
                         {
                             width: inputWidths[index] || "100%", // Match Name input width
                             left: 0, // Align below Name input
                             top: 50, // Position below the Name input
                         },
-                    ]}>
-                        {filteredSuggestions.map((item) => (
-                            <TouchableOpacity
-                                key={item.key}
-                                onPressIn={() => applySuggestion(index, item.key)}
-                                style={styles.suggestionItem}
-                            >
-                                <Text variant={'bodyLarge'}>{item.key}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                )}
+                    ]}
+                >
+                    {filteredSuggestions.map((item) => (
+                        <TouchableOpacity
+                            key={item.key}
+                            onPress={() => {
+                                applySuggestion(index, item.key);
+                            }}
+                            style={styles.suggestionItem}
+                        >
+                            <Text>{item.key}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+            )}
 
-            {currentFocusedValueIndex === index &&
-                filteredValueSuggestions.length > 0 && (
-                    <View
-                        style={[
-                            styles.suggestionsContainer,
-                            {
-                                width: inputWidths[`value-${index}`] || "100%",
-                                left: inputWidths[index] + 4 || 0,
-                                top: 50,
-                            },
-                        ]}
-                    >
-                        {filteredValueSuggestions.map((item, idx) => (
-                            <TouchableOpacity
-                                key={idx}
-                                onPress={() => {
-                                    applyValueSuggestion(index, item);
-                                    setTimeout(() => Keyboard.dismiss(), 50);
-                                }
-                                }
-                                style={styles.suggestionItem}
-                            >
-                                <Text>{item}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                )}
+            {/*/!* Suggestions for Attribute Value *!/*/}
+            {currentFocusedValueIndex === index && filteredValueSuggestions.length > 0 && (
+                <View
+                    style={[
+                        styles.suggestionsContainer,
+                        {
+                            width: inputWidths[`value-${index}`] || "100%",
+                            left: inputWidths[index] + 4 || 0,
+                            top: 50,
+                        },
+                    ]}
+                >
+                    {filteredValueSuggestions.map((item, idx) => (
+                        <TouchableOpacity
+                            key={idx}
+                            onPress={() => {
+                                applyValueSuggestion(index, item);
+                            }}
+                            style={styles.suggestionItem}
+                        >
+                            <Text>{item}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+            )}
         </View>
-    );
+};
 
-    const saveAndNavigateToPreview = async () => {
-        console.log('save');
-        const currentState = stateRef.current; // Access the latest state directly
-        console.log('cS:', currentState);
-        const errors = validateForm(currentState); // Pass the current state to validation
-        console.log('line395, errors:', errors);
-        if (Object.keys(errors).length === 0) {
-            console.log("Validation passed. Saving product and navigating...");
-            setErrorMessages({}); // Clear error messages
-            router.push("/Main/(tabs)/AddNewProduct/Preview");
-        } else {
-            console.log("Validation failed. Errors:", errors);
-            setErrorMessages(errors); // Update the error messages
-            // Alert.alert("Validation Error", "Please fix the highlighted errors.");
-        }
-    };
+
 
     useEffect(() => {
-        navigation.setOptions({ headerRight: () => <Button contentStyle={{flexDirection: 'row-reverse'}} icon={'arrow-right'} mode={'contained'} style={{borderRadius: 0, backgroundColor: theme.colors.success}} onPressIn={saveAndNavigateToPreview}>
+        navigation.setOptions({ headerRight: () => <Button contentStyle={{flexDirection: 'row-reverse'}} icon={'arrow-right'} mode={'contained'} style={{borderRadius: 0, backgroundColor: theme.colors.success}} onPressIn={handleSubmit(onSubmit)}>
                 Preview
             </Button>});
     },[navigation])
 
     const publishProduct = async () => {
-        const productData = { productName, price, description, stock, attributes };
-        console.log("Product Published:", productData);
+        // const productData = { productName, price, description, stock, getValues('attributes') };
+        // console.log("Product Published:", productData);
     };
 
     const markAsVariant = () => {
@@ -425,18 +368,15 @@ const AddProductInfoScreen = () => {
             alert("Please select at least one attribute.");
             return;
         }
-        console.log('vSA:', variantSelectedAttributes);
         const attributeValues = variantSelectedAttributes.map((attr) =>
             attributesData.find((a) => a.key === attr)?.values || []
         );
-        console.log('aV:', attributeValues);
         // Generate combinations
         const combinations = cartesianProduct(attributeValues).map((combo) => ({
             options: combo,
             price: "",
             stock: "",
         }));
-        console.log('variants:', combinations);
         setVariants(combinations);
     };
 
@@ -465,44 +405,44 @@ const AddProductInfoScreen = () => {
         }
     };
     const openGstMenu = () => {
-        console.log('line375, open');
         gstInputContainerRef.current.measureInWindow((x, y, width, height) => {
             setGstDropdownPosition({ x, y: y + 2*height, width });
             setGstMenuVisible(true);
-            console.log('opened')
         });
     };
 
     // Add a tag
     const addTag = (tag) => {
-        if (!tags.includes(tag)) {
-            setTags([...tags, tag]);
+        const currentTags = getValues("tags");
+        if (tag.trim() && !currentTags.includes(tag)) {
+            setValue("tags", [...currentTags, tag.trim()]); // Update form state with new tag
         }
-        setTagInput("");
-        setFilteredTagSuggestions([]);
+        setTagInput(""); // Reset input
+        setFilteredTagSuggestions([]); // Clear suggestions
     };
 
-    // Remove a tag
+// Remove a tag
     const removeTag = (tag) => {
-        setTags(tags.filter((t) => t !== tag));
+        const updatedTags = tags.filter((t) => t !== tag);
+        setValue("tags", updatedTags); // Update form state
     };
 
-    // Handle tag input changes
+// Handle input changes for filtering suggestions
     const handleTagInputChange = (input) => {
         setTagInput(input);
-
-        // Filter suggestions based on input
         const filtered = tagSuggestions.filter((tag) =>
             tag.toLowerCase().includes(input.toLowerCase())
         );
         setFilteredTagSuggestions(filtered);
     };
 
-    // Handle adding a tag when pressing enter
+// Handle tag submission (Enter key or "+" icon press)
     const handleTagInputSubmit = () => {
-        if (tagInput.trim()) {
-            addTag(tagInput.trim());
-        }
+        addTag(tagInput);
+    };
+    const onSubmit = (data) => {
+        dispatch(updateField({ field: "all", value: data }));
+        router.push("/Main/(tabs)/AddNewProduct/Preview");
     };
 
     return (
@@ -512,35 +452,57 @@ const AddProductInfoScreen = () => {
             keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
         >
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                {/*<Card mode={'elevated'} style={{width: '100%', backgroundColor: 'white', margin: 0,}}>*/}
                 <Text style={styles.header}>Details</Text>
-                <TextInput
-                    label="Product Name"
-                    mode="outlined"
-                    value={productName}
-                    onChangeText={setProductName}
-                    style={styles.textInput}
-                    multiline
-                    error={!!errorMessages.productName}
+                {/* Product Name */}
+                <Controller
+                    name="productName"
+                    control={control}
+                    render={({ field: { onChange, onBlur, value } }) => (
+                        <TextInput
+                            label="Product Name"
+                            mode="outlined"
+                            value={value}
+                            onBlur={onBlur}
+                            onChangeText={onChange}
+                            style={styles.textInput}
+                            multiline
+                            error={!!errors.productName}
+                        />
+                    )}
                 />
+
                 <View style={styles.row}>
-                    <TextInput
-                        label="Price"
-                        mode="outlined"
-                        value={price}
-                        onChangeText={setPrice}
-                        style={[styles.halfWidthInput, { marginRight: 8 }]}
-                        error={!!errorMessages.price}
-                        keyboardType="numeric"
+                    <Controller
+                        name="price"
+                        control={control}
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <TextInput
+                                label="Price"
+                                mode="outlined"
+                                value={value}
+                                onBlur={onBlur}
+                                onChangeText={onChange}
+                                style={[styles.halfWidthInput, { marginRight: 8 }]}
+                                keyboardType="numeric"
+                                error={!!errors.price}
+                            />
+                        )}
                     />
-                    <TextInput
-                        label="Stock"
-                        mode="outlined"
-                        value={stock}
-                        onChangeText={setStock}
-                        style={styles.halfWidthInput}
-                        error={!!errorMessages.stock}
-                        keyboardType="numeric"
+                    <Controller
+                        name="stock"
+                        control={control}
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <TextInput
+                                label="Stock"
+                                mode="outlined"
+                                value={value}
+                                onBlur={onBlur}
+                                onChangeText={onChange}
+                                style={styles.halfWidthInput}
+                                keyboardType="numeric"
+                                error={!!errors.stock}
+                            />
+                        )}
                     />
                     <View ref={gstInputContainerRef} style={styles.gstInputContainer}>
                         <TextInput
@@ -557,7 +519,6 @@ const AddProductInfoScreen = () => {
                             }
                         />
                     </View>
-                    {/* GST Dropdown */}
                         {/* GST Rate Dropdown */}
                         <Menu
                             visible={gstMenuVisible}
@@ -586,49 +547,61 @@ const AddProductInfoScreen = () => {
                         </Menu>
                 </View>
 
-                <TextInput
-                    label="Description"
-                    mode="outlined"
-                    value={description}
-                    onChangeText={setDescription}
-                    style={[styles.textInput, styles.textArea]}
-                    multiline
-                    dense
-                    error={!!errorMessages.description}
+                <Controller
+                    name="description"
+                    control={control}
+                    render={({ field: { onChange, onBlur, value } }) => (
+                        <TextInput
+                            label="Description"
+                            mode="outlined"
+                            value={value}
+                            onBlur={onBlur}
+                            onChangeText={onChange}
+                            style={[styles.textInput, styles.textArea]}
+                            multiline
+                            error={!!errors.description}
+                        />
+                    )}
                 />
-
-                {/*</Card>*/}
 
                 {/* Collections Section */}
                 <Text style={styles.header}>Collections</Text>
-                <View style={{display: 'flex', flexWrap: 'wrap', flexDirection: 'row'}}>
-                    {existingCollections.map((collection, idx) => (
-                        <View key={idx} style={styles.checkboxContainer}>
-                            <Checkbox
-                                status={
-                                    selectedCollections.includes(collection)
-                                        ? "checked"
-                                        : "unchecked"
-                                }
-                                onPress={() => toggleCollectionSelection(collection)}
-                            />
-                            <Text>{collection}</Text>
+                <Controller
+                    name="collections"
+                    control={control}
+                    rules={{ validate: (value) => value.length > 0 || "At least one collection must be selected." }}
+                    render={({ field: { value, onChange }, fieldState: { error } }) => (
+                        <View>
+                        <View style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap'}}>
+                            {existingCollections.map((collection, idx) => (
+                                <View key={idx} style={styles.checkboxContainer}>
+                                    <Checkbox
+                                        status={value.includes(collection) ? "checked" : "unchecked"}
+                                        onPress={() => {
+                                            if (value.includes(collection)) {
+                                                onChange(value.filter((item) => item !== collection));
+                                            } else {
+                                                onChange([...value, collection]);
+                                            }
+                                        }}
+                                    />
+                                    <Text>{collection}</Text>
+                                </View>
+                            ))}
                         </View>
-                    ))}
-                    {/*<Button*/}
-                    {/*    mode="text"*/}
-                    {/*    onPress={() => setIsDialogVisible(true)}*/}
-                    {/*    style={styles.addNewButton}*/}
-                    {/*>*/}
-                    {/*    Add New Collection*/}
-                    {/*</Button>*/}
-                </View>
-                {errorMessages.collections && (
-                    <Text  style={styles.errorText}>{errorMessages.collections}</Text>
-                )}
+                    {error && <Text style={styles.errorText}>{error.message}</Text>}
+                        </View>
+                    )}
+                />
+
 
                 <Text style={styles.header}>Attributes</Text>
-                {attributes.map((attr, index) => renderAttributeInput(index, attr))}
+                {attributeFields && attributeFields?.map((field, index) => (
+                    <View key={field.id}>
+                        {renderAttributeInput(index, field)}
+                    </View>
+                ))}
+
 
                 <View style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
                     <Button
@@ -657,45 +630,49 @@ const AddProductInfoScreen = () => {
                 </View>
 
                 {/* Tag Input */}
-                <View style={styles.tagInputContainer}>
-                    <TextInput
-                        label="Add Tag"
-                        mode="outlined"
-                        value={tagInput}
-                        onChangeText={handleTagInputChange}
-                        onSubmitEditing={handleTagInputSubmit} // Handle enter key
-                        right={
-                            <TextInput.Icon
-                                icon="plus"
-                                onPress={handleTagInputSubmit} // Handle button press
+                <Controller
+                    name="tags"
+                    control={control}
+                    render={() => (
+                        <View style={styles.tagInputContainer}>
+                            <TextInput
+                                label="Add Tag"
+                                mode="outlined"
+                                value={tagInput}
+                                onChangeText={handleTagInputChange}
+                                onSubmitEditing={handleTagInputSubmit} // Enter key press
+                                right={
+                                    <TextInput.Icon
+                                        icon="plus"
+                                        onPress={handleTagInputSubmit} // "+" icon press
+                                    />
+                                }
+                                style={styles.tagInput}
                             />
-                        }
-                        style={styles.tagInput}
-                    />
 
-                    {/* Tag Suggestions */}
-                    {filteredTagSuggestions.length > 0 && (
-                        <View style={styles.suggestionsContainer}>
-                            {filteredTagSuggestions.map((suggestion) => (
-                                <TouchableOpacity
-                                    key={suggestion}
-                                    style={styles.suggestionItem}
-                                    onPress={() => addTag(suggestion)}
-                                >
-                                    <Text style={styles.suggestionText}>
-                                        {suggestion}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
+                            {/* Tag Suggestions */}
+                            {filteredTagSuggestions.length > 0 && (
+                                <View style={styles.suggestionsContainer}>
+                                    {filteredTagSuggestions.map((suggestion) => (
+                                        <TouchableOpacity
+                                            key={suggestion}
+                                            style={styles.suggestionItem}
+                                            onPress={() => addTag(suggestion)}
+                                        >
+                                            <Text style={styles.suggestionText}>{suggestion}</Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            )}
                         </View>
                     )}
-                </View>
+                />
 
                 {/* Attribute Selection */}
                 <Text style={styles.header}>Manage Variants</Text>
                 <Text variant={'bodyMedium'}>Variant Attributes</Text>
                 <View style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap'}}>
-                    {attributes.map((attribute, idx) => (
+                    {attributeFields?.map((attribute, idx) => (
                         attribute.key.trim()!=='' &&
                         <View key={idx} style={styles.checkboxContainer}>
                             <Checkbox
@@ -773,34 +750,6 @@ const AddProductInfoScreen = () => {
                     </View>
                 )}
 
-                {/* Dialog for Adding New Collection */}
-                {/*<Portal>*/}
-                {/*    <Dialog*/}
-                {/*        visible={isDialogVisible}*/}
-                {/*        onDismiss={() => setIsDialogVisible(false)}*/}
-                {/*    >*/}
-                {/*        <Dialog.Title>Add New Collection</Dialog.Title>*/}
-                {/*        <Dialog.Content>*/}
-                {/*            <TextInput*/}
-                {/*                label="Collection Name"*/}
-                {/*                mode="outlined"*/}
-                {/*                style={styles.textInput}*/}
-                {/*                onChangeText={(text) => {*/}
-                {/*                    console.log('text:', text);*/}
-                {/*                    console.log('ref:', newCollectionRef.current);*/}
-                {/*                    (newCollectionRef.current = text)*/}
-                {/*                }*/}
-                {/*            } // Store value in ref*/}
-                {/*            />*/}
-                {/*        </Dialog.Content>*/}
-                {/*        <Dialog.Actions>*/}
-                {/*            <Button onPress={() => setIsDialogVisible(false)}>*/}
-                {/*                Cancel*/}
-                {/*            </Button>*/}
-                {/*            <Button onPress={addNewCollection}>Add</Button>*/}
-                {/*        </Dialog.Actions>*/}
-                {/*    </Dialog>*/}
-                {/*</Portal>*/}
             </ScrollView>
             {/*<View style={[styles.stickyActionContainer, {display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, width: '100%'}]}>*/}
             {/*    <View style={{display: 'flex', flexDirection:'row', justifyContent: 'center'}}>*/}
