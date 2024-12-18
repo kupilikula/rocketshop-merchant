@@ -37,7 +37,7 @@ export default function ProductDisplayCardCustomerStore (props) {
             </Text>
             <View style={styles.cardContentView}>
                 <View>
-                    <Text variant="titleLarge">{'₹' + props.product.price.toString()}</Text>
+                    <Text variant="titleMedium">{'Price: ₹' + props.product.price.toString()}</Text>
                     {props.product.numberOfRatings > 0 &&
                     <View style={styles.rating}>
                         <Rating disabled={true} variant={'stars-outline'} fillColor={'#faaf00'} baseColor={'black'} size={18} rating={props.product.rating} onChange={()=>{}} />
@@ -105,7 +105,9 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        alignContent: 'center'
+        alignContent: 'center',
+        padding: 0,
+        margin: 0
     },
     actionButton: {
         margin: 10
