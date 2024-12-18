@@ -15,6 +15,7 @@ export default function MediaItem ({
                                  height,
                                  allowPanZoom,
                                  simultaneousHandlers,
+                                 showScrollButtons,
                                  scrollToIndex
                              }) {
 
@@ -41,18 +42,22 @@ export default function MediaItem ({
     return (
         <View style={{position: 'relative', justifyContent: 'center', alignItems: 'center'}}>
 
-
-            {(index < numberOfItems-1) && <View style={{position: 'absolute', right: 10, zIndex: 100, justifyContent: 'center', alignItems: 'center'}}>
-                <Pressable onPress={() => scrollToIndex(index+1)}>
-                <MaterialIcons name={'arrow-forward-ios'} size={40} color={'white'}/>
-                </Pressable>
-            </View>}
+            {(index < numberOfItems-1) &&
+                    <View style={{position: 'absolute', right: 10, zIndex: 100, justifyContent: 'center', alignItems: 'center'}}>
+                        <Pressable onPress={() => {
+                            console.log('scrolling to index:', index+1);
+                            scrollToIndex(index + 1)
+                        }
+                        }>
+                            <MaterialIcons name={'arrow-forward-ios'} size={40} color={'white'}/>
+                        </Pressable>
+                    </View>}
             {(index > 0) &&
-            <View style={{position: 'absolute', left: 10, zIndex: 100, justifyContent: 'center', alignItems: 'center'}}>
-                <Pressable onPress={() => scrollToIndex(index-1)}>
-                    <MaterialIcons name={'arrow-back-ios'} size={40} color={'white'}/>
-                </Pressable>
-            </View>}
+                    <View style={{position: 'absolute', left: 10, zIndex: 100, justifyContent: 'center', alignItems: 'center'}}>
+                        <Pressable onPress={() => scrollToIndex(index-1)}>
+                            <MaterialIcons name={'arrow-back-ios'} size={40} color={'white'}/>
+                        </Pressable>
+                    </View>}
 
 
         <View style={styles.container}>

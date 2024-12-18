@@ -1,5 +1,5 @@
 import {View, StyleSheet, Pressable} from "react-native";
-import {Card, Text} from "react-native-paper";
+import {Card, Surface, Text} from "react-native-paper";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FlatListSlider from "./MediaSlider/FlatListSlider";
 import MediaItem from "./MediaSlider/MediaItem";
@@ -7,14 +7,12 @@ import { Rating } from '@kolking/react-native-rating';
 import {Colors} from "../styles/Colors";
 import {useRouter} from "expo-router";
 
-export default function ProductDisplayCardCustomerStore (props) {
+export default function ProductScreenMerchant (props) {
 
     const router = useRouter();
     console.log('props:', props.product.productId);
     // console.log('size:', size);
-    return <Pressable onPress={() => {
-        console.log('pushing');
-        router.push(`/Main/(tabs)/Products/Product/${props.product.productId}`)}}>
+    return <Surface style={{flex: 1, width: '100%', justifyContent: 'flex-start', flexDirection: 'column', alignItems: 'center', padding: 10}}>
     <Card mode={'elevated'} style={styles.card}>
         <FlatListSlider
             data={props.product.mediaItems}
@@ -30,7 +28,8 @@ export default function ProductDisplayCardCustomerStore (props) {
             indicatorActiveColor='#3498db'
             indicatorInActiveColor='#bdc3c7'
             indicatorActiveWidth={6}
-            flatListWrapperStyle={{backgroundColor: 'white'}}
+            flatListWrapperStyle={{backgroundColor: 'black', width: '100%', aspectRatio: props.orientation==='portrait' ? '0.8' : '1.33'}}
+            // contentContainerStyle={{backgroundColor: 'black'}}
             allowPanZoom={false}
             component = {<MediaItem />}
             />
@@ -39,8 +38,11 @@ export default function ProductDisplayCardCustomerStore (props) {
                 {props.product.productName}
             </Text>
             <View style={styles.cardContentView}>
-                <View>
-                    <Text variant="titleLarge">{'₹' + props.product.price.toString()}</Text>
+                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', alignItems: 'flex-start'}}>
+                    <View>
+                    <Text variant="titleMedium">{'Price: ₹' + props.product.price.toString()}</Text>
+                    <Text variant="titleMedium">{'Stock: ' + props.product.stock.toString()}</Text>
+                    </View>
                     <View style={styles.rating}>
                         <Rating disabled={true} variant={'stars-outline'} fillColor={'#faaf00'} baseColor={'black'} size={18} rating={props.product.rating} onChange={()=>{}} />
                         <Text style={styles.ratingText} variant={'bodyLarge'}>
@@ -48,25 +50,27 @@ export default function ProductDisplayCardCustomerStore (props) {
                         </Text>
                     </View>
                 </View>
-                <View style={styles.actionButtonsContainer}>
-                    <MaterialIcons name={'favorite-border'} size={28} style={styles.actionButton}/>
-                    <MaterialIcons name={'share'} size={28} style={styles.actionButton}/>
-                    <MaterialIcons name={'add-shopping-cart'} size={28} style={styles.actionButton}/>
+                <View style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginTop: 10}}>
+                    {props.product.attributes.map((a, i) => {
+                        return <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}} key={i.toString()}>
+                            <Text variant={'bodyLarge'}>{a.key + ': '}</Text>
+                            <Text variant={'bodyLarge'}>{a.value}</Text>
+                        </View>
+                    })}
                 </View>
             </View>
-            {props.showProductDescription && <View>
-                <Text>{props.product.productDescription}</Text>
-            </View>}
+            <View style={{marginTop: 10}}>
+                <Text variant={'bodyLarge'}>{props.product.productDescription}</Text>
+            </View>
         </Card.Content>
     </Card>
-    </Pressable>
+    </Surface>
 }
 
 const styles = StyleSheet.create({
     card: {
         width: '100%',
         borderRadius: 0,
-        marginBottom: 10,
         backgroundColor: 'white'
     },
     titleTextStyle: {
@@ -81,14 +85,15 @@ const styles = StyleSheet.create({
     cardContentView: {
         width: '100%',
         display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
         marginTop: 10
     },
     rating: {
         display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'flex-start'
+        flexDirection: 'column',
+        alignItems: 'flex-end',
+        // justifyContent: 'flex-start'
     },
     ratingText: {
         marginLeft: 10

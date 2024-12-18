@@ -20,10 +20,12 @@ const OrderDetails = (props) => {
         <View style={styles.productContainer} key={item.product.productId}>
             <Image source={{ uri: item.product.mediaItems[0]?.uri }} style={styles.productImage} />
             <View style={styles.productDetails}>
-                <Text style={styles.productName}>{item.product.productName}</Text>
-                <Text>Quantity: {item.quantity}</Text>
-                <Text>Price: ₹{item.product.price}</Text>
-                <Text style={styles.productSubtotal}>
+                <Text variant={'titleMedium'}>{item.product.productName}</Text>
+                <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start'}}>
+                    <Text variant={'bodyLarge'} style={{marginRight: 15}}>Price: ₹{item.product.price}</Text>
+                    <Text variant={'bodyLarge'} >Quantity: {item.quantity}</Text>
+                </View>
+                <Text variant={'titleMedium'}>
                     Subtotal: ₹{item.product.price * item.quantity}
                 </Text>
             </View>
@@ -38,15 +40,16 @@ const OrderDetails = (props) => {
             <Card style={styles.card}>
                 <Card.Title title="Order Summary" left={(props) => <Avatar.Icon {...props} icon="clipboard-list" />} />
                 <Card.Content>
-                    <Text>Order ID: {order.orderId}</Text>
-                    <Text>Order Date: {new Date(order.orderDate).toDateString()}</Text>
+                    <Text variant={'bodyLarge'}>Order ID: {order.orderId}</Text>
+                    <Text variant={'bodyLarge'}>Order Date: {new Date(order.orderDate).toLocaleDateString()}</Text>
+                    <Text variant={'bodyLarge'}>Number of Items: {order.orderItems.reduce((A,v) => A+v.quantity,0)}</Text>
+                    <Text variant={'titleMedium'}>Order Total: ₹{order.orderTotal}</Text>
                     <View style={styles.statusRow}>
-                        <Text style={{ marginRight: 8 }}>Status:</Text>
                         <Chip style={{ backgroundColor: statusColors[order.orderStatus] }} textStyle={{ color: '#fff' }}>
                             {order.orderStatus}
                         </Chip>
                     </View>
-                    <Text style={styles.orderTotal}>Order Total: ₹{order.orderTotal}</Text>
+
                 </Card.Content>
             </Card>
 
@@ -56,10 +59,10 @@ const OrderDetails = (props) => {
             <Card style={styles.card}>
                 <Card.Title title="Customer Information" left={(props) => <Avatar.Icon {...props} icon="account" />} />
                 <Card.Content>
-                    <Text>Name: {order.customer.fullName}</Text>
-                    <Text>Address: {order.customer.customerAddress}</Text>
-                    <Text>Phone: {order.customer.phone}</Text>
-                    <Text>Email: {order.customer.email}</Text>
+                    <Text variant={'bodyLarge'}>Name: {order.customer.fullName}</Text>
+                    <Text variant={'bodyLarge'}>Address: {order.customer.customerAddress}</Text>
+                    <Text variant={'bodyLarge'}>Phone: {order.customer.phone}</Text>
+                    <Text variant={'bodyLarge'}>Email: {order.customer.email}</Text>
                 </Card.Content>
             </Card>
 

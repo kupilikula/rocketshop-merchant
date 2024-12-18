@@ -45,6 +45,7 @@ const FlatListSlider = forwardRef( ( props, ref) =>{
     }, [])
 
     const scrollToIndex = (index) => {
+        console.log('line48, index:', index);
         if (slider.current) {
             slider?.current.scrollToIndex({ index: index, animated: true });
         }
@@ -105,7 +106,7 @@ const FlatListSlider = forwardRef( ( props, ref) =>{
 
 
     return ( props.data.length>0 &&
-            <View onLayout={onLayout} style={{position: 'relative'}}>
+            <View onLayout={onLayout} style={[{position: 'relative'}, props.flatListWrapperStyle || {}]}>
                 <FlatList
                     ref={slider}
                     simultaneousHandlers={props.simultaneousHandlers || []}
@@ -114,7 +115,7 @@ const FlatListSlider = forwardRef( ( props, ref) =>{
                     snapToAlignment={'center'}
                     decelerationRate={0.99}
                     bounces={false}
-                    contentContainerStyle={props.contentContainerStyle}
+                    // contentContainerStyle={props.contentContainerStyle}
                     data={props.data}
                     extraData={props.data}
                     showsHorizontalScrollIndicator={false}
@@ -134,6 +135,7 @@ const FlatListSlider = forwardRef( ( props, ref) =>{
                             active={i === currentIndex}
                             local={props.local}
                             allowPanZoom={props.allowPanZoom}
+                            showScrollButtons={props.showScrollButtons}
                             simultaneousHandlers={props.simultaneousHandlers ? [slider, ...props.simultaneousHandlers] : [slider]} />
                         }}
                     ItemSeparatorComponent={() => (
@@ -160,7 +162,7 @@ const FlatListSlider = forwardRef( ( props, ref) =>{
                     initialNumToRender={50}
                     maxToRenderPerBatch={50}
                     removeClippedSubviews={true}
-                    scrollEnabled={false}
+                    scrollEnabled={true}
                     // onContentSizeChange={handleContentSizeChange}
                 />
                 {props.indicator && (props.data.length > 1) && (

@@ -3,23 +3,46 @@ import {en, en_IN, en_US, Faker} from "@faker-js/faker";
 
 const fakerIndian = new Faker({locale: [en]});
 
+const getMediaItem = () => {
+    return {
+        mediaId: fakerIndian.string.uuid(),
+        mediaType: 'image',
+        uri:
+            fakerIndian.image.url(),
+        orientation: 'landscape',
+        desc:
+            fakerIndian.string.alpha(),
+    };
+}
+
 export const getProductForStore = () => {
+
+    const collectionsList = ['Electronics', 'Fashion', 'Books', 'Home Appliances'];
+    const attributeKeysList = ["Color", "Material", "Size"];
+    const attributeValuesMap = {"Color": ["Red", "Blue", "Green"], "Material": ["Silk", "Cotton", "Leather"], "Size": ["Small", "Medium", "Large"]};
+    const tagsList =        ["Best Sellers", "Featured", "HandMade", "New Arrival", "Discount", "Popular",];
+    const collections  = fakerIndian.helpers.uniqueArray(() => fakerIndian.helpers.arrayElement(collectionsList), fakerIndian.number.int({min: 1, max: 4}));
+    const attributeKeys = fakerIndian.helpers.uniqueArray( () => fakerIndian.helpers.arrayElement(attributeKeysList), fakerIndian.number.int({min: 0, max: 3}));
+    const attributes = [];
+    attributeKeys.forEach((k) => {
+        attributes.push( { key: k, value: fakerIndian.helpers.arrayElement(attributeValuesMap[k]) });
+    })
+    const tags = fakerIndian.helpers.uniqueArray(() => fakerIndian.helpers.arrayElement(tagsList), fakerIndian.number.int({min: 1, max: 6}));
+
     return {
         productName: fakerIndian.commerce.productName(),
         productId: fakerIndian.string.uuid(),
         price: fakerIndian.number.int({ min: 100, max: 5000 }),
-        rating: fakerIndian.number.float({ multipleOf: 0.5, min: 0, max:5 }),
+        stock: fakerIndian.number.int({min:0, max: 500}),
         productDescription: fakerIndian.lorem.text(),
+        collections: collections,
+        gstRate: fakerIndian.helpers.arrayElement([0,5,12,18, 28]),
+        attributes: attributes,
+        tags: tags,
+        rating: fakerIndian.number.float({ multipleOf: 0.5, min: 0, max:5 }),
         numberOfRatings: fakerIndian.number.int({min:0, max: 3000}),
-        mediaItems: fakerIndian.helpers.multiple( () => (            {
-            mediaId: fakerIndian.string.uuid(),
-            mediaType: 'image',
-            uri:
-                fakerIndian.image.url(),
-            orientation: 'landscape',
-            desc:
-                fakerIndian.string.alpha(),
-        }), 3)
+        mediaItems: fakerIndian.helpers.multiple( getMediaItem , 3),
+        productStatus: faker.helpers.arrayElement(["Active", "Draft"]);
     }}
 
 export const getProductForCustomerFeed = () => {
@@ -95,7 +118,7 @@ export const getOrder = () => {
         orderDate: fakerIndian.date.recent(),
         orderItems: fakerIndian.helpers.multiple( () => ({product: getProductForStore(), quantity: fakerIndian.number.int({min: 1, max: 10})}), {count: fakerIndian.number.int({min: 1, max: 7})}),
         customer: getCustomer(),
-        orderStatus: fakerIndian.helpers.arrayElement(["Submitted", "Payment Received", "Shipped", "Delivered"]),
+        orderStatus: fakerIndian.helpers.arrayElement(["Received", "Payment Received", "Shipped", "Delivered"]),
         orderTotal: fakerIndian.number.int({min:30, max: 5000}),
     }
 }

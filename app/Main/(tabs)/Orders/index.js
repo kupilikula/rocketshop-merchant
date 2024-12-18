@@ -23,7 +23,7 @@ const Orders = () => {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [sortField, setSortField] = useState('orderDate'); // Default sorting
     const [sortOrder, setSortOrder] = useState('ascending'); // Default sorting order
-    const [filterExpanded, setFilterExpanded] = useState(true);
+    const [filterExpanded, setFilterExpanded] = useState(false);
     const [sortExpanded, setSortExpanded] = useState(false);
     const [showStartPicker, setShowStartPicker] = useState(false);
     const [showEndPicker, setShowEndPicker] = useState(false);
@@ -116,7 +116,7 @@ const Orders = () => {
         setShowEndPicker(false);
     };
 
-    const orderStatusChipColorMap = {"Submitted": theme.colors.secondary, "Payment Received": 'green', "Shipped": theme.colors.primary , "Delivered": 'magenta'}
+    const orderStatusChipColorMap = {"Received": theme.colors.secondary, "Payment Received": 'green', "Shipped": theme.colors.primary , "Delivered": 'magenta'}
 
 
     const renderOrderItem = ({ item }) => (
@@ -200,7 +200,7 @@ const Orders = () => {
                                 <MaterialCommunityIcons
                                     name={sortOrder === 'ascending' ? 'arrow-up-bold' : 'arrow-down-bold'}
                                     size={20}
-                                    color="#6200ee"
+                                    color={theme.colors.primary}
                                 />
                             )}
                             onPress={toggleSortOrder}
@@ -214,7 +214,7 @@ const Orders = () => {
             <View style={{marginHorizontal: 10}}>
                 <Text style={styles.sectionTitle}>Order Status</Text>
                 <View style={styles.chipContainer}>
-                    {["All", "Submitted", "Payment Received", "Shipped", "Delivered"].map((status) => (
+                    {["All", "Received", "Payment Received", "Shipped", "Delivered"].map((status) => (
                         <Chip
                             key={status}
                             selected={statusFilter.includes(status)}
@@ -345,7 +345,7 @@ const Orders = () => {
 //     card: { marginVertical: 8 },
 // });
 const makeStyles = ({colors}) => StyleSheet.create({
-    container: { flex: 1, paddingHorizontal: 10, margin: 0, },
+    container: { flex: 1, paddingHorizontal: 10, margin: 0, backgroundColor: colors.surface },
     searchBar: { marginVertical: 10 },
     sectionTitle: { marginVertical: 8, fontSize: 16, fontWeight: 'bold' },
     chipContainer: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 10 },
@@ -354,7 +354,7 @@ const makeStyles = ({colors}) => StyleSheet.create({
     row: { flexDirection: 'row', justifyContent: 'space-between', marginVertical: 0, alignItems: 'center'},
     input: { flex: 1, marginHorizontal: 5, backgroundColor: colors.surface },
     card: { marginVertical: 8 },
-    orderCard: { borderRadius: 0, backgroundColor: 'white', marginVertical: 5, borderWidth: 1, borderColor: '#aaaaaa'},
+    orderCard: { borderRadius: 8, marginVertical: 5, borderWidth: 1, borderColor: '#aaaaaa'},
     accordionBar: { backgroundColor: colors.primary, height:50, minHeight: 50, paddingVertical: 0,justifyContent: 'center', alignItems: 'center',verticalAlign: 'center'},
     accordionContent: {justifyContent: 'center', color: 'white',},
     accordionTitle:{ color: 'white', fontSize: 16},

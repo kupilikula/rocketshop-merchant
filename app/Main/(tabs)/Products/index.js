@@ -1,12 +1,319 @@
-import {FlatList, ScrollView} from "react-native";
-import {Surface} from 'react-native-paper';
+import React, { useState, useMemo } from 'react';
+import { FlatList, View, StyleSheet, TouchableOpacity } from 'react-native';
+import {Card, Text, TextInput, Chip, RadioButton, List, Surface, Checkbox, useTheme, Divider} from 'react-native-paper';
+import { useRouter } from "expo-router";
+import Fuse from "fuse.js";
+import { getProductForStore } from "../../../../utils/fakeDataMethods";
+import { faker } from '@faker-js/faker';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import FlatListSlider from "../../../../components/MediaSlider/FlatListSlider";
+import MediaItem from "../../../../components/MediaSlider/MediaItem";
+import {Rating} from "@kolking/react-native-rating";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import ProductDisplayCardMerchantListing from "../../../../components/ProductDisplayCardMerchantListing";
 import ProductDisplayCardCustomerStore from "../../../../components/ProductDisplayCardCustomerStore";
-import {faker} from '@faker-js/faker';
-import {getProductForStore} from "../../../../utils/fakeDataMethods";
 
-export default function Products () {
-    const products = faker.helpers.multiple(getProductForStore, {count: 10});
-    return <Surface mode={'flat'} style={{backgroundColor: 'white', height: '100%'}}>
-        <FlatList data={products} renderItem={({item}) => <ProductDisplayCardCustomerStore product={item}/>}/>
-    </Surface>
-}
+const initialProducts = faker.helpers.multiple(getProductForStore, { count: 100 });
+const collections = ['Electronics', 'Fashion', 'Books', 'Home Appliances'];
+const tags = ['Best Sellers', 'Featured', 'HandMade', 'New Arrival', 'Discount', 'Popular'];
+
+const Products = () => {
+    const [products, setProducts] = useState(initialProducts);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [priceRange, setPriceRange] = useState({ min: '', max: '' });
+    const [sortField, setSortField] = useState('price'); // Default sorting by price
+    const [sortOrder, setSortOrder] = useState('ascending'); // Default sorting order
+    const [filterExpanded, setFilterExpanded] = useState(false);
+    const [selectedCollections, setSelectedCollections] = useState(['All']);
+    const [selectedTags, setSelectedTags] = useState(['All']);
+
+
+    const router = useRouter();
+    const theme = useTheme();
+    const styles = makeStyles(theme);
+
+    const fuse = useMemo(() => {
+        return new Fuse(products, {
+            keys: [
+                'productName',
+                'description',
+                'collections',
+                'tags',
+                'attributes.*'
+            ],
+            threshold: 0.4,
+            includeScore: false,
+            ignoreLocation: true,
+        });
+    }, [products]);
+
+    const toggleSortOrder = () => {
+        setSortOrder((prev) => (prev === 'ascending' ? 'descending' : 'ascending'));
+    };
+    const filteredProducts = useMemo(() => {
+        let result = products;
+
+        // Search filtering
+        if (searchQuery.trim()) {
+            const searchResults = fuse.search(searchQuery);
+            result = searchResults.map((res) => res.item);
+        }
+
+        // Price range filtering
+        if (priceRange.min || priceRange.max) {
+            const min = priceRange.min ? parseInt(priceRange.min, 10) : Number.NEGATIVE_INFINITY;
+            const max = priceRange.max ? parseInt(priceRange.max, 10) : Number.POSITIVE_INFINITY;
+            result = result.filter(product => product.price >= min && product.price <= max);
+        }
+
+        // Collections filtering
+        if (!selectedCollections.includes('All')) {
+            result = result.filter(product =>
+                selectedCollections.some(collection => product.collections.includes(collection))
+            );
+        }
+
+        // Tags filtering
+        if (!selectedTags.includes('All')) {
+            result = result.filter(product =>
+                selectedTags.some(tag => product.tags.includes(tag))
+            );
+        }
+
+        // Sorting
+        result = [...result].sort((a, b) => {
+            const isAscending = sortOrder === 'ascending';
+            if (sortField === 'price') {
+                return isAscending ? a.price - b.price : b.price - a.price;
+            } else if (sortField === 'stock') {
+                return isAscending ? a.stock - b.stock : b.stock - a.stock;
+            }
+            return 0;
+        });
+
+        return result;
+    }, [searchQuery, priceRange, selectedCollections, selectedTags, sortField, sortOrder, fuse]);
+
+    const handleCollectionToggle = (collection) => {
+        if (collection === 'All') {
+            setSelectedCollections(['All']);
+        } else {
+            setSelectedCollections((prev) => {
+                const newSelections = prev.includes(collection)
+                    ? prev.filter((item) => item !== collection)
+                    : [...prev.filter((item) => item !== 'All'), collection];
+                return newSelections.length === 0 ? ['All'] : newSelections;
+            });
+        }
+    };
+
+    const handleTagToggle = (tag) => {
+        if (tag === 'All') {
+            setSelectedTags(['All']);
+        } else {
+            setSelectedTags((prev) => {
+                const newSelections = prev.includes(tag)
+                    ? prev.filter((item) => item !== tag)
+                    : [...prev.filter((item) => item !== 'All'), tag];
+                return newSelections.length === 0 ? ['All'] : newSelections;
+            });
+        }
+    };
+
+
+    const renderProductItem = ({ item }) => {
+        console.log('item:', item);
+        return <ProductDisplayCardMerchantListing product={item} showProductDescription={false} orientation={'landscape'}/>
+    };
+
+    const searchFilterAndSortComponent = () => (
+        <View style={{marginBottom: 10}}>
+            <TextInput
+                label="Search Products"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                style={styles.searchBar}
+                mode="outlined"
+            />
+        <List.Accordion
+            title="Sort & Filter"
+            expanded={filterExpanded}
+            onPress={() => setFilterExpanded(!filterExpanded)}
+            style={styles.accordionBar}
+            titleStyle={styles.accordionTitle}
+            contentStyle={styles.accordionContent}
+            right={() => <MaterialCommunityIcons name={filterExpanded ? 'chevron-up' : 'chevron-down'} size={24} color="white" />}
+        >
+            <View style={styles.sortFilterContent}>
+                <View style={styles.section}>
+                    {/* Sort Options */}
+                    <Text style={styles.sectionTitle}>Sort By</Text>
+                    <View style={styles.row}>
+                        <RadioButton.Group onValueChange={setSortField} value={sortField}>
+                            <View style={styles.radioRow}>
+                                <RadioButton.Item label="Price" value="price" />
+                                <RadioButton.Item label="Stock" value="stock" />
+                            </View>
+                        </RadioButton.Group>
+                        <View style={{display: 'flex',flexDirection: 'row'}}>
+                            <Chip
+                                mode="outlined"
+                                style={styles.chip}
+                                icon={() => (
+                                    <MaterialCommunityIcons
+                                        name={sortOrder === 'ascending' ? 'arrow-up-bold' : 'arrow-down-bold'}
+                                        size={20}
+                                        color={theme.colors.primary}
+                                    />
+                                )}
+                                onPress={toggleSortOrder}
+                            >
+                                {sortOrder === 'ascending' ? 'Ascending' : 'Descending'}
+                            </Chip>
+                        </View>
+                    </View>
+                </View>
+
+                <View style={styles.section}>
+                    {/* Price Range */}
+                    <Text style={styles.sectionTitle}>Price Range</Text>
+                    <View style={styles.row}>
+                        <TextInput
+                            label="Min Price"
+                            value={priceRange.min}
+                            onChangeText={(value) => setPriceRange(prev => ({ ...prev, min: value }))}
+                            style={styles.input}
+                            mode="outlined"
+                            keyboardType="numeric"
+                            dense
+                        />
+                        <TextInput
+                            label="Max Price"
+                            value={priceRange.max}
+                            onChangeText={(value) => setPriceRange(prev => ({ ...prev, max: value }))}
+                            style={styles.input}
+                            mode="outlined"
+                            keyboardType="numeric"
+                            dense
+                        />
+                    </View>
+                </View>
+
+                <View style={styles.section}>
+                    {/* Collections Filter */}
+                    <Text style={styles.sectionTitle}>Collections</Text>
+                    <View style={styles.flexWrapRowCompact}>
+                        {["All", ...collections].map((collection) => (
+                            <Checkbox.Item
+                                key={collection}
+                                label={collection}
+                                status={selectedCollections.includes(collection) ? 'checked' : 'unchecked'}
+                                onPress={() => handleCollectionToggle(collection)}
+                                style={styles.checkboxItemCompact}
+                                position={'leading'}
+                            />
+                        ))}
+                    </View>
+                </View>
+
+                <View style={styles.section}>
+                    {/* Tags Filter */}
+                    <Text style={styles.sectionTitle}>Tags</Text>
+                    <View style={styles.flexWrapRow}>
+                        {["All", ...tags].map((tag) => (
+                            <Chip
+                                key={tag}
+                                selected={selectedTags.includes(tag)}
+                                onPress={() => handleTagToggle(tag)}
+                                style={[styles.chip, selectedTags.includes(tag) && styles.chipSelected]}
+                            >
+                                {tag}
+                            </Chip>
+                        ))}
+                    </View>
+                </View>
+            </View>
+        </List.Accordion>
+        </View>
+    );
+
+    return (
+        <Surface style={styles.container}>
+            <FlatList
+                data={filteredProducts}
+                keyExtractor={(item) => item.productId}
+                renderItem={renderProductItem}
+                ItemSeparatorComponent={() => <Divider style={{marginVertical: 10}} />}
+                ListHeaderComponent={searchFilterAndSortComponent()}
+                ListEmptyComponent={<Text>No Products Found</Text>}
+            />
+        </Surface>
+    );
+};
+
+const makeStyles = ({ colors }) => StyleSheet.create({
+    container: { flex: 1, paddingHorizontal: 10, margin: 0, },
+    searchBar: { marginVertical: 10 },
+    section: { marginHorizontal: 10, marginVertical: 5 },
+    sectionTitle: { fontSize: 16, fontWeight: 'bold' },
+    radioRow: { flexDirection: 'row', justifyContent: 'space-around' },
+    input: { flex: 1, marginHorizontal: 5, backgroundColor: colors.surface },
+    row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    flexWrapRow: { flexDirection: 'row', flexWrap: 'wrap', marginVertical: 10 },
+    flexWrapRowCompact: { flexDirection: 'row', flexWrap: 'wrap', marginVertical: 5 },
+    productCard: { marginVertical: 5, overflow: 'hidden', width: '100%', padding: 0, borderWidth: 1, borderColor: '#aaa' }, // Ensure no extra space around the card
+    productCardContent: { width: '100%', backgroundColor: 'red'},
+    productImage: { width: '100%' }, // Full width and aspect ratio
+    accordionBar: { backgroundColor: colors.primary, height:50, minHeight: 50, paddingVertical: 0,justifyContent: 'center', alignItems: 'center',verticalAlign: 'center'},
+    accordionContent: {justifyContent: 'center', color: 'white',},
+    accordionTitle:{ color: 'white', fontSize: 16},
+    sortFilterContent: {paddingBottom: 20, borderRadius: 0, backgroundColor: 'white', borderWidth: 1, borderColor: '#aaaaaa'},
+    sortOrderContainer: { flexDirection: 'row', alignItems: 'center', marginLeft: 10 },
+    sortOrderChip: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10 },
+    chip: { margin: 5 },
+    chipSelected: { backgroundColor: colors.primary },
+    checkboxItem: { flex: 1, marginHorizontal: 0, backgroundColor: 'red', },
+    checkboxItemCompact: { flex: 1, marginHorizontal: 2, paddingVertical: 0, paddingHorizontal: 5 },
+
+    card: {
+        width: '100%',
+        borderRadius: 0,
+        marginBottom: 10,
+    },
+    titleTextStyle: {
+        color: 'black',
+        paddingLeft:0,
+        marginLeft: 0,
+        marginTop: 10
+    },
+    cardContent: {
+        backgroundColor: 'red'
+    },
+    cardContentView: {
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 10,
+    },
+    rating: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'flex-start'
+    },
+    ratingText: {
+        marginLeft: 10
+    },
+    actionButtonsContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignContent: 'center'
+    },
+    actionButton: {
+        margin: 10
+    }
+
+});
+
+export default Products;

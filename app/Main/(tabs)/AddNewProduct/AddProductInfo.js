@@ -42,11 +42,12 @@ const AddProductInfoScreen = () => {
         { key: "Color", values: ["Red", "Blue", "Green"] },
         { key: "Size", values: ["S", "M", "L"] },
     ]); // Example attributes
-    const [existingCollections, setExistingCollections] = useState(["Electronics", "Clothing", "Home Appliances", "Best Sellers"]); // Existing collections
+    const [existingCollections, setExistingCollections] = useState(['Electronics', 'Fashion', 'Books', 'Home Appliances']); // Existing collections
     const [collections, setCollections] = useState([]); // Selected collections
     const [tagSuggestions, setTagSuggestions] = useState([
-        "Electronics",
-        "Clothing",
+        "Best Sellers",
+        "Featured",
+        "HandMade",
         "New Arrival",
         "Discount",
         "Popular",
