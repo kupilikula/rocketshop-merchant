@@ -10,12 +10,9 @@ import {useRouter} from "expo-router";
 export default function ProductDisplayCardCustomerStore (props) {
 
     const router = useRouter();
-    console.log('props:', props.product.productId);
+    console.log('props:', props);
     // console.log('size:', size);
-    return <Pressable onPress={() => {
-        console.log('pushing');
-        router.push(`/Main/(tabs)/Products/Product/${props.product.productId}`)}}>
-    <Card mode={'elevated'} style={styles.card}>
+    return <Card mode={'elevated'} style={styles.card}>
         <FlatListSlider
             data={props.product.mediaItems}
             local={false}
@@ -30,7 +27,7 @@ export default function ProductDisplayCardCustomerStore (props) {
             indicatorActiveColor='#3498db'
             indicatorInActiveColor='#bdc3c7'
             indicatorActiveWidth={6}
-            flatListWrapperStyle={{backgroundColor: 'white'}}
+            flatListWrapperStyle={{backgroundColor: 'white', width: '100%', aspectRatio: '1.33'}}
             allowPanZoom={false}
             component = {<MediaItem />}
             />
@@ -41,25 +38,35 @@ export default function ProductDisplayCardCustomerStore (props) {
             <View style={styles.cardContentView}>
                 <View>
                     <Text variant="titleLarge">{'₹' + props.product.price.toString()}</Text>
+                    {props.product.numberOfRatings > 0 &&
                     <View style={styles.rating}>
                         <Rating disabled={true} variant={'stars-outline'} fillColor={'#faaf00'} baseColor={'black'} size={18} rating={props.product.rating} onChange={()=>{}} />
                         <Text style={styles.ratingText} variant={'bodyLarge'}>
                             {props.product.rating.toString() + '/5 ' + '(' + props.product.numberOfRatings.toString() + ')'}
                         </Text>
                     </View>
+                    }
                 </View>
                 <View style={styles.actionButtonsContainer}>
-                    <MaterialIcons name={'favorite-border'} size={28} style={styles.actionButton}/>
+                    <MaterialIcons name={'bookmark'} size={28} style={styles.actionButton}/>
                     <MaterialIcons name={'share'} size={28} style={styles.actionButton}/>
                     <MaterialIcons name={'add-shopping-cart'} size={28} style={styles.actionButton}/>
                 </View>
             </View>
-            {props.showProductDescription && <View>
-                <Text>{props.product.productDescription}</Text>
+            {props.product.attributes.length > 0 &&
+            <View style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
+                {props.product.attributes.map((a, i) => {
+                    return <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}} key={i.toString()}>
+                        <Text variant={'titleMedium'}>{a.key + ': '}</Text>
+                        <Text variant={'titleMedium'}>{a.value}</Text>
+                    </View>
+                })}
+            </View>}
+            {props.showProductDescription && <View style={{marginTop: 15}}>
+                <Text variant={'bodyLarge'}>{props.product.description}</Text>
             </View>}
         </Card.Content>
     </Card>
-    </Pressable>
 }
 
 const styles = StyleSheet.create({
@@ -83,7 +90,8 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: 10
+        alignItems: 'center',
+        marginTop: 10,
     },
     rating: {
         display: 'flex',

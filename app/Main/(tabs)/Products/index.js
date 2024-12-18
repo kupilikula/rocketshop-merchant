@@ -12,6 +12,7 @@ import {Rating} from "@kolking/react-native-rating";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import ProductDisplayCardMerchantListing from "../../../../components/ProductDisplayCardMerchantListing";
 import ProductDisplayCardCustomerStore from "../../../../components/ProductDisplayCardCustomerStore";
+import {ProductDisplayCompactMerchant} from "../../../../components/ProductDisplayCompactMerchant";
 
 const initialProducts = faker.helpers.multiple(getProductForStore, { count: 100 });
 const collections = ['Electronics', 'Fashion', 'Books', 'Home Appliances'];
@@ -123,7 +124,8 @@ const Products = () => {
 
     const renderProductItem = ({ item }) => {
         console.log('item:', item);
-        return <ProductDisplayCardMerchantListing product={item} showProductDescription={false} orientation={'landscape'}/>
+        // return <ProductDisplayCardMerchantListing product={item} showProductDescription={false} orientation={'landscape'}/>
+        return <ProductDisplayCompactMerchant product={item}/>
     };
 
     const searchFilterAndSortComponent = () => (

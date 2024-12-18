@@ -16,7 +16,7 @@ const initialOrders = faker.helpers.multiple(getOrder, {count: 100});
 const Orders = () => {
     const [orders, setOrders] = useState(initialOrders);
     const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState(["All"]);
+    const [statusFilter, setStatusFilter] = useState(["Received", "Payment Received"]);
     const [minTotal, setMinTotal] = useState('');
     const [maxTotal, setMaxTotal] = useState('');
     const [filterDates, setFilterDates] = useState({startDate: new Date(new Date().setFullYear(new Date().getFullYear() - 1)), endDate: new Date()});
@@ -345,7 +345,7 @@ const Orders = () => {
 //     card: { marginVertical: 8 },
 // });
 const makeStyles = ({colors}) => StyleSheet.create({
-    container: { flex: 1, paddingHorizontal: 10, margin: 0, backgroundColor: colors.surface },
+    container: { flex: 1, paddingHorizontal: 10, margin: 0, },
     searchBar: { marginVertical: 10 },
     sectionTitle: { marginVertical: 8, fontSize: 16, fontWeight: 'bold' },
     chipContainer: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 10 },
@@ -354,7 +354,7 @@ const makeStyles = ({colors}) => StyleSheet.create({
     row: { flexDirection: 'row', justifyContent: 'space-between', marginVertical: 0, alignItems: 'center'},
     input: { flex: 1, marginHorizontal: 5, backgroundColor: colors.surface },
     card: { marginVertical: 8 },
-    orderCard: { borderRadius: 8, marginVertical: 5, borderWidth: 1, borderColor: '#aaaaaa'},
+    orderCard: { borderRadius: 8, marginVertical: 5, borderWidth: 1, borderColor: '#aaaaaa', backgroundColor: 'white'},
     accordionBar: { backgroundColor: colors.primary, height:50, minHeight: 50, paddingVertical: 0,justifyContent: 'center', alignItems: 'center',verticalAlign: 'center'},
     accordionContent: {justifyContent: 'center', color: 'white',},
     accordionTitle:{ color: 'white', fontSize: 16},

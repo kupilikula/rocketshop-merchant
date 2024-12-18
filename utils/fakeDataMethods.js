@@ -34,7 +34,7 @@ export const getProductForStore = () => {
         productId: fakerIndian.string.uuid(),
         price: fakerIndian.number.int({ min: 100, max: 5000 }),
         stock: fakerIndian.number.int({min:0, max: 500}),
-        productDescription: fakerIndian.lorem.text(),
+        description: fakerIndian.lorem.text(),
         collections: collections,
         gstRate: fakerIndian.helpers.arrayElement([0,5,12,18, 28]),
         attributes: attributes,
@@ -42,7 +42,7 @@ export const getProductForStore = () => {
         rating: fakerIndian.number.float({ multipleOf: 0.5, min: 0, max:5 }),
         numberOfRatings: fakerIndian.number.int({min:0, max: 3000}),
         mediaItems: fakerIndian.helpers.multiple( getMediaItem , 3),
-        productStatus: faker.helpers.arrayElement(["Active", "Draft"]);
+        productStatus: fakerIndian.helpers.arrayElement(["Active", "Draft"])
     }}
 
 export const getProductForCustomerFeed = () => {
@@ -53,7 +53,7 @@ export const getProductForCustomerFeed = () => {
         storeBrandColor: fakerIndian.color.rgb(),
         productName: fakerIndian.commerce.productName(),
         productId: fakerIndian.string.uuid(),
-        productDescription: fakerIndian.lorem.text(),
+        description: fakerIndian.lorem.text(),
         price: fakerIndian.number.int({ min: 100, max: 5000 }),
         rating: fakerIndian.number.float({ multipleOf: 0.5, min: 0, max:5 }),
         numberOfRatings: fakerIndian.number.int({min: 0, max: 3000}),
@@ -115,7 +115,7 @@ export const getCustomer = () => {
 export const getOrder = () => {
     return {
         orderId: fakerIndian.string.numeric({length: 10, allowLeadingZeros: false}),
-        orderDate: fakerIndian.date.recent(),
+        orderDate: fakerIndian.date.past(),
         orderItems: fakerIndian.helpers.multiple( () => ({product: getProductForStore(), quantity: fakerIndian.number.int({min: 1, max: 10})}), {count: fakerIndian.number.int({min: 1, max: 7})}),
         customer: getCustomer(),
         orderStatus: fakerIndian.helpers.arrayElement(["Received", "Payment Received", "Shipped", "Delivered"]),

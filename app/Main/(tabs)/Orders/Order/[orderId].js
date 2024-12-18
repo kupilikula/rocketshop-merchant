@@ -59,7 +59,7 @@ const OrderDetails = (props) => {
             <Card style={styles.card}>
                 <Card.Title title="Customer Information" left={(props) => <Avatar.Icon {...props} icon="account" />} />
                 <Card.Content>
-                    <Text variant={'bodyLarge'}>Name: {order.customer.fullName}</Text>
+                    <Text variant={'titleMedium'}>Name: {order.customer.fullName}</Text>
                     <Text variant={'bodyLarge'}>Address: {order.customer.customerAddress}</Text>
                     <Text variant={'bodyLarge'}>Phone: {order.customer.phone}</Text>
                     <Text variant={'bodyLarge'}>Email: {order.customer.email}</Text>
@@ -74,14 +74,6 @@ const OrderDetails = (props) => {
                 {order.orderItems.map((item) => {
                         return <View key={item.product.productId}>{renderOrderItem({item})}</View>
                 })}
-
-                {/*<FlatList*/}
-                {/*    data={order.orderItems}*/}
-                {/*    keyExtractor={(item, index) => item.product.productId + index}*/}
-                {/*    renderItem={renderOrderItem}*/}
-                {/*    ItemSeparatorComponent={() => <Divider style={styles.itemDivider} />}*/}
-                {/*    scrollEnabled={false}*/}
-                {/*/>*/}
             </Card>
         </View>
             </ScrollView>
@@ -93,12 +85,13 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 10,
-        backgroundColor: '#f9f9f9',
+        // backgroundColor: '#f9f9f9',
     },
     card: {
         marginBottom: 10,
         borderRadius: 8,
         elevation: 2,
+        backgroundColor: 'white'
     },
     divider: {
         marginVertical: 10,

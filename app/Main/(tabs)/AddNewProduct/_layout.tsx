@@ -10,7 +10,8 @@ export default function AddNewProductStack() {
     const router = useRouter();
     const theme = useTheme(); // Access the theme here
 
-    return <Stack initialRouteName={'AddMediaItems'} >
+    return <Stack initialRouteName={'index'} >
+        <Stack.Screen name={'index'} options={{header: () => null}}/>
         <Stack.Screen
             name={'AddMediaItems'}
             options={{

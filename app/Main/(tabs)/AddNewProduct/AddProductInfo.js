@@ -20,7 +20,7 @@ import _ from "lodash";
 import { updateField } from "../../../../store/newProductSlice";
 import {useNavigation, useRouter} from "expo-router";
 import * as yup from "yup";
-import {Controller, useFieldArray, useForm} from "react-hook-form";
+import {Controller, useFieldArray, useForm, useWatch} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
 
 const AddProductInfoScreen = () => {
@@ -128,7 +128,6 @@ const AddProductInfoScreen = () => {
     // Restore state from Redux when the screen gains focus for the first time
     // Handle screen focus and restoration of state
     useEffect(() => {
-        console.log("Fields in useFieldArray:", attributeFields);
         if (productData && isFocused) {
             // Restore state from Redux when screen regains focus
             reset({
@@ -140,6 +139,9 @@ const AddProductInfoScreen = () => {
                 collections: productData.collections || [],
                 tags: productData.tags || [],
             });
+            if (!_.isEqual(attributeFields.map((a) => ({key: a.key, value: a.value})), productData.attributes)) {
+                replaceAttributes([...productData.attributes]);
+            }
             //attributes does not need a reset or replace since useFieldArray does it automatically
         } else if (!isFocused){
             // Save state to Redux when screen loses focus
@@ -211,13 +213,13 @@ const AddProductInfoScreen = () => {
 
 
     const applySuggestion = (index, suggestion) => {
-        updateAttribute(index, {...attributeFields[index], key: suggestion})
+        // updateAttribute(index, {attributeFields[index]['value'], key: suggestion})
         setFilteredSuggestions([]);
         setCurrentFocusedIndex(null);
     };
     //
     const applyValueSuggestion = (index, suggestion) => {
-        updateAttribute(index, {...attributeFields[index], value: suggestion})
+        // updateAttribute(index, {attributeFields[index]['key'], value: suggestion})
         setFilteredValueSuggestions([]);
         setCurrentFocusedValueIndex(null);
     };
@@ -350,7 +352,7 @@ const AddProductInfoScreen = () => {
 
 
     useEffect(() => {
-        navigation.setOptions({ headerRight: () => <Button contentStyle={{flexDirection: 'row-reverse'}} icon={'arrow-right'} mode={'contained'} style={{borderRadius: 0, backgroundColor: theme.colors.success}} onPressIn={handleSubmit(onSubmit)}>
+        navigation.setOptions({ headerRight: () => <Button contentStyle={{flexDirection: 'row-reverse'}} icon={'arrow-right'} mode={'contained'} style={{borderRadius: 0, backgroundColor: theme.colors.primary}} onPressIn={handleSubmit(onSubmit)}>
                 Preview
             </Button>});
     },[navigation])

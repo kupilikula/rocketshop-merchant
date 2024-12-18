@@ -23,30 +23,18 @@ export default function DrawerMenu(props) {
             <Drawer.Item label={<Text variant={'titleLarge'}>Store Front</Text>}
                          style={{padding: 0, borderRadius: 5, marginLeft: 0}}
                          onPress={() => {
-                             console.log('LP');
-                             try {
-                                 router.push('/Main/(tabs)/Store/StoreFront')
-                             } catch (err) {
-                                 console.log('err:', err);
-                             }
-                         }
-            }
+                             router.push('/Main/(tabs)/Store/StoreFront')
+                         }}
                          icon={({size, color}) => <MaterialIcons name={'store'} size={size}/>}/>
             <Drawer.Item label={<Text variant={'titleLarge'}>Products</Text>}
                          style={{padding: 0, borderRadius: 5, marginLeft: 0}}
-                         onPress={() => router.push('/Main/(tabs)/Store/Products')}
+                         onPress={() => router.push('/Main/(tabs)/Products')}
                          icon={({size, color}) => <MaterialIcons name={'shopping-bag'} size={size}/>}/>
             <Drawer.Item label={<Text variant={'titleLarge'}>Collections</Text>}
                          style={{padding: 0, borderRadius: 5, marginLeft: 0}}
                          onPress={() => {
-                             console.log('routing to Collections')
-                             try {
-                                 router.push('/Main/(tabs)/Store/Collections')
-                             } catch (err) {
-                                 console.log('rerror:', err);
-                             }
-                         }
-            }
+                                 router.push('/Main/(tabs)/Collections')
+                         }}
                          icon={({size, color}) => <MaterialIcons name={'category'} size={size}/>}/>
             <Drawer.Item label={<Text variant={'titleLarge'}>Orders</Text>}
                          style={{padding: 0, borderRadius: 5, marginLeft: 0}}
@@ -54,15 +42,15 @@ export default function DrawerMenu(props) {
                          icon={({size, color}) => <MaterialIcons name={'receipt-long'} size={size}/>}/>
             <Drawer.Item label={<Text variant={'titleLarge'}>Customers</Text>}
                          style={{padding: 0, borderRadius: 5, marginLeft: 0}}
-                         onPress={() => router.push('/Main/(tabs)/Store/Customers')}
+                         onPress={() => router.push('/Main/(tabs)/Customers')}
                          icon={({size, color}) => <MaterialIcons name={'hail'} size={size}/>}/>
             <Drawer.Item label={<Text variant={'titleLarge'}>Offers</Text>}
                          style={{padding: 0, borderRadius: 5, marginLeft: 0}}
-                         onPress={() => router.push('/Main/(tabs)/Store/Offers')}
+                         onPress={() => router.push('/Main/(tabs)/Offers')}
                          icon={({size, color}) => <MaterialIcons name={'discount'} size={size}/>}/>
             <Drawer.Item label={<Text variant={'titleLarge'}>Settings</Text>}
                          style={{padding: 0, borderRadius: 5, marginLeft: 0}}
-                         onPress={() => router.push('/Main/(tabs)/Store/Settings')}
+                         onPress={() => router.push('/Main/(tabs)/Settings')}
                          icon={({size, color}) => <MaterialIcons name={'settings'} size={size}/>}/>
         </DrawerContentScrollView>
     );

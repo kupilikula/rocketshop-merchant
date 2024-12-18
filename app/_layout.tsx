@@ -22,7 +22,6 @@ export default function RootLayout() {
         })();
     },[])
 
-    console.log('Theme:', DefaultTheme.colors);
     const customTheme = {
         ...DefaultTheme,
         colors: {

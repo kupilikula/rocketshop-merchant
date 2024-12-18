@@ -26,6 +26,7 @@ import {useIsFocused} from "@react-navigation/native";
 import {updateField} from "../store/newProductSlice";
 import {useDispatch, useSelector} from "react-redux";
 import _ from "lodash";
+import * as Crypto from 'expo-crypto';
 
 const  MediaGallery = (props) => {
     const [media, setMedia] = useState([]);
@@ -164,6 +165,7 @@ const  MediaGallery = (props) => {
                 ...item,
                 mediaType: item?.mediaType === "photo" ? "image" : "video",
                 orientation,
+                mediaId: Crypto.randomUUID()
             };
         });
     }, [selectedItems, orientation]);
