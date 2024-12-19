@@ -69,6 +69,10 @@ const  MediaGallery = (props) => {
         setFacing(current => (current === 'back' ? 'front' : 'back'));
     }
 
+    useEffect(()=> {
+       console.log('MediaGallery mounted');
+    },[])
+
     const savePhotoToGallery = async (photoUri) => {
         let asset;
         try {
@@ -379,6 +383,7 @@ const  MediaGallery = (props) => {
         if (!isFocused){
             // Save state to Redux when screen loses focus
             dispatch(updateField( {field:"mediaItems", value: _.cloneDeep(previewMediaItems)}));
+            setPreviewMediaItems([]);
         } else {
             console.log('previewitems:', previewMediaItems, ' storeMitems:', productDataMediaItems);
             setPreviewMediaItems(productDataMediaItems);
