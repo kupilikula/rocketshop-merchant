@@ -10,15 +10,13 @@ import {useRouter} from "expo-router";
 export default function ProductDisplayCardCustomerStore (props) {
 
     const router = useRouter();
-    console.log('props:', props);
-    // console.log('size:', size);
     return <Card mode={'elevated'} style={styles.card}>
         <FlatListSlider
             data={props.product.mediaItems}
             local={false}
             orientation={'landscape'}
             separator={0}
-            currentIndexCallback={index => console.log('Index', index)}
+            currentIndexCallback={index => {}}
             // onPress={item => { console.log('pressed')}}
             keyExtractor={(item) => item.mediaId}
             indicator
@@ -38,12 +36,13 @@ export default function ProductDisplayCardCustomerStore (props) {
             <View style={styles.cardContentView}>
                 <View>
                     <Text variant="titleMedium">{'Price: ₹' + props.product.price.toString()}</Text>
-                    {props.product.numberOfRatings > 0 &&
+                    {props.showRating &&
                     <View style={styles.rating}>
-                        <Rating disabled={true} variant={'stars-outline'} fillColor={'#faaf00'} baseColor={'black'} size={18} rating={props.product.rating} onChange={()=>{}} />
+                        <Rating disabled={true} variant={'stars-outline'} fillColor={'#faaf00'} baseColor={'black'} size={18} rating={props.product.rating || 0} onChange={()=>{}} />
+                        {props.product.numberOfRatings > 0 &&
                         <Text style={styles.ratingText} variant={'bodyLarge'}>
                             {props.product.rating.toString() + '/5 ' + '(' + props.product.numberOfRatings.toString() + ')'}
-                        </Text>
+                        </Text>}
                     </View>
                     }
                 </View>
@@ -54,7 +53,7 @@ export default function ProductDisplayCardCustomerStore (props) {
                 </View>
             </View>
             {props.product.attributes.length > 0 &&
-            <View style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
+            <View style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginVertical: 10}}>
                 {props.product.attributes.map((a, i) => {
                     return <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}} key={i.toString()}>
                         <Text variant={'titleMedium'}>{a.key + ': '}</Text>
@@ -96,7 +95,8 @@ const styles = StyleSheet.create({
     rating: {
         display: 'flex',
         flexDirection: 'row',
-        justifyContent: 'flex-start'
+        justifyContent: 'flex-start',
+        marginVertical: 10,
     },
     ratingText: {
         marginLeft: 10

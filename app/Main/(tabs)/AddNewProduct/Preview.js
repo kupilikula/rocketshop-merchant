@@ -13,16 +13,11 @@ export default function Preview(props) {
     const [gstInclusive, setGstInclusive] = useState(false);
     const theme = useTheme();
     const newProduct = useSelector((state) => state.newProduct);
-    console.log('newP:', newProduct);
     return <ScrollView>
     <Surface style={{flex: 1, padding: 10}}>
+        <ProductDisplayCardCustomerStore product={newProduct} showProductDescription={true} showRating={enableRatings}/>
         <Card style={styles.card}>
             <Card.Content>
-                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%',}}>
-                    <Button mode={'outlined'} style={{borderRadius: 8, borderWidth: 2,  borderColor: theme.colors.primary }}>Save As Draft</Button>
-                    <Button mode={'contained'} style={{borderRadius: 8, backgroundColor: theme.colors.success }}>Publish Product</Button>
-                </View>
-
                 <View style={styles.optionColumn}>
                     <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginVertical: 8, marginHorizontal: 10}}>
                         <Switch
@@ -56,9 +51,14 @@ export default function Preview(props) {
                         onPress={() => setGstInclusive(!gstInclusive)}
                     />
                 </View>
+                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%',}}>
+                    <Button mode={'outlined'} style={{borderRadius: 8, borderWidth: 2,  borderColor: theme.colors.primary }}>Save As Draft</Button>
+                    <Button mode={'contained'} style={{borderRadius: 8, backgroundColor: theme.colors.success }}>Publish Product</Button>
+                </View>
+
             </Card.Content>
         </Card>
-        <ProductDisplayCardCustomerStore product={newProduct} showProductDescription={true}/>
+
     </Surface>
     </ScrollView>
 }
@@ -69,14 +69,15 @@ const styles = StyleSheet.create({
     },
     card: {
         marginBottom: 15,
+        backgroundColor: 'white'
     },
     optionColumn: {
         flexDirection: "column",
         alignItems: "flex-start",
         justifyContent: "flex-start",
-        marginTop: 15,
+        marginBottom: 15,
         // marginBottom: 10,
-        // backgroundColor: 'red',
+        // backgroundColor: 'white',
         padding: 0
     },
     input: {
