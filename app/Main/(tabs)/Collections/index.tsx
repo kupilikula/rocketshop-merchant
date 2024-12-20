@@ -44,7 +44,7 @@ const CollectionsScreen = () => {
     };
 
     return (
-        <Surface style={{padding: 10}}>
+        <Surface style={{paddingHorizontal: 10}}>
             <ReorderableList
                 style={{}}
                 data={data}

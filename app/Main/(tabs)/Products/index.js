@@ -149,8 +149,8 @@ const Products = () => {
                     <View style={styles.row}>
                         <RadioButton.Group onValueChange={setSortField} value={sortField}>
                             <View style={styles.radioRow}>
-                                <RadioButton.Item label="Price" value="price" />
-                                <RadioButton.Item label="Stock" value="stock" />
+                                <RadioButton.Item mode='android' position={'leading'} color={theme.colors.primary} label="Price" value="price" />
+                                <RadioButton.Item mode='android' position={'leading'} color={theme.colors.primary} label="Stock" value="stock" />
                             </View>
                         </RadioButton.Group>
                         <View style={{display: 'flex',flexDirection: 'row'}}>
@@ -203,6 +203,7 @@ const Products = () => {
                     <View style={styles.flexWrapRowCompact}>
                         {["All", ...collections].map((collection) => (
                             <Checkbox.Item
+                                mode={'android'}
                                 key={collection}
                                 label={collection}
                                 status={selectedCollections.includes(collection) ? 'checked' : 'unchecked'}
@@ -251,7 +252,7 @@ const Products = () => {
 
 const makeStyles = ({ colors }) => StyleSheet.create({
     container: { flex: 1, paddingHorizontal: 10, margin: 0, },
-    searchBar: { marginVertical: 10 },
+    searchBar: { marginVertical: 10, backgroundColor: 'white' },
     section: { marginHorizontal: 10, marginVertical: 5 },
     sectionTitle: { fontSize: 16, fontWeight: 'bold' },
     radioRow: { flexDirection: 'row', justifyContent: 'space-around' },

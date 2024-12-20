@@ -611,7 +611,7 @@ const ProductInfoScreen = (props) => {
                             <View style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap'}}>
                                 {existingCollections.map((collection, idx) => (
                                     <View key={idx} style={styles.checkboxContainer}>
-                                        <Checkbox
+                                        <Checkbox.Android
                                             status={value.includes(collection) ? "checked" : "unchecked"}
                                             onPress={() => {
                                                 if (value.includes(collection)) {

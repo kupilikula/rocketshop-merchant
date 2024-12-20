@@ -6,7 +6,9 @@ import {useRouter} from "expo-router";
 import Fuse from "fuse.js";
 import {getOrder} from "../../../../utils/fakeDataMethods";
 import {faker} from '@faker-js/faker';
-import {DatePickerModal} from "react-native-paper-dates";
+// import {DatePickerModal} from "react-native-paper-dates";
+import DatePicker from '@react-native-community/datetimepicker';
+
 import { List } from 'react-native-paper';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
@@ -180,13 +182,13 @@ const Orders = () => {
                         <View style={styles.radioRow}>
                             {/* Date Option */}
                             <View style={styles.radioItem}>
-                                <RadioButton value="orderDate" color="#6200ee" />
+                                <RadioButton.Android value="orderDate" color={theme.colors.primary} />
                                 <Text style={styles.radioLabel}>Date</Text>
                             </View>
 
                             {/* Order Total Option */}
                             <View style={styles.radioItem}>
-                                <RadioButton value="orderTotal" color="#6200ee" />
+                                <RadioButton.Android value="orderTotal" color={theme.colors.primary} />
                                 <Text style={styles.radioLabel}>Order Total</Text>
                             </View>
                         </View>
@@ -243,49 +245,87 @@ const Orders = () => {
                 <Text style={styles.sectionTitle}>Order Date</Text>
                 {/* Display Selected Start and End Dates */}
                 {/* Row Layout for Start and End Date Cards */}
-                <View style={styles.row}>
-                    {/* Start Date Card */}
-                    <TouchableOpacity onPress={() => setShowStartPicker(true)} style={[styles.dateContainer, {marginRight: 5}]}>
-                        <MaterialCommunityIcons name="calendar-start" size={20} color="#6200ee" />
-                        <View style={styles.dateContent}>
-                            <Text style={styles.dateLabel}>Start Date</Text>
-                            <Text style={styles.dateText}>{formatDate(filterDates.startDate)}</Text>
-                        </View>
-                    </TouchableOpacity>
 
-                    {/* End Date Card */}
-                    <TouchableOpacity onPress={() => setShowEndPicker(true)} style={[styles.dateContainer, {marginLeft: 5}]}>
-                        <MaterialCommunityIcons name="calendar-end" size={20} color="#6200ee" />
-                        <View style={styles.dateContent}>
-                            <Text style={styles.dateLabel}>End Date</Text>
-                            <Text style={styles.dateText}>{formatDate(filterDates.endDate)}</Text>
-                        </View>
+                <View style={styles.dateRow}>
+                    <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.dateInput}>
+                        <MaterialCommunityIcons name="calendar" size={20} color={theme.colors.primary} />
+                        <Text style={styles.dateText}>
+                            {filterDates.startDate ? filterDates.startDate.toLocaleDateString() : 'Start Date'}
+                        </Text>
                     </TouchableOpacity>
+                    {showStartPicker && (
+                        <DatePicker
+                            mode='date'
+                            value={filterDates.startDate || new Date()}
+                            onChange={(event, date) => {
+                                setShowStartPicker(false);
+                                if (date) setFilterDates((prev) => ({ ...prev, startDate: date }));
+                            }}
+                        />
+                    )}
+
+                    <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.dateInput}>
+                        <MaterialCommunityIcons name="calendar" size={20} color={theme.colors.primary} />
+                        <Text style={styles.dateText}>
+                            {filterDates.endDate ? filterDates.endDate.toLocaleDateString() : 'End Date'}
+                        </Text>
+                    </TouchableOpacity>
+                    {showEndPicker && (
+                        <DatePicker
+                            mode="date"
+                            value={filterDates.endDate || new Date()}
+                            onChange={(event, date) => {
+                                setShowEndPicker(false);
+                                if (date) setFilterDates((prev) => ({ ...prev, endDate: date }));
+                            }}
+                        />
+                    )}
                 </View>
 
-                {/* Start Date Picker */}
-                <DatePickerModal
-                    locale="en"
-                    mode="single"
-                    visible={showStartPicker}
-                    date={filterDates.startDate}
-                    onDismiss={() => setShowStartPicker(false)}
-                    onConfirm={handleStartDateChange}
-                    saveLabel={'Select'}
-                    presentationStyle={'pageSheet'}
-                    label={'Start Date'}
-                    // labelStyle={{color: 'red'}}
-                />
 
-                {/* End Date Picker */}
-                <DatePickerModal
-                    locale="en"
-                    mode="single"
-                    visible={showEndPicker}
-                    date={filterDates.endDate}
-                    onDismiss={() => setShowEndPicker(false)}
-                    onConfirm={handleEndDateChange}
-                />
+                {/*<View style={styles.row}>*/}
+                {/*    /!* Start Date Card *!/*/}
+                {/*    <TouchableOpacity onPress={() => setShowStartPicker(true)} style={[styles.dateContainer, {marginRight: 5}]}>*/}
+                {/*        <MaterialCommunityIcons name="calendar-start" size={20} color="#6200ee" />*/}
+                {/*        <View style={styles.dateContent}>*/}
+                {/*            <Text style={styles.dateLabel}>Start Date</Text>*/}
+                {/*            <Text style={styles.dateText}>{formatDate(filterDates.startDate)}</Text>*/}
+                {/*        </View>*/}
+                {/*    </TouchableOpacity>*/}
+
+                {/*    /!* End Date Card *!/*/}
+                {/*    <TouchableOpacity onPress={() => setShowEndPicker(true)} style={[styles.dateContainer, {marginLeft: 5}]}>*/}
+                {/*        <MaterialCommunityIcons name="calendar-end" size={20} color="#6200ee" />*/}
+                {/*        <View style={styles.dateContent}>*/}
+                {/*            <Text style={styles.dateLabel}>End Date</Text>*/}
+                {/*            <Text style={styles.dateText}>{formatDate(filterDates.endDate)}</Text>*/}
+                {/*        </View>*/}
+                {/*    </TouchableOpacity>*/}
+                {/*</View>*/}
+
+                {/*/!* Start Date Picker *!/*/}
+                {/*<DatePickerModal*/}
+                {/*    locale="en"*/}
+                {/*    mode="single"*/}
+                {/*    visible={showStartPicker}*/}
+                {/*    date={filterDates.startDate}*/}
+                {/*    onDismiss={() => setShowStartPicker(false)}*/}
+                {/*    onConfirm={handleStartDateChange}*/}
+                {/*    saveLabel={'Select'}*/}
+                {/*    presentationStyle={'pageSheet'}*/}
+                {/*    label={'Start Date'}*/}
+                {/*    // labelStyle={{color: 'red'}}*/}
+                {/*/>*/}
+
+                {/*/!* End Date Picker *!/*/}
+                {/*<DatePickerModal*/}
+                {/*    locale="en"*/}
+                {/*    mode="single"*/}
+                {/*    visible={showEndPicker}*/}
+                {/*    date={filterDates.endDate}*/}
+                {/*    onDismiss={() => setShowEndPicker(false)}*/}
+                {/*    onConfirm={handleEndDateChange}*/}
+                {/*/>*/}
 
                 <Text style={styles.sectionTitle}>Order Total</Text>
                 <View style={styles.row}>
@@ -346,7 +386,7 @@ const Orders = () => {
 // });
 const makeStyles = ({colors}) => StyleSheet.create({
     container: { flex: 1, paddingHorizontal: 10, margin: 0, },
-    searchBar: { marginVertical: 10 },
+    searchBar: { marginVertical: 10, backgroundColor: 'white' },
     sectionTitle: { marginVertical: 8, fontSize: 16, fontWeight: 'bold' },
     chipContainer: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 10 },
     chip: { margin: 5 },
@@ -372,19 +412,39 @@ const makeStyles = ({colors}) => StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 2,
     },
-    dateContent: {
-        marginLeft: 10,
-        flex: 1,
+    dateRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 20,
     },
-    dateLabel: {
-        fontSize: 14,
-        color: '#666',
+    dateInput: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 10,
+        borderWidth: 1,
+        borderColor: colors.primary,
+        borderRadius: 5,
+        flex: 0.48,
     },
     dateText: {
+        marginLeft: 10,
         fontSize: 16,
-        fontWeight: 'bold',
-        color: '#333',
+        color: 'black',
     },
+
+    // dateContent: {
+    //     marginLeft: 10,
+    //     flex: 1,
+    // },
+    // dateLabel: {
+    //     fontSize: 14,
+    //     color: '#666',
+    // },
+    // dateText: {
+    //     fontSize: 16,
+    //     fontWeight: 'bold',
+    //     color: '#333',
+    // },
     section: {
         marginHorizontal: 10,
     },

@@ -104,16 +104,21 @@ const  MediaGallery = (props) => {
             const thumbnailMap = {};
             for (const asset of assets) {
                 try {
-                    let assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
-                    console.log('asset:', asset);
-                    console.log('assetInfo:', assetInfo);
 
-                    const {uri} = await VideoThumbnails.getThumbnailAsync(assetInfo.localUri, {
+                    let assetUri = null;
+                    if (Platform.OS==='ios') {
+                        let assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
+                        assetUri = assetInfo.localUri;
+                    } else {
+                        assetUri = asset.uri;
+                    }
+
+                    const {uri} = await VideoThumbnails.getThumbnailAsync(assetUri, {
                         time: 1000, // Extract frame at 1 second
                     });
                     thumbnailMap[asset.id] = uri;
                 } catch (e) {
-                    console.error(`Failed to generate thumbnail for ${asset.uri}:`, e);
+                    console.error(`Failed to generate thumbnail for ${asset.id}:`, e);
                 }
             }
             // console.log('t:', thumbnails.current);
@@ -284,18 +289,14 @@ const  MediaGallery = (props) => {
     }, [newAssetTrigger.counter]);
 
     const startRecording = async () => {
+        console.log('line292')
         if (cameraRef.current) {
-
-            let codecs = await CameraView.getAvailableVideoCodecsAsync();
-            console.log('codecs:', codecs);
-            setVideoElapsedTime(0);
-
-            let videoRecordPromise;
             try {
+            setVideoElapsedTime(0);
+            let videoRecordPromise;
+
                 videoRecordPromise = cameraRef.current.recordAsync({codec: 'avc1', quality: '720p'});
-            } catch (err) {
-                console.log('record Error:', err);
-            }
+
             if (videoRecordPromise) {
                 setIsRecording(true);
                 timerRef.current = setInterval(() => {
@@ -312,6 +313,9 @@ const  MediaGallery = (props) => {
                 // console.log('v.l:', video.localUri);
                 console.log('v.u:', video.uri);
                 setRecordedUri(video.uri);
+            }
+            } catch (err) {
+                console.log('record Error:', err);
             }
         }
     };
@@ -452,10 +456,10 @@ const  MediaGallery = (props) => {
         <Surface style={styles.container}>
             <>
             {!openCamera &&
-        <View style={{flex: 1, display: 'flex', flexDirection: 'column' , justifyContent: 'flex-start', alignItems: 'center', backgroundColor: 'yellow'}}>
+        <View style={{flex: 1, display: 'flex', flexDirection: 'column' , justifyContent: 'flex-start', alignItems: 'center', backgroundColor: 'black'}}>
             <View style={{position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', backgroundColor: 'red', width: '100%', aspectRatio: orientation==='landscape' ? '1.33' : '0.8'}}>
                 {/*<View style={{backgroundColor: 'magenta', width: '100%', aspectRatio: '1.33'}}></View>*/}
-                { (previewMediaItems.length===0) && <View style={{backgroundColor: 'green', alignItems: 'center', justifyContent: 'center', width: '100%', aspectRatio: orientation==='landscape' ? '1.33' : '0.8'}}><MaterialIcons name={'photo'} size={36} color={'white'} /></View>}
+                { (previewMediaItems.length===0) && <View style={{backgroundColor: 'black', alignItems: 'center', justifyContent: 'center', width: '100%', aspectRatio: orientation==='landscape' ? '1.33' : '0.8'}}><MaterialIcons name={'photo'} size={36} color={'white'} /></View>}
                 {/*{ (previewMediaItems.length===0) && <Text style={{color: 'black'}}>TEST</Text>}*/}
                 <FlatListSlider ref={previewFlatListSliderRef}
                                 simultaneousHandlers={[libraryFlatListRef]}

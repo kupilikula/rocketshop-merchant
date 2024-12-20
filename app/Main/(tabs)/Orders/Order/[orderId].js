@@ -2,10 +2,14 @@ import React from 'react';
 import {View, StyleSheet, FlatList, Image, ScrollView} from 'react-native';
 import {Card, Text, Divider, Chip, Avatar, List, Surface} from 'react-native-paper';
 import {getOrder} from "../../../../../utils/fakeDataMethods";
+import {useRouter} from "expo-router";
 
 const OrderDetails = (props) => {
 
     const order = getOrder();
+
+    const router = useRouter();
+
     console.log('order:', JSON.stringify(order, null, 2));
     // Status color mapping
     const statusColors = {
@@ -56,7 +60,7 @@ const OrderDetails = (props) => {
             <Divider style={styles.divider} />
 
             {/* Customer Information */}
-            <Card style={styles.card}>
+            <Card style={styles.card} onPress={ () => router.push('/Main/(tabs)/Customers/Customer/' + order.customer.customerId)}>
                 <Card.Title title="Customer Information" left={(props) => <Avatar.Icon {...props} icon="account" />} />
                 <Card.Content>
                     <Text variant={'titleMedium'}>Name: {order.customer.fullName}</Text>

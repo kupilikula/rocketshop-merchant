@@ -2,11 +2,11 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Card, Text, Chip, IconButton } from "react-native-paper";
 
-const CollectionListItem = ({ collection, onEdit, onDelete }) => {
+const CollectionListItem = ({ collection, onEdit, onDelete, cardMode= 'elevated',showStatusChip= true, showEditIcon = true, showCheckbox = false }) => {
     const { collectionName, products, status, storeFrontDisplayNumberOfItems } = collection;
 
     return (
-        <Card style={styles.card}>
+        <Card style={styles.card} mode={cardMode}>
             <View style={styles.container}>
                 {/* Left Section */}
                 <View style={styles.details}>
@@ -29,6 +29,7 @@ const CollectionListItem = ({ collection, onEdit, onDelete }) => {
                 {/* Right Section */}
                 <View style={styles.rightSection}>
                     {/* Status Chip */}
+                    {showStatusChip &&
                     <Chip
                         mode="flat"
                         style={[
@@ -37,9 +38,10 @@ const CollectionListItem = ({ collection, onEdit, onDelete }) => {
                         ]}
                     >
                         {status}
-                    </Chip>
+                    </Chip>}
 
                     {/* Action Buttons */}
+                    {showEditIcon &&
                     <View style={styles.actions}>
                         <IconButton
                             icon="pencil"
@@ -47,7 +49,16 @@ const CollectionListItem = ({ collection, onEdit, onDelete }) => {
                             onPress={onEdit}
                             style={styles.actionButton}
                         />
-                    </View>
+                    </View>}
+                    {/*{showCheckbox &&*/}
+                    {/*    <View style={styles.actions}>*/}
+                    {/*        <IconButton*/}
+                    {/*            icon="pencil"*/}
+                    {/*            size={20}*/}
+                    {/*            onPress={onEdit}*/}
+                    {/*            style={styles.actionButton}*/}
+                    {/*        />*/}
+                    {/*    </View>}*/}
                 </View>
             </View>
         </Card>
