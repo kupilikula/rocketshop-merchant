@@ -38,18 +38,12 @@ const  MediaGallery = (props) => {
     const [isRecording, setIsRecording] = useState(false);
     const [videoElapsedTime, setVideoElapsedTime] = useState(0);
 
-    const [isVideo, setIsVideo] = useState(false);
     const [recordedUri, setRecordedUri] = useState(null);
-    const videoUriRef = useRef(null);  // Use a ref to store video URI
     const [thumbnails, setThumbnails] = useState({});
     const [facing, setFacing] = useState('back');
     const [permission, requestPermission] = useCameraPermissions();
     const cameraRef = useRef(null);
-    const [newAssetCounter, setNewAssetCounter] = useState(0);
-    // const [newPhotoTaken, setNewPhotoTaken] = useState(false);
-    const [newAsset, setNewAsset] = useState(null);
-    // const [refreshMediaGalleryTimeStamp, setRefreshMediaGalleryTimeStamp] = useState(true);
-    // const [isGalleryScrolling, setIsGalleryScrolling] = useState(false);
+    const [newAssetTrigger, setNewAssetTrigger] = useState({counter: 0, asset: null});
     const isGalleryScrollingRef = useRef(false); // Ref for synchronous scrolling state
 
     const scrollTimeoutRef = useRef(null);
@@ -69,15 +63,23 @@ const  MediaGallery = (props) => {
         setFacing(current => (current === 'back' ? 'front' : 'back'));
     }
 
+
     useEffect(()=> {
        console.log('MediaGallery mounted');
+       return () => {
+           console.log('MediaGallery UNmounted');
+       }
     },[])
+
+    // const forceUpdate = useCallback(() => setNewAssetTrigger((prev) => ({ ...prev })), []);
+
 
     const savePhotoToGallery = async (photoUri) => {
         let asset;
         try {
-         asset =  await MediaLibrary.createAssetAsync(photoUri);
-            setNewAssetCounter(newAssetCounter+1);
+            asset = await MediaLibrary.createAssetAsync(photoUri);
+            console.log('new image asset:', asset);
+            setNewAssetTrigger((prev) => ({counter: prev.counter+1, asset: asset}));
         } catch (err) {
             console.log('Error creating asset:', err);
         }
@@ -102,7 +104,11 @@ const  MediaGallery = (props) => {
             const thumbnailMap = {};
             for (const asset of assets) {
                 try {
-                    const {uri} = await VideoThumbnails.getThumbnailAsync(asset.uri, {
+                    let assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
+                    console.log('asset:', asset);
+                    console.log('assetInfo:', assetInfo);
+
+                    const {uri} = await VideoThumbnails.getThumbnailAsync(assetInfo.localUri, {
                         time: 1000, // Extract frame at 1 second
                     });
                     thumbnailMap[asset.id] = uri;
@@ -118,31 +124,44 @@ const  MediaGallery = (props) => {
     };
 
     useEffect(() => {
+        console.log('get Media useEffect');
         const getMedia = async () => {
+            console.log('get Media line122 ');
+            try {
             const { status } = await MediaLibrary.requestPermissionsAsync();
             if (status !== 'granted') {
                 alert('Permission to access media library is required!');
                 return;
             }
-
+            console.log('get Media line128 ');
             const mediaItems = await MediaLibrary.getAssetsAsync({
                 mediaType: [MediaLibrary.MediaType.photo, MediaLibrary.MediaType.video],
                 first: 50, // Limit the number of items fetched
                 sortBy: [MediaLibrary.SortBy.creationTime]
             });
 
-            setMedia(mediaItems.assets);
+            // console.log('M0:', mediaItems.assets.slice(0,10));
+
             let newVideos = mediaItems.assets.filter((asset) => asset.mediaType==='video' && !Object.keys(thumbnails).includes(asset.id))
             generateThumbnails(newVideos);
+
+            setMedia(mediaItems.assets);
+
+            } catch (err) {
+                console.log('Err line 136:', err);
+            }
         };
         // console.log('r:', props.refreshMediaGalleryTimeStamp);
         getMedia().then(() => {
-            if (newAsset) {
-                toggleSelection(newAsset);
+            // console.log('line 147, newAsset:', newAsset);
+            closeCamera();
+            if (newAssetTrigger.asset) {
+                console.log('line 149')
+                toggleSelection(newAssetTrigger.asset);
             }
-        });
+        }).catch((err) => console.log('line150 err:', err));
 
-    }, [newAssetCounter]);
+    }, [newAssetTrigger.counter]);
 
 
     const toggleSelection = useCallback((item) => {
@@ -163,26 +182,48 @@ const  MediaGallery = (props) => {
         return selectedItemsIds.map((id) => mediaMap.get(id));
     }, [selectedItemsIds, mediaMap]);
 
-    const transformedItems = useMemo(() => {
-        return selectedItems.map((item) => {
-            return {
-                ...item,
-                mediaType: item?.mediaType === "photo" ? "image" : "video",
-                orientation,
-                mediaId: Crypto.randomUUID()
-            };
-        });
-    }, [selectedItems, orientation]);
-
+    // console.log('line 190, selectedItems dependency:', selectedItems);
+    // console.log('line 191, orientation dependency:', orientation);
     useEffect(() => {
-        console.log("useEffect start");
-        const start = performance.now();
+        console.log('line 193, selectedItems:', selectedItems);
 
-        // Update the state with the transformed items
-        setPreviewMediaItems(transformedItems);
+        const transformItemsAndSetPreviews = async () => {
+            console.log('selectedItems inside transform:', selectedItems);
+            try {
+                console.log('LINE201');
+                const itemsWithPromises = selectedItems.map(async (item, i) => {
 
-        console.log("useEffect end:", performance.now() - start, "ms");
-    }, [transformedItems]);
+                                console.log('line 182, i:', i, ', item:', item);
+                                let localUri = null;
+                                try {
+                                if (item.mediaType === 'video' && Platform.OS === 'ios') {
+                                    let assetInfo = await MediaLibrary.getAssetInfoAsync(item);
+                                    localUri = assetInfo.localUri;
+                                }
+                                    }catch (e) {
+                                    console.log('line206, e:', e);
+                                }
+                                console.log('localuri:', localUri);
+
+
+                    return {
+                        ...item,
+                        mediaType: item.mediaType === "photo" ? "image" : "video",
+                        uri: localUri || item.uri,
+                        orientation,
+                        thumbnail: thumbnails[item.id] || '',
+                        mediaId: Crypto.randomUUID(),
+                    };
+                });
+                const resolvedItems = await Promise.all(itemsWithPromises);
+                console.log('resolvedItems:', resolvedItems);
+                setPreviewMediaItems(resolvedItems);
+            } catch (err) {
+                console.log('line217, err:', err);
+            }
+        };
+        transformItemsAndSetPreviews();
+    }, [selectedItems,orientation]);
 
 
     // useEffect(() => {
@@ -190,19 +231,22 @@ const  MediaGallery = (props) => {
     // }, [previewMediaItems]);
 
 
-    useEffect(() => {
-        if (selectedItemsIds.length>0) {
-            setTimeout(() => {
-                previewFlatListSliderRef.current?.scrollToIndex(selectedItemsIds.length-1);
-            }, 100)
-        }
+        useEffect(() => {
+            if (selectedItemsIds.length>0) {
+                setTimeout(() => {
+                    previewFlatListSliderRef.current?.scrollToIndex(previewMediaItems.length-1);
+                }, 200)
+            }
 
-    }, [selectedItemsIds])
+        }, [previewMediaItems])
 
 
     const closeCamera = () => {
         setVideoElapsedTime(0);
-        setOpenCamera(false);
+        cameraRef.current = null;
+        setTimeout(() => setOpenCamera(false), 100);
+
+        console.log('closed camera');
     }
 
     useEffect(() => {
@@ -220,7 +264,7 @@ const  MediaGallery = (props) => {
     }, [cameraMode])
 
     useEffect(() => {
-        console.log('effect: cameraMode:', openCamera);
+        console.log('effect: openCamera:', openCamera);
             navigation.setOptions({header: () => <MediaHeader cameraOpen={openCamera}/>})
     },[navigation, openCamera])
 
@@ -229,6 +273,15 @@ const  MediaGallery = (props) => {
         const seconds = timeInSeconds % 60;
         return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     };
+
+    useEffect(() => {
+        console.log('newAssetTrigger updated:', newAssetTrigger);
+    }, [newAssetTrigger]);
+
+    useEffect(() => {
+        console.log('newAssetTrigger.counter useEffect triggered:', newAssetTrigger.counter);
+        // Perform media fetching logic
+    }, [newAssetTrigger.counter]);
 
     const startRecording = async () => {
         if (cameraRef.current) {
@@ -289,10 +342,12 @@ const  MediaGallery = (props) => {
 
     useEffect(() => {
 
+            if (recordedUri) {
             const saveVideo = async () => {
                 console.log('rURI:', recordedUri);
                 console.log('recordedUri type:', typeof recordedUri);
-                if (recordedUri) {
+
+                try{
                     console.log('line187');
 
                     // Check file existence
@@ -309,36 +364,29 @@ const  MediaGallery = (props) => {
                         console.log('Full permission status:', fullPermission.status);
                     }
 
-
-                    try{
                     const asset = await MediaLibrary.createAssetAsync(recordedUri);
                     console.log('asset:', asset);
-                    setNewAssetCounter(newAssetCounter + 1);}
-                    catch (err) {
+                    setNewAssetTrigger((prev) => ({counter: prev.counter + 1, asset: asset}));
+                    console.log('line 357, newAssetTrigger:', newAssetTrigger);
+                    // forceUpdate();
+                    } catch (err) {
                         console.log('Error creating asset:',JSON.stringify(err, null, 2))
+                    } finally {
+                        console.log('line165');
                     }
-                }
-                console.log('line165');
-                closeCamera();
             }
             console.log('line167');
             saveVideo();
+            }
         },
         [recordedUri])
-
-    // useEffect(() => {
-    //     console.log('sIDs:', selectedItemsIds);
-    // }, [selectedItemsIds])
-
-    // const onViewableItemsChangedGallery = useRef(({ viewableItems }) => {
-    //     // console.log("Visible items:", viewableItems);
-    // });
 
     const renderItem = useCallback(({ item }) => {
         let i = selectedItemsIds.findIndex( (id) => id===item.id);
         let isSelected = i >=0;
-        return <GalleryMediaItem item={item} toggleSelection={toggleSelection} isSelected={isSelected} selectionIndex={i} videoThumbnails={thumbnails} isGalleryScrolling={checkIsScrolling}/>;
-    },[selectedItemsIds, toggleSelection]);
+        console.log('line393, item:', item);
+        return <GalleryMediaItem item={item} thumbnail={thumbnails[item.id] || ''} toggleSelection={toggleSelection} isSelected={isSelected} selectionIndex={i} isGalleryScrolling={checkIsScrolling}/>;
+    },[selectedItemsIds, toggleSelection, thumbnails]);
 
 
     const handleGalleryScroll = () => {
@@ -390,20 +438,24 @@ const  MediaGallery = (props) => {
         }
     }, [isFocused]);
 
+    const debouncedToggleCameraMode = useRef(_.debounce(() => {
+        setCameraMode((prev) => (prev === 'picture' ? 'video' : 'picture'));
+    }, 200)).current;
 
-    if (!permission) {
-        // Camera permissions are still loading.
-        return <View />;
-    }
+    // if (!permission) {
+    //     // Camera permissions are still loading.
+    //     return <View />;
+    // }
 
 
     return (
         <Surface style={styles.container}>
-            {!openCamera ?
-        <View style={{justifyContent: 'center', alignItems: 'center'}}>
-            <View style={{position: 'relative', justifyContent: 'center', alignItems: 'center', backgroundColor: 'black', width: '100%', aspectRatio: orientation==='landscape' ? '1.33' : '0.8'}}>
-                {/*<View style={{backgroundColor: 'green', width: '100%', aspectRatio: '1.33'}}></View>*/}
-                { (previewMediaItems.length===0) && <View style={{alignItems: 'center', justifyContent: 'center', flex: 1, width: '100%', aspectRatio: orientation==='landscape' ? '1.33' : '0.8'}}><MaterialIcons name={'photo'} size={36} color={'white'} /></View>}
+            <>
+            {!openCamera &&
+        <View style={{flex: 1, display: 'flex', flexDirection: 'column' , justifyContent: 'flex-start', alignItems: 'center', backgroundColor: 'yellow'}}>
+            <View style={{position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', backgroundColor: 'red', width: '100%', aspectRatio: orientation==='landscape' ? '1.33' : '0.8'}}>
+                {/*<View style={{backgroundColor: 'magenta', width: '100%', aspectRatio: '1.33'}}></View>*/}
+                { (previewMediaItems.length===0) && <View style={{backgroundColor: 'green', alignItems: 'center', justifyContent: 'center', width: '100%', aspectRatio: orientation==='landscape' ? '1.33' : '0.8'}}><MaterialIcons name={'photo'} size={36} color={'white'} /></View>}
                 {/*{ (previewMediaItems.length===0) && <Text style={{color: 'black'}}>TEST</Text>}*/}
                 <FlatListSlider ref={previewFlatListSliderRef}
                                 simultaneousHandlers={[libraryFlatListRef]}
@@ -420,7 +472,8 @@ const  MediaGallery = (props) => {
                                 indicatorActiveColor='#3498db'
                                 indicatorInActiveColor='#bdc3c7'
                                 indicatorActiveWidth={6}
-                                contentContainerStyle={{backgroundColor: 'black'}}
+                                contentContainerStyle={{backgroundColor: 'blue'}}
+                                flatListWrapperStyle={{backgroundColor: 'orange'}}
                                 allowPanZoom={true}
                                 component = {<MediaItem />}
                 />
@@ -460,77 +513,63 @@ const  MediaGallery = (props) => {
                 onMomentumScrollEnd={handleGalleryScrollEnd}
                 onScrollEndDrag={handleGalleryScrollEnd}
                 removeClippedSubviews={false}
-                // onTouchStart={() => {
-                //     console.log('FlatList Gallery touch start')
-                // }}
-                // onResponderGrant={() => console.log('FlatList onResponderGrant')}
-                // onResponderRelease={() => console.log('FlatList onResponderRelease')}
-                // onStartShouldSetResponder={() => true}
-                // onMoveShouldSetResponder={() => true}
             />
         </View>
-                :
-                (!permission.granted ? (
-                        <Card style={styles.permissionContainer}>
-                            <Card.Content>
-                                <Text variant={'titleMedium'} style={styles.message}>We need your permission to show the camera</Text>
-                                <View  style={{display: 'flex', flexDirection: 'row', justifyContent: 'center'}}>
-                                    <Button mode="contained" style={{width: 'auto'}} onPress={requestPermission}>Grant Permission</Button>
-                                </View>
-                            </Card.Content>
-                        </Card>
-                    ) :
-                    (
-                        <View style={{flex: 1, justifyContent: 'center', position: 'relative', width: '100%'}}>
-                            <View style={{position: 'absolute', top: 10, left: 10, zIndex:5}}>
-                                <Pressable onPress={() => closeCamera()}>
-                                    <MaterialIcons name={'close'} size={36} color={'white'}/>
-                                </Pressable>
-                            </View>
-                            { cameraMode==='video' &&
-                            <View style={styles.timerContainer}>
-                                <Text style={styles.timerText} variant={'bodyLarge'}>{formatTime(videoElapsedTime)}</Text>
-                            </View>
-                            }
+            }
 
-                            <CameraView style={styles.camera} facing={facing} ref={cameraRef} mode={cameraMode}>
-                                {/*{newPhotoTaken && <View style={{position: 'absolute', width: '100%', height: '100%', backgroundColor: 'black', zIndex: 100}}/>}*/}
-                                <View style={styles.flipCameraButton}>
-                                <TouchableOpacity  onPress={toggleCameraFacing}>
-                                    <MaterialIcons name={'flip-camera-ios'} size={36} color={'white'}/>
-                                </TouchableOpacity>
-                                </View>
-                                <View style={styles.toggleVideoButton}>
-                                    <TouchableOpacity  onPress={() => {
-                                        if (cameraMode==='picture') {
-                                            setCameraMode('video');
-                                        } else if (cameraMode==='video') {
-                                            setCameraMode('picture')
-                                        }}}>
-                                        {cameraMode==='picture' ? <MaterialIcons name={'videocam'} size={36} color={'white'}/> :
-                                        <MaterialIcons name={'image'} size={36} color={'white'}/>
-                                        }
-                                    </TouchableOpacity>
-                                </View>
-
-                                { cameraMode==='picture' ?
-                                <View style={styles.buttonContainer}>
-                                    <TouchableOpacity style={styles.cameraClickButton} onPress={async () => {
-                                            try {
-                                                let photo = await cameraRef.current.takePictureAsync({exif: true});
-                                                const asset = await savePhotoToGallery(photo.uri);
-                                                setNewAsset(asset);
-                                                closeCamera();
-                                            } catch (error) {
-                                                console.log('Error taking pic:', error);
+                            {openCamera &&
+                                <>
+                                {!permission?.granted &&
+                                    <Card style={styles.permissionContainer}>
+                                        <Card.Content>
+                                            <Text variant={'titleMedium'} style={styles.message}>We need your permission to show the camera</Text>
+                                            <View  style={{display: 'flex', flexDirection: 'row', justifyContent: 'center'}}>
+                                                <Button mode="contained" style={{width: 'auto'}} onPress={requestPermission}>Grant Permission</Button>
+                                            </View>
+                                        </Card.Content>
+                                    </Card>
+                                }
+                                {permission.granted &&
+                                <>
+                                    <View style={{position: 'absolute', top: 10, left: 10, zIndex:5}}>
+                                        <Pressable onPress={() => closeCamera()}>
+                                            <MaterialIcons name={'close'} size={36} color={'white'}/>
+                                        </Pressable>
+                                    </View>
+                                { cameraMode==='video' &&
+                                    <View style={styles.timerContainer}>
+                                        <Text style={styles.timerText} variant={'bodyLarge'}>{formatTime(videoElapsedTime)}</Text>
+                                    </View>
+                                }
+                                    <View style={styles.flipCameraButton}>
+                                        <Pressable  onPress={toggleCameraFacing}>
+                                            <MaterialIcons name={'flip-camera-ios'} size={36} color={'white'}/>
+                                        </Pressable>
+                                    </View>
+                                    <View style={styles.toggleVideoButton}>
+                                        <Pressable  onPress={() => { debouncedToggleCameraMode()}}>
+                                            {cameraMode==='picture' ? <MaterialIcons name={'videocam'} size={36} color={'white'}/> :
+                                                <MaterialIcons name={'image'} size={36} color={'white'}/>
                                             }
+                                        </Pressable>
+                                    </View>
+                                    { cameraMode==='picture' &&
+                                        <View style={styles.buttonContainer}>
+                                            <TouchableOpacity style={styles.cameraClickButton} onPress={async () => {
+                                                try {
+                                                    let photo = await cameraRef.current.takePictureAsync({exif: true});
+                                                    const asset = await savePhotoToGallery(photo.uri);
+                                                    closeCamera();
+                                                } catch (error) {
+                                                    console.log('Error taking pic:', error);
+                                                }
 
-                                    }}>
-                                        <View style={styles.innerCameraClickButton}/>
-                                    </TouchableOpacity>
-                                </View> :
-                                    (
-
+                                            }}>
+                                                <View style={styles.innerCameraClickButton}/>
+                                            </TouchableOpacity>
+                                        </View>
+                                    }
+                                    {cameraMode==='video' &&
                                         <View style={styles.buttonContainer}>
                                             <View style={{position: 'relative', width: '100%', height: '100%'}}>
                                             {isRecording ? (
@@ -545,13 +584,13 @@ const  MediaGallery = (props) => {
                                             )}
                                             </View>
                                         </View>
-
-                                    )
                                     }
-                            </CameraView>
-
-                        </View>
-                    ))}
+                                    {isFocused && <CameraView style={styles.camera} facing={facing} ref={cameraRef} mode={cameraMode} active={true}/>}
+                                </>
+                                }
+                                </>
+                            }
+            </>
         </Surface>
     );
 }
@@ -583,7 +622,9 @@ const styles = StyleSheet.create({
     },
     camera: {
         flex: 1,
-        position: 'relative'
+        position: 'absolute',
+        width: '100%',
+        height: '100%'
     },
     buttonContainer: {
         position: 'absolute',
@@ -602,14 +643,16 @@ const styles = StyleSheet.create({
         bottom: 10,
         left: 10,
         width: 50,
-        height: 50
+        height: 50,
+        zIndex: 5,
     },
     toggleVideoButton: {
         position: 'absolute',
         bottom: 10,
         right: 10,
         width: 50,
-        height: 50
+        height: 50,
+        zIndex: 5,
     },
     button: {
         flex: 1,
@@ -624,6 +667,7 @@ const styles = StyleSheet.create({
         position: 'relative',
         display: 'flex',
         justifyContent: 'center',
+        zIndex: 5
     },
     innerCameraClickButton: {
         width: 60,
@@ -644,6 +688,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         justifyContent: 'center',
         // position: 'absolute',
+        zIndex: 5,
         left: '50%',
         transform: [{ translateX: -40 }],
     },

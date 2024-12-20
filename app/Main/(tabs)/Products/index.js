@@ -1,17 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { FlatList, View, StyleSheet, TouchableOpacity } from 'react-native';
+import {FlatList, View, StyleSheet, Pressable} from 'react-native';
 import {Card, Text, TextInput, Chip, RadioButton, List, Surface, Checkbox, useTheme, Divider} from 'react-native-paper';
 import { useRouter } from "expo-router";
 import Fuse from "fuse.js";
 import { getProductForStore } from "../../../../utils/fakeDataMethods";
 import { faker } from '@faker-js/faker';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import FlatListSlider from "../../../../components/MediaSlider/FlatListSlider";
-import MediaItem from "../../../../components/MediaSlider/MediaItem";
-import {Rating} from "@kolking/react-native-rating";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import ProductDisplayCardMerchantListing from "../../../../components/ProductDisplayCardMerchantListing";
-import ProductDisplayCardCustomerStore from "../../../../components/ProductDisplayCardCustomerStore";
 import {ProductDisplayCompactMerchant} from "../../../../components/ProductDisplayCompactMerchant";
 
 const initialProducts = faker.helpers.multiple(getProductForStore, { count: 100 });
@@ -125,7 +119,9 @@ const Products = () => {
     const renderProductItem = ({ item }) => {
         console.log('item:', item);
         // return <ProductDisplayCardMerchantListing product={item} showProductDescription={false} orientation={'landscape'}/>
-        return <ProductDisplayCompactMerchant product={item}/>
+        return <Pressable onPress={() => router.push('/Main/(tabs)/Products/Product/' + item.productId)}>
+                <ProductDisplayCompactMerchant product={item}/>
+                </Pressable>
     };
 
     const searchFilterAndSortComponent = () => (

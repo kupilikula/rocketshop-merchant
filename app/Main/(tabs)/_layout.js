@@ -55,13 +55,12 @@ export default function TabsComponent() {
               tabBarIcon: ({ color }) => <MaterialIcons name={'storefront'} size={30} color={color}/>,
           }}
       />
-      {/*<Tabs.Screen*/}
-      {/*    name="EditProduct"*/}
-      {/*    component={EditProduct}*/}
-      {/*    options={{*/}
-      {/*        tabBarButton: () => null, // Hides the tab bar button*/}
-      {/*        tabBarStyle: { display: "none" }, // Hides the tab bar itself for this route*/}
-      {/*    }}*/}
-      {/*/>*/}
+      <Tabs.Screen
+          name="Collections"
+          options={{
+              href: null,
+              // tabBarButton: () => null, // Hides the tab bar button
+          }}
+      />
   </Tabs>
 }

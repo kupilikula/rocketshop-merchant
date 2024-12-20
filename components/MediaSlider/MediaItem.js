@@ -19,6 +19,8 @@ export default function MediaItem ({
                                  scrollToIndex
                              }) {
 
+
+    console.log('index:', index, ' , item:', item);
     let videoPlayer;
     let isPlaying;
     if (item.mediaType==='video') {
@@ -29,7 +31,7 @@ export default function MediaItem ({
         ({isPlaying} = useEvent(videoPlayer, 'playingChange', { isPlaying: videoPlayer.playing }));
     }
 
-    const playVideo = (item) => {
+    const playVideo = () => {
         if (item.mediaType==='video') {
             if (!isPlaying && !(videoPlayer.currentTime > 0)) {
                 videoPlayer.play()
@@ -72,16 +74,16 @@ export default function MediaItem ({
         <ZoomableImage source={item.uri} size={{width: width, height: height}} simultaneousHandlers={simultaneousHandlers}/> )
              :
                 <Pressable onPress={() => playVideo()}>
-                ( (isPlaying || videoPlayer.currentTime > 0 || !item['thumbnail']) ?
+                    {( (isPlaying || videoPlayer.currentTime > 0 || !item['thumbnail']) ?
                 <VideoView contentFit={'contain'}
                            style={{width: '100%', height: '100%', alignSelf: 'center', marginVertical: 'auto'}}
                            player={videoPlayer} allowsFullscreen allowsPictureInPicture nativeControls={true}/> :
-                        <View style={{display: 'flex', position: 'relative', flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                        <View style={{display: 'flex', position: 'relative', justifyContent: 'center', alignItems: 'center', width: width, height: height}}>
                             <MaterialIcons name={'play-circle'} size={50} color={'white'}
                                            style={{opacity: 0.8, position: 'absolute', zIndex: 10, padding: 0, margin: 0}}/>
                             <Image source={{uri: item.thumbnail}} style={{width: width, aspectRatio: orientation==='landscape' ? '1.33' : '0.8'}} />
                         </View>
-                )
+                )}
                 </Pressable>
             }
             </View>

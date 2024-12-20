@@ -84,12 +84,13 @@ export const getProductForCustomerFeed = () => {
             },
         ]
     }}
-export const getFakeCollection = () => {
+export const getCollection = () => {
     return {
         collectionName: fakerIndian.helpers.arrayElement(['Featured', 'Best Sellers', 'New Arrivals', 'AARI Work Blouses', 'Silk Sarees', 'T Shirts', 'Jeans']),
         collectionId: fakerIndian.string.uuid(),
         storeFrontDisplayNumberOfItems: fakerIndian.helpers.arrayElement([2,4,6,8]),
-        products: fakerIndian.helpers.multiple(getProductForStore, {count: fakerIndian.number.int({min: 8, max: 60})})
+        products: fakerIndian.helpers.multiple(getProductForStore, {count: fakerIndian.number.int({min: 8, max: 60})}),
+        status: fakerIndian.helpers.arrayElement(['Active', 'Inactive'])
     }
 }
 
@@ -99,7 +100,7 @@ export const getStoreFullData = () => {
         storeId: fakerIndian.string.uuid(),
         storeLogoImage: fakerIndian.image.url(),
         storeBrandColor: fakerIndian.color.rgb(),
-        collections: fakerIndian.helpers.uniqueArray(getFakeCollection, 5)
+        collections: fakerIndian.helpers.uniqueArray(getCollection, 5)
     }
 }
 
