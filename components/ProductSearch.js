@@ -1,7 +1,7 @@
 import {Button, Searchbar, Surface} from "react-native-paper";
 import {useEffect, useState} from "react";
 import Fuse from "fuse.js";
-import {FlatList, SafeAreaView, View} from "react-native";
+import {FlatList, View} from "react-native";
 import {SearchResultProduct} from './SearchResultProduct';
 import {useLocalSearchParams, useRouter} from "expo-router";
 

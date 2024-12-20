@@ -1,7 +1,7 @@
 import {Tabs, useRouter} from "expo-router";
 import React from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import {TouchableOpacity, View, Text} from "react-native";
+import {TouchableOpacity, View, Text, SafeAreaView} from "react-native";
 import {Colors} from '@/styles/Colors';
 import AppHeader from '../../../components/AppHeader';
 import {useTheme} from "react-native-paper";

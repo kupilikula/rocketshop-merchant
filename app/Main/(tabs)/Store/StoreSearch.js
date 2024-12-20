@@ -2,7 +2,7 @@ import {Button, Searchbar, Surface} from "react-native-paper";
 import {useEffect, useState} from "react";
 import {getStoreFullData} from "../../../../utils/fakeDataMethods";
 import Fuse from "fuse.js";
-import {FlatList, SafeAreaView, View} from "react-native";
+import {FlatList, View} from "react-native";
 import {SearchResultProduct} from "../../../../components/SearchResultProduct";
 import {useLocalSearchParams} from "expo-router";
 import ProductSearch from "../../../../components/ProductSearch";
@@ -26,7 +26,7 @@ export default function StoreSearch (props) {
     },[])
 
     return storeFullData &&
-        <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
+        // <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
         <Surface mode={'flat'} style={{
         backgroundColor: 'white',
         display: 'flex',
@@ -37,6 +37,6 @@ export default function StoreSearch (props) {
     }}>
             <ProductSearch uniqueProducts={uniqueProducts} limitedResults={false} initialSearchQuery={initialSearchQuery}/>
     </Surface>
-        </SafeAreaView>
+        // </SafeAreaView>
 
 }

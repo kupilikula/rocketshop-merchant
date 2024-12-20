@@ -1,7 +1,7 @@
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Drawer } from 'expo-router/drawer';
 import {DrawerToggleButton} from "@react-navigation/drawer";
-import KadaiLogo from "@/components/KadaiLogo";
+import LogoIconWithName from "@/components/LogoIconWithName";
 import DrawerMenu from '../../../../components/DrawerMenu';
 import {Pressable, View} from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
