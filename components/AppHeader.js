@@ -1,25 +1,17 @@
 import {View, Text, Pressable} from "react-native";
-import {Image} from 'expo-image';
-import {Colors} from "@/styles/Colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-// import { ReactComponent as Logo } from '../assets/images/kadailogo.svg';
-import { useFonts } from 'expo-font';
 import LogoIconWithName from './LogoIconWithName';
 import {DrawerActions} from "@react-navigation/native";
 import {useNavigation} from "expo-router";
 import {useTheme} from "react-native-paper";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 export default function AppHeader (props)  {
 
     const navigation = useNavigation();
     const theme = useTheme();
-    // const [loaded, error] = useFonts({
-    //     'CaveatBrush-Regular': require('../assets/fonts/CaveatBrush-Regular.ttf'),
-    // });
-    // console.log('loaded:', loaded);
-    // console.log('error:', error);
+    const insets = useSafeAreaInsets();
 
-
-    return <View style={{height: 60, backgroundColor: 'white', display: 'flex', flexDirection:'row', alignItems: 'center', justifyContent: 'space-between'}}>
+    return <View style={{height: 60+ insets.top, paddingTop: insets.top, backgroundColor: 'white', display: 'flex', flexDirection:'row', alignItems: 'center', justifyContent: 'space-between'}}>
         <LogoIconWithName/>
         <Pressable onPress={() => navigation.dispatch(DrawerActions.toggleDrawer()) }>
             <View style={{ width: 40, height: 40, margin: 10, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>

@@ -496,8 +496,8 @@ const  MediaGallery = (props) => {
                                 indicatorActiveColor='#3498db'
                                 indicatorInActiveColor='#bdc3c7'
                                 indicatorActiveWidth={6}
-                                contentContainerStyle={{backgroundColor: 'blue'}}
-                                flatListWrapperStyle={{backgroundColor: 'orange'}}
+                                contentContainerStyle={{backgroundColor: 'black'}}
+                                flatListWrapperStyle={{backgroundColor: 'black'}}
                                 allowPanZoom={true}
                                 component = {<MediaItem />}
                 />

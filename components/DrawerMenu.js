@@ -8,14 +8,14 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {View} from "react-native";
 import {StoreLogo} from "@/components/StoreLogo";
 import {faker} from '@faker-js/faker';
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 export default function DrawerMenu(props) {
     const router = useRouter();
     const storeLogoImage = faker.image.url();
 
     // console.log('props:', JSON.stringify(props));
-    return (
-        <DrawerContentScrollView {...props}>
+    return (<DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1, height: '100%'}}>
             <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginBottom: 15}}>
                 <StoreLogo logoImage={storeLogoImage} size={40}/>
                 <Text variant={'displaySmall'} style={{marginLeft: 15}}>Store Name</Text>

@@ -1,27 +1,17 @@
 import {Stack} from "expo-router";
 import {PaperProvider} from "react-native-paper";
-import {SafeAreaProvider, useSafeAreaInsets} from "react-native-safe-area-context";
-import {View} from "react-native";
+import {SafeAreaProvider} from "react-native-safe-area-context";
+import {Platform, View} from "react-native";
 import {StatusBar} from "expo-status-bar";
-import * as NavigationBar from 'expo-navigation-bar';
 import {useEffect} from "react";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
 import {DefaultTheme} from 'react-native-paper';
 import {Provider} from "react-redux";
 import {store} from "@/store/store";
-import {SafeAreaView} from "react-native-safe-area-context";
+import * as NavigationBar from 'expo-navigation-bar';
 
-// const Tabs = createBottomTabNavigator();
 const isLoggedIn = true;
 export default function RootLayout() {
-
-    const insets = useSafeAreaInsets();
-
-    useEffect(() => {
-        (async () => {
-            await NavigationBar.setBackgroundColorAsync("white")
-        })();
-    }, [])
 
     const customTheme = {
         ...DefaultTheme, colors: {
@@ -40,16 +30,21 @@ export default function RootLayout() {
         }, dark: false, // Set to true if creating a dark theme
     };
 
+    useEffect(() => {
+        // Make navigation bar transparent
+        if (Platform.OS==='android') {
+            NavigationBar.setBackgroundColorAsync('transparent');
+        }
+    }, []);
+
     return (
 
         <SafeAreaProvider>
-            <GestureHandlerRootView style={{flex: 1}}>
+            <GestureHandlerRootView style={{flex: 1, backgroundColor: 'green'}}>
                 <Provider store={store}>
                     <PaperProvider theme={customTheme}>
-                        <SafeAreaView style={{flex: 1, backgroundColor: 'white'}} edges={['top']} mode={'padding'}>
                             <StatusBar style="dark"/>
-                                <Stack screenOptions={{header: () => null, headerStyle: {backgroundColor: 'red'}}}/>
-                        </SafeAreaView>
+                            <Stack screenOptions={{header: () => null}}/>
                     </PaperProvider>
                 </Provider>
             </GestureHandlerRootView>
