@@ -23,6 +23,8 @@ import * as yup from "yup";
 import {Controller, useFieldArray, useForm, useWatch} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
+import {generateBoxShadowStyle} from "../styles/generateShadow";
 
 const ProductInfoScreen = (props) => {
     const dispatch = useDispatch();
@@ -80,7 +82,7 @@ const ProductInfoScreen = (props) => {
 
     const theme = useTheme();
     const styles = makeStyles(theme);
-
+    const insets = useSafeAreaInsets();
 
     // Validation schema using Yup
     const schema = yup.object().shape({
@@ -388,7 +390,7 @@ const ProductInfoScreen = (props) => {
 
 
     const ProductInfoHeader = () => {
-        return <View style={{height: 60, paddingHorizontal: 15, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'white', color: 'black'}}>
+        return <View style={[generateBoxShadowStyle(0,4,'#171717', 0.2, 3, 4, '#171717'),{height: 60 + insets.top, paddingTop: insets.top, paddingHorizontal: 15, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'white', color: 'black'}]}>
             <Pressable onPressIn={() => { router.back()}}
             >
                 <MaterialIcons name={'arrow-back'} size={36} style={{color: 'black'}}/>
@@ -504,6 +506,7 @@ const ProductInfoScreen = (props) => {
             keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
         >
             <ScrollView contentContainerStyle={styles.scrollContainer}>
+                <View style={styles.section}>
                 <Text style={styles.header}>Details</Text>
                 {/* Product Name */}
                 <Controller
@@ -615,7 +618,10 @@ const ProductInfoScreen = (props) => {
                         />
                     )}
                 />
+                </View>
 
+                <View style={styles.section}>
+                <Text style={styles.header}>Settings</Text>
                 <View style={styles.optionColumn}>
                     <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginVertical: 8, marginHorizontal: 10}}>
                         <Switch
@@ -649,8 +655,10 @@ const ProductInfoScreen = (props) => {
                         onPress={() => setGstInclusive(!gstInclusive)}
                     />
                 </View>
+                </View>
 
                 {/* Collections Section */}
+                <View style={styles.section}>
                 <Text style={styles.header}>Collections</Text>
                 <Controller
                     name="collections"
@@ -679,8 +687,9 @@ const ProductInfoScreen = (props) => {
                         </View>
                     )}
                 />
+                </View>
 
-
+                <View style={styles.section}>
                 <Text style={styles.header}>Attributes</Text>
                 {attributeFields && attributeFields?.map((field, index) => (
                     <View key={field.id}>
@@ -699,8 +708,10 @@ const ProductInfoScreen = (props) => {
                         Add Attribute
                     </Button>
                 </View>
+                </View>
 
                 {/* Tags Section */}
+                <View style={styles.section}>
                 <Text style={styles.header}>Tags</Text>
                 <View style={styles.tagsContainer}>
                     {/* Display Selected Tags */}
@@ -753,8 +764,10 @@ const ProductInfoScreen = (props) => {
                         </View>
                     )}
                 />
+                </View>
 
                 {/* Attribute Selection */}
+                <View style={styles.section}>
                 <Text style={styles.header}>Manage Variants</Text>
                 <Text variant={'bodyMedium'}>Variant Attributes</Text>
                 <View style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap'}}>
@@ -793,72 +806,10 @@ const ProductInfoScreen = (props) => {
                         Generate Variant
                     </Button>
                 </View>
-
+                </View>
                 {/* Variant List */}
-                {variants.length > 0 && (
-                    <View>
-                        <Text style={styles.subHeader}>Generated Variants</Text>
-                        {variants.map((variant, idx) => (
-                            <View key={idx} style={styles.variantRow}>
-                                <Text style={styles.variantText}>
-                                    {variant.options.join(", ")}
-                                </Text>
-                                <TextInput
-                                    label="Price"
-                                    mode="outlined"
-                                    value={variant.price}
-                                    onChangeText={(value) =>
-                                        updateVariant(idx, "price", value)
-                                    }
-                                    style={styles.variantInput}
-                                    keyboardType="numeric"
-                                />
-                                <TextInput
-                                    label="Stock"
-                                    mode="outlined"
-                                    value={variant.stock}
-                                    onChangeText={(value) =>
-                                        updateVariant(idx, "stock", value)
-                                    }
-                                    style={styles.variantInput}
-                                    keyboardType="numeric"
-                                />
-                                <IconButton
-                                    icon="delete"
-                                    onPress={() =>
-                                        setVariants(
-                                            variants.filter((_, i) => i !== idx)
-                                        )
-                                    }
-                                />
-                            </View>
-                        ))}
-                    </View>
-                )}
 
             </ScrollView>
-            {/*<View style={[styles.stickyActionContainer, {display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, width: '100%'}]}>*/}
-            {/*    <View style={{display: 'flex', flexDirection:'row', justifyContent: 'center'}}>*/}
-            {/*        <Button*/}
-            {/*            mode="contained"*/}
-            {/*            onPress={publishProduct}*/}
-            {/*            style={styles.publishButton}*/}
-            {/*        >*/}
-            {/*            Preview Product*/}
-            {/*        </Button>*/}
-            {/*    </View>*/}
-            {/*    <View style={{display: 'flex', flexDirection:'row', justifyContent: 'center'}}>*/}
-            {/*        <Button*/}
-            {/*            mode="outlined"*/}
-            {/*            onPress={saveChanges}*/}
-            {/*            style={styles.saveButton}*/}
-            {/*        >*/}
-            {/*            Save As Draft*/}
-            {/*        </Button>*/}
-            {/*    </View>*/}
-
-            {/*</View>*/}
-
         </KeyboardAvoidingView>
     );
 };
@@ -873,6 +824,9 @@ const makeStyles = ({ colors }) =>
             // marginTop: 60,
             // paddingTop: 80,
             padding: 16,
+        },
+        section: {
+            marginVertical: 8,
         },
         // stickyActionContainer: {
         //     backgroundColor: 'silver',
@@ -935,7 +889,7 @@ const makeStyles = ({ colors }) =>
         header: {
             fontSize: 18,
             fontWeight: "bold",
-            marginVertical: 8,
+            marginBottom: 8,
         },
         attributeRow: {
             flexDirection: "row",

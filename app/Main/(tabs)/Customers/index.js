@@ -6,6 +6,7 @@ import Fuse from 'fuse.js';
 import { faker } from '@faker-js/faker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getCustomer } from '../../../../utils/fakeDataMethods';
+import {CustomerListItem} from "../../../../components/CustomerListItem";
 
 const initialCustomers = Array.from({ length: 100 }, getCustomer);
 
@@ -61,27 +62,8 @@ const Customers = () => {
     }, [searchQuery, sortField, sortOrder, fuse]);
 
     const renderCustomerItem = ({ item }) => {
-        const totalSpent = item.orders.reduce((sum, order) => sum + order.orderTotal, 0);
-        const mostRecentOrderDate = new Date(Math.max.apply(null, item.orders.map((o) => o.orderDate)));
-        console.log('mROD', mostRecentOrderDate);
-        return (
-            <Pressable onPress={() => router.push('/Main/(tabs)/Customers/Customer/' + item.customerId)}>
-                <Card style={styles.card}>
-                    <Text variant={'titleLarge'}>{item.fullName}</Text>
-                    <Text variant={'bodyMedium'}>{item.phone}</Text>
-                    <Text variant={'bodyMedium'}>{item.customerAddress}</Text>
-                    <Text style={styles.email}>{item.email}</Text>
-                    <View style={{marginTop: 10}}>
-                    <Text variant={'bodyLarge'}>
-                        Orders: {item.orders.length} | Total Spent: ₹{totalSpent}
-                    </Text>
-                    <Text variant={'bodyLarge'}>
-                        Last Order: {mostRecentOrderDate.toLocaleDateString()}
-                    </Text>
-                    </View>
-                </Card>
-            </Pressable>
-        );
+
+        return <CustomerListItem customer={item}/> ;
     };
 
     const searchFilterAndSortComponent = () => (
@@ -174,11 +156,19 @@ const makeStyles = ({ colors }) =>
         container: { flex: 1, paddingHorizontal: 10 },
         searchBar: { marginVertical: 10, backgroundColor: 'white' },
         card: {
-            padding: 10,
-            backgroundColor: colors.surface,
-            elevation: 2,
-            borderRadius: 8
+            width: '100%',
+            borderRadius: 0,
+            backgroundColor: 'white',
+            borderWidth: 1,
+            borderColor: '#aaa',
+            padding: 10
         },
+        // card: {
+        //     padding: 10,
+        //     backgroundColor: colors.surface,
+        //     elevation: 2,
+        //     borderRadius: 8
+        // },
         name: { fontWeight: 'bold', fontSize: 16 },
         email: { color: colors.textSecondary },
         details: { color: colors.textSecondary, fontSize: 16 },

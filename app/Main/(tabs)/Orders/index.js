@@ -13,8 +13,8 @@ import {
     Menu,
     Divider
 } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
-import {useRouter} from "expo-router";
+import {useLocale, useNavigation} from '@react-navigation/native';
+import {useLocalSearchParams, useRouter} from "expo-router";
 import Fuse from "fuse.js";
 import {getOrder} from "../../../../utils/fakeDataMethods";
 import {faker} from '@faker-js/faker';
@@ -43,6 +43,8 @@ const Orders = () => {
     const [showEndPicker, setShowEndPicker] = useState(false);
     const [sortFieldMenuVisible, setSortFieldMenuVisible] = useState(false); // Menu visibility
 
+    const params = useLocalSearchParams();
+    console.log('params:',params);
     const toggleSortOrder = () => {
         setSortOrder((prev) => (prev === 'ascending' ? 'descending' : 'ascending'));
     };

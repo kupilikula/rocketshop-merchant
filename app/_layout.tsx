@@ -40,7 +40,7 @@ export default function RootLayout() {
     return (
 
         <SafeAreaProvider>
-            <GestureHandlerRootView style={{flex: 1, backgroundColor: 'green'}}>
+            <GestureHandlerRootView style={{flex: 1}}>
                 <Provider store={store}>
                     <PaperProvider theme={customTheme}>
                             <StatusBar style="dark"/>

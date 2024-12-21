@@ -8,6 +8,8 @@ import {resetNewProduct} from "../../../../store/newProductSlice";
 import {useNavigation, useRouter} from "expo-router";
 import {CommonActions} from "@react-navigation/native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
+import {generateBoxShadowStyle} from "../../../../styles/generateShadow";
 
 
 export default function Preview(props) {
@@ -17,6 +19,7 @@ export default function Preview(props) {
     const theme = useTheme();
     const newProduct = useSelector((state) => state.newProduct);
     const navigation = useNavigation();
+    const insets = useSafeAreaInsets();
     const publishProduct = () => {
         //publish
         // reset redux new product to empty
@@ -51,7 +54,7 @@ export default function Preview(props) {
         );
     }
     const PreviewHeader = () => {
-        return <View style={{height: 60, paddingHorizontal: 15, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'white', }}>
+        return <View style={[generateBoxShadowStyle(0,4,'#171717', 0.2, 3, 4, '#171717'),{height: 60 + insets.top, paddingTop: insets.top, paddingHorizontal: 15, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'white', }]}>
             <Pressable onPressIn={() => { router.back()}}>
                 <MaterialIcons name={'arrow-back'} size={36} style={{color: 'black'}}/>
             </Pressable>
@@ -67,16 +70,16 @@ export default function Preview(props) {
 
     return <Surface style={{flex: 1, padding: 10}}>
         <ScrollView style={{flex: 1}}>
+            <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginTop: 8, marginBottom: 16}}>
+                <Button onPress={discard} icon={'delete'} mode={'contained'} labelStyle={{color: 'white'}} style={{ borderRadius: 8, backgroundColor: theme.colors.error}}>Discard</Button>
+                <Button onPress={saveAsDraft} mode={'outlined'} style={{borderRadius: 8, borderWidth: 2,  borderColor: theme.colors.primary }}>Save As Draft</Button>
+            </View>
         <ProductDisplayCardCustomerStore product={newProduct} showProductDescription={true} showRating={newProduct.enableRatings}/>
-        <Card style={styles.card}>
-            <Card.Content style={{position: 'relative'}}>
-                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%',}}>
-                    <Button onPress={discard} icon={'delete'} mode={'contained'} labelStyle={{color: 'white'}} style={{ borderRadius: 8, backgroundColor: theme.colors.error}}>Discard</Button>
-                    <Button onPress={saveAsDraft} mode={'outlined'} style={{borderRadius: 8, borderWidth: 2,  borderColor: theme.colors.primary }}>Save As Draft</Button>
-                </View>
+        {/*<Card style={styles.card}>*/}
+        {/*    <Card.Content style={{position: 'relative'}}>*/}
 
-            </Card.Content>
-        </Card>
+        {/*    </Card.Content>*/}
+        {/*</Card>*/}
         </ScrollView>
     </Surface>
 }

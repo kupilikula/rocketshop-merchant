@@ -28,6 +28,8 @@ import {useDispatch, useSelector} from "react-redux";
 import _ from "lodash";
 import * as Crypto from 'expo-crypto';
 import {CommonActions} from "@react-navigation/native";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
+import {generateBoxShadowStyle} from "../styles/generateShadow";
 
 const  MediaGallery = (props) => {
     const [media, setMedia] = useState([]);
@@ -58,6 +60,7 @@ const  MediaGallery = (props) => {
 
     const isFocused = useIsFocused();
     const dispatch = useDispatch();
+    const insets = useSafeAreaInsets();
 
     const productDataMediaItems = useSelector((state) => state.newProduct.mediaItems);
     function toggleCameraFacing() {
@@ -103,7 +106,7 @@ const  MediaGallery = (props) => {
 
         if (cameraOpen) { return null}
         else {
-            return <View style={{height: 60, paddingHorizontal: 15, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'black', color: 'white'}}>
+            return <View style={[generateBoxShadowStyle(0,4,'#171717', 0.2, 3, 4, '#171717'), {height: 60+ insets.top, paddingTop: insets.top, paddingHorizontal: 15, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'black', color: 'white'}]}>
                 <Pressable onPressIn={() => {
                     console.log('cancel workflow');
                     dispatch(resetNewProduct());
