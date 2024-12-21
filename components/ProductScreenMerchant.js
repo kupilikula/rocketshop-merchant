@@ -1,4 +1,4 @@
-import {View, StyleSheet, Pressable, ScrollView, Switch} from "react-native";
+import {View, StyleSheet, Pressable, ScrollView, Switch, Platform} from "react-native";
 import {Button, Card, Chip, Surface, Text, ToggleButton, useTheme} from "react-native-paper";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FlatListSlider from "./MediaSlider/FlatListSlider";
@@ -67,7 +67,7 @@ export default function ProductScreenMerchant (props) {
                     <Button mode={'contained'} style={{borderRadius: 8, marginBottom: 15}}>Edit Product</Button>
                     <View style={styles.statusContainer}>
                     <Switch
-                        style={{ transform: [{ scaleX: 1.5 }, { scaleY: 1.5 }]}}
+                        // style={ Platform.OS==='ios' ? { transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }]} : {}}
                         value={productStatus==='Active'}
                         onValueChange={handleStatusChange}
                         // color={productStatus==='Active' ? "#f44336" : "#4caf50"} // Green for Active, Red for Draft

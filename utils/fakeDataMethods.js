@@ -84,12 +84,14 @@ export const getProductForCustomerFeed = () => {
             },
         ]
     }}
-export const getFakeCollection = () => {
+export const getCollection = () => {
     return {
         collectionName: fakerIndian.helpers.arrayElement(['Featured', 'Best Sellers', 'New Arrivals', 'AARI Work Blouses', 'Silk Sarees', 'T Shirts', 'Jeans']),
         collectionId: fakerIndian.string.uuid(),
         storeFrontDisplayNumberOfItems: fakerIndian.helpers.arrayElement([2,4,6,8]),
-        products: fakerIndian.helpers.multiple(getProductForStore, {count: fakerIndian.number.int({min: 8, max: 60})})
+        storeFrontDisplay: fakerIndian.datatype.boolean(),
+        products: fakerIndian.helpers.multiple(getProductForStore, {count: fakerIndian.number.int({min: 8, max: 60})}),
+        status: fakerIndian.helpers.arrayElement(['Active', 'Inactive'])
     }
 }
 
@@ -99,7 +101,7 @@ export const getStoreFullData = () => {
         storeId: fakerIndian.string.uuid(),
         storeLogoImage: fakerIndian.image.url(),
         storeBrandColor: fakerIndian.color.rgb(),
-        collections: fakerIndian.helpers.uniqueArray(getFakeCollection, 5)
+        collections: fakerIndian.helpers.uniqueArray(getCollection, 5)
     }
 }
 
@@ -109,7 +111,8 @@ export const getCustomer = () => {
         fullName: fakerIndian.person.fullName(),
         customerAddress: fakerIndian.location.streetAddress({useFullAddress: true}),
         phone: fakerIndian.phone.number(),
-        email: fakerIndian.internet.email()
+        email: fakerIndian.internet.email(),
+        orders: fakerIndian.helpers.multiple(getOrderWithoutCustomer)
     }
 }
 export const getOrder = () => {
@@ -122,3 +125,45 @@ export const getOrder = () => {
         orderTotal: fakerIndian.number.int({min:30, max: 5000}),
     }
 }
+
+export const getOrderWithoutCustomer = () => {
+    return {
+        orderId: fakerIndian.string.numeric({length: 10, allowLeadingZeros: false}),
+        orderDate: fakerIndian.date.past(),
+        orderItems: fakerIndian.helpers.multiple( () => ({product: getProductForStore(), quantity: fakerIndian.number.int({min: 1, max: 10})}), {count: fakerIndian.number.int({min: 1, max: 7})}),
+        orderStatus: fakerIndian.helpers.arrayElement(["Received", "Payment Received", "Shipped", "Delivered"]),
+        orderTotal: fakerIndian.number.int({min:30, max: 5000}),
+    }
+}
+
+export const getOffer = () => {
+    return {
+    offerId: fakerIndian.string.uuid(), // Unique identifier for the offer
+    name: fakerIndian.company.catchPhraseDescriptor(), // Offer name
+    description: fakerIndian.company.catchPhrase(), // Optional description
+    offerCode: fakerIndian.string.alphanumeric(),
+    requireCode: fakerIndian.datatype.boolean(),
+    type: fakerIndian.helpers.arrayElement(['Percentage Off' , 'Fixed Amount Off' , 'Buy N Get K Free' , 'Free Shipping']), // Type of the offer
+    discountDetails: {
+        percentage: fakerIndian.number.int({min: 0, max: 90}), // For 'percentage' type
+        fixedAmount: fakerIndian.number.int({min: 100, max: 4000}), // For 'fixed' type
+        buyN: fakerIndian.number.int({min: 2, max: 10}), // For 'buyNgetK' type
+        getK: 1, // For 'buyNgetK' type
+    },
+    applicableTo: {
+        products: fakerIndian.helpers.multiple(getProductForStore, {count: fakerIndian.number.int({min:0, max: 100})}), // Specific products
+        collections: fakerIndian.helpers.multiple(getCollection, {count: fakerIndian.number.int({min:0, max: 10})}), // Specific collections
+        tags: fakerIndian.helpers.uniqueArray(() => fakerIndian.helpers.arrayElement(['Hand Made', 'New Arrivals', 'Organza', 'Clearance', 'Trending']), {count: fakerIndian.number.int({min:0, max: 10})}), // Specific tags
+    },
+    conditions: {
+        minimumPurchaseAmount: fakerIndian.helpers.arrayElement([500,1000,5000, 10000, null]), // Optional: Minimum purchase amount for the offer to apply
+        minimumItems: fakerIndian.helpers.arrayElement([null,1,2,5,10]), // Optional: Minimum number of items for the offer to apply
+    },
+    validity: {
+        startDate: fakerIndian.date.past(), // Start date of the offer
+        endDate: fakerIndian.date.future(), // End date of the offer
+    },
+    isActive: fakerIndian.helpers.arrayElement([true,false]) // Whether the offer is currently active
+};
+}
+

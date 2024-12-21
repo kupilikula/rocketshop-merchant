@@ -161,7 +161,7 @@ const FlatListSlider = forwardRef( ( props, ref) =>{
                     windowSize={50}
                     initialNumToRender={50}
                     maxToRenderPerBatch={50}
-                    removeClippedSubviews={true}
+                    removeClippedSubviews={false}
                     scrollEnabled={true}
                     // onContentSizeChange={handleContentSizeChange}
                 />

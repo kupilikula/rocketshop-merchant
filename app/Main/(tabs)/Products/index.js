@@ -1,17 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { FlatList, View, StyleSheet, TouchableOpacity } from 'react-native';
+import {FlatList, View, StyleSheet, Pressable} from 'react-native';
 import {Card, Text, TextInput, Chip, RadioButton, List, Surface, Checkbox, useTheme, Divider} from 'react-native-paper';
 import { useRouter } from "expo-router";
 import Fuse from "fuse.js";
 import { getProductForStore } from "../../../../utils/fakeDataMethods";
 import { faker } from '@faker-js/faker';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import FlatListSlider from "../../../../components/MediaSlider/FlatListSlider";
-import MediaItem from "../../../../components/MediaSlider/MediaItem";
-import {Rating} from "@kolking/react-native-rating";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import ProductDisplayCardMerchantListing from "../../../../components/ProductDisplayCardMerchantListing";
-import ProductDisplayCardCustomerStore from "../../../../components/ProductDisplayCardCustomerStore";
 import {ProductDisplayCompactMerchant} from "../../../../components/ProductDisplayCompactMerchant";
 
 const initialProducts = faker.helpers.multiple(getProductForStore, { count: 100 });
@@ -125,7 +119,9 @@ const Products = () => {
     const renderProductItem = ({ item }) => {
         console.log('item:', item);
         // return <ProductDisplayCardMerchantListing product={item} showProductDescription={false} orientation={'landscape'}/>
-        return <ProductDisplayCompactMerchant product={item}/>
+        return <Pressable onPress={() => router.push('/Main/(tabs)/Products/Product/' + item.productId)}>
+                <ProductDisplayCompactMerchant product={item}/>
+                </Pressable>
     };
 
     const searchFilterAndSortComponent = () => (
@@ -153,8 +149,8 @@ const Products = () => {
                     <View style={styles.row}>
                         <RadioButton.Group onValueChange={setSortField} value={sortField}>
                             <View style={styles.radioRow}>
-                                <RadioButton.Item label="Price" value="price" />
-                                <RadioButton.Item label="Stock" value="stock" />
+                                <RadioButton.Item mode='android' position={'leading'} color={theme.colors.primary} label="Price" value="price" />
+                                <RadioButton.Item mode='android' position={'leading'} color={theme.colors.primary} label="Stock" value="stock" />
                             </View>
                         </RadioButton.Group>
                         <View style={{display: 'flex',flexDirection: 'row'}}>
@@ -207,6 +203,7 @@ const Products = () => {
                     <View style={styles.flexWrapRowCompact}>
                         {["All", ...collections].map((collection) => (
                             <Checkbox.Item
+                                mode={'android'}
                                 key={collection}
                                 label={collection}
                                 status={selectedCollections.includes(collection) ? 'checked' : 'unchecked'}
@@ -255,7 +252,7 @@ const Products = () => {
 
 const makeStyles = ({ colors }) => StyleSheet.create({
     container: { flex: 1, paddingHorizontal: 10, margin: 0, },
-    searchBar: { marginVertical: 10 },
+    searchBar: { marginVertical: 10, backgroundColor: 'white' },
     section: { marginHorizontal: 10, marginVertical: 5 },
     sectionTitle: { fontSize: 16, fontWeight: 'bold' },
     radioRow: { flexDirection: 'row', justifyContent: 'space-around' },

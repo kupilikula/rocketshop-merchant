@@ -30,6 +30,11 @@ const newProductSlice = createSlice({
             // Update a specific field
             state[field] = value;
         },
+        resetNewProduct: () =>
+        {
+            console.log('resetting: ', {...initialState});
+            return ({...initialState})
+        },
         addAttribute: (state) => {
             state.attributes.push({ key: "", value: "" });
         },
@@ -49,6 +54,7 @@ export const {
     addAttribute,
     updateAttribute,
     removeAttribute,
+    resetNewProduct
 } = newProductSlice.actions;
 
 export default newProductSlice.reducer;

@@ -1,6 +1,6 @@
 import { Drawer } from 'expo-router/drawer';
 import {DrawerToggleButton} from "@react-navigation/drawer";
-import KadaiLogo from "../../components/KadaiLogo";
+import LogoIconWithName from "../../components/LogoIconWithName";
 import {Stack, usePathname, useRouter} from "expo-router";
 import {Text} from 'react-native-paper';
 import {getFocusedRouteNameFromRoute} from "@react-navigation/core";

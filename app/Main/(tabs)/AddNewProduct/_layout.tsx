@@ -36,7 +36,7 @@ export default function AddNewProductStack() {
                             router.back()
                         }
                     }
-                        style={{ marginRight: 10 }}
+                        style={{ marginRight: 10}}
                     >
                         <MaterialIcons name="arrow-back" size={36} color="white" />
                     </Pressable>

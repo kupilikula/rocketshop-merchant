@@ -6,9 +6,10 @@ import {StatusBar} from "expo-status-bar";
 import * as NavigationBar from 'expo-navigation-bar';
 import {useEffect} from "react";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
-import { DefaultTheme } from 'react-native-paper';
+import {DefaultTheme} from 'react-native-paper';
 import {Provider} from "react-redux";
-import { store } from "@/store/store";
+import {store} from "@/store/store";
+import {SafeAreaView} from "react-native-safe-area-context";
 
 // const Tabs = createBottomTabNavigator();
 const isLoggedIn = true;
@@ -16,17 +17,15 @@ export default function RootLayout() {
 
     const insets = useSafeAreaInsets();
 
-    useEffect( () => {
+    useEffect(() => {
         (async () => {
             await NavigationBar.setBackgroundColorAsync("white")
         })();
-    },[])
+    }, [])
 
     const customTheme = {
-        ...DefaultTheme,
-        colors: {
-            ...DefaultTheme.colors,
-            primary: '#3A86FF', // Royal Blue
+        ...DefaultTheme, colors: {
+            ...DefaultTheme.colors, primary: '#3A86FF', // Royal Blue
             secondary: '#FF6F59', // Sunset Orange
             background: '#F4F4F9', // Soft Gray
             surface: '#FFFFFF', // White
@@ -38,23 +37,21 @@ export default function RootLayout() {
             warning: '#FFBE0B', // Gold
             icon: '#4361EE', // Steel Blue for icons
             info: '#00C4CC', // Turquoise Blue for informational states
-        },
-        dark: false, // Set to true if creating a dark theme
+        }, dark: false, // Set to true if creating a dark theme
     };
 
     return (
 
         <SafeAreaProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
+            <GestureHandlerRootView style={{flex: 1}}>
                 <Provider store={store}>
-      <PaperProvider theme={customTheme}>
-          <StatusBar style="dark" backgroundColor={'white'} />
-          {/*<NavigationBar backgroundColor={'white'}/>*/}
-    <View style={{paddingTop: insets.top, width: '100%', height: '100%'}}>
-      <Stack screenOptions={{header: () => null}}/>
-    </View>
-  </PaperProvider>
+                    <PaperProvider theme={customTheme}>
+                        <SafeAreaView style={{flex: 1, backgroundColor: 'white'}} edges={['top']} mode={'padding'}>
+                            <StatusBar style="dark"/>
+                                <Stack screenOptions={{header: () => null, headerStyle: {backgroundColor: 'red'}}}/>
+                        </SafeAreaView>
+                    </PaperProvider>
                 </Provider>
             </GestureHandlerRootView>
-  </SafeAreaProvider>);
+        </SafeAreaProvider>);
 }

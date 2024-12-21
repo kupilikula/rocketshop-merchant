@@ -6,11 +6,7 @@ import {vi} from "@faker-js/faker";
 import {Colors} from "../styles/Colors";
 
 
-const GalleryMediaItem = ({item, toggleSelection, isSelected, selectionIndex, videoThumbnails, isGalleryScrolling}) => {
-
-    // const [isScrolling, setIsScrolling] = useState(false);
-    const pressTimeoutRef = useRef(null);
-
+const GalleryMediaItem = ({item, thumbnail, toggleSelection, isSelected, selectionIndex, isGalleryScrolling}) => {
     const handlePressIn = () => {
         console.log('handlePressIn, isScrolling:', isGalleryScrolling());
         if (!isGalleryScrolling()) {
@@ -23,44 +19,16 @@ const GalleryMediaItem = ({item, toggleSelection, isSelected, selectionIndex, vi
         }
     };
 
-    // const handleResponderMove = () => {
-    //     console.log('handleResponderMove, isScrolling:', isScrolling);
-    //     setIsScrolling(true); // Mark gesture as scroll
-    //     clearTimeout(pressTimeoutRef.current); // Cancel selection
-    // };
-    //
-    // const handlePressOut = () => {
-    //     console.log('handlePressOut, isScrolling:', isScrolling);
-    //     if (!isScrolling) {
-    //         pressTimeoutRef.current = setTimeout(() => {
-    //             console.log('inside timeout, isScrolling:', isScrolling)
-    //             if (!isScrolling) {
-    //                 console.log('toggling');
-    //                 toggleSelection(item);
-    //             }
-    //         }, 1);
-    //     }// Short delay to differentiate tap from scroll
-    //     // clearTimeout(pressTimeoutRef.current); // Clean up the timer
-    // };
     return (<TouchableWithoutFeedback
         style={[styles.itemContainer, isSelected && styles.selectedItem,]}
         // style={{ backgroundColor: 'rgba(0, 0, 255, 0.5)' }}
         onPressOut={handlePressIn}
-        // onResponderMove={handleResponderMove}
-        // onPressOut={handlePressOut}
-        // onStartShouldSetResponder={() => {
-        //     console.log('Responder requested');
-        //     return true;
-        // }}
-        // onMoveShouldSetResponder={() => {
-        //     console.log('Responder move requested');
-        //     return true;
-        // }}
     >
         <View>
             {item.mediaType === MediaLibrary.MediaType.photo ? (
-                <Image source={{uri: item.uri}} style={styles.image}/>) : (<View style={{position: 'relative'}}>
-                    <Image source={{uri: videoThumbnails[item.id]}} style={styles.image}/>
+                <Image source={{uri: item.uri}} style={styles.image}/>) :
+                (<View style={{position: 'relative'}}>
+                    {thumbnail ? <Image source={{uri: thumbnail}} style={styles.image}/> : <View style={[styles.image, {backgroundColor: 'black'}]}/>}
                     <MaterialIcons name={'videocam'} size={28} color={'white'}
                                    style={{position: 'absolute', top: 10, right: 10}}/>
                 </View>)}
