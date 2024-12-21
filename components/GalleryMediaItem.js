@@ -26,8 +26,9 @@ const GalleryMediaItem = ({item, thumbnail, toggleSelection, isSelected, selecti
     >
         <View>
             {item.mediaType === MediaLibrary.MediaType.photo ? (
-                <Image source={{uri: item.uri}} style={styles.image}/>) : (<View style={{position: 'relative'}}>
-                    <Image source={{uri: thumbnail}} style={styles.image}/>
+                <Image source={{uri: item.uri}} style={styles.image}/>) :
+                (<View style={{position: 'relative'}}>
+                    {thumbnail ? <Image source={{uri: thumbnail}} style={styles.image}/> : <View style={[styles.image, {backgroundColor: 'black'}]}/>}
                     <MaterialIcons name={'videocam'} size={28} color={'white'}
                                    style={{position: 'absolute', top: 10, right: 10}}/>
                 </View>)}

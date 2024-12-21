@@ -19,11 +19,11 @@ export default function AppHeader (props)  {
     // console.log('error:', error);
 
 
-    return <View style={{height: 60, backgroundColor: 'white', display: 'flex', flexDirection:'row', alignItems: 'center', borderBottomWidth: 1, borderColor: 'gray', justifyContent: 'space-between'}}>
+    return <View style={{height: 60, backgroundColor: 'white', display: 'flex', flexDirection:'row', alignItems: 'center', justifyContent: 'space-between'}}>
         <LogoIconWithName/>
         <Pressable onPress={() => navigation.dispatch(DrawerActions.toggleDrawer()) }>
             <View style={{ width: 40, height: 40, margin: 10, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-        <MaterialIcons name={'menu'} size={28} style={{color: theme.colors.primary}}/>
+        <MaterialIcons name={'menu'} size={28} style={{color: theme.colors.secondary}}/>
             </View>
         </Pressable>
     </View>

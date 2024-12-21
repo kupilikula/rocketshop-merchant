@@ -12,10 +12,10 @@ export default function LogoIconWithName() {
         Atma_600SemiBold,
     });
     return <View style={{height: 58, backgroundColor: 'white', top: 0, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start',}}>
-        <Image source={require('../assets/images/PocketShopIcon.png')} style={{width:50, height: 50, margin: 5}}/>
+        <Image source={require('../assets/images/PocketShopIcon.svg')} style={{width:50, height: 50, margin: 5}}/>
         <Text style={{fontFamily: Platform.select({
                 android: 'Atma_600SemiBold',
                 ios: 'Atma-SemiBold',
-            }), color: theme.colors.secondary, fontSize: 26, lineHeight: 50}}>PocketShop</Text>
+            }), color: theme.colors.primary, fontSize: 26, lineHeight: 50}}>PocketShop</Text>
     </View>
 }

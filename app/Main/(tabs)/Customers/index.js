@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { FlatList, View, StyleSheet, Pressable } from 'react-native';
-import { TextInput, Text, List, Chip, RadioButton, Surface, Divider, useTheme } from 'react-native-paper';
+import {TextInput, Text, List, Chip, RadioButton, Surface, Divider, useTheme, Card} from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import Fuse from 'fuse.js';
 import { faker } from '@faker-js/faker';
@@ -66,7 +66,7 @@ const Customers = () => {
         console.log('mROD', mostRecentOrderDate);
         return (
             <Pressable onPress={() => router.push('/Main/(tabs)/Customers/Customer/' + item.customerId)}>
-                <Surface style={styles.card}>
+                <Card style={styles.card}>
                     <Text variant={'titleLarge'}>{item.fullName}</Text>
                     <Text variant={'bodyMedium'}>{item.phone}</Text>
                     <Text variant={'bodyMedium'}>{item.customerAddress}</Text>
@@ -79,7 +79,7 @@ const Customers = () => {
                         Last Order: {mostRecentOrderDate.toLocaleDateString()}
                     </Text>
                     </View>
-                </Surface>
+                </Card>
             </Pressable>
         );
     };
@@ -174,7 +174,6 @@ const makeStyles = ({ colors }) =>
         container: { flex: 1, paddingHorizontal: 10 },
         searchBar: { marginVertical: 10, backgroundColor: 'white' },
         card: {
-            marginVertical: 5,
             padding: 10,
             backgroundColor: colors.surface,
             elevation: 2,
@@ -183,12 +182,9 @@ const makeStyles = ({ colors }) =>
         name: { fontWeight: 'bold', fontSize: 16 },
         email: { color: colors.textSecondary },
         details: { color: colors.textSecondary, fontSize: 16 },
-        accordionBar: {
-            backgroundColor: colors.primary,
-            justifyContent: 'center',
-        },
-        accordionContent: { backgroundColor: 'white', padding: 0, margin: 0 },
-        accordionTitle: { color: 'white', fontSize: 16 },
+        accordionBar: { backgroundColor: colors.primary, height:50, minHeight: 50, paddingVertical: 0,justifyContent: 'center', alignItems: 'center',verticalAlign: 'center'},
+        accordionContent: {justifyContent: 'center', color: 'white',},
+        accordionTitle:{ color: 'white', fontSize: 16},
         sectionTitle: { fontSize: 16, fontWeight: 'bold', marginVertical: 5, marginLeft: 10 },
         sortFilterContent: { padding: 0, backgroundColor: 'white', borderWidth: 1 },
         // chip: { marginVertical: 10 },

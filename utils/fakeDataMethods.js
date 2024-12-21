@@ -89,6 +89,7 @@ export const getCollection = () => {
         collectionName: fakerIndian.helpers.arrayElement(['Featured', 'Best Sellers', 'New Arrivals', 'AARI Work Blouses', 'Silk Sarees', 'T Shirts', 'Jeans']),
         collectionId: fakerIndian.string.uuid(),
         storeFrontDisplayNumberOfItems: fakerIndian.helpers.arrayElement([2,4,6,8]),
+        storeFrontDisplay: fakerIndian.datatype.boolean(),
         products: fakerIndian.helpers.multiple(getProductForStore, {count: fakerIndian.number.int({min: 8, max: 60})}),
         status: fakerIndian.helpers.arrayElement(['Active', 'Inactive'])
     }
@@ -138,19 +139,21 @@ export const getOrderWithoutCustomer = () => {
 export const getOffer = () => {
     return {
     offerId: fakerIndian.string.uuid(), // Unique identifier for the offer
-    name: fakerIndian.company.buzzAdjective(), // Offer name
-    description: fakerIndian.company.catchPhraseDescriptor(), // Optional description
-    type: fakerIndian.helpers.arrayElement(['percentage' , 'fixed' , 'buyNgetK' , 'freeShipping']), // Type of the offer
-    discount: {
+    name: fakerIndian.company.catchPhraseDescriptor(), // Offer name
+    description: fakerIndian.company.catchPhrase(), // Optional description
+    offerCode: fakerIndian.string.alphanumeric(),
+    requireCode: fakerIndian.datatype.boolean(),
+    type: fakerIndian.helpers.arrayElement(['Percentage Off' , 'Fixed Amount Off' , 'Buy N Get K Free' , 'Free Shipping']), // Type of the offer
+    discountDetails: {
         percentage: fakerIndian.number.int({min: 0, max: 90}), // For 'percentage' type
         fixedAmount: fakerIndian.number.int({min: 100, max: 4000}), // For 'fixed' type
         buyN: fakerIndian.number.int({min: 2, max: 10}), // For 'buyNgetK' type
         getK: 1, // For 'buyNgetK' type
     },
     applicableTo: {
-        products: fakerIndian.helpers.multiple(getProductForStore), // Specific products
-        collections: fakerIndian.helpers.multiple(getCollection), // Specific collections
-        tags: fakerIndian.helpers.multiple(() => fakerIndian.helpers.arrayElement(['Hand Made', 'New Arrivals', 'Organza', 'Clearance', 'Trending'])), // Specific tags
+        products: fakerIndian.helpers.multiple(getProductForStore, {count: fakerIndian.number.int({min:0, max: 100})}), // Specific products
+        collections: fakerIndian.helpers.multiple(getCollection, {count: fakerIndian.number.int({min:0, max: 10})}), // Specific collections
+        tags: fakerIndian.helpers.uniqueArray(() => fakerIndian.helpers.arrayElement(['Hand Made', 'New Arrivals', 'Organza', 'Clearance', 'Trending']), {count: fakerIndian.number.int({min:0, max: 10})}), // Specific tags
     },
     conditions: {
         minimumPurchaseAmount: fakerIndian.helpers.arrayElement([500,1000,5000, 10000, null]), // Optional: Minimum purchase amount for the offer to apply

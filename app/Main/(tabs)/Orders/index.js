@@ -1,6 +1,18 @@
 import React, {useMemo, useState} from 'react';
 import {FlatList, View, StyleSheet, TouchableOpacity} from 'react-native';
-import {Card, Text, Button, TextInput, RadioButton, Chip, Appbar, useTheme, Surface, Menu} from 'react-native-paper';
+import {
+    Card,
+    Text,
+    Button,
+    TextInput,
+    RadioButton,
+    Chip,
+    Appbar,
+    useTheme,
+    Surface,
+    Menu,
+    Divider
+} from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import {useRouter} from "expo-router";
 import Fuse from "fuse.js";
@@ -166,7 +178,6 @@ const Orders = () => {
             style={styles.accordionBar}
             titleStyle={styles.accordionTitle}
             contentStyle={styles.accordionContent}
-            // left={() => <MaterialIcons name={'tune'} size={28} color={'white'}/>}
             right={ () => <MaterialIcons name={filterExpanded ? 'expand-more' : 'expand-less'} size={28} color={'white'}/>}
 
         >
@@ -366,6 +377,7 @@ const Orders = () => {
                 ListHeaderComponent={filterAndSortComponent()}
                 ListEmptyComponent={<Text>No Orders Found</Text>}
                 contentContainerStyle={{ margin: 0, padding: 0}}
+                ItemSeparatorComponent={<Divider style={{marginVertical: 10}}/>}
             />
         </Surface>
     );
@@ -394,7 +406,7 @@ const makeStyles = ({colors}) => StyleSheet.create({
     row: { flexDirection: 'row', justifyContent: 'space-between', marginVertical: 0, alignItems: 'center'},
     input: { flex: 1, marginHorizontal: 5, backgroundColor: colors.surface },
     card: { marginVertical: 8 },
-    orderCard: { borderRadius: 8, marginVertical: 5, borderWidth: 1, borderColor: '#aaaaaa', backgroundColor: 'white'},
+    orderCard: { borderRadius: 8, marginVertical: 5, backgroundColor: 'white'},
     accordionBar: { backgroundColor: colors.primary, height:50, minHeight: 50, paddingVertical: 0,justifyContent: 'center', alignItems: 'center',verticalAlign: 'center'},
     accordionContent: {justifyContent: 'center', color: 'white',},
     accordionTitle:{ color: 'white', fontSize: 16},
