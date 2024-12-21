@@ -1,8 +1,8 @@
 import {Stack, useRouter} from "expo-router";
-import {Pressable, TouchableOpacity} from "react-native";
+import {Pressable, TouchableOpacity, View} from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {Colors} from "@/styles/Colors";
-import {Button, useTheme} from "react-native-paper";
+import {Button, Text, useTheme} from "react-native-paper";
 
 
 export default function AddNewProductStack() {
@@ -28,23 +28,6 @@ export default function AddNewProductStack() {
             name={'AddProductInfo'}
             options={({navigation}) => ({
                 title: 'Product Info',
-                headerStyle: { backgroundColor: theme.colors.secondary },
-                headerLeft: () => (
-                    <Pressable
-                        onPressIn={() => {
-                            console.log('back')
-                            router.back()
-                        }
-                    }
-                        style={{ marginRight: 10}}
-                    >
-                        <MaterialIcons name="arrow-back" size={36} color="white" />
-                    </Pressable>
-                ),
-                headerTintColor: '#fff',
-                headerTitleStyle: {
-                    // fontWeight: 'bold',
-                },
             })}
         />
 

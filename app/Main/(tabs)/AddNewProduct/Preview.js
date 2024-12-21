@@ -1,22 +1,19 @@
-import {ScrollView, Switch, View} from "react-native";
+import {Pressable, ScrollView, Switch, View} from "react-native";
 import {Button, Card, Surface, useTheme, Checkbox, Text} from "react-native-paper";
 import ProductDisplayCardCustomerStore from "../../../../components/ProductDisplayCardCustomerStore";
 import {useDispatch, useSelector} from "react-redux";
 import {StyleSheet} from "react-native";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {resetNewProduct} from "../../../../store/newProductSlice";
 import {useNavigation, useRouter} from "expo-router";
 import {CommonActions} from "@react-navigation/native";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 
 export default function Preview(props) {
 
     const dispatch = useDispatch();
     const router = useRouter();
-    const [enableRatings, setEnableRatings] = useState(false);
-    const [enableReviews, setEnableReviews] = useState(false);
-    const [enableStockTracking, setEnableStockTracking] = useState(false);
-    const [gstInclusive, setGstInclusive] = useState(false);
     const theme = useTheme();
     const newProduct = useSelector((state) => state.newProduct);
     const navigation = useNavigation();
@@ -53,57 +50,35 @@ export default function Preview(props) {
             })
         );
     }
+    const PreviewHeader = () => {
+        return <View style={{height: 60, paddingHorizontal: 15, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'white', }}>
+            <Pressable onPressIn={() => { router.back()}}>
+                <MaterialIcons name={'arrow-back'} size={36} style={{color: 'black'}}/>
+            </Pressable>
+            <Text variant={'titleLarge'} style={{ color: 'black'}}>Product Preview</Text>
+            <Button onPress={publishProduct} mode={'contained'} style={{borderRadius: 8, backgroundColor: theme.colors.success }}>Publish</Button>
+        </View>;
+    }
+
+    useEffect(() => {
+        navigation.setOptions({header: PreviewHeader});
+    },[navigation])
 
 
-    return <ScrollView>
-    <Surface style={{flex: 1, padding: 10}}>
-        <ProductDisplayCardCustomerStore product={newProduct} showProductDescription={true} showRating={enableRatings}/>
+    return <Surface style={{flex: 1, padding: 10}}>
+        <ScrollView style={{flex: 1}}>
+        <ProductDisplayCardCustomerStore product={newProduct} showProductDescription={true} showRating={newProduct.enableRatings}/>
         <Card style={styles.card}>
             <Card.Content style={{position: 'relative'}}>
-                <Button onPress={discard} icon={'delete'} mode={'contained'} labelStyle={{color: 'white'}} style={{position: 'absolute', top: 15, right: 15, borderRadius: 8, backgroundColor: theme.colors.error}}>Discard</Button>
-                <View style={styles.optionColumn}>
-                    <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginVertical: 8, marginHorizontal: 10}}>
-                        <Switch
-                            value={enableRatings}
-                            onValueChange={setEnableRatings}
-                            style={{}}
-                        />
-                        <Text variant={'bodyLarge'}>Enable Ratings</Text>
-                    </View>
-                    <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginVertical: 8, marginHorizontal: 10}}>
-                        <Switch
-                            value={enableReviews}
-                            onValueChange={setEnableReviews}
-                            style={{}}
-                        />
-                        <Text variant={'bodyLarge'}>Enable Reviews</Text>
-                    </View>
-                    <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginVertical: 8, marginHorizontal: 10}}>
-                        <Switch
-                            value={enableStockTracking}
-                            onValueChange={setEnableStockTracking}
-                            style={{}}
-                        />
-                        <Text variant={'bodyLarge'}>Enable Stock Tracking</Text>
-                    </View>
-                    <Checkbox.Item
-                        label="GST Inclusive"
-                        position={'leading'}
-                        labelStyle={{ fontSize: 16}}
-                        status={gstInclusive ? "checked" : "unchecked"}
-                        onPress={() => setGstInclusive(!gstInclusive)}
-                    />
-                </View>
                 <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%',}}>
+                    <Button onPress={discard} icon={'delete'} mode={'contained'} labelStyle={{color: 'white'}} style={{ borderRadius: 8, backgroundColor: theme.colors.error}}>Discard</Button>
                     <Button onPress={saveAsDraft} mode={'outlined'} style={{borderRadius: 8, borderWidth: 2,  borderColor: theme.colors.primary }}>Save As Draft</Button>
-                    <Button onPress={publishProduct} mode={'contained'} style={{borderRadius: 8, backgroundColor: theme.colors.success }}>Publish Product</Button>
                 </View>
 
             </Card.Content>
         </Card>
-
+        </ScrollView>
     </Surface>
-    </ScrollView>
 }
 
 const styles = StyleSheet.create({

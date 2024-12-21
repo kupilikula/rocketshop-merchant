@@ -5,7 +5,7 @@ import {
     TouchableOpacity,
     KeyboardAvoidingView,
     Platform,
-    ScrollView,
+    ScrollView, Pressable, Switch,
 } from "react-native";
 import {
     TextInput,
@@ -17,11 +17,12 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { useIsFocused } from "@react-navigation/native";
 import _ from "lodash";
-import { updateField } from "../store/newProductSlice";
+import {resetNewProduct, updateField} from "../store/newProductSlice";
 import {useNavigation, useRouter} from "expo-router";
 import * as yup from "yup";
 import {Controller, useFieldArray, useForm, useWatch} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const ProductInfoScreen = (props) => {
     const dispatch = useDispatch();
@@ -61,6 +62,10 @@ const ProductInfoScreen = (props) => {
     const [gstMenuVisible, setGstMenuVisible] = useState(false); // For Dropdown visibility
 
     const gstRates = [0, 5, 12, 18, 28]; // GST Rates
+    const [enableRatings, setEnableRatings] = useState(true);
+    const [enableReviews, setEnableReviews] = useState(false);
+    const [enableStockTracking, setEnableStockTracking] = useState(true);
+    const [gstInclusive, setGstInclusive] = useState(true);
 
     const isFocused = useIsFocused();
     const gstInputContainerRef = useRef(null); // Reference to the GST TextInput
@@ -75,6 +80,7 @@ const ProductInfoScreen = (props) => {
 
     const theme = useTheme();
     const styles = makeStyles(theme);
+
 
     // Validation schema using Yup
     const schema = yup.object().shape({
@@ -381,11 +387,21 @@ const ProductInfoScreen = (props) => {
 
 
 
+    const ProductInfoHeader = () => {
+        return <View style={{height: 60, paddingHorizontal: 15, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'white', color: 'black'}}>
+            <Pressable onPressIn={() => { router.back()}}
+            >
+                <MaterialIcons name={'arrow-back'} size={36} style={{color: 'black'}}/>
+            </Pressable>
+            <Text variant={'titleLarge'} style={{ color: 'black'}}>Product Info</Text>
+            <Pressable onPressIn={handleSubmit(onSubmit)}><MaterialIcons name={'arrow-forward'} size={36} style={{color: 'black'}}/></Pressable>
+        </View>;
+    }
+
     useEffect(() => {
-        navigation.setOptions({ headerRight: () => <Button contentStyle={{flexDirection: 'row-reverse'}} icon={'arrow-right'} mode={'contained'} style={{borderRadius: 0, backgroundColor: theme.colors.primary}} onPressIn={handleSubmit(onSubmit)}>
-                Preview
-            </Button>});
+        navigation.setOptions({header: ProductInfoHeader});
     },[navigation])
+
 
     const publishProduct = async () => {
         // const productData = { productName, price, description, stock, getValues('attributes') };
@@ -599,6 +615,40 @@ const ProductInfoScreen = (props) => {
                         />
                     )}
                 />
+
+                <View style={styles.optionColumn}>
+                    <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginVertical: 8, marginHorizontal: 10}}>
+                        <Switch
+                            value={enableRatings}
+                            onValueChange={setEnableRatings}
+                            style={{}}
+                        />
+                        <Text variant={'bodyLarge'}>Enable Ratings</Text>
+                    </View>
+                    <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginVertical: 8, marginHorizontal: 10}}>
+                        <Switch
+                            value={enableReviews}
+                            onValueChange={setEnableReviews}
+                            style={{}}
+                        />
+                        <Text variant={'bodyLarge'}>Enable Reviews</Text>
+                    </View>
+                    <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginVertical: 8, marginHorizontal: 10}}>
+                        <Switch
+                            value={enableStockTracking}
+                            onValueChange={setEnableStockTracking}
+                            style={{}}
+                        />
+                        <Text variant={'bodyLarge'}>Enable Stock Tracking</Text>
+                    </View>
+                    <Checkbox.Item
+                        label="GST Inclusive"
+                        position={'leading'}
+                        labelStyle={{ fontSize: 16}}
+                        status={gstInclusive ? "checked" : "unchecked"}
+                        onPress={() => setGstInclusive(!gstInclusive)}
+                    />
+                </View>
 
                 {/* Collections Section */}
                 <Text style={styles.header}>Collections</Text>
@@ -871,6 +921,16 @@ const makeStyles = ({ colors }) =>
         menuItemContainer: {
             justifyContent: "center",
             alignItems: "flex-start",
+        },
+        optionColumn: {
+            flexDirection: "row",
+            alignItems: "flex-start",
+            justifyContent: "flex-start",
+            flexWrap: 'wrap',
+            marginVertical: 10,
+            // marginBottom: 10,
+            // backgroundColor: 'white',
+            padding: 0
         },
         header: {
             fontSize: 18,

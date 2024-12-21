@@ -23,10 +23,11 @@ import { useMemo } from "react";
 import GalleryMediaItem from "./GalleryMediaItem";
 import {useNavigation, useRouter} from "expo-router";
 import {useIsFocused} from "@react-navigation/native";
-import {updateField} from "../store/newProductSlice";
+import {resetNewProduct, updateField} from "../store/newProductSlice";
 import {useDispatch, useSelector} from "react-redux";
 import _ from "lodash";
 import * as Crypto from 'expo-crypto';
+import {CommonActions} from "@react-navigation/native";
 
 const  MediaGallery = (props) => {
     const [media, setMedia] = useState([]);
@@ -87,10 +88,30 @@ const  MediaGallery = (props) => {
         return asset;
     };
 
+    const resetNavigationStack = () => {
+        // Reset the navigation stack to the Dashboard tab
+        navigation.dispatch(
+            CommonActions.reset({
+                index: 0,
+                routes: [{ name: "Dashboard" }], // Replace with your Dashboard screen name
+            })
+        );
+    }
+
+
     const MediaHeader = ({cameraOpen}) => {
+
         if (cameraOpen) { return null}
         else {
-            return <View style={{height: 60, paddingHorizontal: 15, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: theme.colors.secondary, color: 'white'}}>
+            return <View style={{height: 60, paddingHorizontal: 15, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'black', color: 'white'}}>
+                <Pressable onPressIn={() => {
+                    console.log('cancel workflow');
+                    dispatch(resetNewProduct());
+                    resetNavigationStack();
+                }}
+                >
+                    <MaterialIcons name={'close'} size={36} style={{color: 'white'}}/>
+                </Pressable>
                 <Text variant={'titleLarge'} style={{ color: 'white'}}>Product Media</Text>
                 <Pressable onPressIn={() => {console.log('press'); router.push('./AddProductInfo')}}><MaterialIcons name={'arrow-forward'} size={36} style={{color: 'white'}}/></Pressable>
             </View>;
@@ -198,7 +219,7 @@ const  MediaGallery = (props) => {
                 console.log('LINE201');
                 const itemsWithPromises = selectedItems.map(async (item, i) => {
 
-                                console.log('line 182, i:', i, ', item:', item);
+                                // console.log('line 182, i:', i, ', item:', item);
                                 let localUri = null;
                                 try {
                                 if (item.mediaType === 'video' && Platform.OS === 'ios') {
@@ -206,7 +227,7 @@ const  MediaGallery = (props) => {
                                     localUri = assetInfo.localUri;
                                 }
                                     }catch (e) {
-                                    console.log('line206, e:', e);
+                                    // console.log('line206, e:', e);
                                 }
                                 console.log('localuri:', localUri);
 
@@ -221,7 +242,7 @@ const  MediaGallery = (props) => {
                     };
                 });
                 const resolvedItems = await Promise.all(itemsWithPromises);
-                console.log('resolvedItems:', resolvedItems);
+                // console.log('resolvedItems:', resolvedItems);
                 setPreviewMediaItems(resolvedItems);
             } catch (err) {
                 console.log('line217, err:', err);
@@ -388,7 +409,6 @@ const  MediaGallery = (props) => {
     const renderItem = useCallback(({ item }) => {
         let i = selectedItemsIds.findIndex( (id) => id===item.id);
         let isSelected = i >=0;
-        console.log('line393, item:', item);
         return <GalleryMediaItem item={item} thumbnail={thumbnails[item.id] || ''} toggleSelection={toggleSelection} isSelected={isSelected} selectionIndex={i} isGalleryScrolling={checkIsScrolling}/>;
     },[selectedItemsIds, toggleSelection, thumbnails]);
 

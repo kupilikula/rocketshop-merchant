@@ -12,7 +12,11 @@ const initialState = {
     tags: [],
     mediaItems: [],
     rating: null,
-    numberOfRatings: 0
+    numberOfRatings: 0,
+    enableRatings: true,
+    enableReviews: false,
+    enableStockTracking: true,
+    gstInclusive: true
 };
 
 const newProductSlice = createSlice({
