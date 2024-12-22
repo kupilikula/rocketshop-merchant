@@ -1,41 +1,19 @@
-import {View, StyleSheet, Pressable, ScrollView, Switch, Platform} from "react-native";
-import {Button, Card, Chip, Surface, Text, ToggleButton, useTheme} from "react-native-paper";
+import {View, StyleSheet, ScrollView, Switch, TouchableOpacity} from "react-native";
+import {Card, Chip, Surface, Text, useTheme} from "react-native-paper";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FlatListSlider from "./MediaSlider/FlatListSlider";
 import MediaItem from "./MediaSlider/MediaItem";
 import { Rating } from '@kolking/react-native-rating';
-import {Colors} from "../styles/Colors";
-import {useNavigation, useRouter} from "expo-router";
-import React, {useEffect, useState} from "react";
-import {generateBoxShadowStyle} from "../styles/generateShadow";
-import {useSafeAreaInsets} from "react-native-safe-area-context";
+import {useRouter} from "expo-router";
+import React, {useState} from "react";
 
 export default function ProductScreenMerchant (props) {
 
     const router = useRouter();
     const theme = useTheme();
-    // const navigation = useNavigation();
     const styles = makeStyles(theme);
     console.log('props:', props.product.productId);
     const [isActive, setIsActive] = useState(props.product.isActive);
-    // const insets = useSafeAreaInsets();
-
-
-
-
-    // useEffect(() => {
-    //     console.log('line 36')
-    //     navigation.setOptions({header: ProductScreenMerchantHeader});
-    // },[navigation])
-
-    // useEffect(() => {
-    //     navigation.setOptions({
-    //         header: () => <View style={{height: 60, backgroundColor: theme.colors.secondary, width: '100%'}}></View>
-    //         // headerTitle: 'All Products',
-    //         // headerLeft: () =>
-    //     });
-    // },[navigation])
-
 
     const handleStatusChange = (status) => {
         console.log('status:', status);
@@ -78,7 +56,22 @@ export default function ProductScreenMerchant (props) {
             </Text>
             <View style={styles.cardContentView}>
                 <View style={styles.actionContainer}>
-                    <Button mode={'contained'} style={{borderRadius: 8, marginBottom: 15}}>Edit Product</Button>
+                    <TouchableOpacity
+                        onPress={() => {}}
+                        style={{
+                            height: 40,
+                            width: 40,
+                            borderRadius: 20,
+                            marginBottom: 10,
+                            backgroundColor: theme.colors.softPrimary,
+                            display: 'flex',
+                            justifyContent: 'center', // Center content vertically
+                            alignItems: 'center', // Center content horizontally
+                        }}
+                    >
+                        <MaterialIcons name="edit" size={28} style={{color: theme.colors.primary}} />
+                    </TouchableOpacity>
+                    {/*<Button mode={'contained'} style={{borderRadius: 8, marginBottom: 15}}>Edit Product</Button>*/}
                     <View style={styles.statusContainer}>
                     <Switch
                         // style={ Platform.OS==='ios' ? { transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }]} : {}}
@@ -97,13 +90,6 @@ export default function ProductScreenMerchant (props) {
                     <Text variant="titleMedium">{'Price: ₹' + props.product.price.toString()}</Text>
                     <Text variant="titleMedium">{'Stock: ' + props.product.stock.toString()}</Text>
                     </View>
-                        {/*<Button*/}
-                        {/*    mode="contained"*/}
-                        {/*    style={styles.actionButton}*/}
-                        {/*    onPress={() => router.push(`/EditProductInfo/${props.product.productId}`)}*/}
-                        {/*>*/}
-                        {/*    Edit Product*/}
-                        {/*</Button>*/}
                 </View>
                 <View style={styles.gstContainer}>
                     <Text>{"GST Rate: " + props.product.gstRate + "%"}</Text>
@@ -152,9 +138,6 @@ export default function ProductScreenMerchant (props) {
                     >
                         {tag}
                     </Chip>
-                    // <Chip key={i} style={styles.chip}>
-                    //     {tag}
-                    // </Chip>
                 ))}
             </View>
 
