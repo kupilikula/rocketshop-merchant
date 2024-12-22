@@ -15,7 +15,7 @@ const ProductPickerModal = ({ visible, onClose, onApply }) => {
     // State for product selection
     const [products, setProducts] = useState(initialProducts);
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedProducts, setSelectedProducts] = useState([]);
+    const [selectedProductIds, setSelectedProductIds] = useState([]);
     const fuse = useMemo(() => {
         return new Fuse(products, {
             keys: ['productName', 'description', 'collections', 'tags', 'attributes.*'],
@@ -34,7 +34,7 @@ const ProductPickerModal = ({ visible, onClose, onApply }) => {
     }, [searchQuery, fuse]);
 
     const toggleProductSelection = (productId) => {
-        setSelectedProducts((prev) =>
+        setSelectedProductIds((prev) =>
             prev.includes(productId)
                 ? prev.filter((id) => id !== productId)
                 : [...prev, productId]
@@ -47,12 +47,28 @@ const ProductPickerModal = ({ visible, onClose, onApply }) => {
             <ProductDisplayCompactMerchant product={item} cardMode={'contained'}/>
             </View>
             <Checkbox.Android
-                status={selectedProducts.includes(item.productId) ? 'checked' : 'unchecked'}
+                status={selectedProductIds.includes(item.productId) ? 'checked' : 'unchecked'}
                 onPress={() => toggleProductSelection(item.productId)}
             />
 
         </View>
     );
+
+    const handleSelectAllFiltered = () => {
+        if (allSelected()) {
+            let newList = selectedProductIds.filter((id) => !filteredProducts.map((p) => p.productId).includes(id));
+            console.log('newList:', newList);
+            setSelectedProductIds(newList);
+        } else {
+            let unique = [...new Set([...selectedProductIds, ...filteredProducts.map( (p)=> p.productId)])];
+            setSelectedProductIds(unique);
+
+        }
+    }
+
+    const allSelected = () => {
+        return filteredProducts.reduce((A,f) => A && selectedProductIds.includes(f.productId), true)
+    }
 
     return (
         <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -66,9 +82,15 @@ const ProductPickerModal = ({ visible, onClose, onApply }) => {
                     mode="outlined"
                 />
 
+                <View>
+                    <Button mode={'text'} onPress={handleSelectAllFiltered}>
+                        {!allSelected() ? 'Select All Results' : 'Unselect All'}
+                    </Button>
+                </View>
                 {/* Product List */}
                 <FlatList
                     data={filteredProducts}
+                    extraData={selectedProductIds}
                     keyExtractor={(item) => item.productId}
                     renderItem={renderProductItem}
                     ItemSeparatorComponent={() => <Divider />}
@@ -80,7 +102,7 @@ const ProductPickerModal = ({ visible, onClose, onApply }) => {
                     <Button mode="outlined" onPress={onClose}>
                         Cancel
                     </Button>
-                    <Button mode="contained" onPress={() => onApply(selectedProducts)}>
+                    <Button mode="contained" onPress={() => onApply(selectedProductIds)}>
                         Apply
                     </Button>
                 </View>

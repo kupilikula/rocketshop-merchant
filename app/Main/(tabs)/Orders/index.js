@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {FlatList, View, StyleSheet, TouchableOpacity} from 'react-native';
 import {
     Card,
@@ -31,21 +31,31 @@ const initialOrders = faker.helpers.multiple(getOrder, {count: 100});
 const Orders = () => {
     const [orders, setOrders] = useState(initialOrders);
     const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState(["Received", "Payment Received"]);
+    const [statusFilter, setStatusFilter] = useState(['All']);
+    const [statusQuickFilter, setStatusQuickFilter] = useState('All');
+    const [dateQuickFilter, setDateQuickFilter] = useState('Today');
     const [minTotal, setMinTotal] = useState('');
     const [maxTotal, setMaxTotal] = useState('');
     const [filterDates, setFilterDates] = useState({startDate: new Date(new Date().setFullYear(new Date().getFullYear() - 1)), endDate: new Date()});
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [sortField, setSortField] = useState('orderDate'); // Default sorting
-    const [sortOrder, setSortOrder] = useState('ascending'); // Default sorting order
+    const [sortOrder, setSortOrder] = useState('descending'); // Default sorting order
     const [filterExpanded, setFilterExpanded] = useState(false);
     const [sortExpanded, setSortExpanded] = useState(false);
     const [showStartPicker, setShowStartPicker] = useState(false);
     const [showEndPicker, setShowEndPicker] = useState(false);
     const [sortFieldMenuVisible, setSortFieldMenuVisible] = useState(false); // Menu visibility
 
-    const params = useLocalSearchParams();
-    console.log('params:',params);
+    const {filter} = useLocalSearchParams();
+    console.log('params:',filter);
+    useEffect(() => {
+        console.log('line50:, params:', filter);
+        if (filter==='open') {
+            setStatusFilter(orderStatusList.slice(0,6))
+        }
+    }, [filter])
+
+
     const toggleSortOrder = () => {
         setSortOrder((prev) => (prev === 'ascending' ? 'descending' : 'ascending'));
     };
@@ -161,6 +171,49 @@ const Orders = () => {
         return x
     }
 
+    useEffect(() => {
+        if (statusQuickFilter!=='') {
+            if (statusQuickFilter==='All') {
+                setStatusFilter(orderStatusList);
+            } else if (statusQuickFilter==='Open'){
+                setStatusFilter(orderStatusList.slice(0,6));
+            } else if (statusQuickFilter==='Fulfilled') {
+                setStatusFilter(orderStatusList.slice(6,9));
+            } else if (statusQuickFilter==='Unfulfilled') {
+                setStatusFilter(orderStatusList.slice(9));
+            }
+        }
+    },[statusQuickFilter])
+
+    useEffect(() => {
+        console.log('line189, dateQuickFilter', dateQuickFilter);
+        if (dateQuickFilter==='Today') {
+            setFilterDates({startDate: new Date(), endDate: new Date()});
+        } else if (dateQuickFilter==='This Week'){
+            console.log('line 193')
+            let end = new Date();
+            let today = new Date();
+            // Calculate the difference between the date's day of the month and its day of the week
+            var diff = end.getDate() - end.getDay() + (end.getDay() === 0 ? -6 : 1);
+
+            let start = new Date(today.setDate(diff));
+            console.log('start:', start, ', end:', end);
+            setFilterDates({startDate: start, endDate: end})
+        } else if (dateQuickFilter==='This Month') {
+            let end = new Date();
+            let today = new Date();
+            let start = new Date(today.getFullYear(), today.getMonth(), 1);
+            // Calculate the difference between the date's day of the month and its day of the week
+            setFilterDates({startDate: start, endDate: end})
+        } else if (dateQuickFilter==='This Year') {
+            let end = new Date();
+            let today = new Date();
+            let start = new Date(today.getFullYear(), 0, 1);
+            // Calculate the difference between the date's day of the month and its day of the week
+            setFilterDates({startDate: start, endDate: end})
+        }
+    }, [dateQuickFilter])
+
     const filterAndSortComponent = () =>
         <>
             <View style={{marginVertical: 10}}>
@@ -238,10 +291,102 @@ const Orders = () => {
                 </View>
             </View>
 
+                <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Order Date</Text>
+                {/* Display Selected Start and End Dates */}
+                {/* Row Layout for Start and End Date Cards */}
+                <View style={styles.flexWrapRow}>
+                    {['Today','This Week', 'This Month', 'This Year'].map((f) => {
+                        return <Chip
+                            key={f}
+                            selected={dateQuickFilter===f}
+                            onPress={() => {
+                                if (dateQuickFilter===f) {
+                                    setDateQuickFilter('')
+                                } else {
+                                    setDateQuickFilter(f);
+                                }
+
+                            }}
+                            style={{margin: 2, backgroundColor: theme.colors.softPrimary, borderColor: 'black'}}
+                            textStyle={{color: dateQuickFilter===f ? 'black' : theme.colors.primary}}
+                            selectedColor={theme.colors.black}
+                        >
+                            {f}
+                        </Chip>
+                    })}
+                </View>
+                <Divider style={{marginVertical: 2}}/>
+                <View style={styles.dateRow}>
+                    <View style={{display: 'flex', flexDirection: 'column', flex: 0.48}}>
+                        <Text variant={'bodySmall'}>Start Date</Text>
+                        <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.dateInput}>
+                            <MaterialCommunityIcons name="calendar" size={20} color={theme.colors.primary} />
+                            <Text style={styles.dateText}>
+                                {filterDates.startDate ? filterDates.startDate.toLocaleDateString() : 'Start Date'}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                    {showStartPicker && (
+                        <DatePicker
+                            style={{backgroundColor: theme.colors.primary}}
+                            accentColor={theme.colors.primary}
+                            mode='date'
+                            value={filterDates.startDate || new Date()}
+                            onChange={(event, date) => {
+                                setShowStartPicker(false);
+                                if (date) setFilterDates((prev) => ({ ...prev, startDate: date }));
+                            }}
+                        />
+                    )}
+                    <View style={{display: 'flex', flexDirection: 'column', flex: 0.48}}>
+                        <Text variant={'bodySmall'}>Stop Date</Text>
+                        <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.dateInput}>
+                            <MaterialCommunityIcons name="calendar" size={20} color={theme.colors.primary} />
+                            <Text style={styles.dateText}>
+                                {filterDates.endDate ? filterDates.endDate.toLocaleDateString() : 'End Date'}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                    {showEndPicker && (
+                        <DatePicker
+                            mode="date"
+                            value={filterDates.endDate || new Date()}
+                            onChange={(event, date) => {
+                                setShowEndPicker(false);
+                                if (date) setFilterDates((prev) => ({ ...prev, endDate: date }));
+                            }}
+                        />
+                    )}
+                </View>
+                </View>
+
             <View style={{marginHorizontal: 10}}>
                 <Text style={styles.sectionTitle}>Order Status</Text>
                 <View style={styles.flexWrapRow}>
-                    {['All', ...orderStatusList].map((status) => (
+                    {['All','Open', 'Fulfilled', 'Unfulfilled'].map((f) => {
+                        return <Chip
+                            key={f}
+                            selected={statusQuickFilter===f}
+                            onPress={() => {
+                                if (statusQuickFilter===f) {
+                                    setStatusQuickFilter('')
+                                } else {
+                                    setStatusQuickFilter(f);
+                                }
+
+                            }}
+                            style={{margin: 2, backgroundColor: theme.colors.softPrimary, borderColor: 'black'}}
+                            textStyle={{color: statusQuickFilter===f ? 'black' : theme.colors.primary}}
+                            selectedColor={theme.colors.black}
+                        >
+                            {f}
+                        </Chip>
+                    })}
+                </View>
+                <Divider style={{marginVertical: 2}}/>
+                <View style={styles.flexWrapRow}>
+                    {orderStatusList.map((status) => (
                         <Chip
                             key={status}
                             selected={statusFilter.includes(status)}
@@ -268,45 +413,7 @@ const Orders = () => {
                     ))}
                 </View>
 
-                <Text style={styles.sectionTitle}>Order Date</Text>
-                {/* Display Selected Start and End Dates */}
-                {/* Row Layout for Start and End Date Cards */}
 
-                <View style={styles.dateRow}>
-                    <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.dateInput}>
-                        <MaterialCommunityIcons name="calendar" size={20} color={theme.colors.primary} />
-                        <Text style={styles.dateText}>
-                            {filterDates.startDate ? filterDates.startDate.toLocaleDateString() : 'Start Date'}
-                        </Text>
-                    </TouchableOpacity>
-                    {showStartPicker && (
-                        <DatePicker
-                            mode='date'
-                            value={filterDates.startDate || new Date()}
-                            onChange={(event, date) => {
-                                setShowStartPicker(false);
-                                if (date) setFilterDates((prev) => ({ ...prev, startDate: date }));
-                            }}
-                        />
-                    )}
-
-                    <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.dateInput}>
-                        <MaterialCommunityIcons name="calendar" size={20} color={theme.colors.primary} />
-                        <Text style={styles.dateText}>
-                            {filterDates.endDate ? filterDates.endDate.toLocaleDateString() : 'End Date'}
-                        </Text>
-                    </TouchableOpacity>
-                    {showEndPicker && (
-                        <DatePicker
-                            mode="date"
-                            value={filterDates.endDate || new Date()}
-                            onChange={(event, date) => {
-                                setShowEndPicker(false);
-                                if (date) setFilterDates((prev) => ({ ...prev, endDate: date }));
-                            }}
-                        />
-                    )}
-                </View>
 
 
                 {/*<View style={styles.row}>*/}
@@ -446,7 +553,7 @@ const makeStyles = ({colors}) => StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.grayBorder
     },
-    sortOrderChip: {margin: 5, backgroundColor: colors.white, color: colors.black},
+    sortOrderChip: {margin: 0, backgroundColor: colors.white, color: colors.black},
     orderStatusChip: {margin: 5, },
     // orderStatusChipSelected: {backgroundColor: colors.secondary, color: colors.white},
     checkboxItemCompact: {flex: 1, marginHorizontal: 2, paddingVertical: 0, paddingHorizontal: 5,},    dateContainer: {
@@ -475,7 +582,6 @@ const makeStyles = ({colors}) => StyleSheet.create({
         borderWidth: 1,
         borderColor: colors.primary,
         borderRadius: 5,
-        flex: 0.48,
     },
     dateText: {
         marginLeft: 10,

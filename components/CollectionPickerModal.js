@@ -16,7 +16,7 @@ const CollectionPickerModal = ({ visible, onClose, onApply }) => {
     // State for product selection
     const [collections, setCollections] = useState(initialCollections);
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCollections, setSelectedCollections] = useState([]);
+    const [selectedCollectionIds, setSelectedCollectionIds] = useState([]);
     const fuse = useMemo(() => {
         return new Fuse(collections, {
             keys: ['collectionName'],
@@ -35,12 +35,29 @@ const CollectionPickerModal = ({ visible, onClose, onApply }) => {
     }, [searchQuery, fuse]);
 
     const toggleCollectionSelection = (collectionId) => {
-        setSelectedCollections((prev) =>
+        setSelectedCollectionIds((prev) =>
             prev.includes(collectionId)
                 ? prev.filter((id) => id !== collectionId)
                 : [...prev, collectionId]
         );
     };
+
+    const allSelected = () => {
+        return filteredCollections.reduce((A,f) => A && selectedCollectionIds.includes(f.collectionId), true)
+    }
+    const handleSelectAllFiltered = () => {
+        console.log('selectedP:', selectedCollectionIds);
+        // console.log('filP:', filteredProducts);
+        if (allSelected()) {
+            let newList = selectedCollectionIds.filter((id) => !filteredCollections.map((p) => p.collectionId).includes(id));
+            console.log('newList:', newList);
+            setSelectedCollectionIds(newList);
+        } else {
+            let unique = [...new Set([...selectedCollectionIds, ...filteredCollections.map( (c)=> c.collectionId)])];
+            setSelectedCollectionIds(unique);
+        }
+    }
+
 
     const renderCollectionItem = ({ item }) => (
         <View style={styles.collectionItem}>
@@ -48,7 +65,7 @@ const CollectionPickerModal = ({ visible, onClose, onApply }) => {
             <CollectionListItem collection={item} cardMode={'contained'} showStatusChip={true} showEditIcon={false}/>
             </View>
             <Checkbox.Android
-                status={selectedCollections.includes(item.collectionId) ? 'checked' : 'unchecked'}
+                status={selectedCollectionIds.includes(item.collectionId) ? 'checked' : 'unchecked'}
                 onPress={() => toggleCollectionSelection(item.collectionId)}
             />
 
@@ -66,7 +83,11 @@ const CollectionPickerModal = ({ visible, onClose, onApply }) => {
                     style={styles.searchBar}
                     mode="outlined"
                 />
-
+                <View>
+                    <Button mode={'text'} onPress={handleSelectAllFiltered}>
+                        {!allSelected() ?  'Select All Results' : 'Unselect All Results'}
+                    </Button>
+                </View>
                 {/* Product List */}
                 <FlatList
                     data={filteredCollections}
@@ -81,7 +102,7 @@ const CollectionPickerModal = ({ visible, onClose, onApply }) => {
                     <Button mode="outlined" onPress={onClose}>
                         Cancel
                     </Button>
-                    <Button mode="contained" onPress={() => onApply(selectedCollections)}>
+                    <Button mode="contained" onPress={() => onApply(selectedCollectionIds)}>
                         Apply
                     </Button>
                 </View>

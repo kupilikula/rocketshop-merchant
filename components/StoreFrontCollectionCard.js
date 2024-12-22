@@ -24,7 +24,7 @@ export default function StoreFrontCollectionCard(props) {
                 <Text variant={'bodyLarge'}>{props.collection.products.length.toString() + ' Products'}</Text>
             </View>
             <View>
-                <Link href={'/Main/(tabs)/Store/Collections/Collection/' + props.collection.collectionId}><Text variant={'bodyLarge'}>See all</Text></Link>
+                <Link href={'/Main/(tabs)/Collections/Collection/' + props.collection.collectionId}><Text variant={'bodyLarge'}>See All</Text></Link>
             </View>
         </View>
         <View style={{alignSelf: 'center', flexDirection: 'row', flexWrap: 'wrap', display: 'flex', width: '100%', justifyContent: 'center'}}>

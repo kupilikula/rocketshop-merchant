@@ -106,21 +106,57 @@ const  MediaGallery = (props) => {
 
         if (cameraOpen) { return null}
         else {
-            return <View style={[generateBoxShadowStyle(0,4,'#171717', 0.2, 3, 4, '#171717'), {height: 60+ insets.top, paddingTop: insets.top, paddingHorizontal: 15, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'black', color: 'white'}]}>
-                <Pressable onPressIn={() => {
-                    console.log('cancel workflow');
-                    dispatch(resetNewProduct());
-                    resetNavigationStack();
-                }}
+            return <View
+                style={[
+                    generateBoxShadowStyle(0, 4, '#171717', 0.2, 3, 4, '#171717'),
+                    {
+                        height: 60 + insets.top,
+                        paddingTop: insets.top,
+                        paddingHorizontal: 15,
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        backgroundColor: 'black'
+                    },
+                ]}
+            >
+                {/* Left Icon (Back Button) */}
+                <Pressable
+                    onPressIn={() => {
+                        console.log('cancel workflow');
+                        dispatch(resetNewProduct());
+                        resetNavigationStack();
+                    }}
+                    style={{ flex: 1 }}
                 >
-                    <MaterialIcons name={'close'} size={36} style={{color: 'white'}}/>
+                    <MaterialIcons name="close" size={36} style={{ color: 'white' }} />
                 </Pressable>
-                <Text variant={'titleLarge'} style={{ color: 'white'}}>Product Media</Text>
-                {previewMediaItems.length > 0 &&
-                <Pressable onPressIn={() => {console.log('press'); router.push('./AddProductInfo')}}><MaterialIcons name={'arrow-forward'} size={36} style={{color: 'white'}}/></Pressable>
-                }
-            </View>;
 
+                {/* Title */}
+                <Text
+                    variant="titleLarge"
+                    style={{
+                        flex: 2, // Allow the title to occupy its space while centering
+                        textAlign: 'center',
+                        color: 'white',
+                    }}
+                >
+                    Product Media
+                </Text>
+
+                {/* Right Icon (Forward Button) */}
+                <Pressable
+                    onPressIn={() => {
+                        console.log('press');
+                        if (previewMediaItems.length>0){
+                            router.push('./AddProductInfo');
+                        }
+                    }}
+                    style={{ flex: 1, alignItems: 'flex-end' }}
+                >
+                    <MaterialIcons name="arrow-forward" size={36} style={{ color: previewMediaItems.length>0 ? 'white' : 'black' }} />
+                </Pressable>
+            </View>
         }
     }
 
@@ -297,7 +333,7 @@ const  MediaGallery = (props) => {
     useEffect(() => {
         console.log('effect: openCamera:', openCamera);
             navigation.setOptions({header: () => <MediaHeader cameraOpen={openCamera}/>})
-    },[navigation, openCamera])
+    },[navigation, openCamera, previewMediaItems.length > 0, dispatch, resetNavigationStack])
 
     const formatTime = (timeInSeconds) => {
         const minutes = Math.floor(timeInSeconds / 60);

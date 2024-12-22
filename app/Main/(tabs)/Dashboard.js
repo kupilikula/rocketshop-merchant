@@ -14,8 +14,8 @@ const Dashboard = () => {
     const router = useRouter();
     const theme = useTheme();
     const styles = makeStyles(theme);
-    const routeToOpenOrders = (filter) => {
-        router.push('Orders', { filter: 'open' });
+    const routeToOpenOrders = () => {
+        router.push({pathname: '/Main/Orders', params: {filter: 'open' }});
     };
 
     const data = {
@@ -31,10 +31,11 @@ const Dashboard = () => {
         },
     };
 
-    const [ordersChartTimeWindow, setOrdersChartTimeWindow] = useState("week");
-    const [salesChartTimeWindow, setSalesChartTimeWindow] = useState("week");
-
+    const [chartTimeWindow, setChartTimeWindow] = useState("week");
+    // const [salesChartTimeWindow, setSalesChartTimeWindow] = useState("week");
+    const [salesOrOrders, setSalesOrOrders] = useState("Sales");
     function lastNDays (n) {
+
         var result = [];
         for (var i= n-1; i>=0; i--) {
             var d = new Date();
@@ -49,23 +50,6 @@ const Dashboard = () => {
             <ScrollView contentContainerStyle={styles.scrollContent}>
 
                 {/* Useful Links */}
-                <Text variant={'titleLarge'} style={{marginVertical: 10}}>Quick Links</Text>
-                <View>
-
-                    <View style={{display: 'flex', flexDirection: 'row', alignItems:'center', justifyContent: 'space-between'}}>
-                        <View style={{display: 'flex', flexDirection: 'row'}}>
-                        <Button icon={'receipt'} mode="contained" style={{borderRadius:8, marginRight: 10}} onPress={() => handleNavigateOrders('openOrders')}>
-                            Open Orders
-                        </Button>
-                        </View>
-                        <View style={{display: 'flex', flexDirection: 'row'}}>
-                        <Button icon={'battery-20'} mode="contained" style={{borderRadius:8}} onPress={() => navigation.navigate('LowStock')}>
-                            Low Stock Products
-                        </Button>
-                        </View>
-                    </View>
-                </View>
-
                 {/* Summary of Open Orders */}
                 <View style={{margin: 4}}>
                 <Text variant={'titleLarge'} style={{marginVertical: 10}}>Today</Text>
@@ -90,12 +74,49 @@ const Dashboard = () => {
                 </View>
                 </View>
 
+
+                <Text variant={'titleLarge'} style={{marginVertical: 10}}>Quick Links</Text>
+                <View style={{marginBottom: 15}}>
+                    <View style={{display: 'flex', flexDirection: 'row', alignItems:'center', justifyContent: 'space-between'}}>
+                        <View style={{display: 'flex', flexDirection: 'row'}}>
+                            <Button icon={'receipt'} mode="contained" style={{borderRadius:8, marginRight: 10}} onPress={() => routeToOpenOrders()}>
+                                Open Orders
+                            </Button>
+                        </View>
+                        <View style={{display: 'flex', flexDirection: 'row'}}>
+                            <Button buttonColor={theme.colors.error} icon={'battery-20'} mode="contained" style={{borderRadius:8}} onPress={() => navigation.navigate('LowStock')}>
+                                Low Stock Products
+                            </Button>
+                        </View>
+                    </View>
+                </View>
+
+
                 <Text variant={'titleLarge'} style={{marginVertical: 10}}>Recent Trend</Text>
                 {/* Sales */}
                 <Card style={styles.card}>
                     <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-                        <Text variant={'titleLarge'}>Sales</Text>
-                        <RadioButton.Group onValueChange={(newValue) => setSalesChartTimeWindow(newValue)} value={salesChartTimeWindow}>
+                        <Text variant={'titleLarge'}>{salesOrOrders}</Text>
+                        <View style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end'}}>
+                            <RadioButton.Group onValueChange={(newValue) => setSalesOrOrders(newValue)} value={salesOrOrders}>
+                                <View style={styles.radioRow}>
+                                    <RadioButton.Item
+                                        label="Sales"
+                                        value="Sales"
+                                        color={theme.colors.primary}
+                                        position="leading"
+                                        style={styles.radioButton}
+                                    />
+                                    <RadioButton.Item
+                                        label="Orders"
+                                        value="Orders"
+                                        color={theme.colors.primary}
+                                        position="leading"
+                                        style={styles.radioButton}
+                                    />
+                                </View>
+                            </RadioButton.Group>
+                            <RadioButton.Group onValueChange={(newValue) => setChartTimeWindow(newValue)} value={chartTimeWindow}>
                             <View style={styles.radioRow}>
                                 <RadioButton.Item
                                     label="Week"
@@ -113,6 +134,7 @@ const Dashboard = () => {
                                 />
                             </View>
                         </RadioButton.Group>
+                        </View>
                     </View>
                     {/*<Card.Content>*/}
                     <View style={{justifyContent: 'center', display: 'flex', flexDirection: 'row'}}>
@@ -122,60 +144,24 @@ const Dashboard = () => {
                         >
                             <VictoryAxis />
                             <VictoryAxis dependentAxis={true} style={{ axis: { display: 'none' }, ticks: { display: 'none' }, tickLabels: { display: 'none' } }} />
-                            {salesChartTimeWindow==='week' && <VictoryBar
+                            {chartTimeWindow==='week' && salesOrOrders==='Sales' && <VictoryBar
                                 data={data.sales.week.map((v,i) => {
                                     let past7days = lastNDays(7);
                                     return ({x: past7days[i], y: v, label: '₹' + v })
                                 })} />}
-                            {salesChartTimeWindow==='month' && <VictoryBar
+                            {chartTimeWindow==='month' && salesOrOrders==='Sales' && <VictoryBar
                                 data={['Week 1', 'Week 2', 'Week 3', 'Week 4'].map((w,i) => ({x: w, y: data.sales.month[i], label: '₹' + data.sales.month[i] }))}/>}
-
-                        </VictoryChart>
-                    </View>
-                </Card>
-
-                {/* Orders*/}
-                <Card style={styles.card}>
-                    <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-                    <Text variant={'titleLarge'}>Orders</Text>
-                        <RadioButton.Group onValueChange={(newValue) => setOrdersChartTimeWindow(newValue)} value={ordersChartTimeWindow}>
-                            <View style={styles.radioRow}>
-                                <RadioButton.Item
-                                    label="Week"
-                                    value="week"
-                                    color={theme.colors.primary}
-                                    position="leading"
-                                    style={styles.radioButton}
-                                />
-                                <RadioButton.Item
-                                    label="Month"
-                                    value="month"
-                                    color={theme.colors.primary}
-                                    position="leading"
-                                    style={styles.radioButton}
-                                />
-                            </View>
-                        </RadioButton.Group>
-                    </View>
-                    {/*<Card.Content>*/}
-                    <View style={{justifyContent: 'center', display: 'flex', flexDirection: 'row'}}>
-                        <VictoryChart
-                            // domainPadding={{ x: 20 }}
-                            theme={VictoryTheme.clean}
-                        >
-                            <VictoryAxis />
-                            <VictoryAxis dependentAxis={true} style={{ axis: { display: 'none' }, ticks: { display: 'none' }, tickLabels: { display: 'none' } }} />
-                            {ordersChartTimeWindow==='week' && <VictoryBar
+                            {chartTimeWindow==='week' && salesOrOrders==='Orders' && <VictoryBar
                                 data={data.orders.week.map((v,i) => {
-                                let past7days = lastNDays(7);
-                                return ({x: past7days[i], y: v, label: v })
-                            })} />}
-                            {ordersChartTimeWindow==='month' && <VictoryBar
+                                    let past7days = lastNDays(7);
+                                    return ({x: past7days[i], y: v, label: v })
+                                })} />}
+                            {chartTimeWindow==='month' && salesOrOrders==='Orders' && <VictoryBar
                                 data={['Week 1', 'Week 2', 'Week 3', 'Week 4'].map((w,i) => ({x: w, y: data.orders.month[i], label: data.orders.month[i].toString() }))} />}
-
                         </VictoryChart>
                     </View>
                 </Card>
+
                 {/* Top Products */}
                 <Text variant={'titleLarge'} style={{marginVertical: 8}}>Top Products</Text>
                 {/*<Card style={styles.card}>*/}
@@ -185,7 +171,7 @@ const Dashboard = () => {
 
                 {/* Top Customers */}
                 <Text variant={'titleLarge'} style={{marginVertical: 8}}>Top Customers</Text>
-                {faker.helpers.multiple(getCustomer, {count: 3}).map((c) => <View key={c.customerId}><CustomerListItem customer={c} key={c.customerId}/><Divider style={{marginVertical: 8}}/></View>)}
+                {faker.helpers.multiple(getCustomer, {count: 3}).map((c) => <View key={c.customerId} style={{padding: 2}}><CustomerListItem customer={c} key={c.customerId}/><Divider style={{marginVertical: 8}}/></View>)}
             </ScrollView>
         </Surface>
     );
