@@ -1,12 +1,16 @@
-import {StyleSheet} from "react-native";
-import {useLocalSearchParams} from "expo-router";
+import { StyleSheet } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 import ProductDisplayCardCustomerStore from "../../../../../components/ProductDisplayCardCustomerStore";
-import {getProductForStore} from "../../../../../utils/fakeDataMethods";
+import { getProductForStore } from "../../../../../utils/fakeDataMethods";
 import ProductScreenMerchant from "../../../../../components/ProductScreenMerchant";
 
-export default function ProductPage (props) {
+export default function ProductPage(props) {
+  const { productId } = useLocalSearchParams();
 
-    const { productId} = useLocalSearchParams();
-
-    return <ProductScreenMerchant product={getProductForStore()} showProductDescription={true}/>
+  return (
+    <ProductScreenMerchant
+      product={getProductForStore()}
+      showProductDescription={true}
+    />
+  );
 }
