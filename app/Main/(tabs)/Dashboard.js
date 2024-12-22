@@ -9,8 +9,7 @@ import {
   RadioButton,
   useTheme,
 } from "react-native-paper";
-import { BarChart } from "react-native-chart-kit"; // Use any chart library of choice
-import { useNavigation } from "@react-navigation/native";
+// Use any chart library of choice
 import { useRouter } from "expo-router";
 import { faker } from "@faker-js/faker";
 import {

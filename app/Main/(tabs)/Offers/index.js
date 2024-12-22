@@ -1,14 +1,7 @@
 import React, { useState } from "react";
-import {
-  FlatList,
-  View,
-  StyleSheet,
-  Pressable,
-  ScrollView,
-} from "react-native";
+import { View, StyleSheet, Pressable, ScrollView } from "react-native";
 import {
   Text,
-  Switch,
   Card,
   Button,
   Divider,

@@ -1,4 +1,4 @@
-import { Redirect, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
 import { updateField } from "../../../../store/newProductSlice";
 import * as Crypto from "expo-crypto";

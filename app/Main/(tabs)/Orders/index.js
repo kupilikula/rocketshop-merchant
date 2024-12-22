@@ -3,17 +3,13 @@ import { FlatList, View, StyleSheet, TouchableOpacity } from "react-native";
 import {
   Card,
   Text,
-  Button,
   TextInput,
   RadioButton,
   Chip,
-  Appbar,
   useTheme,
   Surface,
-  Menu,
   Divider,
 } from "react-native-paper";
-import { useLocale, useNavigation } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Fuse from "fuse.js";
 import { getOrder } from "../../../../utils/fakeDataMethods";

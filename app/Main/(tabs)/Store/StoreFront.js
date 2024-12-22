@@ -1,14 +1,11 @@
-import { FlatList, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { Image } from "expo-image";
-import { Button, Card, Searchbar, Surface, Text } from "react-native-paper";
+import { Button, Card, Surface, Text } from "react-native-paper";
 import { foregroundColor } from "../../../../utils/foregroundColor";
 import { useEffect, useState } from "react";
 import StoreFrontCollectionCard from "../../../../components/StoreFrontCollectionCard";
 import { getStoreFullData } from "../../../../utils/fakeDataMethods";
 import Fuse from "fuse.js";
-import debounce from "lodash.debounce";
-import { SearchResultProduct } from "../../../../components/SearchResultProduct";
-import { Colors } from "../../../../styles/Colors";
 import { useRouter } from "expo-router";
 import ProductSearch from "../../../../components/ProductSearch";
 

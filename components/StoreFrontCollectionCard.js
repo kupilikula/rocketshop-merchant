@@ -1,7 +1,5 @@
 import { Card, Text } from "react-native-paper";
 import { View } from "react-native";
-import { Image } from "expo-image";
-import { Rating } from "@kolking/react-native-rating";
 import StoreFrontProductCard from "./StoreFrontProductCard";
 import { Link } from "expo-router";
 

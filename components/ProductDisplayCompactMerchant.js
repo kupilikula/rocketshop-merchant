@@ -1,4 +1,4 @@
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { Image } from "expo-image";
 import { Card, Text } from "react-native-paper";
 import { useRouter } from "expo-router";

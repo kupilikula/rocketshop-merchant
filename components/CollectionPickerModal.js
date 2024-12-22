@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { FlatList, View, StyleSheet, Modal, Pressable } from "react-native";
+import { FlatList, View, StyleSheet, Modal } from "react-native";
 import {
   TextInput,
   Checkbox,
@@ -11,8 +11,7 @@ import {
 } from "react-native-paper";
 import Fuse from "fuse.js";
 import { faker } from "@faker-js/faker";
-import { getCollection, getProductForStore } from "../utils/fakeDataMethods";
-import { ProductDisplayCompactMerchant } from "./ProductDisplayCompactMerchant";
+import { getCollection } from "../utils/fakeDataMethods";
 import CollectionListItem from "./CollectionListItem";
 
 const initialCollections = faker.helpers.multiple(getCollection, { count: 10 });

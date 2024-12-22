@@ -1,10 +1,8 @@
-import { View, StyleSheet, Pressable } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Card, Text } from "react-native-paper";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FlatListSlider from "./MediaSlider/FlatListSlider";
 import MediaItem from "./MediaSlider/MediaItem";
 import { Rating } from "@kolking/react-native-rating";
-import { Colors } from "../styles/Colors";
 import { useRouter } from "expo-router";
 
 export default function ProductDisplayCardMerchantListing(props) {

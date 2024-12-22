@@ -1,9 +1,6 @@
-import { Button, Searchbar, Surface } from "react-native-paper";
+import { Surface } from "react-native-paper";
 import { useEffect, useState } from "react";
 import { getStoreFullData } from "../../../../utils/fakeDataMethods";
-import Fuse from "fuse.js";
-import { FlatList, View } from "react-native";
-import { SearchResultProduct } from "../../../../components/SearchResultProduct";
 import { useLocalSearchParams } from "expo-router";
 import ProductSearch from "../../../../components/ProductSearch";
 

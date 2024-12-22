@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import LogoIconWithName from "./LogoIconWithName";
 import { DrawerActions } from "@react-navigation/native";

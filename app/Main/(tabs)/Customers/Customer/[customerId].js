@@ -1,8 +1,7 @@
 import React, { useMemo } from "react";
 import { ScrollView, View, StyleSheet } from "react-native";
-import { Text, Surface, Divider, useTheme, Card } from "react-native-paper";
+import { Text, Divider, useTheme, Card } from "react-native-paper";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { faker } from "@faker-js/faker";
 import { getCustomer } from "../../../../../utils/fakeDataMethods";
 
 const mockCustomer = getCustomer(); // Replace with actual customer data

@@ -1,22 +1,11 @@
 import React, {
-  Component,
-  createRef,
   forwardRef,
-  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
   useState,
 } from "react";
-import {
-  View,
-  StyleSheet,
-  LayoutAnimation,
-  Platform,
-  UIManager,
-  Dimensions,
-  Text,
-} from "react-native";
+import { View, StyleSheet, Platform, UIManager } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import Indicator from "./Indicator";
 import MediaItem from "./MediaItem";

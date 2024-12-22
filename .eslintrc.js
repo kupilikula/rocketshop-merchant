@@ -2,8 +2,9 @@
 module.exports = {
   extends: ["expo", "plugin:prettier/recommended"],
   ignorePatterns: ["/dist/*"],
-  plugins: ["prettier"],
+  plugins: ["prettier", "unused-imports"],
   rules: {
     "prettier/prettier": "error",
+    "unused-imports/no-unused-imports": "error",
   },
 };

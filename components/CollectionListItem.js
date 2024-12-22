@@ -1,7 +1,6 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { Card, Text, Chip, IconButton, useTheme } from "react-native-paper";
-import { ActiveStatusColors } from "@/utils/dataValues";
+import { Card, Text, Chip, useTheme } from "react-native-paper";
 
 const CollectionListItem = ({
   collection,

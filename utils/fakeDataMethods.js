@@ -1,4 +1,4 @@
-import { en, en_IN, en_US, Faker } from "@faker-js/faker";
+import { en, Faker } from "@faker-js/faker";
 import { orderStatusList } from "@/utils/dataValues";
 
 const fakerIndian = new Faker({ locale: [en] });

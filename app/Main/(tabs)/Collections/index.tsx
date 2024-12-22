@@ -6,7 +6,7 @@ import ReorderableList, {
   reorderItems,
   useReorderableDrag,
 } from "react-native-reorderable-list";
-import { Text, Card, Surface, useTheme } from "react-native-paper";
+import { Text, Surface, useTheme } from "react-native-paper";
 import { faker } from "@faker-js/faker";
 import { getCollection } from "@/utils/fakeDataMethods";
 import CollectionListItem from "../../../../components/CollectionListItem";

@@ -1,19 +1,11 @@
 import React from "react";
-import {
-  View,
-  StyleSheet,
-  FlatList,
-  Image,
-  ScrollView,
-  Pressable,
-} from "react-native";
+import { View, StyleSheet, Image, ScrollView, Pressable } from "react-native";
 import {
   Card,
   Text,
   Divider,
   Chip,
   Avatar,
-  List,
   Surface,
   useTheme,
 } from "react-native-paper";

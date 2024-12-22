@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { FlatList, View, StyleSheet, Pressable } from "react-native";
+import { FlatList, View, StyleSheet } from "react-native";
 import {
   TextInput,
   Text,
@@ -9,11 +9,9 @@ import {
   Surface,
   Divider,
   useTheme,
-  Card,
 } from "react-native-paper";
 import { useRouter } from "expo-router";
 import Fuse from "fuse.js";
-import { faker } from "@faker-js/faker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { getCustomer } from "../../../../utils/fakeDataMethods";
 import { CustomerListItem } from "../../../../components/CustomerListItem";

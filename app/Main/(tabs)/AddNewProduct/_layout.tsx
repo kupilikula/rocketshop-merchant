@@ -1,8 +1,5 @@
 import { Stack, useRouter } from "expo-router";
-import { Pressable, TouchableOpacity, View } from "react-native";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { Colors } from "@/styles/Colors";
-import { Button, Text, useTheme } from "react-native-paper";
+import { useTheme } from "react-native-paper";
 
 export default function AddNewProductStack() {
   const router = useRouter();

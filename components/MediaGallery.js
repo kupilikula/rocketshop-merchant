@@ -3,10 +3,8 @@ import {
   View,
   TouchableOpacity,
   StyleSheet,
-  Image,
   Pressable,
   Platform,
-  TouchableWithoutFeedback,
 } from "react-native";
 import * as MediaLibrary from "expo-media-library";
 import FlatListSlider from "./MediaSlider/FlatListSlider";
@@ -14,8 +12,7 @@ import MediaItem from "./MediaSlider/MediaItem";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import { Button, Card, Surface, Text, useTheme } from "react-native-paper";
-import { Camera, CameraView, useCameraPermissions } from "expo-camera";
-import { Colors } from "../styles/Colors";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import * as FileSystem from "expo-file-system"; // Import FileSystem
 import { Audio } from "expo-av";
 import { gestureHandlerRootHOC, FlatList } from "react-native-gesture-handler";

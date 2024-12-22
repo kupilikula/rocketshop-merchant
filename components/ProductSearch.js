@@ -1,9 +1,9 @@
-import { Button, Searchbar, Surface } from "react-native-paper";
+import { Button, Searchbar } from "react-native-paper";
 import { useEffect, useState } from "react";
 import Fuse from "fuse.js";
 import { FlatList, View } from "react-native";
 import { SearchResultProduct } from "./SearchResultProduct";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 
 const getUniqueProducts = (storeData) => {
   const allProducts = storeData.collections.reduce(

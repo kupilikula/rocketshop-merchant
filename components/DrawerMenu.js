@@ -1,14 +1,10 @@
-import {
-  DrawerContentScrollView,
-  DrawerItemList,
-} from "@react-navigation/drawer";
+import { DrawerContentScrollView } from "@react-navigation/drawer";
 import { Drawer, Text } from "react-native-paper";
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { View } from "react-native";
 import { StoreLogo } from "@/components/StoreLogo";
 import { faker } from "@faker-js/faker";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function DrawerMenu(props) {
   const router = useRouter();

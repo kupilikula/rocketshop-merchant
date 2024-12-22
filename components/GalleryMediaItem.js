@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React from "react";
 import {
   Image,
   StyleSheet,
@@ -8,7 +8,6 @@ import {
 } from "react-native";
 import * as MediaLibrary from "expo-media-library";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { vi } from "@faker-js/faker";
 import { Colors } from "../styles/Colors";
 
 const GalleryMediaItem = ({

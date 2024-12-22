@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { FlatList, View, StyleSheet, Modal, Pressable } from "react-native";
+import { FlatList, View, StyleSheet, Modal } from "react-native";
 import {
   TextInput,
   Checkbox,

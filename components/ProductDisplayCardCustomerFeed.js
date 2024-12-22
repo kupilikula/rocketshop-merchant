@@ -4,8 +4,6 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FlatListSlider from "./MediaSlider/FlatListSlider";
 import MediaItem from "./MediaSlider/MediaItem";
 import { Rating } from "@kolking/react-native-rating";
-import { Image } from "expo-image";
-import { Colors } from "../styles/Colors";
 import { foregroundColor } from "../utils/foregroundColor";
 import { StoreLogo } from "./StoreLogo";
 

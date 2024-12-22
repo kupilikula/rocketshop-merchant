@@ -1,16 +1,9 @@
-import { Pressable, ScrollView, Switch, View } from "react-native";
-import {
-  Button,
-  Card,
-  Surface,
-  useTheme,
-  Checkbox,
-  Text,
-} from "react-native-paper";
+import { Pressable, ScrollView, View } from "react-native";
+import { Button, Surface, useTheme, Text } from "react-native-paper";
 import ProductDisplayCardCustomerStore from "../../../../components/ProductDisplayCardCustomerStore";
 import { useDispatch, useSelector } from "react-redux";
 import { StyleSheet } from "react-native";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { resetNewProduct } from "../../../../store/newProductSlice";
 import { useNavigation, useRouter } from "expo-router";
 import { CommonActions } from "@react-navigation/native";

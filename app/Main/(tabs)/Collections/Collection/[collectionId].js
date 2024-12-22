@@ -9,22 +9,15 @@ import {
 import { StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Text } from "react-native-paper";
-import { FlatList, ListRenderItemInfo, Pressable, View } from "react-native";
-import ProductDisplayCardCustomerStore from "../../../../../components/ProductDisplayCardCustomerStore";
-import { faker } from "@faker-js/faker";
-import {
-  getCollection,
-  getProductForStore,
-} from "../../../../../utils/fakeDataMethods";
+import { Pressable, View } from "react-native";
+import { getCollection } from "../../../../../utils/fakeDataMethods";
 import { ProductDisplayCompactMerchant } from "../../../../../components/ProductDisplayCompactMerchant";
 import ReorderableList, {
   ReorderableListItem,
-  ReorderableListReorderEvent,
   reorderItems,
   useReorderableDrag,
 } from "react-native-reorderable-list";
 import React, { useState } from "react";
-import CollectionListItem from "../../../../../components/CollectionListItem";
 
 const ListElement = React.memo((product) => {
   const drag = useReorderableDrag();

@@ -1,13 +1,4 @@
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { Drawer } from "expo-router/drawer";
-import { DrawerToggleButton } from "@react-navigation/drawer";
-import LogoIconWithName from "@/components/LogoIconWithName";
-import DrawerMenu from "../../../../components/DrawerMenu";
-import { Pressable, View } from "react-native";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Stack, usePathname, useRouter } from "expo-router";
-import { Text } from "react-native-paper";
-import { getFocusedRouteNameFromRoute } from "@react-navigation/core";
 
 export default function Layout() {
   const router = useRouter();

@@ -1,4 +1,3 @@
-import { Redirect, useLocalSearchParams } from "expo-router";
 import ProductInfo from "../../../../components/ProductInfo";
 import { useEffect } from "react";
 
