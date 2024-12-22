@@ -105,7 +105,8 @@ const makeStyles = (theme) =>
             flexDirection: 'row',
             alignItems: 'center',
             marginVertical: 5,
-            backgroundColor: 'white'
+            backgroundColor: 'white',
+            borderRadius: 8
             // paddingVertical: 10,
         },
         productText: {

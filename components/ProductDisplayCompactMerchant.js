@@ -12,10 +12,9 @@ export const ProductDisplayCompactMerchant = (props) => {
     let nAttrOdd = (nAttributes % 2)===1;
     let nAttrRows = nAttrOdd ? (nAttributes+1)/2 : nAttributes/2;
 
-     // return <Pressable onPress={() => router.push(`/Main/(tabs)/Products/Product/${props.product.productId}`)}>
-        return <Card mode={props.cardMode || 'elevated'} style={{borderRadius: 8,  height: 100,width: '100%', backgroundColor: 'white'}}>
+        return <Card mode={props.cardMode || 'elevated' } style={{borderRadius: 8,  height: 100, backgroundColor: 'white'}}>
                     <View style={{backgroundColor: 'white', width: '100%', borderRadius: 8, display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
-         <Image source={props.product.mediaItems[0].uri} style={{width: 100, height: 100}}/>
+         <Image source={props.product.mediaItems[0].uri} style={{width: 100, height: 100, borderTopLeftRadius: 8, borderBottomLeftRadius: 8}}/>
          <View style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start', height: '100%', width: '100%',marginLeft: 5}}>
             <Text variant={'titleMedium'}>{props.product.productName}</Text>
              <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-start'}}>
@@ -41,6 +40,6 @@ export const ProductDisplayCompactMerchant = (props) => {
              </View>
          </View>
      </View>
-                </Card>
-     // </Pressable>
+        </Card>
+
 }

@@ -22,7 +22,13 @@ export default function Layout() {
         drawerStyle: {flex: 1, height: '100%', width: '70%', borderTopLeftRadius: 0, borderBottomLeftRadius: 0, borderTopRightRadius: 0, borderBottomRightRadius: 0},
         header: () => {
             console.log('pathName:', pathName);
-            return pathName.startsWith('/Main/AddNewProduct') ? null : <AppHeader/>
+            return pathName.startsWith('/Main/AddNewProduct')
+            || pathName.startsWith('/Main/Products/Product')
+            || pathName.startsWith('/Main/Orders/Order')
+            || pathName.startsWith('/Main/Collections/Collection')
+            || pathName.startsWith('/Main/Customers/Customer')
+            || pathName.startsWith('/Main/Offers/Offer')
+                ? null : <AppHeader/>
         }
     })}
     drawerContent={(props) => <DrawerMenu {...props}/>}>

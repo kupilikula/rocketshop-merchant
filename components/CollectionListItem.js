@@ -1,10 +1,12 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { Card, Text, Chip, IconButton } from "react-native-paper";
+import {Card, Text, Chip, IconButton, useTheme} from "react-native-paper";
+import {ActiveStatusColors} from "@/utils/dataValues";
 
-const CollectionListItem = ({ collection, onEdit, onDelete, cardMode= 'elevated',showStatusChip= true, showEditIcon = true, showCheckbox = false }) => {
-    const { collectionName, products, status, storeFrontDisplayNumberOfItems } = collection;
-
+const CollectionListItem = ({ collection, onDelete, cardMode= 'elevated',showStatusChip= true, showEditIcon = true, showCheckbox = false }) => {
+    const { collectionName, products, isActive, storeFrontDisplay, storeFrontDisplayNumberOfItems } = collection;
+    const theme = useTheme();
+    const styles = makeStyles(theme);
     return (
         <Card style={styles.card} mode={cardMode}>
             <View style={styles.container}>
@@ -21,8 +23,9 @@ const CollectionListItem = ({ collection, onEdit, onDelete, cardMode= 'elevated'
                     </Text>
 
                     {/* Storefront Display */}
+
                     <Text variant="bodyMedium" style={styles.displayCount}>
-                        Displaying {storeFrontDisplayNumberOfItems} on storefront
+                        {storeFrontDisplay ? 'Displaying ' + storeFrontDisplayNumberOfItems.toString() + ' on storefront' : ''}
                     </Text>
                 </View>
 
@@ -34,22 +37,12 @@ const CollectionListItem = ({ collection, onEdit, onDelete, cardMode= 'elevated'
                         mode="flat"
                         style={[
                             styles.statusChip,
-                            status === "Active" ? styles.activeChip : styles.inactiveChip,
+                            isActive ? styles.activeChip : styles.inactiveChip,
                         ]}
                     >
-                        {status}
+                        {isActive ? 'Active' : 'Inactive'}
                     </Chip>}
 
-                    {/* Action Buttons */}
-                    {showEditIcon &&
-                    <View style={styles.actions}>
-                        <IconButton
-                            icon="pencil"
-                            size={20}
-                            onPress={onEdit}
-                            style={styles.actionButton}
-                        />
-                    </View>}
                     {/*{showCheckbox &&*/}
                     {/*    <View style={styles.actions}>*/}
                     {/*        <IconButton*/}
@@ -65,7 +58,7 @@ const CollectionListItem = ({ collection, onEdit, onDelete, cardMode= 'elevated'
     );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (theme) => StyleSheet.create({
     card: {
         margin: 8,
         padding: 8,
@@ -74,7 +67,7 @@ const styles = StyleSheet.create({
     },
     container: {
         flexDirection: "row",
-        alignItems: "center",
+        alignItems: "flex-start",
         justifyContent: "space-between",
     },
     details: {
@@ -84,11 +77,11 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
     productCount: {
-        color: "gray",
+        color: theme.colors.text,
         marginTop: 4,
     },
     displayCount: {
-        color: "gray",
+        color: theme.colors.text,
         marginTop: 2,
     },
     rightSection: {
@@ -98,10 +91,10 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     activeChip: {
-        backgroundColor: "#DFF6DD",
+        backgroundColor: theme.colors.active,
     },
     inactiveChip: {
-        backgroundColor: "#FFE6E6",
+        backgroundColor: theme.colors.inactive,
     },
     actions: {
         flexDirection: "row",

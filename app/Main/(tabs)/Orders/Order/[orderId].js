@@ -1,6 +1,6 @@
 import React from 'react';
-import {View, StyleSheet, FlatList, Image, ScrollView} from 'react-native';
-import {Card, Text, Divider, Chip, Avatar, List, Surface} from 'react-native-paper';
+import {View, StyleSheet, FlatList, Image, ScrollView, Pressable} from 'react-native';
+import {Card, Text, Divider, Chip, Avatar, List, Surface, useTheme} from 'react-native-paper';
 import {getOrder} from "../../../../../utils/fakeDataMethods";
 import {useRouter} from "expo-router";
 
@@ -9,6 +9,8 @@ const OrderDetails = (props) => {
     const order = getOrder();
 
     const router = useRouter();
+    const theme = useTheme()
+    const styles = makeStyles(theme);
 
     console.log('order:', JSON.stringify(order, null, 2));
     // Status color mapping
@@ -21,7 +23,9 @@ const OrderDetails = (props) => {
 
     // Render individual order item
     const renderOrderItem = ({ item }) => (
-        <View style={styles.productContainer} key={item.product.productId}>
+        <>
+            <Pressable key={item.product.productId} onPress={() => router.push('/Main/(tabs)/Products/Product/' + item.product.productId)}>
+        <View style={styles.productContainer}>
             <Image source={{ uri: item.product.mediaItems[0]?.uri }} style={styles.productImage} />
             <View style={styles.productDetails}>
                 <Text variant={'titleMedium'}>{item.product.productName}</Text>
@@ -34,10 +38,13 @@ const OrderDetails = (props) => {
                 </Text>
             </View>
         </View>
+            </Pressable>
+            <Divider style={{marginVertical: 8}}/>
+        </>
     );
 
     return (
-        <Surface style={{flex: 1}}>
+        <Surface style={{flex: 1, backgroundColor: theme.colors.surface}}>
             <ScrollView>
         <View style={styles.container}>
             {/* Order Summary */}
@@ -85,17 +92,16 @@ const OrderDetails = (props) => {
     );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
         padding: 10,
         // backgroundColor: '#f9f9f9',
     },
     card: {
-        marginBottom: 10,
         borderRadius: 8,
         elevation: 2,
-        backgroundColor: 'white'
+        backgroundColor: theme.colors.card,
     },
     divider: {
         marginVertical: 10,
@@ -114,10 +120,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         padding: 10,
+        backgroundColor: theme.colors.nestedCard,
+        borderRadius: 8,
+        marginHorizontal: 10
     },
     productImage: {
-        width: 60,
-        height: 60,
+        width: 80,
+        height: 80,
         borderRadius: 8,
         marginRight: 10,
     },

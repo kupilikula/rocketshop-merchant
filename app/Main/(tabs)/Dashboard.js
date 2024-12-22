@@ -13,6 +13,7 @@ import {CustomerListItem} from "../../../components/CustomerListItem";
 const Dashboard = () => {
     const router = useRouter();
     const theme = useTheme();
+    const styles = makeStyles(theme);
     const routeToOpenOrders = (filter) => {
         router.push('Orders', { filter: 'open' });
     };
@@ -49,7 +50,7 @@ const Dashboard = () => {
 
                 {/* Useful Links */}
                 <Text variant={'titleLarge'} style={{marginVertical: 10}}>Quick Links</Text>
-                <Card style={styles.card}>
+                <View>
 
                     <View style={{display: 'flex', flexDirection: 'row', alignItems:'center', justifyContent: 'space-between'}}>
                         <View style={{display: 'flex', flexDirection: 'row'}}>
@@ -63,7 +64,7 @@ const Dashboard = () => {
                         </Button>
                         </View>
                     </View>
-                </Card>
+                </View>
 
                 {/* Summary of Open Orders */}
                 <View style={{margin: 4}}>
@@ -190,11 +191,11 @@ const Dashboard = () => {
     );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
         padding: 10,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: theme.colors.surface,
     },
     scrollContent: {
         paddingBottom: 20,

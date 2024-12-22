@@ -116,7 +116,9 @@ const  MediaGallery = (props) => {
                     <MaterialIcons name={'close'} size={36} style={{color: 'white'}}/>
                 </Pressable>
                 <Text variant={'titleLarge'} style={{ color: 'white'}}>Product Media</Text>
+                {previewMediaItems.length > 0 &&
                 <Pressable onPressIn={() => {console.log('press'); router.push('./AddProductInfo')}}><MaterialIcons name={'arrow-forward'} size={36} style={{color: 'white'}}/></Pressable>
+                }
             </View>;
 
         }

@@ -83,7 +83,7 @@ const PublishOfferScreen = () => {
             paddingBottom: 60, // Ensure bottom padding is enough to avoid overlapping
         }}>
             <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Offer Details</Text>
+            <Text style={styles.sectionTitle}>Offer Description</Text>
             {/* Offer Name */}
             <TextInput
                 label="Offer Name"

@@ -5,11 +5,12 @@ import {useRouter} from 'expo-router';
 import {faker} from '@faker-js/faker';
 import {getOffer} from "../../../../utils/fakeDataMethods";
 import * as Crypto from 'expo-crypto';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const OffersScreen = () => {
 
     // console.log(getOffer());
-    const existingOffers = faker.helpers.multiple(getOffer, {count: faker.number.int(3)});
+    const existingOffers = faker.helpers.multiple(getOffer, {count: faker.number.int(20)});
     console.log('EO:', existingOffers);
 
     const [offers, setOffers] = useState(existingOffers);
@@ -30,7 +31,7 @@ const OffersScreen = () => {
         <Card style={styles.offerCard} >
                 <View style={styles.cardContent}>
                     <View>
-                        <Text variant={'titleMedium'}>{item.name}</Text>
+                        <Text variant={'titleLarge'}>{item.name}</Text>
                         <Text variant={'bodyLarge'}>Offer Type: {item.type}</Text>
                         <View style={{display: 'flex', flexWrap: 'wrap', flexDirection: 'row'}}>
                             {item.applicableTo.products.length > 0 && <Text
@@ -51,9 +52,6 @@ const OffersScreen = () => {
                     {/*    color={item.isActive ? theme.colors.success : theme.colors.primary}*/}
                     {/*/>*/}
                     <Chip textStyle={{color: 'white'}} style={{
-                        position: 'absolute',
-                        bottom: 5,
-                        right: 5,
                         backgroundColor: item.isActive ? theme.colors.success : '#aaa'
                     }}>{item.isActive ? 'Active' : 'Inactive'}</Chip>
                 </View>
@@ -64,21 +62,27 @@ const OffersScreen = () => {
         </View>
     );
 
+    let nActive = offers.filter((o)=> o.isActive).length;
+    let nInactive = offers.filter((o)=> !o.isActive).length;
+
     return (<Surface style={styles.container}>
             <ScrollView>
-                <View style={{display: 'flex', flexDirection: 'column', marginVertical: 15}}>
-                {/*<View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%'}}>*/}
-                <Text variant={'titleLarge'} style={{marginTop: 10, marginLeft: 10}}>Offers</Text>
-                    <Text variant={'bodyLarge'} style={{marginLeft: 10}}>{offers.filter((o)=> o.isActive).length.toString() + ' Active Offers'}</Text>
-                    <Text variant={'bodyLarge'} style={{marginLeft: 10}}>{offers.filter((o) => !o.isActive).length.toString() + ' Inactive Offers'}</Text>
-                {/*</View>*/}
-                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', marginVertical: 15}}>
-                    <Button onPress={() => router.push('/Main/(tabs)/Offers/Offer/' + Crypto.randomUUID())}
-                            mode={'contained'} icon={'plus'}
-                            style={{borderRadius: 8, backgroundColor: theme.colors.secondary}}>Create New Offer</Button>
+                <View style={{marginVertical: 10}}>
+                    <View style={{marginLeft: 8, marginTop: 8, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start'}}>
+                        <MaterialIcons name={'discount'} size={40} color={theme.colors.primary} style={{}}/>
+                        <Text variant={'displaySmall'} style={{marginLeft: 10, color: theme.colors.secondary}}>Offers</Text>
+                    </View>
+                    <Text variant={'bodyLarge'} style={{marginLeft: 10}}>{nActive.toString() + ' Active Offer' + (nActive !== 1 ? 's' : '')}</Text>
+                    <Text variant={'bodyLarge'} style={{marginLeft: 10}}>{nInactive.toString() + ' Inactive Offer'  + (nInactive !== 1 ? 's' : '')}</Text>
+                    <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', marginVertical: 15}}>
+                        <Button onPress={() => router.push('/Main/(tabs)/Offers/Offer/' + Crypto.randomUUID())}
+                                mode={'contained'} icon={'plus'}
+                                style={{borderRadius: 8, backgroundColor: theme.colors.secondary}}>Create New Offer</Button>
+                    </View>
                 </View>
-                <View
-                    style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
+
+
+                <View style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 2}}>
                     {offers.map(renderOfferItem)}
                 </View>
                 {/*<FlatList*/}
@@ -89,7 +93,6 @@ const OffersScreen = () => {
                 {/*    ListEmptyComponent={<Text style={styles.emptyText}>No Offers Available</Text>}*/}
                 {/*    contentContainerStyle={styles.listContent}*/}
                 {/*/>*/}
-                </View>
             </ScrollView>
         </Surface>);
 };
@@ -97,19 +100,25 @@ const OffersScreen = () => {
 const makeStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
-        // backgroundColor: theme.colors.background,
+        backgroundColor: theme.colors.surface,
         paddingHorizontal: 10,
-    }, listContent: {
+    },
+    listContent: {
         padding: 10,
-    }, offerCard: {
+    },
+    offerCard: {
         borderRadius: 8, elevation: 2, width: '100%', backgroundColor: 'white'
-    }, cardContent: {
-        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, position: 'relative'
-    }, offerName: {
+    },
+    cardContent: {
+        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', padding: 10, position: 'relative'
+    },
+    offerName: {
         fontSize: 16, fontWeight: 'bold',
-    }, offerDetails: {
+    },
+    offerDetails: {
         fontSize: 14, color: theme.colors.textSecondary,
-    }, emptyText: {
+    },
+    emptyText: {
         textAlign: 'center', marginTop: 20, fontSize: 16, color: theme.colors.text,
     },
 });

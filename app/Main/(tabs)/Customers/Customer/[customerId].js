@@ -23,26 +23,26 @@ const CustomerDetails = () => {
     return (
         <ScrollView style={styles.container}>
             {/* Customer Info */}
-            <Surface style={styles.section}>
+            <Card style={styles.section}>
                 <Text style={styles.sectionTitle}>Customer Information</Text>
                 <Text style={styles.infoText}>Name: {customer.fullName}</Text>
                 <Text style={styles.infoText}>Phone: {customer.phone}</Text>
                 <Text style={styles.infoText}>Email: {customer.email}</Text>
                 <Text style={styles.infoText}>Address: {customer.customerAddress}</Text>
-            </Surface>
+            </Card>
 
             {/* Customer Statistics */}
-            <Surface style={styles.section}>
+            <Card style={styles.section}>
                 <Text style={styles.sectionTitle}>Customer Statistics</Text>
                 <Text style={styles.infoText}>Total Orders: {customer.orders.length}</Text>
                 <Text style={styles.infoText}>Total Spent: ₹{totalSpent}</Text>
                 <Text style={styles.infoText}>
                     Most Recent Order: {mostRecentOrderDate.toLocaleDateString()}
                 </Text>
-            </Surface>
+            </Card>
 
             {/* Orders List */}
-            <Surface style={styles.section}>
+            <Card style={styles.section}>
                 <Text style={styles.sectionTitle}>Orders</Text>
                 <View>
                     {customer.orders.map((order, index) => (
@@ -57,7 +57,7 @@ const CustomerDetails = () => {
                         </View>
                     ))}
                 </View>
-            </Surface>
+            </Card>
         </ScrollView>
     );
 };
@@ -67,11 +67,12 @@ const makeStyles = ({ colors }) =>
         container: {
             flex: 1,
             padding: 10,
+            backgroundColor: colors.surface,
         },
         section: {
             marginBottom: 20,
             padding: 10,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.card,
             borderRadius: 8,
             elevation: 2,
         },
@@ -87,7 +88,7 @@ const makeStyles = ({ colors }) =>
         orderCard: {
             padding: 10,
             marginVertical: 5,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.nestedCard,
             borderRadius: 8,
             elevation: 2,
         },

@@ -4,8 +4,6 @@ import ProductDisplayCardCustomerStore from "../../../../../components/ProductDi
 import {getProductForStore} from "../../../../../utils/fakeDataMethods";
 import ProductScreenMerchant from "../../../../../components/ProductScreenMerchant";
 
-
-
 export default function ProductPage (props) {
 
     const { productId} = useLocalSearchParams();

@@ -7,15 +7,26 @@ import { Rating } from '@kolking/react-native-rating';
 import {Colors} from "../styles/Colors";
 import {useNavigation, useRouter} from "expo-router";
 import React, {useEffect, useState} from "react";
+import {generateBoxShadowStyle} from "../styles/generateShadow";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 export default function ProductScreenMerchant (props) {
 
     const router = useRouter();
     const theme = useTheme();
-    const navigation = useNavigation();
-
+    // const navigation = useNavigation();
+    const styles = makeStyles(theme);
     console.log('props:', props.product.productId);
-    const [productStatus, setProductStatus] = useState(props.product.productStatus);
+    const [isActive, setIsActive] = useState(props.product.isActive);
+    // const insets = useSafeAreaInsets();
+
+
+
+
+    // useEffect(() => {
+    //     console.log('line 36')
+    //     navigation.setOptions({header: ProductScreenMerchantHeader});
+    // },[navigation])
 
     // useEffect(() => {
     //     navigation.setOptions({
@@ -25,8 +36,10 @@ export default function ProductScreenMerchant (props) {
     //     });
     // },[navigation])
 
+
     const handleStatusChange = (status) => {
-        setProductStatus(!status ? 'Draft' : 'Active')
+        console.log('status:', status);
+        setIsActive(status)
         console.log(`Product status changed to: ${status}`);
     };
 
@@ -36,8 +49,9 @@ export default function ProductScreenMerchant (props) {
 
     console.log('props.product:', props.product);
     // console.log('size:', size);
-    return <Surface style={{flex: 1, width: '100%', flexDirection: 'column', alignItems: 'center', padding: 10}}>
-        <ScrollView>
+    return <ScrollView>
+    <Surface style={{flex: 1, width: '100%', flexDirection: 'column', alignItems: 'center', padding: 10, backgroundColor: theme.colors.surface}}>
+
     <Card mode={'elevated'} style={styles.card}>
         <FlatListSlider
             data={props.product.mediaItems}
@@ -68,13 +82,13 @@ export default function ProductScreenMerchant (props) {
                     <View style={styles.statusContainer}>
                     <Switch
                         // style={ Platform.OS==='ios' ? { transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }]} : {}}
-                        value={productStatus==='Active'}
+                        value={isActive}
                         onValueChange={handleStatusChange}
                         // color={productStatus==='Active' ? "#f44336" : "#4caf50"} // Green for Active, Red for Draft
                     />
-                    <Chip textStyle={{color: 'white', textAlign: 'center'}}
-                          style={{marginLeft: 10, backgroundColor: productStatus==='Active' ? "#4caf50" : "#aaaaaa"}}>
-                        {productStatus}
+                    <Chip textStyle={{color: 'black', textAlign: 'center'}}
+                          style={{marginLeft: 10, backgroundColor: isActive ? theme.colors.active : theme.colors.inactive}}>
+                        {isActive ? 'Active' : 'Inactive'}
                     </Chip>
                     </View>
                 </View>
@@ -117,33 +131,49 @@ export default function ProductScreenMerchant (props) {
             <View style={{marginTop: 15}}>
                 <Text variant={"titleMedium"} style={{marginBottom: 10}}>Collections:</Text>
                 <View style={styles.collectionsContainer}>
-                {props.product.collections.map((c) => <View style={{display: 'flex', flexDirection:'row', margin: 5}} key={c}><Chip textStyle={{color: 'white'}} style={{backgroundColor: theme.colors.secondary}}>{c}</Chip></View>)}
+                {props.product.collections.map((c) => <View style={{display: 'flex', flexDirection:'row', margin: 5}} key={c}>
+                    <Chip
+                        textStyle={{color: 'white'}}
+                        style={{backgroundColor: theme.colors.primary}}
+                    >
+                        {c}
+                    </Chip>
+                </View>)}
                 </View>
             </View>
 
             <Text variant={"titleMedium"} style={{marginTop: 10}}>Tags:</Text>
             <View style={styles.tagsContainer}>
                 {props.product.tags.map((tag, i) => (
-                    <Chip key={i} style={styles.chip}>
+                    <Chip
+                        key={tag}
+                        style={styles.tagChipSelected}
+                        textStyle={{color: theme.colors.white}}
+                    >
                         {tag}
                     </Chip>
+                    // <Chip key={i} style={styles.chip}>
+                    //     {tag}
+                    // </Chip>
                 ))}
             </View>
 
         </Card.Content>
     </Card>
-        </ScrollView>
     </Surface>
+    </ScrollView>
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme) => StyleSheet.create({
     card: {
         position: 'relative',
         width: '100%',
-        borderRadius: 0,
+        borderRadius: 8,
         backgroundColor: 'white',
         borderWidth: 1,
-        borderColor: "#aaa"
+        borderColor: theme.colors.grayBorder,
+        marginVertical: 15,
+        overflow: 'hidden'
     },
     titleTextStyle: {
         color: 'black',
@@ -209,11 +239,7 @@ const styles = StyleSheet.create({
         // marginHorizontal: 5,
         width: "50%",
     },
-    activeButton: {
-        backgroundColor: "#4caf50", // Green for Active
-    },
-    draftButton: {
-        backgroundColor: "#f44336", // Red for Draft
-    },
     archiveButton: { marginTop: 20, alignSelf: "center" },
+    tagChipSelected: {margin: 5, backgroundColor: theme.colors.secondary, color: theme.colors.white},
+
 })

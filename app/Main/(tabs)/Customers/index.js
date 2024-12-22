@@ -7,6 +7,7 @@ import { faker } from '@faker-js/faker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getCustomer } from '../../../../utils/fakeDataMethods';
 import {CustomerListItem} from "../../../../components/CustomerListItem";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const initialCustomers = Array.from({ length: 100 }, getCustomer);
 
@@ -67,6 +68,15 @@ const Customers = () => {
     };
 
     const searchFilterAndSortComponent = () => (
+        <>
+            <View style={{marginVertical: 10}}>
+                <View style={{marginLeft: 8, marginTop: 8, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start'}}>
+                    <MaterialIcons name={'hail'} size={44} color={theme.colors.primary} style={{}}/>
+                    <Text variant={'displaySmall'} style={{marginLeft: 10, color: theme.colors.secondary}}>Customers</Text>
+                </View>
+                <Text variant={'bodyLarge'} style={{marginLeft: 10}}>{customers.length.toString() + ' Customer' + (customers.length !== 1 ? 's' : '')}</Text>
+            </View>
+
         <View style={{ marginBottom: 10 }}>
             <TextInput
                 label="Search Customers"
@@ -75,6 +85,8 @@ const Customers = () => {
                 style={styles.searchBar}
                 mode="outlined"
             />
+
+            <View style={{backgroundColor: theme.colors.surface, overflow: 'hidden', borderRadius: 8}}>
             <List.Accordion
                 title="Sort & Filter"
                 expanded={filterExpanded}
@@ -134,7 +146,9 @@ const Customers = () => {
 
 
             </List.Accordion>
+            </View>
         </View>
+        </>
     );
 
     return (
@@ -145,6 +159,7 @@ const Customers = () => {
                 renderItem={renderCustomerItem}
                 ItemSeparatorComponent={() => <Divider style={{ marginVertical: 10 }} />}
                 ListHeaderComponent={searchFilterAndSortComponent()}
+                contentContainerStyle={{overflow: 'visible', padding: 2}}
                 ListEmptyComponent={<Text>No Customers Found</Text>}
             />
         </Surface>
@@ -153,7 +168,7 @@ const Customers = () => {
 
 const makeStyles = ({ colors }) =>
     StyleSheet.create({
-        container: { flex: 1, paddingHorizontal: 10 },
+        container: { flex: 1, paddingHorizontal: 10, backgroundColor: colors.surface},
         searchBar: { marginVertical: 10, backgroundColor: 'white' },
         card: {
             width: '100%',
@@ -172,11 +187,30 @@ const makeStyles = ({ colors }) =>
         name: { fontWeight: 'bold', fontSize: 16 },
         email: { color: colors.textSecondary },
         details: { color: colors.textSecondary, fontSize: 16 },
-        accordionBar: { backgroundColor: colors.primary, height:50, minHeight: 50, paddingVertical: 0,justifyContent: 'center', alignItems: 'center',verticalAlign: 'center'},
-        accordionContent: {justifyContent: 'center', color: 'white',},
-        accordionTitle:{ color: 'white', fontSize: 16},
+        accordionBar: {
+            backgroundColor: colors.primary,
+            height: 50,
+            minHeight: 50,
+            paddingVertical: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+            verticalAlign: 'center',
+            borderTopLeftRadius: 8,
+            borderTopRightRadius: 8,
+        },
+        accordionContent: {justifyContent: 'center'},
+        accordionTitle: {color: 'white', fontSize: 16},
+        sortFilterContent: {
+            paddingBottom: 20,
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+            borderBottomLeftRadius: 8,
+            borderBottomRightRadius: 8,
+            backgroundColor: colors.white,
+            borderWidth: 1,
+            borderColor: colors.grayBorder
+        },
         sectionTitle: { fontSize: 16, fontWeight: 'bold', marginVertical: 5, marginLeft: 10 },
-        sortFilterContent: { padding: 0, backgroundColor: 'white', borderWidth: 1 },
         // chip: { marginVertical: 10 },
         row: {
             flexDirection: 'row',

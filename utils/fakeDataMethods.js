@@ -1,7 +1,10 @@
 import {en, en_IN, en_US, Faker} from "@faker-js/faker";
+import {orderStatusList} from "@/utils/dataValues";
 
 
 const fakerIndian = new Faker({locale: [en]});
+
+
 
 const getMediaItem = () => {
     return {
@@ -42,7 +45,7 @@ export const getProductForStore = () => {
         rating: fakerIndian.number.float({ multipleOf: 0.5, min: 0, max:5 }),
         numberOfRatings: fakerIndian.number.int({min:0, max: 3000}),
         mediaItems: fakerIndian.helpers.multiple( getMediaItem , 3),
-        productStatus: fakerIndian.helpers.arrayElement(["Active", "Draft"])
+        isActive: fakerIndian.datatype.boolean()
     }}
 
 export const getProductForCustomerFeed = () => {
@@ -91,7 +94,7 @@ export const getCollection = () => {
         storeFrontDisplayNumberOfItems: fakerIndian.helpers.arrayElement([2,4,6,8]),
         storeFrontDisplay: fakerIndian.datatype.boolean(),
         products: fakerIndian.helpers.multiple(getProductForStore, {count: fakerIndian.number.int({min: 8, max: 60})}),
-        status: fakerIndian.helpers.arrayElement(['Active', 'Inactive'])
+        isActive: fakerIndian.datatype.boolean()
     }
 }
 
@@ -121,7 +124,7 @@ export const getOrder = () => {
         orderDate: fakerIndian.date.past(),
         orderItems: fakerIndian.helpers.multiple( () => ({product: getProductForStore(), quantity: fakerIndian.number.int({min: 1, max: 10})}), {count: fakerIndian.number.int({min: 1, max: 7})}),
         customer: getCustomer(),
-        orderStatus: fakerIndian.helpers.arrayElement(["Received", "Payment Received", "Shipped", "Delivered"]),
+        orderStatus: fakerIndian.helpers.arrayElement(orderStatusList),
         orderTotal: fakerIndian.number.int({min:30, max: 5000}),
     }
 }
@@ -131,7 +134,7 @@ export const getOrderWithoutCustomer = () => {
         orderId: fakerIndian.string.numeric({length: 10, allowLeadingZeros: false}),
         orderDate: fakerIndian.date.past(),
         orderItems: fakerIndian.helpers.multiple( () => ({product: getProductForStore(), quantity: fakerIndian.number.int({min: 1, max: 10})}), {count: fakerIndian.number.int({min: 1, max: 7})}),
-        orderStatus: fakerIndian.helpers.arrayElement(["Received", "Payment Received", "Shipped", "Delivered"]),
+        orderStatus: fakerIndian.helpers.arrayElement(orderStatusList),
         orderTotal: fakerIndian.number.int({min:30, max: 5000}),
     }
 }

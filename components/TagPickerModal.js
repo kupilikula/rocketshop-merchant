@@ -49,6 +49,8 @@ const TagPickerModal = ({ visible, existingTags, onClose, onApply }) => {
                                 styles.chip,
                                 selectedTags.includes(tag) && styles.chipSelected,
                             ]}
+                            textStyle={{color: selectedTags.includes(tag) ? 'white' : 'black'}}
+                            selectedColor={'white'}
                         >
                             {tag}
                         </Chip>
@@ -92,10 +94,10 @@ const makeStyles = (theme) =>
         },
         chip: {
             margin: 5,
-            backgroundColor: theme.colors.surface,
+            backgroundColor: theme.colors.softSecondary,
         },
         chipSelected: {
-            backgroundColor: theme.colors.primary,
+            backgroundColor: theme.colors.secondary,
         },
         actionContainer: {
             flexDirection: 'row',

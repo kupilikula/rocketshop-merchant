@@ -24,6 +24,7 @@ import DatePicker from '@react-native-community/datetimepicker';
 import { List } from 'react-native-paper';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
+import {orderStatusColors, orderStatusList} from "../../../../utils/dataValues";
 
 const initialOrders = faker.helpers.multiple(getOrder, {count: 100});
 
@@ -132,9 +133,6 @@ const Orders = () => {
         setShowEndPicker(false);
     };
 
-    const orderStatusChipColorMap = {"Received": theme.colors.secondary, "Payment Received": 'green', "Shipped": theme.colors.primary , "Delivered": 'magenta'}
-
-
     const renderOrderItem = ({ item }) => (
         <Card style={styles.orderCard} onPress={() => router.push('/Main/(tabs)/Orders/Order/'+ item.orderId)}>
 
@@ -144,7 +142,7 @@ const Orders = () => {
                     <Text variant={'bodyLarge'}>Date: {item.orderDate.toLocaleDateString()}</Text>
                 </View>
                 <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', margin: 10}}>
-                    <Chip mode={'outlined'} textStyle={{color: 'white'}} style={{ backgroundColor: orderStatusChipColorMap[item.orderStatus]}}>{item.orderStatus}</Chip>
+                    <Chip mode={'outlined'} textStyle={{color: 'black'}} style={{ backgroundColor: orderStatusColors[item.orderStatus]}}>{item.orderStatus}</Chip>
                 </View>
             </View>
 
@@ -163,7 +161,20 @@ const Orders = () => {
         return x
     }
 
-    const filterAndSortComponent = () => <View style={{padding: 0, marginBottom: 10}}>
+    const filterAndSortComponent = () =>
+        <>
+            <View style={{marginVertical: 10}}>
+                <View style={{marginLeft: 8, marginTop: 8, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start'}}>
+                    <MaterialIcons name={'receipt-long'} size={44} color={theme.colors.primary} style={{}}/>
+                    <Text variant={'displaySmall'} style={{marginLeft: 10, color: theme.colors.secondary}}>Orders</Text>
+                </View>
+                <Text variant={'bodyLarge'} style={{marginLeft: 10}}>{nOpen.toString() + ' Open Order' + (nOpen !== 1 ? 's' : '')}</Text>
+                <Text variant={'bodyLarge'} style={{marginLeft: 10}}>{nFulfilled.toString() + ' Fulfilled Order'  + (nFulfilled !== 1 ? 's' : '')}</Text>
+                <Text variant={'bodyLarge'} style={{marginLeft: 10}}>{nUnfulfilled.toString() + ' Unfulfilled Order'  + (nUnfulfilled !== 1 ? 's' : '')}</Text>
+            </View>
+
+
+        <View style={{padding: 0, marginBottom: 10}}>
         <TextInput
             label="Search Orders"
             value={searchQuery}
@@ -173,6 +184,7 @@ const Orders = () => {
         />
 
         {/* Sort & Filters Accordion */}
+        <View style={{backgroundColor: theme.colors.surface, overflow: 'hidden', borderRadius: 8}}>
         <List.Accordion
             title={'Sort & Filter'}
             expanded={filterExpanded}
@@ -183,7 +195,7 @@ const Orders = () => {
             right={ () => <MaterialIcons name={filterExpanded ? 'expand-more' : 'expand-less'} size={28} color={'white'}/>}
 
         >
-            <Card mode={'elevated'} style={{paddingBottom: 20, borderRadius: 0, backgroundColor: 'white', borderWidth: 1, borderColor: '#aaaaaa'}}>
+            <Card mode={'elevated'} style={styles.sortFilterContent}>
             {/* Sort Field Selector */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Sort By</Text>
@@ -210,7 +222,7 @@ const Orders = () => {
                     <View style={{display: 'flex',flexDirection: 'row'}}>
                         <Chip
                             mode="outlined"
-                            style={styles.chip}
+                            style={styles.sortOrderChip}
                             icon={() => (
                                 <MaterialCommunityIcons
                                     name={sortOrder === 'ascending' ? 'arrow-up-bold' : 'arrow-down-bold'}
@@ -228,8 +240,8 @@ const Orders = () => {
 
             <View style={{marginHorizontal: 10}}>
                 <Text style={styles.sectionTitle}>Order Status</Text>
-                <View style={styles.chipContainer}>
-                    {["All", "Received", "Payment Received", "Shipped", "Delivered"].map((status) => (
+                <View style={styles.flexWrapRow}>
+                    {['All', ...orderStatusList].map((status) => (
                         <Chip
                             key={status}
                             selected={statusFilter.includes(status)}
@@ -246,9 +258,10 @@ const Orders = () => {
                                     setStatusFilter(statusFilter.concat(status))
                                 }
                             }}
-                            selectedColor={theme.colors.secondary}
-                            style={[styles.chip, statusFilter.includes(status) && styles.chipSelected]}
-                            textStyle={{color: 'black'}}
+                            style={[styles.orderStatusChip, {backgroundColor: status==='All' ? '#aaa' : orderStatusColors[status]}]}
+                            // textStyle={{color: status==='All' ? theme.colors.white : theme.colors.black}}
+                            // selectedColor={'white'}
+
                         >
                             {status}
                         </Chip>
@@ -365,20 +378,23 @@ const Orders = () => {
             </View>
             </Card>
         </List.Accordion>
+        </View>
+    </View>
+        </>;
 
-    </View>;
+    let nOpen = orders.map((o) => orderStatusList.indexOf(o.orderStatus)).filter( (i) => i < 6).length;
+    let nFulfilled = orders.map((o) => orderStatusList.indexOf(o.orderStatus)).filter( (i) => i >= 6 && i <=8).length;
+    let nUnfulfilled = orders.map((o) => orderStatusList.indexOf(o.orderStatus)).filter( (i) => i > 8).length;
 
     return (
         <Surface style={styles.container}>
-            {/* Search Input */}
-
             <FlatList
                 data={filteredOrders}
                 keyExtractor={(item) => item.orderId}
                 renderItem={renderOrderItem}
                 ListHeaderComponent={filterAndSortComponent()}
                 ListEmptyComponent={<Text>No Orders Found</Text>}
-                contentContainerStyle={{ margin: 0, padding: 0}}
+                contentContainerStyle={{overflow: 'visible', padding: 2}}
                 ItemSeparatorComponent={<Divider style={{marginVertical: 10}}/>}
             />
         </Surface>
@@ -399,20 +415,41 @@ const Orders = () => {
 //     card: { marginVertical: 8 },
 // });
 const makeStyles = ({colors}) => StyleSheet.create({
-    container: { flex: 1, paddingHorizontal: 10, margin: 0, },
+    container: { flex: 1, paddingHorizontal: 10, margin: 0, backgroundColor: colors.surface },
     searchBar: { marginVertical: 10, backgroundColor: 'white' },
     sectionTitle: { marginVertical: 8, fontSize: 16, fontWeight: 'bold' },
-    chipContainer: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 10 },
-    chip: { margin: 5 },
-    chipSelected: { backgroundColor: colors.primary },
+    flexWrapRow: {flexDirection: 'row', flexWrap: 'wrap', marginVertical: 10},
     row: { flexDirection: 'row', justifyContent: 'space-between', marginVertical: 0, alignItems: 'center'},
-    input: { flex: 1, marginHorizontal: 5, backgroundColor: colors.surface },
+    input: { flex: 1, marginHorizontal: 5, backgroundColor: colors.white },
     card: { marginVertical: 8 },
-    orderCard: { borderRadius: 8, marginVertical: 5, backgroundColor: 'white'},
-    accordionBar: { backgroundColor: colors.primary, height:50, minHeight: 50, paddingVertical: 0,justifyContent: 'center', alignItems: 'center',verticalAlign: 'center'},
-    accordionContent: {justifyContent: 'center', color: 'white',},
-    accordionTitle:{ color: 'white', fontSize: 16},
-    dateContainer: {
+    orderCard: { borderRadius: 8, marginVertical: 5, backgroundColor: colors.card},
+    accordionBar: {
+        backgroundColor: colors.primary,
+        height: 50,
+        minHeight: 50,
+        paddingVertical: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        verticalAlign: 'center',
+        borderTopLeftRadius: 8,
+        borderTopRightRadius: 8,
+    },
+    accordionContent: {justifyContent: 'center'},
+    accordionTitle: {color: 'white', fontSize: 16},
+    sortFilterContent: {
+        paddingBottom: 20,
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: 0,
+        borderBottomLeftRadius: 8,
+        borderBottomRightRadius: 8,
+        backgroundColor: colors.white,
+        borderWidth: 1,
+        borderColor: colors.grayBorder
+    },
+    sortOrderChip: {margin: 5, backgroundColor: colors.white, color: colors.black},
+    orderStatusChip: {margin: 5, },
+    // orderStatusChipSelected: {backgroundColor: colors.secondary, color: colors.white},
+    checkboxItemCompact: {flex: 1, marginHorizontal: 2, paddingVertical: 0, paddingHorizontal: 5,},    dateContainer: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
