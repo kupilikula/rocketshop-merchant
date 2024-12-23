@@ -105,8 +105,9 @@ export default function Preview(props) {
   };
 
   return (
-    <Surface style={{ flex: 1, padding: 10 }}>
-      <ScrollView style={{ flex: 1 }}>
+      <ScrollView style={{ flex: 1, backgroundColor: theme.colors.surface, paddingHorizontal: 10, paddingVertical: 20}}>
+    {/*<Surface style={{ flex: 1, paddingHorizontal: 10, backgroundColor: theme.colors.surface }}>*/}
+
         <View
           style={{
             display: "flex",
@@ -143,7 +144,7 @@ export default function Preview(props) {
           showProductDescription={true}
           showRating={newProduct.enableRatings}
         />
+    {/*</Surface>*/}
       </ScrollView>
-    </Surface>
   );
 }

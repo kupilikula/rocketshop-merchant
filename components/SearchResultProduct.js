@@ -10,7 +10,7 @@ export const SearchResultProduct = (props) => {
     <Pressable
       onPress={() =>
         router.push(
-          `/Main/(tabs)/Store/Products/Product/${props.product.productId}`,
+          `/Main/(tabs)/Products/Product/${props.product.productId}`,
         )
       }
     >

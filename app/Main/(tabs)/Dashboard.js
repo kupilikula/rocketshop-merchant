@@ -109,38 +109,49 @@ const Dashboard = () => {
               display: "flex",
               flexDirection: "row",
               justifyContent: "space-between",
+                // backgroundColor: 'green'
             }}
           >
-            <Card style={styles.card}>
-              <Text variant={"titleMedium"} style={{ alignSelf: "center" }}>
-                Open Orders
-              </Text>
-              <Text
-                variant="headlineLarge"
-                style={{ alignSelf: "center", marginVertical: 8 }}
-              >
-                24
-              </Text>
-              <View
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  alignSelf: "center",
-                  marginVertical: 8,
-                }}
-              ></View>
-            </Card>
-            <Card style={styles.card}>
-              <Text variant={"titleMedium"} style={{ alignSelf: "center" }}>
-                New Orders
-              </Text>
-              <Text
-                variant="headlineLarge"
-                style={{ alignSelf: "center", marginVertical: 8 }}
-              >
-                17
-              </Text>
-            </Card>
+            {/*<Card style={styles.card}>*/}
+              <Card style={styles.card}>
+                  <Text variant={"titleMedium"} style={{ alignSelf: "center" }}>
+                      Open Orders
+                  </Text>
+                  <Text
+                      variant="headlineLarge"
+                      style={{ alignSelf: "center", marginVertical: 8 }}
+                  >
+                      24
+                  </Text>
+                  <View
+                      style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          alignSelf: "center",
+                          marginVertical: 8,
+                      }}/>
+              </Card>
+            {/*</Card>*/}
+
+
+              <Card style={styles.card}>
+                  <Text variant={"titleMedium"} style={{ alignSelf: "center" }}>
+                      New Orders
+                  </Text>
+                  <Text
+                      variant="headlineLarge"
+                      style={{ alignSelf: "center", marginVertical: 8 }}
+                  >
+                      17
+                  </Text>
+                  <View
+                      style={{
+                          display: "flex",
+                          flexDirection: "row",
+                          alignSelf: "center",
+                          marginVertical: 8,
+                      }}/>
+              </Card>
 
             <Card style={styles.card}>
               <Text variant={"titleMedium"} style={{ alignSelf: "center" }}>
@@ -158,8 +169,7 @@ const Dashboard = () => {
                   flexDirection: "row",
                   alignSelf: "center",
                   marginVertical: 8,
-                }}
-              ></View>
+                }}/>
             </Card>
           </View>
         </View>
@@ -283,6 +293,7 @@ const Dashboard = () => {
                   <RadioButton.Item
                     label="Sales"
                     value="Sales"
+                    mode={'android'}
                     color={theme.colors.primary}
                     position="leading"
                     style={styles.radioButton}
@@ -290,6 +301,7 @@ const Dashboard = () => {
                   <RadioButton.Item
                     label="Orders"
                     value="Orders"
+                    mode={'android'}
                     color={theme.colors.primary}
                     position="leading"
                     style={styles.radioButton}
@@ -304,6 +316,7 @@ const Dashboard = () => {
                   <RadioButton.Item
                     label="Week"
                     value="week"
+                    mode={'android'}
                     color={theme.colors.primary}
                     position="leading"
                     style={styles.radioButton}
@@ -311,6 +324,7 @@ const Dashboard = () => {
                   <RadioButton.Item
                     label="Month"
                     value="month"
+                    mode={'android'}
                     color={theme.colors.primary}
                     position="leading"
                     style={styles.radioButton}
@@ -462,8 +476,7 @@ const makeStyles = (theme) =>
       // paddingBottom: 20,
     },
     card: {
-      flex: 0.31,
-      marginBottom: 10,
+      // marginBottom: 10,
       padding: 10,
       backgroundColor: "white",
     },

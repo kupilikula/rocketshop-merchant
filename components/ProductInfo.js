@@ -644,8 +644,7 @@ const ProductInfoScreen = (props) => {
               <Switch
                 value={enableRatings}
                 onValueChange={setEnableRatings}
-                style={{}}
-              />
+                style={{marginRight: 16}}              />
               <Text variant={"bodyLarge"}>Enable Ratings</Text>
             </View>
             <View
@@ -660,8 +659,7 @@ const ProductInfoScreen = (props) => {
               <Switch
                 value={enableReviews}
                 onValueChange={setEnableReviews}
-                style={{}}
-              />
+                style={{marginRight: 16}}              />
               <Text variant={"bodyLarge"}>Enable Reviews</Text>
             </View>
             <View
@@ -676,13 +674,14 @@ const ProductInfoScreen = (props) => {
               <Switch
                 value={enableStockTracking}
                 onValueChange={setEnableStockTracking}
-                style={{}}
+                style={{marginRight: 16}}
               />
               <Text variant={"bodyLarge"}>Enable Stock Tracking</Text>
             </View>
             <Checkbox.Item
               label="GST Inclusive"
               position={"leading"}
+              mode={'android'}
               labelStyle={{ fontSize: 16 }}
               status={gstInclusive ? "checked" : "unchecked"}
               onPress={() => setGstInclusive(!gstInclusive)}
@@ -880,7 +879,7 @@ const makeStyles = ({ colors }) =>
       padding: 16,
     },
     scrollContainer: {
-      flex: 1,
+      // flex: 1,
       // backgroundColor: 'green',
       // marginTop: 60,
       // paddingTop: 80,

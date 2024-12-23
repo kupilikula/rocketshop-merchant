@@ -1,10 +1,10 @@
 import {
-  Card,
-  Chip,
-  RadioButton,
-  Surface,
-  Switch,
-  useTheme,
+    Card,
+    Chip, Divider,
+    RadioButton,
+    Surface,
+    Switch,
+    useTheme,
 } from "react-native-paper";
 import { StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
@@ -170,7 +170,7 @@ export default function CollectionPage(props) {
     <Surface
       mode={"flat"}
       style={{
-        height: "100%",
+          flex: 1,
         paddingHorizontal: 10,
         backgroundColor: theme.colors.surface,
       }}
@@ -180,6 +180,7 @@ export default function CollectionPage(props) {
         data={productsData}
         onReorder={handleReorder}
         renderItem={renderItem}
+        ItemSeparatorComponent={() => <Divider style={{marginVertical: 5}}/>}
         ListHeaderComponent={
           <>
             <View
