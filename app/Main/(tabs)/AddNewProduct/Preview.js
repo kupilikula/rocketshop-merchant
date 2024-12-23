@@ -2,7 +2,7 @@ import { Pressable, ScrollView, View } from "react-native";
 import { Button, Surface, useTheme, Text } from "react-native-paper";
 import ProductDisplayCardCustomerStore from "../../../../components/ProductDisplayCardCustomerStore";
 import { useDispatch, useSelector } from "react-redux";
-import {useCallback, useEffect} from "react";
+import { useCallback, useEffect } from "react";
 import { resetNewProduct } from "../../../../store/newProductSlice";
 import { useNavigation, useRouter } from "expo-router";
 import { CommonActions } from "@react-navigation/native";
@@ -35,8 +35,7 @@ export default function Preview(props) {
     dispatch(resetNewProduct());
     console.log("after reset:", newProduct);
     resetNavigationStack();
-  },[resetNewProduct, resetNavigationStack]);
-
+  }, [resetNewProduct, resetNavigationStack]);
 
   useEffect(() => {
     const PreviewHeader = () => {
@@ -104,7 +103,6 @@ export default function Preview(props) {
     console.log("AFTER DISCARDING: redux product before reset:", newProduct);
     resetNavigationStack();
   };
-
 
   return (
     <Surface style={{ flex: 1, padding: 10 }}>

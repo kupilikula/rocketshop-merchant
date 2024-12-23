@@ -1,10 +1,8 @@
-import React, {useEffect, useState, useRef, useCallback} from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   View,
   StyleSheet,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Pressable,
   Switch,
@@ -17,7 +15,8 @@ import {
   useTheme,
   Checkbox,
   Menu,
-  Chip, Surface,
+  Chip,
+  Surface,
 } from "react-native-paper";
 import { useSelector, useDispatch } from "react-redux";
 import { useIsFocused } from "@react-navigation/native";
@@ -517,8 +516,8 @@ const ProductInfoScreen = (props) => {
   console.log("452, getValues(prodcutName):", getValues("productName"));
 
   return (
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Surface style={styles.container}>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <Surface style={styles.container}>
         <View style={styles.section}>
           <Text style={styles.header}>Details</Text>
           {/* Product Name */}
@@ -868,8 +867,8 @@ const ProductInfoScreen = (props) => {
             </Button>
           </View>
         </View>
-        </Surface>
-      </ScrollView>
+      </Surface>
+    </ScrollView>
   );
 };
 
@@ -878,7 +877,7 @@ const makeStyles = ({ colors }) =>
     container: {
       flex: 1,
       backgroundColor: colors.surface,
-      padding: 16
+      padding: 16,
     },
     scrollContainer: {
       flex: 1,
