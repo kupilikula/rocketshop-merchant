@@ -10,7 +10,7 @@ import { Provider } from "react-redux";
 import { store } from "@/store/store";
 import * as NavigationBar from "expo-navigation-bar";
 
-const isLoggedIn = true;
+// const isLoggedIn = true;
 export default function RootLayout() {
   const customTheme = {
     ...DefaultTheme,
@@ -46,7 +46,7 @@ export default function RootLayout() {
   useEffect(() => {
     // Make navigation bar transparent
     if (Platform.OS === "android") {
-      NavigationBar.setBackgroundColorAsync("transparent");
+      NavigationBar.setBackgroundColorAsync("white");
     }
   }, []);
 

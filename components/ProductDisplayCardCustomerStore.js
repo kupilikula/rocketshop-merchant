@@ -4,10 +4,9 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FlatListSlider from "./MediaSlider/FlatListSlider";
 import MediaItem from "./MediaSlider/MediaItem";
 import { Rating } from "@kolking/react-native-rating";
-import { useRouter } from "expo-router";
 
 export default function ProductDisplayCardCustomerStore(props) {
-  const router = useRouter();
+  // const router = useRouter();
   return (
     <Card mode={"elevated"} style={styles.card}>
       <FlatListSlider

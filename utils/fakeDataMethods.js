@@ -210,7 +210,7 @@ export const getOffer = () => {
     },
     applicableTo: {
       products: fakerIndian.helpers.multiple(getProductForStore, {
-        count: fakerIndian.number.int({ min: 0, max: 100 }),
+        count: fakerIndian.number.int({ min: 0, max: 10 }),
       }), // Specific products
       collections: fakerIndian.helpers.multiple(getCollection, {
         count: fakerIndian.number.int({ min: 0, max: 10 }),

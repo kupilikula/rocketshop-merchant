@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, StyleSheet, Pressable, ScrollView } from "react-native";
 import {
   Text,
@@ -17,28 +17,28 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const OffersScreen = () => {
   // console.log(getOffer());
-  const existingOffers = faker.helpers.multiple(getOffer, {
-    count: faker.number.int(20),
+  const offers = faker.helpers.multiple(getOffer, {
+    count: faker.number.int(10),
   });
-  console.log("EO:", existingOffers);
+  // console.log("EO:", existingOffers);
 
-  const [offers, setOffers] = useState(existingOffers);
+  // const [offers, setOffers] = useState(existingOffers);
   const theme = useTheme();
   const router = useRouter();
   const styles = makeStyles(theme);
 
-  const toggleOfferActivation = (offerId) => {
-    setOffers((prevOffers) =>
-      prevOffers.map((offer) =>
-        offer.offerId === offerId
-          ? {
-              ...offer,
-              isActive: !offer.isActive,
-            }
-          : offer,
-      ),
-    );
-  };
+  // const toggleOfferActivation = (offerId) => {
+  //   setOffers((prevOffers) =>
+  //     prevOffers.map((offer) =>
+  //       offer.offerId === offerId
+  //         ? {
+  //             ...offer,
+  //             isActive: !offer.isActive,
+  //           }
+  //         : offer,
+  //     ),
+  //   );
+  // };
 
   const renderOfferItem = (item) => (
     <View key={item.offerId} style={{ width: "100%" }}>

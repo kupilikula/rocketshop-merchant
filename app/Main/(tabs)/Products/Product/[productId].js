@@ -1,9 +1,9 @@
-import { useLocalSearchParams } from "expo-router";
+// import { useLocalSearchParams } from "expo-router";
 import { getProductForStore } from "../../../../../utils/fakeDataMethods";
 import ProductScreenMerchant from "../../../../../components/ProductScreenMerchant";
 
 export default function ProductPage(props) {
-  const { productId } = useLocalSearchParams();
+  // const { productId } = useLocalSearchParams();
 
   return (
     <ProductScreenMerchant

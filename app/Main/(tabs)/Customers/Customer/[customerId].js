@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { ScrollView, View, StyleSheet } from "react-native";
 import { Text, Divider, useTheme, Card } from "react-native-paper";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter } from "expo-router";
 import { getCustomer } from "../../../../../utils/fakeDataMethods";
 
 const mockCustomer = getCustomer(); // Replace with actual customer data
@@ -9,8 +9,8 @@ const mockCustomer = getCustomer(); // Replace with actual customer data
 const CustomerDetails = () => {
   const theme = useTheme();
   const router = useRouter();
-  const { customerId } = useLocalSearchParams(); // Fetch the customer ID from the route params
-  const customer = useMemo(() => mockCustomer, [customerId]); // Replace with API data based on customerId
+  // const { customerId } = useLocalSearchParams(); // Fetch the customer ID from the route params
+  const customer = useMemo(() => mockCustomer, []); // Replace with API data based on customerId
 
   const styles = makeStyles(theme);
 

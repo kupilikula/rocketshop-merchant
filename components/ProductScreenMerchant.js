@@ -1,20 +1,19 @@
+import { View, StyleSheet, ScrollView, Switch } from "react-native";
 import {
-  View,
-  StyleSheet,
-  ScrollView,
-  Switch,
-  TouchableOpacity,
-} from "react-native";
-import { Card, Chip, Surface, Text, useTheme } from "react-native-paper";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+  Card,
+  Chip,
+  IconButton,
+  Surface,
+  Text,
+  useTheme,
+} from "react-native-paper";
 import FlatListSlider from "./MediaSlider/FlatListSlider";
 import MediaItem from "./MediaSlider/MediaItem";
 import { Rating } from "@kolking/react-native-rating";
-import { useRouter } from "expo-router";
 import React, { useState } from "react";
 
 export default function ProductScreenMerchant(props) {
-  const router = useRouter();
+  // const router = useRouter();
   const theme = useTheme();
   const styles = makeStyles(theme);
   console.log("props:", props.product.productId);
@@ -26,9 +25,9 @@ export default function ProductScreenMerchant(props) {
     console.log(`Product status changed to: ${status}`);
   };
 
-  const handleArchive = () => {
-    console.log(`Product ${props.product.productId} archived`);
-  };
+  // const handleArchive = () => {
+  //   console.log(`Product ${props.product.productId} archived`);
+  // };
 
   console.log("props.product:", props.product);
   // console.log('size:', size);
@@ -74,26 +73,15 @@ export default function ProductScreenMerchant(props) {
             </Text>
             <View style={styles.cardContentView}>
               <View style={styles.actionContainer}>
-                <TouchableOpacity
-                  onPress={() => {}}
-                  style={{
-                    height: 40,
-                    width: 40,
-                    borderRadius: 20,
-                    marginBottom: 10,
-                    backgroundColor: theme.colors.softPrimary,
-                    display: "flex",
-                    justifyContent: "center", // Center content vertically
-                    alignItems: "center", // Center content horizontally
-                  }}
-                >
-                  <MaterialIcons
-                    name="edit"
+                <View style={styles.actions}>
+                  <IconButton
+                    icon="pencil"
                     size={28}
-                    style={{ color: theme.colors.primary }}
+                    onPress={() => {}}
+                    style={styles.actionButton}
+                    iconColor={theme.colors.primary}
                   />
-                </TouchableOpacity>
-                {/*<Button mode={'contained'} style={{borderRadius: 8, marginBottom: 15}}>Edit Product</Button>*/}
+                </View>
                 <View style={styles.statusContainer}>
                   <Switch
                     // style={ Platform.OS==='ios' ? { transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }]} : {}}
@@ -274,7 +262,7 @@ const makeStyles = (theme) =>
       alignContent: "center",
     },
     actionButton: {
-      margin: 10,
+      marginBottom: 10,
     },
     collectionsContainer: { flexDirection: "row", flexWrap: "wrap" },
     tagsContainer: {

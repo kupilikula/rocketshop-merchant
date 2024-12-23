@@ -5,8 +5,7 @@ import { foregroundColor } from "../../../../utils/foregroundColor";
 import { useEffect, useState } from "react";
 import StoreFrontCollectionCard from "../../../../components/StoreFrontCollectionCard";
 import { getStoreFullData } from "../../../../utils/fakeDataMethods";
-import Fuse from "fuse.js";
-import { useRouter } from "expo-router";
+// import { useRouter } from "expo-router";
 import ProductSearch from "../../../../components/ProductSearch";
 
 const getUniqueProducts = (storeData) => {
@@ -20,30 +19,19 @@ const getUniqueProducts = (storeData) => {
 export default function StoreFront(props) {
   // const results = useQuery({ queryKey: ['storeDataFull', storeId], queryFn: getStoreDataFull });
   const [storeFullData, setStoreFullData] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const [uniqueProducts, setUniqueProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
   const [textColor, setTextColor] = useState(null);
   const [oppositeColor, setOppositeColor] = useState(null);
   const [followButtonText, setFollowButtonText] = useState("Follow");
   const [followButtonLoading, setFollowButtonLoading] = useState(false);
 
-  const router = useRouter();
+  // const router = useRouter();
 
   useEffect(() => {
     let d = getStoreFullData();
     setStoreFullData(d);
     setUniqueProducts(getUniqueProducts(d));
   }, []);
-
-  useEffect(() => {
-    if (searchQuery === "") {
-      setFilteredProducts(uniqueProducts);
-    } else {
-      const result = fuse.search(searchQuery).map(({ item }) => item);
-      setFilteredProducts(result);
-    }
-  }, [searchQuery, uniqueProducts]);
 
   useEffect(() => {
     if (storeFullData) {
@@ -54,16 +42,6 @@ export default function StoreFront(props) {
       setOppositeColor(o);
     }
   }, [storeFullData]);
-
-  const onSearchQueryChange = (query) => {
-    setSearchQuery(query);
-  }; // 300ms debounce delay
-
-  const fuse = new Fuse(uniqueProducts, {
-    keys: ["productName", "productDescription"], // Specify fields to search
-    includeScore: true,
-    threshold: 0.3, // You can adjust this for fuzziness
-  });
 
   const onFollowButtonPress = () => {
     if (followButtonText === "Follow") {

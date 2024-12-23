@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ListRenderItemInfo, Pressable, StyleSheet, View } from "react-native";
+import { ListRenderItemInfo, Pressable, View } from "react-native";
 import ReorderableList, {
   ReorderableListItem,
   ReorderableListReorderEvent,
@@ -110,22 +110,5 @@ const CollectionsScreen = () => {
     </Surface>
   );
 };
-
-const styles = StyleSheet.create({
-  card: {
-    // justifyContent: 'center',
-    // alignItems: 'center',
-    // margin: 6,
-    // borderRadius: 5,
-    // backgroundColor: 'green',
-    borderWidth: 1,
-    borderColor: "#ddd",
-    height: 100,
-  },
-  text: {
-    fontSize: 20,
-    color: "black",
-  },
-});
 
 export default CollectionsScreen;

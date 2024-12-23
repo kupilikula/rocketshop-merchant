@@ -92,12 +92,12 @@ const PublishOfferScreen = () => {
     // });
   };
 
-  const handleToggleApplyTo = (type) => {
-    setApplicableTo((prev) => ({
-      ...prev,
-      [type]: prev[type].length > 0 ? [] : [], // Clear selection on uncheck
-    }));
-  };
+  // const handleToggleApplyTo = (type) => {
+  //   setApplicableTo((prev) => ({
+  //     ...prev,
+  //     [type]: prev[type].length > 0 ? [] : [], // Clear selection on uncheck
+  //   }));
+  // };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

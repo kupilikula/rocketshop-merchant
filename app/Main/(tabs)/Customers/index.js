@@ -10,7 +10,6 @@ import {
   Divider,
   useTheme,
 } from "react-native-paper";
-import { useRouter } from "expo-router";
 import Fuse from "fuse.js";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { getCustomer } from "../../../../utils/fakeDataMethods";
@@ -26,7 +25,7 @@ const Customers = () => {
   const [sortOrder, setSortOrder] = useState("ascending"); // Default sorting order
   const [filterExpanded, setFilterExpanded] = useState(false);
 
-  const router = useRouter();
+  // const router = useRouter();
   const theme = useTheme();
   const styles = makeStyles(theme);
 
@@ -76,7 +75,7 @@ const Customers = () => {
     });
 
     return result;
-  }, [searchQuery, sortField, sortOrder, fuse]);
+  }, [customers, searchQuery, sortField, sortOrder, fuse]);
 
   const renderCustomerItem = ({ item }) => {
     return <CustomerListItem customer={item} />;
@@ -197,6 +196,7 @@ const Customers = () => {
           </List.Accordion>
         </View>
       </View>
+      <Divider style={{ marginVertical: 10 }} />
     </>
   );
 

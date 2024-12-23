@@ -47,7 +47,7 @@ const ProductPickerModal = ({ visible, onClose, onApply }) => {
       return searchResults.map((res) => res.item);
     }
     return products;
-  }, [searchQuery, fuse]);
+  }, [searchQuery, fuse, products]);
 
   const toggleProductSelection = (productId) => {
     setSelectedProductIds((prev) =>

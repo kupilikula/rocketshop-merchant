@@ -30,7 +30,7 @@ const initialOrders = faker.helpers.multiple(getOrder, { count: 100 });
 const Orders = () => {
   const [orders, setOrders] = useState(initialOrders);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState(["All"]);
+  const [statusFilter, setStatusFilter] = useState([]);
   const [statusQuickFilter, setStatusQuickFilter] = useState("All");
   const [dateQuickFilter, setDateQuickFilter] = useState("Today");
   const [minTotal, setMinTotal] = useState("");
@@ -39,14 +39,11 @@ const Orders = () => {
     startDate: new Date(new Date().setFullYear(new Date().getFullYear() - 1)),
     endDate: new Date(),
   });
-  const [showDatePicker, setShowDatePicker] = useState(false);
   const [sortField, setSortField] = useState("orderDate"); // Default sorting
   const [sortOrder, setSortOrder] = useState("descending"); // Default sorting order
   const [filterExpanded, setFilterExpanded] = useState(false);
-  const [sortExpanded, setSortExpanded] = useState(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
-  const [sortFieldMenuVisible, setSortFieldMenuVisible] = useState(false); // Menu visibility
 
   const { filter } = useLocalSearchParams();
   console.log("params:", filter);
@@ -54,6 +51,9 @@ const Orders = () => {
     console.log("line50:, params:", filter);
     if (filter === "open") {
       setStatusFilter(orderStatusList.slice(0, 6));
+    } else if (filter === "today") {
+      setFilterDates({ startDate: new Date(), endDate: new Date() });
+      setStatusQuickFilter("All");
     }
   }, [filter]);
 
@@ -136,6 +136,7 @@ const Orders = () => {
 
     return result;
   }, [
+    orders,
     searchQuery,
     statusFilter,
     minTotal,
@@ -147,21 +148,12 @@ const Orders = () => {
   ]);
 
   // Function to update order status
-  const updateOrderStatus = (id, newStatus) => {
-    const updatedOrders = orders.map((order) =>
-      order.id === id ? { ...order, status: newStatus } : order,
-    );
-    setOrders(updatedOrders);
-  };
-  const handleStartDateChange = ({ date }) => {
-    setFilterDates((prev) => ({ ...prev, startDate: date }));
-    setShowStartPicker(false);
-  };
-
-  const handleEndDateChange = ({ date }) => {
-    setFilterDates((prev) => ({ ...prev, endDate: date }));
-    setShowEndPicker(false);
-  };
+  // const updateOrderStatus = (id, newStatus) => {
+  //   const updatedOrders = orders.map((order) =>
+  //     order.id === id ? { ...order, status: newStatus } : order,
+  //   );
+  //   setOrders(updatedOrders);
+  // };
 
   const renderOrderItem = ({ item }) => (
     <Card
@@ -214,15 +206,6 @@ const Orders = () => {
       </View>
     </Card>
   );
-  const formatDate = (date) => {
-    let x = date.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-    console.log("x:", x);
-    return x;
-  };
 
   useEffect(() => {
     if (statusQuickFilter !== "") {
@@ -584,50 +567,6 @@ const Orders = () => {
                   ))}
                 </View>
 
-                {/*<View style={styles.row}>*/}
-                {/*    /!* Start Date Card *!/*/}
-                {/*    <TouchableOpacity onPress={() => setShowStartPicker(true)} style={[styles.dateContainer, {marginRight: 5}]}>*/}
-                {/*        <MaterialCommunityIcons name="calendar-start" size={20} color="#6200ee" />*/}
-                {/*        <View style={styles.dateContent}>*/}
-                {/*            <Text style={styles.dateLabel}>Start Date</Text>*/}
-                {/*            <Text style={styles.dateText}>{formatDate(filterDates.startDate)}</Text>*/}
-                {/*        </View>*/}
-                {/*    </TouchableOpacity>*/}
-
-                {/*    /!* End Date Card *!/*/}
-                {/*    <TouchableOpacity onPress={() => setShowEndPicker(true)} style={[styles.dateContainer, {marginLeft: 5}]}>*/}
-                {/*        <MaterialCommunityIcons name="calendar-end" size={20} color="#6200ee" />*/}
-                {/*        <View style={styles.dateContent}>*/}
-                {/*            <Text style={styles.dateLabel}>End Date</Text>*/}
-                {/*            <Text style={styles.dateText}>{formatDate(filterDates.endDate)}</Text>*/}
-                {/*        </View>*/}
-                {/*    </TouchableOpacity>*/}
-                {/*</View>*/}
-
-                {/*/!* Start Date Picker *!/*/}
-                {/*<DatePickerModal*/}
-                {/*    locale="en"*/}
-                {/*    mode="single"*/}
-                {/*    visible={showStartPicker}*/}
-                {/*    date={filterDates.startDate}*/}
-                {/*    onDismiss={() => setShowStartPicker(false)}*/}
-                {/*    onConfirm={handleStartDateChange}*/}
-                {/*    saveLabel={'Select'}*/}
-                {/*    presentationStyle={'pageSheet'}*/}
-                {/*    label={'Start Date'}*/}
-                {/*    // labelStyle={{color: 'red'}}*/}
-                {/*/>*/}
-
-                {/*/!* End Date Picker *!/*/}
-                {/*<DatePickerModal*/}
-                {/*    locale="en"*/}
-                {/*    mode="single"*/}
-                {/*    visible={showEndPicker}*/}
-                {/*    date={filterDates.endDate}*/}
-                {/*    onDismiss={() => setShowEndPicker(false)}*/}
-                {/*    onConfirm={handleEndDateChange}*/}
-                {/*/>*/}
-
                 <Text style={styles.sectionTitle}>Order Total</Text>
                 <View style={styles.row}>
                   <TextInput
@@ -654,6 +593,7 @@ const Orders = () => {
           </List.Accordion>
         </View>
       </View>
+      <Divider style={{ marginVertical: 10 }} />
     </>
   );
 

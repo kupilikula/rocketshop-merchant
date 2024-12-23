@@ -1,10 +1,9 @@
 import { View } from "react-native";
 import { Image } from "expo-image";
 import { Card, Text } from "react-native-paper";
-import { useRouter } from "expo-router";
 
 export const ProductDisplayCompactMerchant = (props) => {
-  const router = useRouter();
+  // const router = useRouter();
 
   const nAttributes = props.product.attributes.length;
   let nAttrOdd = nAttributes % 2 === 1;

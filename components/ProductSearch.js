@@ -1,17 +1,9 @@
 import { Button, Searchbar } from "react-native-paper";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Fuse from "fuse.js";
 import { FlatList, View } from "react-native";
 import { SearchResultProduct } from "./SearchResultProduct";
 import { useRouter } from "expo-router";
-
-const getUniqueProducts = (storeData) => {
-  const allProducts = storeData.collections.reduce(
-    (A, c) => A.concat(c.products),
-    [],
-  );
-  return [...new Set(allProducts)];
-};
 
 export default function ProductSearch(props) {
   const router = useRouter();
@@ -27,17 +19,27 @@ export default function ProductSearch(props) {
       const result = fuse.search(searchQuery).map(({ item }) => item);
       setFilteredProducts(result);
     }
-  }, [searchQuery, props.uniqueProducts]);
+  }, [searchQuery, props.uniqueProducts, fuse]);
 
   const onSearchQueryChange = (query) => {
     setSearchQuery(query);
   }; // 300ms debounce delay
 
-  const fuse = new Fuse(props.uniqueProducts, {
-    keys: ["productName", "productDescription"], // Specify fields to search
-    includeScore: true,
-    threshold: 0.3, // You can adjust this for fuzziness
-  });
+  const fuse = useMemo(() => {
+    return new Fuse(props.uniqueProducts, {
+      keys: [
+        "productName",
+        "description",
+        "collections",
+        "tags",
+        "attributes.*",
+      ],
+      threshold: 0.4,
+      includeScore: false,
+      ignoreLocation: true,
+    });
+  }, [props.uniqueProducts]);
+
   const flatListHeightStyle = props.limitedResults
     ? {
         height: Math.min(props.resultsLimit * 60, filteredProducts.length * 60),

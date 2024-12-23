@@ -7,7 +7,7 @@ import {
   useTheme,
 } from "react-native-paper";
 import { StyleSheet } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { Text } from "react-native-paper";
 import { Pressable, View } from "react-native";
 import { getCollection } from "../../../../../utils/fakeDataMethods";
@@ -38,8 +38,7 @@ const ListElement = React.memo((product) => {
   );
 });
 export default function CollectionPage(props) {
-  const { collectionId } = useLocalSearchParams();
-  // const products = faker.helpers.multiple(getProductForStore, {count: 10});
+  // const { collectionId } = useLocalSearchParams();
   const collection = getCollection();
   const [isActive, setIsActive] = useState(collection.isActive);
   const [storeFrontDisplay, setStoreFrontDisplay] = useState(

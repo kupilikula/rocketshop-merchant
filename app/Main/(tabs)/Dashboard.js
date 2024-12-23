@@ -24,6 +24,7 @@ import {
 } from "../../../utils/fakeDataMethods";
 import { ProductDisplayCompactMerchant } from "../../../components/ProductDisplayCompactMerchant";
 import { CustomerListItem } from "../../../components/CustomerListItem";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -31,6 +32,10 @@ const Dashboard = () => {
   const styles = makeStyles(theme);
   const routeToOpenOrders = () => {
     router.push({ pathname: "/Main/Orders", params: { filter: "open" } });
+  };
+
+  const routeToOrdersToday = () => {
+    router.push({ pathname: "/Main/Orders", params: { filter: "today" } });
   };
 
   const data = {
@@ -72,14 +77,33 @@ const Dashboard = () => {
   }
 
   return (
-    <Surface style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+    <ScrollView contentContainerStyle={styles.scrollContent}>
+      <Surface style={styles.container}>
         {/* Useful Links */}
         {/* Summary of Open Orders */}
         <View style={{ margin: 4 }}>
-          <Text variant={"titleLarge"} style={{ marginVertical: 10 }}>
-            Today
-          </Text>
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 10,
+              justifyContent: "flex-start",
+            }}
+          >
+            <MaterialIcons
+              name={"today"}
+              size={36}
+              style={{ marginRight: 10 }}
+              color={theme.colors.primary}
+            />
+            <Text
+              variant={"titleLarge"}
+              style={{ color: theme.colors.secondary }}
+            >
+              Today
+            </Text>
+          </View>
           <View
             style={{
               display: "flex",
@@ -139,24 +163,45 @@ const Dashboard = () => {
             </Card>
           </View>
         </View>
+        <Divider style={{ marginVertical: 10 }} />
 
-        <Text variant={"titleLarge"} style={{ marginVertical: 10 }}>
-          Quick Links
-        </Text>
-        <View style={{ marginBottom: 15 }}>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 10,
+            justifyContent: "flex-start",
+          }}
+        >
+          <MaterialIcons
+            name={"launch"}
+            size={36}
+            style={{ marginRight: 10 }}
+            color={theme.colors.primary}
+          />
+          <Text
+            variant={"titleLarge"}
+            style={{ color: theme.colors.secondary }}
+          >
+            Quick Links
+          </Text>
+        </View>
+        <View style={{ marginBottom: 10 }}>
           <View
             style={{
               display: "flex",
               flexDirection: "row",
+              flexWrap: "wrap",
               alignItems: "center",
-              justifyContent: "space-between",
+              justifyContent: "space-around",
             }}
           >
             <View style={{ display: "flex", flexDirection: "row" }}>
               <Button
                 icon={"receipt"}
                 mode="contained"
-                style={{ borderRadius: 8, marginRight: 10 }}
+                style={{ borderRadius: 8, margin: 10 }}
                 onPress={() => routeToOpenOrders()}
               >
                 Open Orders
@@ -164,21 +209,55 @@ const Dashboard = () => {
             </View>
             <View style={{ display: "flex", flexDirection: "row" }}>
               <Button
+                icon={"calendar-today"}
+                mode="contained"
+                style={{ borderRadius: 8, margin: 10 }}
+                onPress={() => routeToOrdersToday()}
+              >
+                Orders Today
+              </Button>
+            </View>
+            <View style={{ display: "flex", flexDirection: "row" }}>
+              <Button
                 buttonColor={theme.colors.error}
                 icon={"battery-20"}
                 mode="contained"
-                style={{ borderRadius: 8 }}
-                onPress={() => navigation.navigate("LowStock")}
+                style={{ borderRadius: 8, margin: 10 }}
+                onPress={() =>
+                  router.push({
+                    pathname: "/Main/Products",
+                    params: { filter: "lowstock" },
+                  })
+                }
               >
                 Low Stock Products
               </Button>
             </View>
           </View>
         </View>
-
-        <Text variant={"titleLarge"} style={{ marginVertical: 10 }}>
-          Recent Trend
-        </Text>
+        <Divider style={{ marginVertical: 10 }} />
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 10,
+            justifyContent: "flex-start",
+          }}
+        >
+          <MaterialIcons
+            name={"trending-up"}
+            size={36}
+            style={{ marginRight: 10 }}
+            color={theme.colors.primary}
+          />
+          <Text
+            variant={"titleLarge"}
+            style={{ color: theme.colors.secondary }}
+          >
+            Recent Trend
+          </Text>
+        </View>
         {/* Sales */}
         <Card style={styles.card}>
           <View
@@ -303,10 +382,30 @@ const Dashboard = () => {
           </View>
         </Card>
 
+        <Divider style={{ marginVertical: 10 }} />
         {/* Top Products */}
-        <Text variant={"titleLarge"} style={{ marginVertical: 8 }}>
-          Top Products
-        </Text>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 10,
+            justifyContent: "flex-start",
+          }}
+        >
+          <MaterialIcons
+            name={"shopping-bag"}
+            size={36}
+            style={{ marginRight: 10 }}
+            color={theme.colors.primary}
+          />
+          <Text
+            variant={"titleLarge"}
+            style={{ color: theme.colors.secondary }}
+          >
+            Top Products
+          </Text>
+        </View>
         {/*<Card style={styles.card}>*/}
         {faker.helpers.multiple(getProductForStore, { count: 3 }).map((p) => (
           <View key={p.productId}>
@@ -317,17 +416,38 @@ const Dashboard = () => {
         {/*</Card>*/}
 
         {/* Top Customers */}
-        <Text variant={"titleLarge"} style={{ marginVertical: 8 }}>
-          Top Customers
-        </Text>
+        <Divider style={{ marginVertical: 10 }} />
+        {/* Top Products */}
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 10,
+            justifyContent: "flex-start",
+          }}
+        >
+          <MaterialIcons
+            name={"hail"}
+            size={36}
+            style={{ marginRight: 10 }}
+            color={theme.colors.primary}
+          />
+          <Text
+            variant={"titleLarge"}
+            style={{ color: theme.colors.secondary }}
+          >
+            Top Customers
+          </Text>
+        </View>
         {faker.helpers.multiple(getCustomer, { count: 3 }).map((c) => (
           <View key={c.customerId} style={{ padding: 2 }}>
             <CustomerListItem customer={c} key={c.customerId} />
             <Divider style={{ marginVertical: 8 }} />
           </View>
         ))}
-      </ScrollView>
-    </Surface>
+      </Surface>
+    </ScrollView>
   );
 };
 
@@ -339,7 +459,7 @@ const makeStyles = (theme) =>
       backgroundColor: theme.colors.surface,
     },
     scrollContent: {
-      paddingBottom: 20,
+      // paddingBottom: 20,
     },
     card: {
       flex: 0.31,
@@ -362,8 +482,10 @@ const makeStyles = (theme) =>
       alignItems: "center",
     },
     radioButton: {
-      flex: 1, // Each button occupies equal space
+      // flex: 1, // Each button occupies equal space
       width: 120,
+      marginVertical: 0,
+      padding: 0,
     },
   });
 

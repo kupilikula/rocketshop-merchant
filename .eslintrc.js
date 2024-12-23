@@ -7,4 +7,8 @@ module.exports = {
     "prettier/prettier": "error",
     "unused-imports/no-unused-imports": "error",
   },
+  env: {
+    browser: true,
+    node: true,
+  },
 };

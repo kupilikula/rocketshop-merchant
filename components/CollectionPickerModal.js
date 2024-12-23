@@ -39,7 +39,7 @@ const CollectionPickerModal = ({ visible, onClose, onApply }) => {
       return searchResults.map((res) => res.item);
     }
     return collections;
-  }, [searchQuery, fuse]);
+  }, [searchQuery, fuse, collections]);
 
   const toggleCollectionSelection = (collectionId) => {
     setSelectedCollectionIds((prev) =>

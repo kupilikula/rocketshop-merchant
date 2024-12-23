@@ -37,6 +37,7 @@ const Products = () => {
   const [products, setProducts] = useState(initialProducts);
   const [searchQuery, setSearchQuery] = useState("");
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
+  const [stockRange, setStockRange] = useState({ min: "", max: "" });
   const [sortField, setSortField] = useState("price"); // Default sorting by price
   const [sortOrder, setSortOrder] = useState("ascending"); // Default sorting order
   const [filterExpanded, setFilterExpanded] = useState(false);
@@ -87,6 +88,19 @@ const Products = () => {
       );
     }
 
+    // Stock range filtering
+    if (stockRange.min || stockRange.max) {
+      const min = stockRange.min
+        ? parseInt(stockRange.min, 10)
+        : Number.NEGATIVE_INFINITY;
+      const max = stockRange.max
+        ? parseInt(stockRange.max, 10)
+        : Number.POSITIVE_INFINITY;
+      result = result.filter(
+        (product) => product.stock >= min && product.stock <= max,
+      );
+    }
+
     // Collections filtering
     if (!selectedCollections.includes("All")) {
       result = result.filter((product) =>
@@ -116,8 +130,10 @@ const Products = () => {
 
     return result;
   }, [
+    products,
     searchQuery,
     priceRange,
+    stockRange,
     selectedCollections,
     selectedTags,
     sortField,
@@ -311,6 +327,35 @@ const Products = () => {
               </View>
 
               <View style={styles.section}>
+                {/* Stock Range */}
+                <Text style={styles.sectionTitle}>Stock Range</Text>
+                <View style={styles.row}>
+                  <TextInput
+                    label="Min Stock"
+                    value={stockRange.min}
+                    onChangeText={(value) =>
+                      setStockRange((prev) => ({ ...prev, min: value }))
+                    }
+                    style={styles.input}
+                    mode="outlined"
+                    keyboardType="numeric"
+                    dense
+                  />
+                  <TextInput
+                    label="Max Stock"
+                    value={stockRange.max}
+                    onChangeText={(value) =>
+                      setStockRange((prev) => ({ ...prev, max: value }))
+                    }
+                    style={styles.input}
+                    mode="outlined"
+                    keyboardType="numeric"
+                    dense
+                  />
+                </View>
+              </View>
+
+              <View style={styles.section}>
                 {/* Collections Filter */}
                 <Text style={styles.sectionTitle}>Collections</Text>
                 <View style={styles.flexWrapRowCompact}>
@@ -363,6 +408,7 @@ const Products = () => {
           </List.Accordion>
         </View>
       </View>
+      <Divider style={{ marginVertical: 10 }} />
     </>
   );
 
