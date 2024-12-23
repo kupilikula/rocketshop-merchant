@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, {useEffect, useState, useRef, useCallback} from "react";
 import {
   View,
   StyleSheet,
@@ -17,7 +17,7 @@ import {
   useTheme,
   Checkbox,
   Menu,
-  Chip,
+  Chip, Surface,
 } from "react-native-paper";
 import { useSelector, useDispatch } from "react-redux";
 import { useIsFocused } from "@react-navigation/native";
@@ -47,17 +47,12 @@ const ProductInfoScreen = (props) => {
     { key: "Material", values: ["Cotton", "Leather", "Plastic"] },
     { key: "Size", values: ["Small", "Medium", "Large"] },
   ]);
-  const [attributesData, setAttributesData] = useState([
-    { key: "Color", values: ["Red", "Blue", "Green"] },
-    { key: "Size", values: ["S", "M", "L"] },
-  ]); // Example attributes
   const [existingCollections, setExistingCollections] = useState([
     "Electronics",
     "Fashion",
     "Books",
     "Home Appliances",
   ]); // Existing collections
-  const [collections, setCollections] = useState([]); // Selected collections
   const [tagSuggestions, setTagSuggestions] = useState([
     "Best Sellers",
     "Featured",
@@ -69,7 +64,7 @@ const ProductInfoScreen = (props) => {
   const [filteredTagSuggestions, setFilteredTagSuggestions] = useState([]);
   const [tagInput, setTagInput] = useState(""); // Tag input
 
-  const [variants, setVariants] = useState([]); // Generated variants
+  // const [variants, setVariants] = useState([]); // Generated variants
   const [variantSelectedAttributes, setVariantSelectedAttributes] = useState(
     [],
   ); // Selected attributes for variant generation
@@ -90,7 +85,6 @@ const ProductInfoScreen = (props) => {
     width: 0,
   });
 
-  const isSelectingSuggestion = useRef(false); // Tracks if a suggestion is being clicked
   const router = useRouter();
 
   const theme = useTheme();
@@ -141,11 +135,11 @@ const ProductInfoScreen = (props) => {
   });
 
   const {
-    fields: attributeFields,
-    append: appendAttribute,
-    update: updateAttribute,
-    remove: deleteAttribute,
-    replace: replaceAttributes,
+    fields: attributeFormFields,
+    append: appendFormAttribute,
+    // update: updateFormAttribute,
+    remove: deleteFormAttribute,
+    replace: replaceFormAttributes,
   } = useFieldArray({
     control,
     name: "attributes", // Ties this to "attributes" in form state
@@ -173,57 +167,51 @@ const ProductInfoScreen = (props) => {
       });
       if (
         !_.isEqual(
-          attributeFields.map((a) => ({ key: a.key, value: a.value })),
+          attributeFormFields.map((a) => ({ key: a.key, value: a.value })),
           productData.attributes,
         )
       ) {
-        replaceAttributes([...productData.attributes]);
+        replaceFormAttributes([...productData.attributes]);
       }
-      //attributes does not need a reset or replace since useFieldArray does it automatically
     }
-    // else if (!isFocused){
-    //     // Save state to Redux when screen loses focus
-    //     console.log('Saving product info form to redux');
-    //     saveStateToRedux();
-    //     console.log('Resetting local product info form data');
-    //     reset();
-    //     replaceAttributes([]);
-    // }
   }, [isFocused]);
 
-  const saveStateToRedux = () => {
+  const saveStateToRedux = useCallback(() => {
     const currentState = getValues(); // Get the latest form values
     console.log("saveStateToRedux:,currentState:", currentState);
     dispatch(updateField({ field: "all", value: currentState }));
-  };
+  }, [dispatch, updateField]);
 
-  const resetFormData = () => {
-    console.log("resetting form data");
-    reset();
-    replaceAttributes([]);
-    console.log("form state after reset:", getValues());
-  };
+  const saveStateToReduxAndResetFormData = useCallback(() => {
+    const resetFormData = () => {
+      console.log("resetting form data");
+      reset();
+      replaceFormAttributes([]);
+      console.log("form state after reset:", getValues());
+    };
 
-  const saveStateToReduxAndResetFormData = () => {
     saveStateToRedux();
     resetFormData();
-  };
+  }, [saveStateToRedux]);
 
-  const handleBeforeRemove = (e) => {
-    // Prevent saving state when unmounting
-    console.log("e:", e.data.action.type);
-    if (
-      e.data.action.type === "NAVIGATE" ||
-      e.data.action.type === "POP" ||
-      e.data.action.type === "GO_BACK" ||
-      e.data.action.type === "REPLACE"
-    ) {
-      console.log("Navigation detected, saving state");
-      saveStateToReduxAndResetFormData();
-    } else {
-      console.log("Unmount detected, skipping save");
-    }
-  };
+  const handleBeforeRemove = useCallback(
+    (e) => {
+      // Prevent saving state when unmounting
+      console.log("e:", e.data.action.type);
+      if (
+        e.data.action.type === "NAVIGATE" ||
+        e.data.action.type === "POP" ||
+        e.data.action.type === "GO_BACK" ||
+        e.data.action.type === "REPLACE"
+      ) {
+        console.log("Navigation detected, saving state");
+        saveStateToReduxAndResetFormData();
+      } else {
+        console.log("Unmount detected, skipping save");
+      }
+    },
+    [saveStateToReduxAndResetFormData],
+  );
 
   // Add `beforeRemove` listener for back navigation
   useEffect(() => {
@@ -232,7 +220,7 @@ const ProductInfoScreen = (props) => {
       handleBeforeRemove,
     );
     return unsubscribe; // Cleanup listener
-  }, [navigation, productData, dispatch]);
+  }, [navigation, dispatch, handleBeforeRemove]);
 
   // // Add `state` listener for other navigation transitions
   useEffect(() => {
@@ -241,48 +229,40 @@ const ProductInfoScreen = (props) => {
       saveStateToReduxAndResetFormData,
     );
     return unsubscribe; // Cleanup listener
-  }, [navigation, productData, dispatch]);
+  }, [navigation, dispatch, saveStateToReduxAndResetFormData]);
 
   // Handle selection of collections
-  const toggleCollectionSelection = (collection) => {
-    if (collections.includes(collection)) {
-      setCollections(collections.filter((item) => item !== collection));
-    } else {
-      setCollections([...collections, collection]);
-    }
-  };
-
   const addAttribute = () => {
-    appendAttribute({ key: "", value: "" });
+    appendFormAttribute({ key: "", value: "" });
   };
 
-  const updateAttributeSuggestions = (index, field, value) => {
-    const currentAttribute = attributeFields[index] || null;
-
-    // Handle suggestions for key and value fields
-    if (field === "key") {
-      const suggestions = attributeSuggestions.filter((item) =>
-        item.key.toLowerCase().startsWith(value.toLowerCase()),
-      );
-      setFilteredSuggestions(suggestions);
-      setCurrentFocusedIndex(index);
-    }
-    console.log("238");
-    if (field === "value") {
-      // const currentAttribute = currentAttributes[index];
-      const values =
-        attributeSuggestions.find((item) => item.key === currentAttribute?.key)
-          ?.values || [];
-      const suggestions = values.filter((val) =>
-        val.toLowerCase().startsWith(value.toLowerCase()),
-      );
-      setFilteredValueSuggestions(suggestions);
-      setCurrentFocusedValueIndex(index);
-    }
-  };
+  // const updateAttributeSuggestions = (index, field, value) => {
+  //   const currentAttribute = attributeFormFields[index] || null;
+  //
+  //   // Handle suggestions for key and value fields
+  //   if (field === "key") {
+  //     const suggestions = attributeSuggestions.filter((item) =>
+  //       item.key.toLowerCase().startsWith(value.toLowerCase()),
+  //     );
+  //     setFilteredSuggestions(suggestions);
+  //     setCurrentFocusedIndex(index);
+  //   }
+  //   console.log("238");
+  //   if (field === "value") {
+  //     // const currentAttribute = currentAttributes[index];
+  //     const values =
+  //       attributeSuggestions.find((item) => item.key === currentAttribute?.key)
+  //         ?.values || [];
+  //     const suggestions = values.filter((val) =>
+  //       val.toLowerCase().startsWith(value.toLowerCase()),
+  //     );
+  //     setFilteredValueSuggestions(suggestions);
+  //     setCurrentFocusedValueIndex(index);
+  //   }
+  // };
 
   const removeAttribute = (index) => {
-    deleteAttribute(index);
+    deleteFormAttribute(index);
   };
 
   const applySuggestion = (index, suggestion) => {
@@ -309,7 +289,7 @@ const ProductInfoScreen = (props) => {
 
   const renderAttributeInput = (index, attr) => {
     return (
-      <View key={attributeFields[index]?.id} style={styles.attributeRow}>
+      <View key={attributeFormFields[index]?.id} style={styles.attributeRow}>
         {/* Attribute Name */}
         <Controller
           name={`attributes.${index}.key`}
@@ -425,52 +405,56 @@ const ProductInfoScreen = (props) => {
     );
   };
 
-  const ProductInfoHeader = () => {
-    return (
-      <View
-        style={[
-          generateBoxShadowStyle(0, 4, "#171717", 0.2, 3, 4, "#171717"),
-          {
-            height: 60 + insets.top,
-            paddingTop: insets.top,
-            paddingHorizontal: 15,
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            backgroundColor: "white",
-            color: "black",
-          },
-        ]}
-      >
-        <Pressable
-          onPressIn={() => {
-            router.back();
-          }}
-        >
-          <MaterialIcons
-            name={"arrow-back"}
-            size={36}
-            style={{ color: "black" }}
-          />
-        </Pressable>
-        <Text variant={"titleLarge"} style={{ color: "black" }}>
-          Product Info
-        </Text>
-        <Pressable onPressIn={handleSubmit(onSubmit)}>
-          <MaterialIcons
-            name={"arrow-forward"}
-            size={36}
-            style={{ color: "black" }}
-          />
-        </Pressable>
-      </View>
-    );
-  };
-
   useEffect(() => {
+    const onSubmit = (data) => {
+      dispatch(updateField({ field: "all", value: data }));
+      router.push("/Main/(tabs)/AddNewProduct/Preview");
+    };
+
+    const ProductInfoHeader = () => {
+      return (
+        <View
+          style={[
+            generateBoxShadowStyle(0, 4, "#171717", 0.2, 3, 4, "#171717"),
+            {
+              height: 60 + insets.top,
+              paddingTop: insets.top,
+              paddingHorizontal: 15,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              backgroundColor: "white",
+              color: "black",
+            },
+          ]}
+        >
+          <Pressable
+            onPressIn={() => {
+              router.back();
+            }}
+          >
+            <MaterialIcons
+              name={"arrow-back"}
+              size={36}
+              style={{ color: "black" }}
+            />
+          </Pressable>
+          <Text variant={"titleLarge"} style={{ color: "black" }}>
+            Product Info
+          </Text>
+          <Pressable onPressIn={handleSubmit(onSubmit)}>
+            <MaterialIcons
+              name={"arrow-forward"}
+              size={36}
+              style={{ color: "black" }}
+            />
+          </Pressable>
+        </View>
+      );
+    };
     navigation.setOptions({ header: ProductInfoHeader });
-  }, [navigation]);
+  }, [navigation, handleSubmit, insets.top, router]);
 
   const publishProduct = async () => {
     // const productData = { productName, price, description, stock, getValues('attributes') };
@@ -478,39 +462,9 @@ const ProductInfoScreen = (props) => {
   };
 
   const markAsVariant = () => {};
-  // Generate all combinations of variants
-  const generateVariants = () => {
-    if (variantSelectedAttributes.length === 0) {
-      alert("Please select at least one attribute.");
-      return;
-    }
-    const attributeValues = variantSelectedAttributes.map(
-      (attr) => attributesData.find((a) => a.key === attr)?.values || [],
-    );
-    // Generate combinations
-    const combinations = cartesianProduct(attributeValues).map((combo) => ({
-      options: combo,
-      price: "",
-      stock: "",
-    }));
-    setVariants(combinations);
-  };
+  const generateVariant = () => {};
 
-  // Cartesian product utility
-  const cartesianProduct = (arrays) => {
-    return arrays.reduce(
-      (acc, curr) => acc.flatMap((a) => curr.map((b) => [...a, b])),
-      [[]],
-    );
-  };
-
-  const updateVariant = (index, field, value) => {
-    const updatedVariants = [...variants];
-    updatedVariants[index][field] = value;
-    setVariants(updatedVariants);
-  };
-
-  const toggleAttributeSelection = (attributeKey) => {
+  const toggleVariantAttributeSelection = (attributeKey) => {
     if (variantSelectedAttributes.includes(attributeKey)) {
       setVariantSelectedAttributes(
         variantSelectedAttributes.filter((attr) => attr !== attributeKey),
@@ -558,21 +512,13 @@ const ProductInfoScreen = (props) => {
   const handleTagInputSubmit = () => {
     addTag(tagInput);
   };
-  const onSubmit = (data) => {
-    dispatch(updateField({ field: "all", value: data }));
-    router.push("/Main/(tabs)/AddNewProduct/Preview");
-  };
 
   console.log("451, productData:", productData);
   console.log("452, getValues(prodcutName):", getValues("productName"));
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
-    >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Surface style={styles.container}>
         <View style={styles.section}>
           <Text style={styles.header}>Details</Text>
           {/* Product Name */}
@@ -792,8 +738,8 @@ const ProductInfoScreen = (props) => {
 
         <View style={styles.section}>
           <Text style={styles.header}>Attributes</Text>
-          {attributeFields &&
-            attributeFields?.map((field, index) => (
+          {attributeFormFields &&
+            attributeFormFields?.map((field, index) => (
               <View key={field.id}>{renderAttributeInput(index, field)}</View>
             ))}
 
@@ -878,7 +824,7 @@ const ProductInfoScreen = (props) => {
           <View
             style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}
           >
-            {attributeFields?.map(
+            {attributeFormFields?.map(
               (attribute, idx) =>
                 attribute.key.trim() !== "" && (
                   <View key={idx} style={styles.checkboxContainer}>
@@ -888,7 +834,9 @@ const ProductInfoScreen = (props) => {
                           ? "checked"
                           : "unchecked"
                       }
-                      onPress={() => toggleAttributeSelection(attribute.key)}
+                      onPress={() =>
+                        toggleVariantAttributeSelection(attribute.key)
+                      }
                     />
                     <Text>{attribute.key}</Text>
                   </View>
@@ -913,16 +861,15 @@ const ProductInfoScreen = (props) => {
             <Button
               icon="plus"
               mode="contained"
-              onPress={generateVariants}
+              onPress={generateVariant}
               style={styles.generateVariantButton}
             >
               Generate Variant
             </Button>
           </View>
         </View>
-        {/* Variant List */}
+        </Surface>
       </ScrollView>
-    </KeyboardAvoidingView>
   );
 };
 
@@ -930,12 +877,15 @@ const makeStyles = ({ colors }) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: "white",
+      backgroundColor: colors.surface,
+      padding: 16
     },
     scrollContainer: {
+      flex: 1,
+      // backgroundColor: 'green',
       // marginTop: 60,
       // paddingTop: 80,
-      padding: 16,
+      // padding: 16,
     },
     section: {
       marginVertical: 8,
