@@ -1,10 +1,6 @@
-import { Stack, useRouter } from "expo-router";
-import { useTheme } from "react-native-paper";
+import { Stack } from "expo-router";
 
 export default function AddNewProductStack() {
-  const router = useRouter();
-  const theme = useTheme(); // Access the theme here
-
   return (
     <Stack initialRouteName={"index"}>
       <Stack.Screen name={"index"} options={{ header: () => null }} />
@@ -12,19 +8,13 @@ export default function AddNewProductStack() {
         name={"AddMediaItems"}
         options={{
           title: "Product Media",
-          // headerStyle: { backgroundColor: theme.colors.secondary },
-          // headerTintColor: 'white',
-          // headerTitleStyle: {
-          //     // fontWeight: 'bold',
-          // },
-          // headerRight: () => <Pressable onPressIn={() => {console.log('press'); router.push('./AddProductInfo')}}><MaterialIcons name={'arrow-forward'} size={36} style={{color: 'white'}}/></Pressable>
         }}
       />
       <Stack.Screen
         name={"AddProductInfo"}
-        options={({ navigation }) => ({
+        options={{
           title: "Product Info",
-        })}
+        }}
       />
     </Stack>
   );

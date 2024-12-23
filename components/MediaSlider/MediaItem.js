@@ -18,17 +18,18 @@ export default function MediaItem({
   scrollToIndex,
 }) {
   console.log("index:", index, " , item:", item);
-  let videoPlayer;
-  let isPlaying;
-  if (item.mediaType === "video") {
-    videoPlayer = useVideoPlayer(item["uri"], (player) => {
-      // player.loop = true;
-      // player.play();
-    });
-    ({ isPlaying } = useEvent(videoPlayer, "playingChange", {
-      isPlaying: videoPlayer.playing,
-    }));
-  }
+
+  // Initialize video player and event hook unconditionally
+  const videoPlayer = useVideoPlayer(
+    item.mediaType === "video" ? item.uri : null,
+    (player) => {
+      // Optional setup for the player
+    },
+  );
+
+  const { isPlaying } = useEvent(videoPlayer, "playingChange", {
+    isPlaying: videoPlayer ? videoPlayer.playing : false,
+  });
 
   const playVideo = () => {
     if (item.mediaType === "video") {

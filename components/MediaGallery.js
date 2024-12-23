@@ -76,6 +76,10 @@ const MediaGallery = (props) => {
     };
   }, []);
 
+  const mediaSelected = useMemo(() => {
+    return previewMediaItems.length > 0;
+  }, [previewMediaItems.length]);
+
   // const forceUpdate = useCallback(() => setNewAssetTrigger((prev) => ({ ...prev })), []);
 
   const savePhotoToGallery = async (photoUri) => {
@@ -94,7 +98,7 @@ const MediaGallery = (props) => {
     return asset;
   };
 
-  const resetNavigationStack = () => {
+  const resetNavigationStack = useCallback(() => {
     // Reset the navigation stack to the Dashboard tab
     navigation.dispatch(
       CommonActions.reset({
@@ -102,73 +106,7 @@ const MediaGallery = (props) => {
         routes: [{ name: "Dashboard" }], // Replace with your Dashboard screen name
       }),
     );
-  };
-
-  const MediaHeader = ({ cameraOpen }) => {
-    if (cameraOpen) {
-      return null;
-    } else {
-      return (
-        <View
-          style={[
-            generateBoxShadowStyle(0, 4, "#171717", 0.2, 3, 4, "#171717"),
-            {
-              height: 60 + insets.top,
-              paddingTop: insets.top,
-              paddingHorizontal: 15,
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              backgroundColor: "black",
-            },
-          ]}
-        >
-          {/* Left Icon (Back Button) */}
-          <Pressable
-            onPressIn={() => {
-              console.log("cancel workflow");
-              dispatch(resetNewProduct());
-              resetNavigationStack();
-            }}
-            style={{ flex: 1 }}
-          >
-            <MaterialIcons name="close" size={36} style={{ color: "white" }} />
-          </Pressable>
-
-          {/* Title */}
-          <Text
-            variant="titleLarge"
-            style={{
-              flex: 2, // Allow the title to occupy its space while centering
-              textAlign: "center",
-              color: "white",
-            }}
-          >
-            Product Media
-          </Text>
-
-          {/* Right Icon (Forward Button) */}
-          <Pressable
-            onPressIn={() => {
-              console.log("press");
-              if (previewMediaItems.length > 0) {
-                router.push("./AddProductInfo");
-              }
-            }}
-            style={{ flex: 1, alignItems: "flex-end" }}
-          >
-            <MaterialIcons
-              name="arrow-forward"
-              size={36}
-              style={{
-                color: previewMediaItems.length > 0 ? "white" : "black",
-              }}
-            />
-          </Pressable>
-        </View>
-      );
-    }
-  };
+  }, [navigation]);
 
   const generateThumbnails = async (assets) => {
     console.log("generate:", assets.length);
@@ -198,6 +136,16 @@ const MediaGallery = (props) => {
       setThumbnails({ ...thumbnails, ...thumbnailMap });
     }
   };
+
+  const toggleSelection = useCallback((item) => {
+    setSelectedItemsIds((prev) => {
+      if (prev.includes(item.id)) {
+        return prev.filter((id) => id !== item.id);
+      } else {
+        return [...prev, item.id];
+      }
+    });
+  }, []);
 
   useEffect(() => {
     console.log("get Media useEffect");
@@ -244,17 +192,12 @@ const MediaGallery = (props) => {
         }
       })
       .catch((err) => console.log("line150 err:", err));
-  }, [newAssetTrigger.counter]);
-
-  const toggleSelection = useCallback((item) => {
-    setSelectedItemsIds((prev) => {
-      if (prev.includes(item.id)) {
-        return prev.filter((id) => id !== item.id);
-      } else {
-        return [...prev, item.id];
-      }
-    });
-  }, []);
+  }, [
+    newAssetTrigger.counter,
+    // generateThumbnails,
+    // thumbnails,
+    // toggleSelection,
+  ]);
 
   const mediaMap = useMemo(() => {
     return new Map(media.map((item) => [item.id, item]));
@@ -282,7 +225,7 @@ const MediaGallery = (props) => {
               localUri = assetInfo.localUri;
             }
           } catch (e) {
-            // console.log('line206, e:', e);
+            console.log("line206, e:", e);
           }
           console.log("localuri:", localUri);
 
@@ -303,21 +246,21 @@ const MediaGallery = (props) => {
       }
     };
     transformItemsAndSetPreviews();
-  }, [selectedItems, orientation]);
+  }, [selectedItems, orientation, thumbnails]);
 
   // useEffect(() => {
   //     console.log("Updated previewMediaItems:", previewMediaItems);
   // }, [previewMediaItems]);
 
   useEffect(() => {
-    if (selectedItemsIds.length > 0) {
+    if (previewMediaItems.length > 0) {
       setTimeout(() => {
         previewFlatListSliderRef.current?.scrollToIndex(
           previewMediaItems.length - 1,
         );
       }, 200);
     }
-  }, [previewMediaItems]);
+  }, [previewMediaItems.length]);
 
   const closeCamera = () => {
     setVideoElapsedTime(0);
@@ -342,16 +285,81 @@ const MediaGallery = (props) => {
 
   useEffect(() => {
     console.log("effect: openCamera:", openCamera);
+
+    const MediaHeader = ({ cameraOpen }) => {
+      if (cameraOpen) {
+        return null;
+      } else {
+        return (
+          <View
+            style={[
+              generateBoxShadowStyle(0, 4, "#171717", 0.2, 3, 4, "#171717"),
+              {
+                height: 60 + insets.top,
+                paddingTop: insets.top,
+                paddingHorizontal: 15,
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: "black",
+              },
+            ]}
+          >
+            {/* Left Icon (Back Button) */}
+            <Pressable
+              onPressIn={() => {
+                console.log("cancel workflow");
+                dispatch(resetNewProduct());
+                resetNavigationStack();
+              }}
+              style={{ flex: 1 }}
+            >
+              <MaterialIcons
+                name="close"
+                size={36}
+                style={{ color: "white" }}
+              />
+            </Pressable>
+
+            {/* Title */}
+            <Text
+              variant="titleLarge"
+              style={{
+                flex: 2, // Allow the title to occupy its space while centering
+                textAlign: "center",
+                color: "white",
+              }}
+            >
+              Product Media
+            </Text>
+
+            {/* Right Icon (Forward Button) */}
+            <Pressable
+              onPressIn={() => {
+                console.log("press");
+                if (mediaSelected) {
+                  router.push("./AddProductInfo");
+                }
+              }}
+              style={{ flex: 1, alignItems: "flex-end" }}
+            >
+              <MaterialIcons
+                name="arrow-forward"
+                size={36}
+                style={{
+                  color: mediaSelected ? "white" : "black",
+                }}
+              />
+            </Pressable>
+          </View>
+        );
+      }
+    };
+
     navigation.setOptions({
       header: () => <MediaHeader cameraOpen={openCamera} />,
     });
-  }, [
-    navigation,
-    openCamera,
-    previewMediaItems.length > 0,
-    dispatch,
-    resetNavigationStack,
-  ]);
+  }, [navigation, openCamera, mediaSelected, dispatch, insets.top, router]);
 
   const formatTime = (timeInSeconds) => {
     const minutes = Math.floor(timeInSeconds / 60);
@@ -461,7 +469,7 @@ const MediaGallery = (props) => {
             counter: prev.counter + 1,
             asset: asset,
           }));
-          console.log("line 357, newAssetTrigger:", newAssetTrigger);
+          // console.log("line 357, newAssetTrigger:", newAssetTrigger);
           // forceUpdate();
         } catch (err) {
           console.log("Error creating asset:", JSON.stringify(err, null, 2));
@@ -778,7 +786,7 @@ const MediaGallery = (props) => {
                           let photo = await cameraRef.current.takePictureAsync({
                             exif: true,
                           });
-                          const asset = await savePhotoToGallery(photo.uri);
+                          await savePhotoToGallery(photo.uri);
                           closeCamera();
                         } catch (error) {
                           console.log("Error taking pic:", error);
