@@ -145,7 +145,7 @@ export default function StoreFront(props) {
             <ProductSearch
               uniqueProducts={uniqueProducts}
               limitedResults={true}
-              resultsLimit={5}
+              resultsLimit={9}
               initialSearchQuery={""}
               style={{ marginTop: 10 }}
             />

@@ -18,6 +18,8 @@ export default function StoreSearch(props) {
   const [storeFullData, setStoreFullData] = useState(null);
   const [uniqueProducts, setUniqueProducts] = useState([]);
 
+  console.log('initialSQ:', initialSearchQuery);
+
   useEffect(() => {
     let d = getStoreFullData();
     setStoreFullData(d);
@@ -34,11 +36,14 @@ export default function StoreSearch(props) {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          padding: 10,
+          paddingHorizontal: 10,
           flex: 1,
+            height: '100%',
+            width: '100%'
         }}
       >
         <ProductSearch
+            style={{marginTop: 10}}
           uniqueProducts={uniqueProducts}
           limitedResults={false}
           initialSearchQuery={initialSearchQuery}

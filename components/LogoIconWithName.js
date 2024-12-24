@@ -26,6 +26,7 @@ export default function LogoIconWithName() {
         source={require("../assets/images/PocketShopIcon.png")}
         style={{ width: 50, height: 50, margin: 5 }}
       />
+        {fontsLoaded &&
       <Text
         style={{
           fontFamily: Platform.select({
@@ -38,7 +39,7 @@ export default function LogoIconWithName() {
         }}
       >
         PocketShop
-      </Text>
+      </Text>}
     </View>
   );
 }

@@ -289,6 +289,7 @@ const MediaGallery = (props) => {
     const MediaHeader = ({ cameraOpen }) => {
       if (cameraOpen) {
         return null;
+        // return <View style={{height: 60 + insets.top, backgroundColor: "#000000"}}/>;
       } else {
         return (
           <View
@@ -359,6 +360,15 @@ const MediaGallery = (props) => {
     navigation.setOptions({
       header: () => <MediaHeader cameraOpen={openCamera} />,
     });
+    if (openCamera) {
+      navigation.getParent().setOptions({
+        tabBarStyle: {display: 'none'}
+      })
+    }
+    return () => navigation.getParent()?.setOptions({
+      tabBarStyle: undefined
+    });
+
   }, [navigation, openCamera, mediaSelected, dispatch, insets.top, router]);
 
   const formatTime = (timeInSeconds) => {
@@ -572,6 +582,7 @@ const MediaGallery = (props) => {
   return (
     <Surface style={styles.container}>
       <>
+
         {!openCamera && (
           <View
             style={{
@@ -708,7 +719,7 @@ const MediaGallery = (props) => {
             />
           </View>
         )}
-
+        {/*<View style={{paddingTop: 60 + insets.top}}>*/}
         {openCamera && (
           <>
             {!permission?.granted && (
@@ -737,6 +748,7 @@ const MediaGallery = (props) => {
             )}
             {permission.granted && (
               <>
+                <View style={{flex: 1, width: '100%', marginTop: insets.top, marginBottom: insets.bottom}}>
                 <View
                   style={{ position: "absolute", top: 10, left: 10, zIndex: 5 }}
                 >
@@ -824,9 +836,11 @@ const MediaGallery = (props) => {
                     </View>
                   </View>
                 )}
+                </View>
+                {/*</View>*/}
                 {isFocused && (
                   <CameraView
-                    style={styles.camera}
+                    style={[styles.camera]}
                     facing={facing}
                     ref={cameraRef}
                     mode={cameraMode}
@@ -845,7 +859,7 @@ const MediaGallery = (props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // padding: 10,
+    padding: 0,
     width: "100%",
     height: "100%",
     justifyContent: "center",

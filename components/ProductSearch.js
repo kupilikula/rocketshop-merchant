@@ -1,4 +1,4 @@
-import { Button, Searchbar } from "react-native-paper";
+import {Button, Divider, Searchbar} from "react-native-paper";
 import { useEffect, useMemo, useState } from "react";
 import Fuse from "fuse.js";
 import { FlatList, View } from "react-native";
@@ -42,7 +42,7 @@ export default function ProductSearch(props) {
 
   const flatListHeightStyle = props.limitedResults
     ? {
-        height: Math.min(props.resultsLimit * 60, filteredProducts.length * 60),
+        height: Math.min(props.resultsLimit * 64 , filteredProducts.length * 64),
       }
     : {};
 
@@ -66,6 +66,7 @@ export default function ProductSearch(props) {
           backgroundColor: "#efefef",
           elevation: 5,
           width: "100%",
+            marginBottom: 5,
         }}
       />
       {searchQuery !== "" && filteredProducts.length > 0 && (
@@ -80,6 +81,7 @@ export default function ProductSearch(props) {
                 withCheckBox={props.withCheckbox}
               />
             )}
+            ItemSeparatorComponent={() => <Divider style={{marginVertical: 2}}/>}
           />
         </View>
       )}

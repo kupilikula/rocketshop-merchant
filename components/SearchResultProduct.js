@@ -1,10 +1,11 @@
 import { Pressable, View } from "react-native";
 import { Image } from "expo-image";
-import { Text } from "react-native-paper";
+import {Card, Text, useTheme} from "react-native-paper";
 import { useRouter } from "expo-router";
 
 export const SearchResultProduct = (props) => {
   const router = useRouter();
+  const theme = useTheme();
 
   return (
     <Pressable
@@ -18,11 +19,15 @@ export const SearchResultProduct = (props) => {
         style={{
           height: 60,
           borderStyle: "solid",
-          borderBottomWidth: 1,
-          borderRightWidth: 1,
+            borderWidth: 1,
+            borderRadius: 8,
+            borderColor: theme.colors.grayBorder,
+          // borderBottomWidth: 1,
+          // borderRightWidth: 1,
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
+            overflow: 'hidden'
         }}
       >
         <Image
