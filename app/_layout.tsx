@@ -9,7 +9,9 @@ import { DefaultTheme } from "react-native-paper";
 import { Provider } from "react-redux";
 import { store } from "@/store/store";
 import * as NavigationBar from "expo-navigation-bar";
+import {QueryClient, QueryClientProvider} from "react-query";
 
+const queryClient = new QueryClient();
 // const isLoggedIn = true;
 export default function RootLayout() {
   const customTheme = {
@@ -51,15 +53,17 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <SafeAreaProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <Provider store={store}>
-          <PaperProvider theme={customTheme}>
-            <StatusBar style="dark" />
-            <Stack screenOptions={{ header: () => null }} />
-          </PaperProvider>
-        </Provider>
-      </GestureHandlerRootView>
-    </SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+          <SafeAreaProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <Provider store={store}>
+              <PaperProvider theme={customTheme}>
+                <StatusBar style="dark" />
+                <Stack screenOptions={{ header: () => null }} />
+              </PaperProvider>
+            </Provider>
+          </GestureHandlerRootView>
+        </SafeAreaProvider>
+      </QueryClientProvider>
   );
 }

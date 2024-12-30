@@ -40,7 +40,7 @@ const PublishOfferScreen = () => {
     const [discountDetails, setDiscountDetails] = useState({});
     const [applicableTo, setApplicableTo] = useState({});
     const [conditions, setConditions] = useState({});
-    const [validity, setValidity] = useState({});
+    const [validityDateRange, setValidityDateRange] = useState({});
     const [offerStatus, setOfferStatus] = useState(false);
 
     const [showStartDatePicker, setShowStartDatePicker] = useState(false);
@@ -57,11 +57,11 @@ const PublishOfferScreen = () => {
         if (offer) {
             setOfferType(offer.offerType);
             setOfferName(offer.offerName);
-            setOfferDescription(offer.description);
+            setOfferDescription(offer.offerDescription);
             setDiscountDetails(offer.discountDetails);
             setApplicableTo(offer.applicableTo);
             setConditions(offer.conditions);
-            setValidity(offer.validityDateRange);
+            setValidityDateRange(offer.validityDateRange);
             setOfferStatus(offer.isActive);
             setSelectedProducts(offer.applicableTo.productIds || []);
             setSelectedCollections(offer.applicableTo.collectionIds || []);
@@ -97,7 +97,7 @@ const PublishOfferScreen = () => {
                 tags: selectedTags,
             },
             conditions,
-            validity,
+            validityDateRange,
             offerStatus,
         });
     };
@@ -162,16 +162,16 @@ const PublishOfferScreen = () => {
                     <TouchableOpacity onPress={() => setShowStartDatePicker(true)} style={styles.dateInput}>
                         <MaterialCommunityIcons name="calendar" size={20} color={theme.colors.primary} />
                         <Text style={styles.dateText}>
-                            {validity.startDate ? new Date(validity.startDate).toLocaleDateString() : "Start Date"}
+                            {validityDateRange.startDate ? new Date(validityDateRange.startDate).toLocaleDateString() : "Start Date"}
                         </Text>
                     </TouchableOpacity>
                     {showStartDatePicker && (
                         <DatePicker
                             mode="date"
-                            value={validity.startDate ? new Date(validity.startDate) : new Date()}
+                            value={validityDateRange.startDate ? new Date(validityDateRange.startDate) : new Date()}
                             onChange={(event, date) => {
                                 setShowStartDatePicker(false);
-                                if (date) setValidity((prev) => ({ ...prev, startDate: date }));
+                                if (date) setValidityDateRange((prev) => ({ ...prev, startDate: date }));
                             }}
                         />
                     )}
@@ -179,16 +179,16 @@ const PublishOfferScreen = () => {
                     <TouchableOpacity onPress={() => setShowEndDatePicker(true)} style={styles.dateInput}>
                         <MaterialCommunityIcons name="calendar" size={20} color={theme.colors.primary} />
                         <Text style={styles.dateText}>
-                            {validity.endDate ? new Date(validity.endDate).toLocaleDateString() : "End Date"}
+                            {validityDateRange.endDate ? new Date(validityDateRange.endDate).toLocaleDateString() : "End Date"}
                         </Text>
                     </TouchableOpacity>
                     {showEndDatePicker && (
                         <DatePicker
                             mode="date"
-                            value={validity.endDate ? new Date(validity.endDate) : new Date()}
+                            value={validityDateRange.endDate ? new Date(validityDateRange.endDate) : new Date()}
                             onChange={(event, date) => {
                                 setShowEndDatePicker(false);
-                                if (date) setValidity((prev) => ({ ...prev, endDate: date }));
+                                if (date) setValidityDateRange((prev) => ({ ...prev, endDate: date }));
                             }}
                         />
                     )}

@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  storeId: null,
+  storeId: 'd9117fb1-135b-4fab-8e26-21082c1f59ea',
 };
 
 const storeSlice = createSlice({

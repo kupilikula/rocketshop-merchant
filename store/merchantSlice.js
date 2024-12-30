@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  merchantId: null,
+  merchantId: "61c6f62d-27d3-44be-9eae-d34d95f94e32",
   merchantName: null,
   merchantPhone: null,
   merchantRole: null,

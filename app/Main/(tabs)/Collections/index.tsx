@@ -40,7 +40,7 @@ const ListElement: React.FC<ListElementProps> = React.memo((collection) => {
     );
 });
 
-const CollectionsScreen = ({ storeId }) => {
+const CollectionsScreen = () => {
     const theme = useTheme();
     const router = useRouter();
     const {storeId} = useSelector((state) => state.store);

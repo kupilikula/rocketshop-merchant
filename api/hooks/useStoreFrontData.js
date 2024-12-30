@@ -1,11 +1,11 @@
 import { useQuery } from "react-query";
-import axios from "axios";
+import axiosClient from "../client";
 
 export const useStoreFrontData = (storeId) => {
     return useQuery(
         ["storeFrontData", storeId],
         async () => {
-            const { data } = await axios.get(`/stores/${storeId}/storeFront`);
+            const { data } = await axiosClient.get(`/stores/${storeId}/storeFront`);
             return data;
         },
         {

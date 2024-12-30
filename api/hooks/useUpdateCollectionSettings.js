@@ -1,12 +1,11 @@
 import { useMutation, useQueryClient } from "react-query";
-import axios from "axios";
-
+import axiosClient from "../client";
 export const useUpdateCollectionSettings = (storeId, collectionId) => {
     const queryClient = useQueryClient();
 
     return useMutation(
         async (settings) => {
-            await axios.patch(`/stores/${storeId}/collections/${collectionId}`, settings);
+            await axiosClient.patch(`/stores/${storeId}/collections/${collectionId}`, settings);
         },
         {
             onSuccess: () => {

@@ -1,6 +1,5 @@
 import { useQuery } from "react-query";
-import axios from "axios";
-
+import axiosClient from "../client";
 /**
  * Fetch offers for a store
  * @param {string} storeId - ID of the store
@@ -9,7 +8,7 @@ export const useOffers = (storeId) => {
     return useQuery(
         ["offers", storeId],
         async () => {
-            const response = await axios.get(`/stores/${storeId}/offers`);
+            const response = await axiosClient.get(`/stores/${storeId}/offers`);
             return response.data;
         },
         {

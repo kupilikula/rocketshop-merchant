@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "react-query";
-import axios from "axios";
-
+import axiosClient from "../client";
 /**
  * Update the order of collections in the backend.
  */
@@ -15,7 +14,7 @@ export const useUpdateCollectionOrder = (storeId) => {
                 displayOrder: index + 1, // Display order starts from 1
             }));
 
-            await axios.patch(`/stores/${storeId}/collections/reorderCollections`, {
+            await axiosClient.patch(`/stores/${storeId}/collections/reorderCollections`, {
                 collectionOrders,
             });
         },
