@@ -100,15 +100,10 @@ const PublishOfferScreen = () => {
   // };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <Surface style={{ flex: 1, backgroundColor: "white" }}>
-        <ScrollView
-          style={styles.container}
-          contentContainerStyle={{
-            // paddingHorizontal: 16,
-            paddingBottom: 60, // Ensure bottom padding is enough to avoid overlapping
-          }}
-        >
+    // <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView>
+
+      <Surface style={styles.container}>
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Offer Description</Text>
             {/* Offer Name */}
@@ -470,9 +465,9 @@ const PublishOfferScreen = () => {
             </Button>
           </View>
           {/*</View>*/}
-        </ScrollView>
       </Surface>
-    </SafeAreaView>
+      </ScrollView>
+    // </SafeAreaView>
   );
 };
 
@@ -483,6 +478,7 @@ const makeStyles = ({ colors }) =>
       paddingHorizontal: 10,
       width: "100%",
       paddingBottom: 100,
+        backgroundColor: colors.surface
       // marginBottom: 100
     },
     input: {

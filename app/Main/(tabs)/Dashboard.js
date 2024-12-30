@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, ScrollView, StyleSheet } from "react-native";
+import {View, ScrollView, StyleSheet, Pressable} from "react-native";
 import {
   Card,
   Text,
@@ -423,7 +423,9 @@ const Dashboard = () => {
         {/*<Card style={styles.card}>*/}
         {faker.helpers.multiple(getProductForStore, { count: 3 }).map((p) => (
           <View key={p.productId}>
+              <Pressable onPress={() => router.push('/Main/(tabs)/Products/Product/' + p.productId)}>
             <ProductDisplayCompactMerchant product={p} key={p.productId} />
+              </Pressable>
             <Divider style={{ marginVertical: 8 }} />
           </View>
         ))}

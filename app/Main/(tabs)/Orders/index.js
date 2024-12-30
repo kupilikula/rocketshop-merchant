@@ -32,7 +32,7 @@ const Orders = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState([]);
   const [statusQuickFilter, setStatusQuickFilter] = useState("All");
-  const [dateQuickFilter, setDateQuickFilter] = useState("Today");
+  const [dateQuickFilter, setDateQuickFilter] = useState("This Month");
   const [minTotal, setMinTotal] = useState("");
   const [maxTotal, setMaxTotal] = useState("");
   const [filterDates, setFilterDates] = useState({

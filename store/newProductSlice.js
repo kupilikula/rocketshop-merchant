@@ -20,7 +20,7 @@ const initialState = {
 };
 
 const newProductSlice = createSlice({
-  name: "product",
+  name: "newProduct",
   initialState,
   reducers: {
     updateField: (state, action) => {
