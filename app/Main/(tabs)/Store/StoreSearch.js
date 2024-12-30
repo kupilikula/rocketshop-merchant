@@ -1,11 +1,12 @@
 import { Surface, Text } from "react-native-paper";
 import { useLocalSearchParams } from "expo-router";
 import ProductSearch from "../../../../components/ProductSearch";
-import { useStoreProducts } from "../../../../utils/useStoreProducts";
+import { useStoreProducts } from "../../../../api/hooks/useStoreProducts";
+import {useSelector} from "react-redux";
 
 export default function StoreSearch(props) {
-    const { initialSearchQuery, storeId } = useLocalSearchParams();
-
+    const { initialSearchQuery } = useLocalSearchParams();
+    const {storeId} = useSelector((state) => state.store);
     // Fetch store products using the custom hook
     const { data: storeProducts, isLoading, isError } = useStoreProducts(storeId);
 

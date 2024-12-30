@@ -2,13 +2,15 @@ import React, { useMemo } from "react";
 import { ScrollView, View, StyleSheet } from "react-native";
 import { Text, Divider, useTheme, Card } from "react-native-paper";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useCustomerDetails } from "../../../../../hooks/useCustomerDetails"; // Custom hook
+import { useCustomerDetails } from "../../../../../api/hooks/useCustomerDetails";
+import {useSelector} from "react-redux"; // Custom hook
 
 const CustomerDetails = () => {
     const theme = useTheme();
     const router = useRouter();
+    const {storeId} = useSelector( (state) => state.store);
     const { customerId } = useLocalSearchParams(); // Fetch the customer ID from the route params
-    const { data: customer, isLoading, isError } = useCustomerDetails(customerId); // Fetch customer data
+    const { data: customer, isLoading, isError } = useCustomerDetails(storeId, customerId); // Fetch customer data
     const styles = makeStyles(theme);
 
     const totalSpent = useMemo(() => {

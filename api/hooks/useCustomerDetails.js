@@ -1,11 +1,11 @@
 import { useQuery } from "react-query";
 import axios from "axios";
 
-export const useCustomerDetails = (customerId) => {
+export const useCustomerDetails = (storeId, customerId) => {
     return useQuery(
         ["customerDetails", customerId],
         async () => {
-            const { data } = await axios.get(`/api/customers/${customerId}`);
+            const { data } = await axios.get(`/stores/${storeId}/customers/${customerId}`);
             return data; // Assumes the API returns the customer object
         },
         {

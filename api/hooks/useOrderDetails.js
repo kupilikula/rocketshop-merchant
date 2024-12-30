@@ -5,11 +5,11 @@ import axios from "axios";
  * Fetch details of a specific order.
  * @param {string} orderId - The ID of the order.
  */
-export const useOrderDetails = (orderId) => {
+export const useOrderDetails = (storeId, orderId) => {
     return useQuery(
         ["orderDetails", orderId],
         async () => {
-            const response = await axios.get(`/api/merchants/orders/${orderId}`);
+            const response = await axios.get(`/stores/${storeId}/orders/${orderId}`);
             return response.data;
         },
         {

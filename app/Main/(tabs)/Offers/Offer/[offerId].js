@@ -20,13 +20,15 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ProductPickerModal from "../../../../../components/ProductPickerModal";
 import CollectionPickerModal from "../../../../../components/CollectionPickerModal";
 import TagPickerModal from "../../../../../components/TagPickerModal";
-import { useOffer } from "../../../../../hooks/useOffer";
+import { useOffer } from "../../../../../api/hooks/useOffer";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import {useSelector} from "react-redux";
 
 const PublishOfferScreen = () => {
     const theme = useTheme();
     const router = useRouter();
-    const { storeId, offerId } = useLocalSearchParams();
+    const {storeId} = useSelector((state) => state.store);
+    const { offerId } = useLocalSearchParams();
     const { data: offer, isLoading, isError } = useOffer(storeId, offerId);
 
     const styles = makeStyles(theme);

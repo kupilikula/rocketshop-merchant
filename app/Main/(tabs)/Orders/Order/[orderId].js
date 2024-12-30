@@ -10,16 +10,18 @@ import {
     useTheme,
 } from "react-native-paper";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useOrderDetails } from "../../../../../hooks/useOrderDetails";
+import { useOrderDetails } from "../../../../../api/hooks/useOrderDetails";
+import {useSelector} from "react-redux";
 
 const OrderDetails = () => {
+    const {storeId} = useSelector((state) => state.store);
     const { orderId } = useLocalSearchParams(); // Fetch orderId from params
     const router = useRouter();
     const theme = useTheme();
     const styles = makeStyles(theme);
 
     // React Query: Fetch order details
-    const { data: order, isLoading, isError } = useOrderDetails(orderId);
+    const { data: order, isLoading, isError } = useOrderDetails(storeId, orderId);
 
     if (isLoading) {
         return (

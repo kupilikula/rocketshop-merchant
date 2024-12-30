@@ -11,7 +11,7 @@ export const useStoreProduct = (storeId, productId) => {
         ["merchantProduct", storeId, productId],
         async () => {
             const response = await axios.get(
-                `/api/merchants/stores/${storeId}/products/${productId}`
+                `/stores/${storeId}/products/${productId}`
             );
             return response.data;
         },

@@ -4,11 +4,11 @@ import axios from "axios";
 /**
  * Fetch the list of collections for the store.
  */
-export const useCollections = () => {
+export const useCollections = (storeId) => {
     return useQuery(
         "collections",
         async () => {
-            const response = await axios.get("/api/merchants/collections");
+            const response = await axios.get(`/stores/${storeId}/collections`);
             return response.data;
         },
         {

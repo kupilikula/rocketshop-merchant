@@ -9,9 +9,10 @@ import ReorderableList, {
 import { Text, Surface, useTheme } from "react-native-paper";
 import { useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useCollections } from "../../../../hooks/useCollections";
-import { useUpdateCollectionOrder } from "../../../../hooks/useUpdateCollectionOrder";
+import { useCollections } from "@/api/hooks/useCollections";
+import { useUpdateCollectionOrder } from "@/api/hooks/useUpdateCollectionOrder";
 import CollectionListItem from "../../../../components/CollectionListItem";
+import {useSelector} from "react-redux";
 
 interface ListElementProps {
     collectionId: string;
@@ -42,9 +43,10 @@ const ListElement: React.FC<ListElementProps> = React.memo((collection) => {
 const CollectionsScreen = ({ storeId }) => {
     const theme = useTheme();
     const router = useRouter();
+    const {storeId} = useSelector((state) => state.store);
 
     // React Query: Fetch collections
-    const { data: collections = [], isLoading, isError } = useCollections();
+    const { data: collections = [], isLoading, isError } = useCollections(storeId);
 
     // React Query: Mutation for updating order
     const { mutate: updateCollectionOrder } = useUpdateCollectionOrder(storeId);

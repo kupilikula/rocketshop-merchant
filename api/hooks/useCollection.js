@@ -1,11 +1,11 @@
 import { useQuery } from "react-query";
 import axios from "axios";
 
-export const useCollection = (collectionId) => {
+export const useCollection = (storeId, collectionId) => {
     return useQuery(
         ["collection", collectionId],
         async () => {
-            const { data } = await axios.get(`/api/collections/${collectionId}`);
+            const { data } = await axios.get(`/stores/${storeId}/collections/${collectionId}`);
             return data;
         },
         {

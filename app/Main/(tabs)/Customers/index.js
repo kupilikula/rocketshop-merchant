@@ -14,10 +14,12 @@ import Fuse from "fuse.js";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { CustomerListItem } from "../../../../components/CustomerListItem";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useCustomers } from "../../../../hooks/useCustomers"; // Custom hook for fetching customers
+import { useCustomers } from "../../../../api/hooks/useCustomers";
+import {useSelector} from "react-redux"; // Custom hook for fetching customers
 
 const Customers = () => {
-    const { data: customers = [], isLoading, isError } = useCustomers(); // Use the custom hook
+    const {storeId} = useSelector((state) => state.store);
+    const { data: customers = [], isLoading, isError } = useCustomers(storeId); // Use the custom hook
     const [searchQuery, setSearchQuery] = useState("");
     const [sortField, setSortField] = useState("numberOfOrders"); // Default sorting by number of orders
     const [sortOrder, setSortOrder] = useState("ascending"); // Default sorting order

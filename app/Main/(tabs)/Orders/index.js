@@ -13,7 +13,7 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Fuse from "fuse.js";
 import { useSelector } from "react-redux"; // For getting storeId from Redux
-import { useMerchantOrders } from "../../../../hooks/useMerchantOrders";
+import { useMerchantOrders } from "../../../../api/hooks/useMerchantOrders";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {

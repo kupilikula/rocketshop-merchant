@@ -14,12 +14,12 @@ import {
 } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { useSelector } from "react-redux";
-import { useStoreProducts } from "../../../../utils/useStoreProducts";
+import { useStoreProducts } from "../../../../api/hooks/useStoreProducts";
 import { ProductDisplayCompactMerchant } from "../../../../components/ProductDisplayCompactMerchant";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const Products = () => {
-  const storeId = useSelector((state) => state.store.storeId);
+  const {storeId} = useSelector((state) => state.store);
   const theme = useTheme();
   const router = useRouter();
   const { data: products = [], isLoading, isError } = useStoreProducts(storeId);

@@ -5,7 +5,7 @@ export const useStoreFrontData = (storeId) => {
     return useQuery(
         ["storeFrontData", storeId],
         async () => {
-            const { data } = await axios.get(`/api/stores/${storeId}/storefront`);
+            const { data } = await axios.get(`/stores/${storeId}/storeFront`);
             return data;
         },
         {

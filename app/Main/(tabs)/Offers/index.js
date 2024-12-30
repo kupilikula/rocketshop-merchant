@@ -3,7 +3,7 @@ import { View, StyleSheet, Pressable, ScrollView } from "react-native";
 import { Text, Card, Button, Divider, Surface, useTheme, Chip } from "react-native-paper";
 import { useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useOffers } from "../../../../hooks/useOffers"; // Import custom hook
+import { useOffers } from "../../../../api/hooks/useOffers"; // Import custom hook
 import { useSelector } from "react-redux"; // Assuming storeId is in Redux store
 
 const OffersScreen = () => {

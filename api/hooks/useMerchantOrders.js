@@ -9,7 +9,7 @@ export const useMerchantOrders = (storeId) => {
     return useQuery(
         ["merchantOrders", storeId],
         async () => {
-            const response = await axios.get(`/api/merchants/stores/${storeId}/orders`);
+            const response = await axios.get(`/stores/${storeId}/orders`);
             return response.data;
         },
         {

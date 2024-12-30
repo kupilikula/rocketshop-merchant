@@ -17,11 +17,11 @@ import ReorderableList, {
     useReorderableDrag,
 } from "react-native-reorderable-list";
 import { ProductDisplayCompactMerchant } from "../../../../../components/ProductDisplayCompactMerchant";
-import {
-    useCollection,
-    useUpdateCollectionSettings,
-    useReorderCollectionProducts,
-} from "../../../../../hooks";
+import {useCollection} from "../../../../../api/hooks/useCollection";
+import {useUpdateCollectionSettings} from "../../../../../api/hooks/useUpdateCollectionSettings";
+import {useReorderCollectionProducts} from "../../../../../api/hooks/useReorderCollectionProducts";
+import {useSelector} from "react-redux";
+
 
 const ListElement = React.memo((product) => {
     const drag = useReorderableDrag();
@@ -46,11 +46,11 @@ export default function CollectionPage() {
     const { collectionId } = useLocalSearchParams();
     const theme = useTheme();
     const styles = makeStyles(theme);
-
+    const {storeId} = useSelector((state) => state.store);
     // React Query hooks
-    const { data: collection, isLoading, isError } = useCollection(collectionId);
-    const { mutate: updateSettings } = useUpdateCollectionSettings(collectionId);
-    const { mutate: reorderProducts } = useReorderCollectionProducts(collectionId);
+    const { data: collection, isLoading, isError } = useCollection(storeId, collectionId);
+    const { mutate: updateSettings } = useUpdateCollectionSettings(storeId, collectionId);
+    const { mutate: reorderProducts } = useReorderCollectionProducts(storeId, collectionId);
 
     const [productsData, setProductsData] = useState([]);
 

@@ -4,18 +4,19 @@ import { Image } from "expo-image";
 import { Button, Card, Surface, Text } from "react-native-paper";
 import { foregroundColor } from "../../../../utils/foregroundColor";
 import { useQueries } from "react-query";
-import { useStoreFrontData } from "../../../../utils/useStoreFrontData";
-import { useStoreProducts } from "../../../../utils/useStoreProducts";
+import { useStoreFrontData } from "../../../../api/hooks/useStoreFrontData";
+import { useStoreProducts } from "../../../../api/hooks/useStoreProducts";
 import ProductSearch from "../../../../components/ProductSearch";
 import StoreFrontCollectionCard from "../../../../components/StoreFrontCollectionCard";
 import { useLocalSearchParams } from "expo-router";
+import {useSelector} from "react-redux";
 
 const getUniqueProducts = (products) => {
     return [...new Set(products)];
 };
 
 export default function StoreFront(props) {
-    const { storeId } = useLocalSearchParams(); // Get storeId from route params
+    const { storeId } = useSelector((state) => state.store);
 
     const [storeFrontQuery, storeProductsQuery] = useQueries([
         {

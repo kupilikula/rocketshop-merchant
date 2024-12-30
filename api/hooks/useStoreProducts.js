@@ -9,7 +9,7 @@ export const useStoreProducts = (storeId) => {
     return useQuery(
         ["storeProducts", storeId],
         async () => {
-            const response = await axios.get(`/api/merchants/stores/${storeId}/products`);
+            const response = await axios.get(`/stores/${storeId}/products`);
             return response.data;
         },
         {

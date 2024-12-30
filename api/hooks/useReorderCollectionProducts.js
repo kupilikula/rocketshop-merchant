@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "react-query";
 import axios from "axios";
 
-export const useReorderCollectionProducts = (collectionId) => {
+export const useReorderCollectionProducts = (storeId, collectionId) => {
     const queryClient = useQueryClient();
 
     return useMutation(
@@ -10,7 +10,7 @@ export const useReorderCollectionProducts = (collectionId) => {
                 productId: product.productId,
                 displayOrder: index + 1, // 1-based order
             }));
-            await axios.patch(`/api/collections/${collectionId}/reorder`, {
+            await axios.patch(`/stores/${storeId}/collections/${collectionId}/reorderProducts`, {
                 productOrders,
             });
         },

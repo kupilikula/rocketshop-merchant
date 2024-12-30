@@ -10,7 +10,7 @@ export const useOffer = (storeId, offerId) => {
     return useQuery(
         ["offer", storeId, offerId],
         async () => {
-            const response = await axios.get(`/api/merchants/stores/${storeId}/offers/${offerId}`);
+            const response = await axios.get(`/stores/${storeId}/offers/${offerId}`);
             return response.data;
         },
         {

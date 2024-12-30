@@ -15,7 +15,7 @@ export const useUpdateCollectionOrder = (storeId) => {
                 displayOrder: index + 1, // Display order starts from 1
             }));
 
-            await axios.patch(`/api/merchants/stores/${storeId}/collections/reorder`, {
+            await axios.patch(`/stores/${storeId}/collections/reorderCollections`, {
                 collectionOrders,
             });
         },
