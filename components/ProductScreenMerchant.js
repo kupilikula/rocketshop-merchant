@@ -182,13 +182,13 @@ export default function ProductScreenMerchant(props) {
                 {props.product.collections.map((c) => (
                   <View
                     style={{ display: "flex", flexDirection: "row", margin: 5 }}
-                    key={c}
+                    key={c.collectionId}
                   >
                     <Chip
                       textStyle={{ color: "white" }}
                       style={{ backgroundColor: theme.colors.primary }}
                     >
-                      {c}
+                      {c.collectionName}
                     </Chip>
                   </View>
                 ))}
@@ -199,7 +199,7 @@ export default function ProductScreenMerchant(props) {
               Tags:
             </Text>
             <View style={styles.tagsContainer}>
-              {props.product.tags.map((tag, i) => (
+              {props.product.productTags.map((tag, i) => (
                 <Chip
                   key={tag}
                   style={styles.tagChipSelected}

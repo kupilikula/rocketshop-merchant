@@ -4,6 +4,7 @@ import StoreFrontProductCard from "./StoreFrontProductCard";
 import { Link } from "expo-router";
 
 export default function StoreFrontCollectionCard(props) {
+    console.log('c:',props.collection);
   return (
     <Card
       style={{
@@ -27,7 +28,7 @@ export default function StoreFrontCollectionCard(props) {
         <View>
           <Text variant={"titleLarge"}>{props.collection.collectionName}</Text>
           <Text variant={"bodyLarge"}>
-            {props.collection.products.length.toString() + " Products"}
+            {props.collection.numberOfActiveProducts.toString() + " Products"}
           </Text>
         </View>
         <View>
@@ -51,8 +52,7 @@ export default function StoreFrontCollectionCard(props) {
           justifyContent: "center",
         }}
       >
-        {props.collection.products
-          .slice(0, props.collection.storeFrontDisplayNumberOfItems)
+        {props.collection.displayProducts
           .map((p) => {
             return <StoreFrontProductCard product={p} key={p.productId} />;
           })}

@@ -6,7 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { DefaultTheme } from "react-native-paper";
-import { Provider } from "react-redux";
+import {Provider, useDispatch} from "react-redux";
 import { store } from "@/store/store";
 import * as NavigationBar from "expo-navigation-bar";
 import {QueryClient, QueryClientProvider} from "react-query";
@@ -51,6 +51,7 @@ export default function RootLayout() {
       NavigationBar.setBackgroundColorAsync("white");
     }
   }, []);
+
 
   return (
       <QueryClientProvider client={queryClient}>

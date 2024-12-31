@@ -29,7 +29,7 @@ const ProductPage = () => {
         </View>
     );
   }
-
+  console.log('product:', product);
   return (
       <ProductScreenMerchant product={product} showProductDescription={true} />
   );

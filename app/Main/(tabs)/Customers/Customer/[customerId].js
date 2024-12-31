@@ -12,7 +12,7 @@ const CustomerDetails = () => {
     const { customerId } = useLocalSearchParams(); // Fetch the customer ID from the route params
     const { data: customer, isLoading, isError } = useCustomerDetails(storeId, customerId); // Fetch customer data
     const styles = makeStyles(theme);
-
+    console.log('customer:', customer);
     const totalSpent = useMemo(() => {
         return customer?.orders.reduce((sum, order) => sum + order.orderTotal, 0);
     }, [customer]);

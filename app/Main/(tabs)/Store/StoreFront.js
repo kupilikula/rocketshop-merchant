@@ -4,8 +4,8 @@ import { Image } from "expo-image";
 import { Button, Card, Surface, Text } from "react-native-paper";
 import { foregroundColor } from "../../../../utils/foregroundColor";
 import { useQueries } from "react-query";
-import { useStoreFrontData } from "../../../../api/hooks/useStoreFrontData";
-import { useStoreProducts } from "../../../../api/hooks/useStoreProducts";
+import { fetchStoreFrontData } from "../../../../api/hooks/useStoreFrontData"; // Extracted query function
+import { fetchStoreProducts } from "../../../../api/hooks/useStoreProducts"; // Extracted query function
 import ProductSearch from "../../../../components/ProductSearch";
 import StoreFrontCollectionCard from "../../../../components/StoreFrontCollectionCard";
 import { useLocalSearchParams } from "expo-router";
@@ -18,16 +18,22 @@ const getUniqueProducts = (products) => {
 export default function StoreFront(props) {
     const { storeId } = useSelector((state) => state.store);
 
+    const merchant = useSelector((state) => state.merchant);
+    const store = useSelector((state) => state.store);
+    console.log('store:', store);
+    console.log('merchant:', merchant);
+
+    // Parallel queries using useQueries
     const [storeFrontQuery, storeProductsQuery] = useQueries([
         {
             queryKey: ["storeFrontData", storeId],
-            queryFn: () => useStoreFrontData(storeId).queryFn(),
+            queryFn: () => fetchStoreFrontData(storeId),
             enabled: !!storeId,
             staleTime: 5 * 60 * 1000,
         },
         {
             queryKey: ["storeProducts", storeId],
-            queryFn: () => useStoreProducts(storeId).queryFn(),
+            queryFn: () => fetchStoreProducts(storeId),
             enabled: !!storeId,
             staleTime: 5 * 60 * 1000,
         },
@@ -181,7 +187,7 @@ export default function StoreFront(props) {
                         <ProductSearch
                             uniqueProducts={uniqueProducts}
                             limitedResults={true}
-                            resultsLimit={9}
+                            resultsLimit={5}
                             initialSearchQuery={""}
                             style={{ marginTop: 10 }}
                         />

@@ -27,7 +27,8 @@ const Customers = () => {
 
     const theme = useTheme();
     const styles = makeStyles(theme);
-
+    // console.log('customers:', customers);
+    // console.log('customers[0].orders:', customers[0].orders);
     const fuse = useMemo(() => {
         return new Fuse(customers, {
             keys: ["fullName", "email", "phone"],

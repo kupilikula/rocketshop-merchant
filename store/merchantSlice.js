@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  merchantId: "61c6f62d-27d3-44be-9eae-d34d95f94e32",
+  merchantId: null,
   merchantName: null,
   merchantPhone: null,
   merchantRole: null,
@@ -12,7 +12,7 @@ const merchantSlice = createSlice({
   initialState,
   reducers: {
     setMerchant: (state, action) => {
-        return action.payload;
+        return {...state, ...action.payload};
       }
     },
     logoutMerchant: () => {

@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  storeId: 'd9117fb1-135b-4fab-8e26-21082c1f59ea',
+  storeId: null,
 };
 
 const storeSlice = createSlice({
@@ -9,7 +9,7 @@ const storeSlice = createSlice({
   initialState,
   reducers: {
     setStore: (state, action) => {
-        return action.payload;
+        return {...state, ...action.payload};
       }
     },
     clearStore: () => {
@@ -18,8 +18,8 @@ const storeSlice = createSlice({
 });
 
 export const {
-    setMerchant,
-    logoutMerchant
+    setStore,
+    clearStore
 } = storeSlice.actions;
 
 export default storeSlice.reducer;

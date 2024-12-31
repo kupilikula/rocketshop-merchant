@@ -70,7 +70,7 @@ const OrderDetails = () => {
                             <Text variant={"bodyLarge"}>Quantity: {item.quantity}</Text>
                         </View>
                         <Text variant={"titleMedium"}>
-                            Subtotal: ₹{item.product.price * item.quantity}
+                            Subtotal: ₹{(item.product.price * item.quantity).toFixed(2)}
                         </Text>
                     </View>
                 </View>

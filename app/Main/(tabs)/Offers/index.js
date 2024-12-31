@@ -11,7 +11,7 @@ const OffersScreen = () => {
     const router = useRouter();
     const storeId = useSelector((state) => state.store.storeId); // Get storeId from Redux
     const { data: offers = [], isLoading, isError } = useOffers(storeId);
-
+    console.log('offers:', offers);
     const styles = makeStyles(theme);
 
     const renderOfferItem = (item) => (
@@ -31,14 +31,14 @@ const OffersScreen = () => {
                                     flexDirection: "row",
                                 }}
                             >
-                                {item.applicableTo.productIds.length > 0 && (
+                                {item.applicableTo.products.length > 0 && (
                                     <Text variant={"bodyLarge"}>
-                                        {item.applicableTo.productIds.length.toString() + " Products  "}
+                                        {item.applicableTo.products.length.toString() + " Products  "}
                                     </Text>
                                 )}
-                                {item.applicableTo.collectionIds.length > 0 && (
+                                {item.applicableTo.collections.length > 0 && (
                                     <Text variant={"bodyLarge"}>
-                                        {item.applicableTo.collectionIds.length.toString() +
+                                        {item.applicableTo.collections.length.toString() +
                                             " Collections  "}
                                     </Text>
                                 )}
@@ -49,8 +49,8 @@ const OffersScreen = () => {
                                 )}
                             </View>
                             <Text variant={"bodyLarge"}>
-                                Valid: {new Date(item.validityDateRange.startDate).toLocaleDateString()} -{" "}
-                                {new Date(item.validityDateRange.endDate).toLocaleDateString()}
+                                Valid: {new Date(item.validityDateRange.validFrom).toLocaleDateString()} -{" "}
+                                {new Date(item.validityDateRange.validUntil).toLocaleDateString()}
                             </Text>
                         </View>
                         <Chip
