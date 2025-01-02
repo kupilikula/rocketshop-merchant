@@ -19,7 +19,9 @@ const FlatListSlider = forwardRef((props, ref) => {
     const { layout } = event.nativeEvent;
 
     if (layout.width > 0 && layout.height > 0) {
-      setSize({ width: layout.width, height: layout.height });
+      if (layout.width !== size.width || layout.height !== size.height) {
+        setSize({ width: layout.width, height: layout.height });
+      }
     }
   };
 
@@ -153,10 +155,12 @@ const FlatListSlider = forwardRef((props, ref) => {
               index,
             };
           }}
-          windowSize={50}
-          initialNumToRender={50}
-          maxToRenderPerBatch={50}
-          removeClippedSubviews={false}
+          initialNumToRender={3}
+          maxToRenderPerBatch={2}
+          windowSize={1}
+          removeClippedSubviews={true}
+          updateCellsBatchingPeriod={50}
+          onEndReachedThreshold={0.5} // Preload data before reaching the end
           scrollEnabled={true}
           // onContentSizeChange={handleContentSizeChange}
         />

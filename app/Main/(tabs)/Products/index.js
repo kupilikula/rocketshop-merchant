@@ -17,8 +17,6 @@ import { useSelector } from "react-redux";
 import { useStoreProducts } from "../../../../api/hooks/useStoreProducts";
 import { ProductDisplayCompactMerchant } from "../../../../components/ProductDisplayCompactMerchant";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import {useCollections} from "../../../../api/hooks/useCollections";
-import {useProductTags} from "../../../../api/hooks/useProductTags";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
 
 const Products = () => {

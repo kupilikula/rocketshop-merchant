@@ -27,6 +27,7 @@ import * as Crypto from "expo-crypto";
 import { CommonActions } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { generateBoxShadowStyle } from "../styles/generateShadow";
+import mime from 'mime';
 
 const MediaGallery = (props) => {
   const [media, setMedia] = useState([]);
@@ -62,8 +63,8 @@ const MediaGallery = (props) => {
   const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
 
-  const productDataMediaItems = useSelector(
-    (state) => state.newProduct.mediaItems,
+  const { mediaItems: productDataMediaItems } = useSelector(
+    (state) => state.newProduct,
   );
   function toggleCameraFacing() {
     setFacing((current) => (current === "back" ? "front" : "back"));
@@ -221,21 +222,28 @@ const MediaGallery = (props) => {
           let localUri = null;
           try {
             if (item.mediaType === "video" && Platform.OS === "ios") {
+              console.log('line225, item:', item);
               let assetInfo = await MediaLibrary.getAssetInfoAsync(item);
               localUri = assetInfo.localUri;
             }
           } catch (e) {
             console.log("line206, e:", e);
           }
-          console.log("localuri:", localUri);
 
+
+
+          let correctMediaType = item.mediaType === "photo" ? "image" : "video";
+          let contentType = mime.getType(item.filename);
+          console.log('contentType: ', contentType);
           return {
             ...item,
-            mediaType: item.mediaType === "photo" ? "image" : "video",
+            mediaType: correctMediaType,
+            contentType: contentType,
             uri: localUri || item.uri,
             orientation,
             thumbnail: thumbnails[item.id] || "",
             mediaId: Crypto.randomUUID(),
+            // blob: blob
           };
         });
         const resolvedItems = await Promise.all(itemsWithPromises);
@@ -550,13 +558,15 @@ const MediaGallery = (props) => {
     console.log("preview Media Items", previewMediaItems);
     if (!isFocused) {
       // Save state to Redux when screen loses focus
+      console.log('updating redux media items. before:', productDataMediaItems);
       dispatch(
         updateField({
           field: "mediaItems",
           value: _.cloneDeep(previewMediaItems),
         }),
       );
-      setPreviewMediaItems([]);
+      console.log('updating redux media items. after:', productDataMediaItems);
+      // setPreviewMediaItems([]);
     } else {
       console.log(
         "previewitems:",
@@ -601,7 +611,7 @@ const MediaGallery = (props) => {
                 flexDirection: "column",
                 justifyContent: "flex-start",
                 alignItems: "center",
-                backgroundColor: "red",
+                backgroundColor: "black",
                 width: "100%",
                 aspectRatio: orientation === "landscape" ? "1.33" : "0.8",
               }}

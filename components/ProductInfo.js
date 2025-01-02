@@ -29,9 +29,11 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { generateBoxShadowStyle } from "../styles/generateShadow";
+import {useCollections} from "../api/hooks/useCollections";
 
 const ProductInfoScreen = (props) => {
   const dispatch = useDispatch();
+  const {storeId} = useSelector((state) => state.store);
   const productData = useSelector((state) => state.newProduct);
   const navigation = useNavigation();
 
@@ -41,17 +43,13 @@ const ProductInfoScreen = (props) => {
   const [currentFocusedValueIndex, setCurrentFocusedValueIndex] =
     useState(null);
   const [inputWidths, setInputWidths] = useState({});
-  const [attributeSuggestions, setAttributeSuggestions] = useState([
-    { key: "Color", values: ["Red", "Blue", "Green"] },
-    { key: "Material", values: ["Cotton", "Leather", "Plastic"] },
-    { key: "Size", values: ["Small", "Medium", "Large"] },
-  ]);
-  const [existingCollections, setExistingCollections] = useState([
-    "Electronics",
-    "Fashion",
-    "Books",
-    "Home Appliances",
-  ]); // Existing collections
+  // const [attributeSuggestions, setAttributeSuggestions] = useState([
+  //   { key: "Color", values: ["Red", "Blue", "Green"] },
+  //   { key: "Material", values: ["Cotton", "Leather", "Plastic"] },
+  //   { key: "Size", values: ["Small", "Medium", "Large"] },
+  // ]);
+
+  const { data: existingCollections = [], isLoading, isError } = useCollections(storeId);
   const [tagSuggestions, setTagSuggestions] = useState([
     "Best Sellers",
     "Featured",
@@ -126,8 +124,14 @@ const ProductInfoScreen = (props) => {
       description: "",
       collections: [],
       gstRate: 18,
+      gstInclusive: true,
       attributes: [],
-      tags: [],
+      productTags: [],
+      rating: null,
+      numberOfRatings: 0,
+      enableRatings: true,
+      enableReviews: false,
+      enableStockTracking: true,
     },
     shouldUnregister: false,
     resolver: yupResolver(schema),
@@ -144,7 +148,7 @@ const ProductInfoScreen = (props) => {
     name: "attributes", // Ties this to "attributes" in form state
   });
 
-  const tags = watch("tags", []); // Watch the tags array
+  const tags = watch("productTags", []); // Watch the tags array
 
   // Restore state from Redux when the screen gains focus for the first time
   // Handle screen focus and restoration of state
@@ -155,23 +159,18 @@ const ProductInfoScreen = (props) => {
         "restoring product info from redux, productData:",
         productData,
       );
-      reset({
-        productName: productData.productName || "",
-        price: productData.price || "",
-        description: productData.description || "",
-        stock: productData.stock || "",
-        gstRate: productData.gstRate || 18,
-        collections: productData.collections || [],
-        tags: productData.tags || [],
-      });
-      if (
-        !_.isEqual(
-          attributeFormFields.map((a) => ({ key: a.key, value: a.value })),
-          productData.attributes,
-        )
-      ) {
-        replaceFormAttributes([...productData.attributes]);
-      }
+      let productInfoData = _.cloneDeep(productData);
+      delete productInfoData.mediaItems
+
+      reset(productInfoData);
+      // if (
+      //   !_.isEqual(
+      //     attributeFormFields.map((a) => ({ key: a.key, value: a.value })),
+      //     productData.attributes,
+      //   )
+      // ) {
+      //   replaceFormAttributes([...productData.attributes]);
+      // }
     }
   }, [isFocused]);
 
@@ -484,9 +483,9 @@ const ProductInfoScreen = (props) => {
 
   // Add a tag
   const addTag = (tag) => {
-    const currentTags = getValues("tags");
+    const currentTags = getValues("productTags");
     if (tag.trim() && !currentTags.includes(tag)) {
-      setValue("tags", [...currentTags, tag.trim()]); // Update form state with new tag
+      setValue("productTags", [...currentTags, tag.trim()]); // Update form state with new tag
     }
     setTagInput(""); // Reset input
     setFilteredTagSuggestions([]); // Clear suggestions
@@ -495,7 +494,7 @@ const ProductInfoScreen = (props) => {
   // Remove a tag
   const removeTag = (tag) => {
     const updatedTags = tags.filter((t) => t !== tag);
-    setValue("tags", updatedTags); // Update form state
+    setValue("productTags", updatedTags); // Update form state
   };
 
   // Handle input changes for filtering suggestions
@@ -712,19 +711,19 @@ const ProductInfoScreen = (props) => {
                     <View key={idx} style={styles.checkboxContainer}>
                       <Checkbox.Android
                         status={
-                          value.includes(collection) ? "checked" : "unchecked"
+                          value.includes(collection.collectionId) ? "checked" : "unchecked"
                         }
                         onPress={() => {
-                          if (value.includes(collection)) {
+                          if (value.includes(collection.collectionId)) {
                             onChange(
-                              value.filter((item) => item !== collection),
+                              value.filter((item) => item !== collection.collectionId),
                             );
                           } else {
-                            onChange([...value, collection]);
+                            onChange([...value, collection.collectionId]);
                           }
                         }}
                       />
-                      <Text>{collection}</Text>
+                      <Text>{collection.collectionName}</Text>
                     </View>
                   ))}
                 </View>
@@ -777,7 +776,7 @@ const ProductInfoScreen = (props) => {
 
           {/* Tag Input */}
           <Controller
-            name="tags"
+            name="productTags"
             control={control}
             render={() => (
               <View style={styles.tagInputContainer}>

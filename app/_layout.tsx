@@ -10,6 +10,7 @@ import {Provider, useDispatch} from "react-redux";
 import { store } from "@/store/store";
 import * as NavigationBar from "expo-navigation-bar";
 import {QueryClient, QueryClientProvider} from "react-query";
+import 'react-native-get-random-values';
 
 const queryClient = new QueryClient();
 // const isLoggedIn = true;

@@ -1,5 +1,6 @@
 import React from "react";
-import { Image, StyleSheet, Pressable, View } from "react-native";
+import { StyleSheet, Pressable, View } from "react-native";
+import {Image} from 'expo-image';
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useEvent } from "expo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -99,6 +100,7 @@ export default function MediaItem({
                   aspectRatio: orientation === "landscape" ? "1.33" : "0.8",
                 }}
                 source={local ? item.uri : { uri: item.uri }}
+                cachePolicy="memory-disk" // Options: 'memory', 'disk', or 'none'
               />
             ) : (
               <ZoomableImage

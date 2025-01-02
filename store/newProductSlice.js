@@ -9,7 +9,7 @@ const initialState = {
   gstRate: 18,
   attributes: [],
   collections: [],
-  tags: [],
+  productTags: [],
   mediaItems: [],
   rating: null,
   numberOfRatings: 0,

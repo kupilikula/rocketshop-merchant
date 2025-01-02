@@ -9,13 +9,34 @@ import { CommonActions } from "@react-navigation/native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { generateBoxShadowStyle } from "../../../../styles/generateShadow";
+import { v4 as uuidv4 } from 'uuid';
+import axiosClient from "../../../../api/client";
+import * as MediaLibrary from "expo-media-library";
+import * as ImageManipulator from 'expo-image-manipulator';
+
+import _ from "lodash";
+const convertHeicToJpg = async (uri) => {
+    try {
+        const result = await ImageManipulator.manipulateAsync(
+            uri,
+            [],
+            { compress: 1, format: ImageManipulator.SaveFormat.JPEG }
+        );
+        console.log('Converted image:', result);
+        return result.uri;
+    } catch (error) {
+        console.error('Image conversion error:', error);
+    }
+};
 
 export default function Preview(props) {
   const dispatch = useDispatch();
   const router = useRouter();
   const theme = useTheme();
   const newProduct = useSelector((state) => state.newProduct);
-  const navigation = useNavigation();
+  const storeId = useSelector((state) => state.store.storeId); // Access the storeId from Redux
+
+    const navigation = useNavigation();
   const insets = useSafeAreaInsets();
 
   const resetNavigationStack = () => {
@@ -28,14 +49,88 @@ export default function Preview(props) {
     );
   };
 
-  const publishProduct = useCallback(() => {
-    //publish
-    // reset redux new product to empty
-    console.log("resetting:", newProduct);
-    dispatch(resetNewProduct());
-    console.log("after reset:", newProduct);
-    resetNavigationStack();
-  }, [resetNewProduct, resetNavigationStack]);
+    async function publishProduct() {
+        try {
+
+            // Generate fileKeys for each mediaItem
+            const fileKeysWithContentTypes = newProduct.mediaItems.map((item) => ({
+                    fileKey: `stores/${storeId}/products/${newProduct.productId}/${item.mediaId}`,
+                    contentType: item.contentType==='image/heic' ? 'image/jpg' : item.contentType
+                }));
+            console.log('f:', fileKeysWithContentTypes);
+            const { data: presignedUrls } = await axiosClient.post(`/stores/${storeId}/products/mediaUploadPresignedUrls`, {
+                fileKeysWithContentTypes
+            });
+
+            // Request presigned URLs for all mediaItems
+
+            console.log('presignedUrls:', presignedUrls);
+
+            let updatedMediaItems = _.cloneDeep(newProduct.mediaItems);
+            // Upload each mediaItem to Spaces
+            await Promise.all(
+                newProduct.mediaItems.map(async (item, index) => {
+                    const presignedUrl = presignedUrls[index].presignedUrl;
+                    console.log('pre:', presignedUrl);
+
+                    // console.log('line66, blob:', blob);
+                    // console.log('line89:, blob.type:', blob.type);
+
+                        let convertedItemUri = null;
+                        if (item.contentType === 'image/heic') {
+                            convertedItemUri = await convertHeicToJpg(item.uri);
+                            console.log('convertedItemUri:', convertedItemUri);
+                            updatedMediaItems[index].contentType = 'image/jpg';
+                        }
+
+                        let blob;
+                        if (convertedItemUri) {
+                            console.log('computing blob of converted item');
+                            let res = await fetch(convertedItemUri);
+                            blob = res.blob();
+                            console.log('line 87, blob:', blob);
+                        } else {
+                            let assetInfo = await MediaLibrary.getAssetInfoAsync(item);
+                            console.log('assetInfo:', assetInfo);
+                            let res = await fetch(assetInfo.localUri || assetInfo.uri);
+                            blob = await res.blob();
+                            console.log('line 94, blob:', blob);
+                        }
+
+
+                    // Replace the local uri with the Spaces URI after upload
+                    console.log('line 58,item.uri:', item.uri);
+                    try {
+                        let r = await fetch(presignedUrl, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': updatedMediaItems[index].contentType, // Update Content-Type based on your files
+                                'x-amz-acl': 'public-read',
+                            },
+                            body: blob,
+                        });
+                        console.log('r:', r);
+                        // Update the mediaItem with its uploaded URI
+                        updatedMediaItems[index].uri = presignedUrls[index].fileUri;
+                    } catch (err) {
+                        console.log('err:', err);
+                    }
+
+                })
+            );
+            console.log('updatedMediaItems:', updatedMediaItems);
+            // Send the updated product data to the backend
+            await axiosClient.post(`/stores/${storeId}/products/addNewProduct`, {
+                ...newProduct,
+                mediaItems: updatedMediaItems,
+            });
+
+            console.log('Product published successfully!');
+            // resetNewProduct()
+        } catch (error) {
+            console.error('Failed to publish product:', error);
+        }
+    }
 
   useEffect(() => {
     const PreviewHeader = () => {
