@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, {useEffect, useState, useRef, useCallback, forwardRef, useImperativeHandle} from "react";
 import {
   View,
   StyleSheet,
@@ -22,16 +22,14 @@ import { useSelector, useDispatch } from "react-redux";
 import { useIsFocused } from "@react-navigation/native";
 import _ from "lodash";
 import { updateField } from "../store/newProductSlice";
-import { useNavigation, useRouter } from "expo-router";
+import {useNavigation, useRouter} from "expo-router";
 import * as yup from "yup";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { generateBoxShadowStyle } from "../styles/generateShadow";
 import {useCollections} from "../api/hooks/useCollections";
+import {useProductInfoFormRef} from "./ProductInfoFormRefContext";
 
-const ProductInfoScreen = (props) => {
+const ProductInfoScreen = () => {
   const dispatch = useDispatch();
   const {storeId} = useSelector((state) => state.store);
   const productData = useSelector((state) => state.newProduct);
@@ -86,7 +84,7 @@ const ProductInfoScreen = (props) => {
 
   const theme = useTheme();
   const styles = makeStyles(theme);
-  const insets = useSafeAreaInsets();
+  const productInfoFormRef = useProductInfoFormRef();
 
   // Validation schema using Yup
   const schema = yup.object().shape({
@@ -403,61 +401,23 @@ const ProductInfoScreen = (props) => {
     );
   };
 
-  useEffect(() => {
-    const onSubmit = (data) => {
-      dispatch(updateField({ field: "all", value: data }));
-      router.push("/Main/(tabs)/AddNewProduct/Preview");
-    };
-
-    const ProductInfoHeader = () => {
-      return (
-        <View
-          style={[
-            generateBoxShadowStyle(0, 4, "#171717", 0.2, 3, 4, "#171717"),
-            {
-              height: 60 + insets.top,
-              paddingTop: insets.top,
-              paddingHorizontal: 15,
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              backgroundColor: "white",
-              color: "black",
-            },
-          ]}
-        >
-          <Pressable
-            onPressIn={() => {
-              router.back();
-            }}
-          >
-            <MaterialIcons
-              name={"arrow-back"}
-              size={36}
-              style={{ color: "black" }}
-            />
-          </Pressable>
-          <Text variant={"titleLarge"} style={{ color: "black" }}>
-            Product Info
-          </Text>
-          <Pressable onPressIn={handleSubmit(onSubmit)}>
-            <MaterialIcons
-              name={"arrow-forward"}
-              size={36}
-              style={{ color: "black" }}
-            />
-          </Pressable>
-        </View>
-      );
-    };
-    navigation.setOptions({ header: ProductInfoHeader });
-  }, [navigation, handleSubmit, insets.top, router]);
-
-  const publishProduct = async () => {
-    // const productData = { productName, price, description, stock, getValues('attributes') };
-    // console.log("Product Published:", productData);
+  const onSubmit = (data) => {
+    dispatch(updateField({ field: "all", value: data }));
+    router.push("/Main/(tabs)/AddNewProduct/Preview");
   };
+
+  useEffect(() => {
+    // Attach the `handleSubmit` method to the ref passed in initialParams
+    if (productInfoFormRef) {
+      productInfoFormRef.current = {
+        submitForm: () =>
+        {
+          console.log('line418 submitForm');
+          handleSubmit(onSubmit)();
+        },
+      };
+    }
+  }, [productInfoFormRef, handleSubmit]);
 
   const markAsVariant = () => {};
   const generateVariant = () => {};

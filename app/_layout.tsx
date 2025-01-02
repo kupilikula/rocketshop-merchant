@@ -49,7 +49,7 @@ export default function RootLayout() {
   useEffect(() => {
     // Make navigation bar transparent
     if (Platform.OS === "android") {
-      NavigationBar.setBackgroundColorAsync("white");
+      NavigationBar.setBackgroundColorAsync("#00000000");
     }
   }, []);
 

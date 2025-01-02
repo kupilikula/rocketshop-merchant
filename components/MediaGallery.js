@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {useCallback, useContext, useEffect, useRef, useState} from "react";
 import {
   View,
   TouchableOpacity,
@@ -20,21 +20,28 @@ import { useMemo } from "react";
 import GalleryMediaItem from "./GalleryMediaItem";
 import { useNavigation, useRouter } from "expo-router";
 import { useIsFocused } from "@react-navigation/native";
-import { resetNewProduct, updateField } from "../store/newProductSlice";
+import { updateField } from "../store/newProductSlice";
 import { useDispatch, useSelector } from "react-redux";
 import _ from "lodash";
 import * as Crypto from "expo-crypto";
 import { CommonActions } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { generateBoxShadowStyle } from "../styles/generateShadow";
 import mime from 'mime';
+import {MediaSelectionContext} from "./MediaSelectionContext";
 
 const MediaGallery = (props) => {
   const [media, setMedia] = useState([]);
+  const {
+    isCameraOpen,
+    setIsCameraOpen,
+    isMediaSelected,
+    setIsMediaSelected,
+  } = useContext(MediaSelectionContext);
+  console.log('isCameraOpen:', isCameraOpen, ', isMediaSelected:', isMediaSelected);
+
   const [selectedItemsIds, setSelectedItemsIds] = useState([]);
   const [previewMediaItems, setPreviewMediaItems] = useState([]);
   const [orientation, setOrientation] = useState("landscape");
-  const [openCamera, setOpenCamera] = useState(false);
   const [cameraMode, setCameraMode] = useState("picture");
   const [isRecording, setIsRecording] = useState(false);
   const [videoElapsedTime, setVideoElapsedTime] = useState(0);
@@ -57,7 +64,6 @@ const MediaGallery = (props) => {
 
   const theme = useTheme();
   const navigation = useNavigation();
-  const router = useRouter();
 
   const isFocused = useIsFocused();
   const dispatch = useDispatch();
@@ -77,11 +83,10 @@ const MediaGallery = (props) => {
     };
   }, []);
 
-  const mediaSelected = useMemo(() => {
-    return previewMediaItems.length > 0;
-  }, [previewMediaItems.length]);
 
-  // const forceUpdate = useCallback(() => setNewAssetTrigger((prev) => ({ ...prev })), []);
+  useEffect(() => {
+      setIsMediaSelected(previewMediaItems.length > 0);
+  },[previewMediaItems.length])
 
   const savePhotoToGallery = async (photoUri) => {
     let asset;
@@ -98,16 +103,6 @@ const MediaGallery = (props) => {
 
     return asset;
   };
-
-  const resetNavigationStack = useCallback(() => {
-    // Reset the navigation stack to the Dashboard tab
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: "Dashboard" }], // Replace with your Dashboard screen name
-      }),
-    );
-  }, [navigation]);
 
   const generateThumbnails = async (assets) => {
     console.log("generate:", assets.length);
@@ -273,7 +268,7 @@ const MediaGallery = (props) => {
   const closeCamera = () => {
     setVideoElapsedTime(0);
     cameraRef.current = null;
-    setTimeout(() => setOpenCamera(false), 100);
+    setTimeout(() => setIsCameraOpen(false), 100);
 
     console.log("closed camera");
   };
@@ -292,92 +287,15 @@ const MediaGallery = (props) => {
   }, [cameraMode]);
 
   useEffect(() => {
-    console.log("effect: openCamera:", openCamera);
-
-    const MediaHeader = ({ cameraOpen }) => {
-      if (cameraOpen) {
-        return null;
-        // return <View style={{height: 60 + insets.top, backgroundColor: "#000000"}}/>;
-      } else {
-        return (
-          <View
-            style={[
-              generateBoxShadowStyle(0, 4, "#171717", 0.2, 3, 4, "#171717"),
-              {
-                height: 60 + insets.top,
-                paddingTop: insets.top,
-                paddingHorizontal: 15,
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: "black",
-              },
-            ]}
-          >
-            {/* Left Icon (Back Button) */}
-            <Pressable
-              onPressIn={() => {
-                console.log("cancel workflow");
-                dispatch(resetNewProduct());
-                resetNavigationStack();
-              }}
-              style={{ flex: 1 }}
-            >
-              <MaterialIcons
-                name="close"
-                size={36}
-                style={{ color: "white" }}
-              />
-            </Pressable>
-
-            {/* Title */}
-            <Text
-              variant="titleLarge"
-              style={{
-                flex: 2, // Allow the title to occupy its space while centering
-                textAlign: "center",
-                color: "white",
-              }}
-            >
-              Product Media
-            </Text>
-
-            {/* Right Icon (Forward Button) */}
-            <Pressable
-              onPressIn={() => {
-                console.log("press");
-                if (mediaSelected) {
-                  router.push("./AddProductInfo");
-                }
-              }}
-              style={{ flex: 1, alignItems: "flex-end" }}
-            >
-              <MaterialIcons
-                name="arrow-forward"
-                size={36}
-                style={{
-                  color: mediaSelected ? "white" : "black",
-                }}
-              />
-            </Pressable>
-          </View>
-        );
+      if (isCameraOpen) {
+        navigation.getParent().setOptions({
+          tabBarStyle: {display: 'none'}
+        })
       }
-    };
-
-    navigation.setOptions({
-      header: () => <MediaHeader cameraOpen={openCamera} />,
-    });
-    if (openCamera) {
-      navigation.getParent().setOptions({
-        tabBarStyle: {display: 'none'}
-      })
-    }
-    return () => navigation.getParent()?.setOptions({
-      tabBarStyle: undefined
-    });
-
-  }, [navigation, openCamera, mediaSelected, dispatch, insets.top, router]);
+      return () => navigation.getParent()?.setOptions({
+        tabBarStyle: undefined
+      });
+  },[isCameraOpen, navigation])
 
   const formatTime = (timeInSeconds) => {
     const minutes = Math.floor(timeInSeconds / 60);
@@ -593,7 +511,7 @@ const MediaGallery = (props) => {
     <Surface style={styles.container}>
       <>
 
-        {!openCamera && (
+        {!isCameraOpen && (
           <View
             style={{
               flex: 1,
@@ -672,7 +590,7 @@ const MediaGallery = (props) => {
                   transform: [{ translateX: -25 }],
                 }}
               >
-                <Pressable onPress={() => setOpenCamera(true)}>
+                <Pressable onPress={() => setIsCameraOpen(true)}>
                   <MaterialIcons
                     name={"camera-alt"}
                     color={"black"}
@@ -730,7 +648,7 @@ const MediaGallery = (props) => {
           </View>
         )}
         {/*<View style={{paddingTop: 60 + insets.top}}>*/}
-        {openCamera && (
+        {isCameraOpen && (
           <>
             {!permission?.granted && (
               <Card style={styles.permissionContainer}>

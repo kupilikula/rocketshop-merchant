@@ -13,8 +13,9 @@ import { v4 as uuidv4 } from 'uuid';
 import axiosClient from "../../../../api/client";
 import * as MediaLibrary from "expo-media-library";
 import * as ImageManipulator from 'expo-image-manipulator';
-
 import _ from "lodash";
+import {useProductPreviewPublishRef} from "../../../../components/ProductPreviewPublishRefContext";
+
 const convertHeicToJpg = async (uri) => {
     try {
         const result = await ImageManipulator.manipulateAsync(
@@ -35,7 +36,7 @@ export default function Preview(props) {
   const theme = useTheme();
   const newProduct = useSelector((state) => state.newProduct);
   const storeId = useSelector((state) => state.store.storeId); // Access the storeId from Redux
-
+    const productPreviewPublishRef = useProductPreviewPublishRef();
     const navigation = useNavigation();
   const insets = useSafeAreaInsets();
 
@@ -183,6 +184,19 @@ export default function Preview(props) {
       theme,
     });
   }, [navigation]);
+
+    useEffect(() => {
+        // Attach the `handleSubmit` method to the ref passed in initialParams
+        if (productPreviewPublishRef) {
+            productPreviewPublishRef.current = {
+                publish: () =>
+                {
+                    console.log('207 publish');
+                    publishProduct();
+                },
+            };
+        }
+    }, [productPreviewPublishRef]);
 
   const saveAsDraft = () => {
     // save draft
