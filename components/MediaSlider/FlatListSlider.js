@@ -128,6 +128,7 @@ const FlatListSlider = forwardRef((props, ref) => {
                 active={i === currentIndex}
                 local={props.local}
                 allowPanZoom={props.allowPanZoom}
+                onZoomAndPanEnd={props.onZoomAndPanEnd} // Pass the callback
                 showScrollButtons={props.showScrollButtons}
                 simultaneousHandlers={
                   props.simultaneousHandlers

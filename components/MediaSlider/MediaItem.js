@@ -14,12 +14,11 @@ export default function MediaItem({
   width,
   height,
   allowPanZoom,
+    onZoomAndPanEnd,
   simultaneousHandlers,
   showScrollButtons,
   scrollToIndex,
 }) {
-  console.log("index:", index, " , item:", item);
-
   // Initialize video player and event hook unconditionally
   const videoPlayer = useVideoPlayer(
     item.mediaType === "video" ? item.uri : null,
@@ -41,6 +40,8 @@ export default function MediaItem({
   };
   // console.log('nI:', numberOfItems);
   // console.log('I:', index);
+  const scale = item.scale || 1; // Default to 1 if not present
+  const offset = item.offset || { x: 0, y: 0 }; // Default to {x: 0, y: 0} if not present
 
   return (
     <View
@@ -91,22 +92,29 @@ export default function MediaItem({
       )}
 
       <View style={styles.container}>
-        <View style={{ width: width, height: height }}>
+        <View style={{ width: width, height: height, overflow: 'hidden', backgroundColor: 'black'}}>
           {item.mediaType === "image" ? (
             !allowPanZoom ? (
               <Image
                 style={{
-                  width: "100%",
-                  aspectRatio: orientation === "landscape" ? "1.33" : "0.8",
+                  position: "absolute", // Ensure the image is positioned absolutely within the container
+                  width: width*scale, // Scale the width dynamically
+                  height: item.height*width*scale/item.width, // Scale the height dynamically
+                  left: width*(1-scale)/2 + offset.x,
+                  top: (height - (item.height *scale/ item.width) * width)/2 + offset.y,
                 }}
                 source={local ? item.uri : { uri: item.uri }}
                 cachePolicy="memory-disk" // Options: 'memory', 'disk', or 'none'
+                  resizeMode={'cover'}
               />
             ) : (
               <ZoomableImage
                 source={item.uri}
                 size={{ width: width, height: height }}
                 simultaneousHandlers={simultaneousHandlers}
+                onZoomAndPanEnd={(scale, offset) =>
+                    onZoomAndPanEnd(item.mediaId, scale, offset)
+                }
               />
             )
           ) : (

@@ -428,6 +428,16 @@ const MediaGallery = (props) => {
     }
   }, [recordedUri]);
 
+  const handleZoomAndPanEnd = (itemId, scale, offset) => {
+    setPreviewMediaItems((prevItems) =>
+        prevItems.map((item) =>
+            item.mediaId === itemId
+                ? { ...item, scale, offset }
+                : item
+        )
+    );
+  };
+
   const renderItem = useCallback(
     ({ item }) => {
       let i = selectedItemsIds.findIndex((id) => id === item.id);
@@ -578,6 +588,7 @@ const MediaGallery = (props) => {
                 contentContainerStyle={{ backgroundColor: "black" }}
                 flatListWrapperStyle={{ backgroundColor: "black" }}
                 allowPanZoom={true}
+                onZoomAndPanEnd={handleZoomAndPanEnd}
                 component={<MediaItem />}
               />
             </View>

@@ -25,7 +25,7 @@ export default function Layout() {
         drawerStyle: {
           flex: 1,
           height: "100%",
-          width: "70%",
+          width: "80%",
           borderTopLeftRadius: 0,
           borderBottomLeftRadius: 0,
           borderTopRightRadius: 0,

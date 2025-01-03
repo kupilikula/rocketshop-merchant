@@ -16,11 +16,13 @@ import Animated, {
 } from "react-native-reanimated";
 import { Fontisto } from "@expo/vector-icons";
 import { Colors } from "../../styles/Colors";
+import { runOnJS } from "react-native-reanimated";
+
 
 // const { width, height } = Dimensions.get('window');
 const pixelRatio = PixelRatio.get(); // Get the device's pixel density
 
-export default function ZoomableImage({ source, size, simultaneousHandlers }) {
+export default function ZoomableImage({ source, size, simultaneousHandlers, onZoomAndPanEnd }) {
   // Shared values for scale and translation
   const scale = useSharedValue(1);
   const translateX = useSharedValue(0);
@@ -92,6 +94,9 @@ export default function ZoomableImage({ source, size, simultaneousHandlers }) {
     },
     onEnd: () => {
       lastScale.current = scale.value;
+      if (onZoomAndPanEnd) {
+        runOnJS(onZoomAndPanEnd)(scale.value, {x: translateX.value, y: translateY.value}); // Pass scale and offset
+      }
     },
   });
 
@@ -140,6 +145,9 @@ export default function ZoomableImage({ source, size, simultaneousHandlers }) {
     },
     onEnd: () => {
       lastOffset.current = { x: translateX.value, y: translateY.value };
+      if (onZoomAndPanEnd) {
+        runOnJS(onZoomAndPanEnd)(scale.value, {x: translateX.value, y: translateY.value}); // Pass scale and offset
+      }
     },
   });
 
@@ -147,9 +155,9 @@ export default function ZoomableImage({ source, size, simultaneousHandlers }) {
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [
-        { scale: scale.value },
-        { translateX: translateX.value },
-        { translateY: translateY.value },
+        { translateX: translateX.value }, // Apply translation first
+        { translateY: translateY.value }, // Apply vertical translation
+        { scale: scale.value },           // Apply scaling after translation
       ],
     };
   });
