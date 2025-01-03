@@ -1,10 +1,9 @@
-import React, {useEffect, useState, useRef, useCallback, forwardRef, useImperativeHandle} from "react";
+import React, {useEffect, useState, useRef, useCallback, forwardRef, useImperativeHandle, useContext} from "react";
 import {
   View,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Pressable,
   Switch,
 } from "react-native";
 import {
@@ -27,7 +26,7 @@ import * as yup from "yup";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {useCollections} from "../api/hooks/useCollections";
-import {useProductInfoFormRef} from "./ProductInfoFormRefContext";
+import {AddNewProductWorkflowContext} from "./AddNewProductWorkflowContext";
 
 const ProductInfoScreen = () => {
   const dispatch = useDispatch();
@@ -84,7 +83,7 @@ const ProductInfoScreen = () => {
 
   const theme = useTheme();
   const styles = makeStyles(theme);
-  const productInfoFormRef = useProductInfoFormRef();
+  const {productInfoFormRef} = useContext(AddNewProductWorkflowContext);
 
   // Validation schema using Yup
   const schema = yup.object().shape({

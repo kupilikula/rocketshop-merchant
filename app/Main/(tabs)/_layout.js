@@ -1,7 +1,7 @@
 import { Tabs } from "expo-router";
 import React from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { TouchableOpacity } from "react-native";
+import {Platform, TouchableOpacity} from "react-native";
 import { useTheme } from "react-native-paper";
 
 export default function TabsComponent() {
@@ -17,7 +17,7 @@ export default function TabsComponent() {
         animation: "fade",
         tabBarStyle: {
           backgroundColor: "white",
-          paddingBottom: 0,
+          paddingBottom: Platform.OS==='android' ? 80 : 0,
           paddingTop: 3,
         },
         tabBarActiveTintColor: theme.colors.secondary,

@@ -1,9 +1,14 @@
 import MediaGallery from "../../../../components/MediaGallery";
-import { useLocalSearchParams } from "expo-router";
-import { useEffect } from "react";
+import {useLocalSearchParams, useRouter} from "expo-router";
+import {useContext, useEffect} from "react";
+import {AddNewProductWorkflowContext} from "../../../../components/AddNewProductWorkflowContext";
+import {useSelector} from "react-redux";
 
 export default function AddMediaItems() {
   const params = useLocalSearchParams();
+  const {mediaGalleryKey} = useContext(AddNewProductWorkflowContext);
+
+
   useEffect(() => {
     console.log("Mounted AddMediaItems!!");
     return () => {
@@ -12,5 +17,5 @@ export default function AddMediaItems() {
   }, []);
 
   console.log("params:", params);
-  return <MediaGallery />;
+  return <MediaGallery key ={mediaGalleryKey}/>;
 }

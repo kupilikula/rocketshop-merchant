@@ -2,20 +2,21 @@ import {Pressable, View} from "react-native";
 import {generateBoxShadowStyle} from "../styles/generateShadow";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {Button, Text, useTheme} from "react-native-paper";
-import {useProductPreviewPublishRef} from "./ProductPreviewPublishRefContext";
 import {useRouter} from "expo-router";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
+import {useContext} from "react";
+import {AddNewProductWorkflowContext} from "@/components/AddNewProductWorkflowContext";
 
 const PreviewHeader = () => {
 
-    const ref = useProductPreviewPublishRef();
+    const {productPreviewPublishRef, isPublishing, published, publishFailure} = useContext(AddNewProductWorkflowContext);
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const theme = useTheme();
 
     const onPublish = () => {
-        if (ref.current) {
-            ref.current.publish(); // Call the exposed method
+        if (productPreviewPublishRef.current) {
+            productPreviewPublishRef.current.publish(); // Call the exposed method
         }
     };
 
@@ -35,6 +36,7 @@ const PreviewHeader = () => {
                 },
             ]}
         >
+            {!published && !isPublishing ?
             <Pressable
                 onPressIn={() => {
                     router.back();
@@ -46,9 +48,13 @@ const PreviewHeader = () => {
                     style={{ color: "black" }}
                 />
             </Pressable>
+                :
+                <View/>
+            }
             <Text variant={"titleLarge"} style={{ color: "black" }}>
                 Product Preview
             </Text>
+            {!isPublishing && !published && !publishFailure ?
             <Button
                 onPress={onPublish}
                 mode={"contained"}
@@ -56,6 +62,9 @@ const PreviewHeader = () => {
             >
                 Publish
             </Button>
+                :
+                <View/>
+            }
         </View>
     );
 };

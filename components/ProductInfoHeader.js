@@ -2,19 +2,19 @@ import {Pressable, View} from "react-native";
 import {generateBoxShadowStyle} from "@/styles/generateShadow";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {Text} from "react-native-paper";
-import React from "react";
+import React, {useContext} from "react";
 import {useRouter} from "expo-router";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
-import {useProductInfoFormRef} from "@/components/ProductInfoFormRefContext";
+import {AddNewProductWorkflowContext} from "@/components/AddNewProductWorkflowContext";
 
 const ProductInfoHeader = (props) => {
 
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const formRef = useProductInfoFormRef();
+    const {productInfoFormRef} = useContext(AddNewProductWorkflowContext);
     const onSubmit = () => {
-        if (formRef.current) {
-            formRef.current.submitForm(); // Call the exposed method
+        if (productInfoFormRef.current) {
+            productInfoFormRef.current.submitForm(); // Call the exposed method
         }
     };
     return (

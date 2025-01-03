@@ -7,8 +7,8 @@ import React, {useCallback, useContext} from "react";
 import {CommonActions} from "@react-navigation/native";
 import {useNavigation, useRouter} from "expo-router";
 import {useDispatch} from "react-redux";
-import {MediaSelectionContext} from "@/components/MediaSelectionContext";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
+import {AddNewProductWorkflowContext} from "@/components/AddNewProductWorkflowContext";
 
 const MediaHeader = () => {
 
@@ -16,7 +16,7 @@ const MediaHeader = () => {
     const dispatch = useDispatch();
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const {isCameraOpen, isMediaSelected} = useContext(MediaSelectionContext);
+    const {isCameraOpen, isMediaSelected} = useContext(AddNewProductWorkflowContext);
 
     const resetNavigationStack = useCallback(() => {
         // Reset the navigation stack to the Dashboard tab

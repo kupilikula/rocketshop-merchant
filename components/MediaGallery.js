@@ -18,16 +18,15 @@ import { Audio } from "expo-av";
 import { gestureHandlerRootHOC, FlatList } from "react-native-gesture-handler";
 import { useMemo } from "react";
 import GalleryMediaItem from "./GalleryMediaItem";
-import { useNavigation, useRouter } from "expo-router";
+import {useFocusEffect, useNavigation, useRouter} from "expo-router";
 import { useIsFocused } from "@react-navigation/native";
 import { updateField } from "../store/newProductSlice";
 import { useDispatch, useSelector } from "react-redux";
 import _ from "lodash";
 import * as Crypto from "expo-crypto";
-import { CommonActions } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import mime from 'mime';
-import {MediaSelectionContext} from "./MediaSelectionContext";
+import {AddNewProductWorkflowContext} from "./AddNewProductWorkflowContext";
 
 const MediaGallery = (props) => {
   const [media, setMedia] = useState([]);
@@ -36,7 +35,7 @@ const MediaGallery = (props) => {
     setIsCameraOpen,
     isMediaSelected,
     setIsMediaSelected,
-  } = useContext(MediaSelectionContext);
+  } = useContext(AddNewProductWorkflowContext);
   console.log('isCameraOpen:', isCameraOpen, ', isMediaSelected:', isMediaSelected);
 
   const [selectedItemsIds, setSelectedItemsIds] = useState([]);
@@ -61,7 +60,7 @@ const MediaGallery = (props) => {
   const previewFlatListSliderRef = useRef();
   const libraryFlatListRef = useRef();
   const timerRef = useRef(null);
-
+  const router = useRouter();
   const theme = useTheme();
   const navigation = useNavigation();
 
@@ -69,7 +68,7 @@ const MediaGallery = (props) => {
   const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
 
-  const { mediaItems: productDataMediaItems } = useSelector(
+  const {productId, mediaItems: productDataMediaItems } = useSelector(
     (state) => state.newProduct,
   );
   function toggleCameraFacing() {
@@ -82,6 +81,13 @@ const MediaGallery = (props) => {
       console.log("MediaGallery UNmounted");
     };
   }, []);
+
+  useFocusEffect(() => {
+    if(!productId) {
+      console.log('null product id, replacing.')
+      router.push('/Main/(tabs)/AddNewProduct')
+    }
+  })
 
 
   useEffect(() => {
@@ -293,7 +299,11 @@ const MediaGallery = (props) => {
         })
       }
       return () => navigation.getParent()?.setOptions({
-        tabBarStyle: undefined
+        tabBarStyle: {
+          backgroundColor: "white",
+          paddingBottom: Platform.OS==='android' ? 80 : 0,
+          paddingTop: 3,
+    },
       });
   },[isCameraOpen, navigation])
 

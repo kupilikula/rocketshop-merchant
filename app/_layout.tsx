@@ -47,10 +47,16 @@ export default function RootLayout() {
   };
 
   useEffect(() => {
-    // Make navigation bar transparent
-    if (Platform.OS === "android") {
-      NavigationBar.setBackgroundColorAsync("#00000000");
+    const configureNavigationBar = async () => {
+      await NavigationBar.setVisibilityAsync('hidden'); // Hide initially
+      await NavigationBar.setBehaviorAsync('overlay-swipe'); // Allow swipe-up to reveal
+      await NavigationBar.setBackgroundColorAsync('#00000000'); // Transparent background
+    };
+
+    if (Platform.OS==='android') {
+      configureNavigationBar();
     }
+
   }, []);
 
 
