@@ -17,6 +17,7 @@ const initialState = {
   enableReviews: false,
   enableStockTracking: true,
   gstInclusive: true,
+  isActive: true,
 };
 
 const newProductSlice = createSlice({
