@@ -5,11 +5,11 @@ import {Button, Text, useTheme} from "react-native-paper";
 import {useRouter} from "expo-router";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {useContext} from "react";
-import {AddNewProductWorkflowContext} from "@/components/AddNewProductWorkflowContext";
+import {ProductWorkflowContext} from "@/components/ProductWorkflowContext";
 
 const PreviewHeader = () => {
 
-    const {productPreviewPublishRef, isPublishing, published, publishFailure} = useContext(AddNewProductWorkflowContext);
+    const {productPreviewPublishRef, isPublishing, published, publishFailure} = useContext(ProductWorkflowContext);
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const theme = useTheme();

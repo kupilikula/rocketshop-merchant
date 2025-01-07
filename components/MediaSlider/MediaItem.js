@@ -42,6 +42,12 @@ export default function MediaItem({
   // console.log('I:', index);
   const scale = item.scale || 1; // Default to 1 if not present
   const offset = item.offset || { x: 0, y: 0 }; // Default to {x: 0, y: 0} if not present
+  if (!item.width) {
+    item.width = width;
+  }
+  if (!item.height) {
+    item.height = height;
+  }
 
   return (
     <View
@@ -99,6 +105,7 @@ export default function MediaItem({
                 style={{
                   position: "absolute", // Ensure the image is positioned absolutely within the container
                   width: width*scale, // Scale the width dynamically
+                  // aspectRatio: '1.33',
                   height: item.height*width*scale/item.width, // Scale the height dynamically
                   left: width*(1-scale)/2 + offset.x,
                   top: (height - (item.height *scale/ item.width) * width)/2 + offset.y,

@@ -11,10 +11,12 @@ import FlatListSlider from "./MediaSlider/FlatListSlider";
 import MediaItem from "./MediaSlider/MediaItem";
 import { Rating } from "@kolking/react-native-rating";
 import React, { useState } from "react";
+import {useRouter} from "expo-router";
 
 export default function ProductScreenMerchant(props) {
   // const router = useRouter();
   const theme = useTheme();
+  const router = useRouter();
   const styles = makeStyles(theme);
   console.log("props:", props.product.productId);
   const [isActive, setIsActive] = useState(props.product.isActive);
@@ -77,7 +79,7 @@ export default function ProductScreenMerchant(props) {
                   <IconButton
                     icon="pencil"
                     size={28}
-                    onPress={() => {}}
+                    onPress={() => { router.push({pathname: '/Main/(tabs)/EditProduct', params: { productId: props.product.productId} } )}}
                     style={styles.actionButton}
                     iconColor={theme.colors.primary}
                   />

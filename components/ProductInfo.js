@@ -8,18 +8,20 @@ import {
 import {useSelector, useDispatch} from "react-redux";
 import {useIsFocused} from "@react-navigation/native";
 import _ from "lodash";
-import {updateField} from "../store/newProductSlice";
+import {updateField as updateNewProductField} from "../store/newProductSlice";
+import {updateField as updateEditProductField} from "../store/editProductSlice";
 import {useNavigation, useRouter} from "expo-router";
 import * as yup from "yup";
 import {Controller, useFieldArray, useForm} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
 import {useCollections} from "../api/hooks/useCollections";
-import {AddNewProductWorkflowContext} from "./AddNewProductWorkflowContext";
+import {ProductWorkflowContext} from "./ProductWorkflowContext";
 
-const ProductInfoScreen = () => {
+const ProductInfoScreen = (props) => {
     const dispatch = useDispatch();
+    const {isNewProduct, productInfoFormRef} = useContext(ProductWorkflowContext);
     const {storeId} = useSelector((state) => state.store);
-    const productData = useSelector((state) => state.newProduct);
+    const productData = useSelector((state) => isNewProduct ? state.newProduct : state.editProduct);
     const navigation = useNavigation();
 
     const [filteredSuggestions, setFilteredSuggestions] = useState([]);
@@ -54,7 +56,7 @@ const ProductInfoScreen = () => {
 
     const theme = useTheme();
     const styles = makeStyles(theme);
-    const {productInfoFormRef} = useContext(AddNewProductWorkflowContext);
+
 
     // Validation schema using Yup
     const schema = yup.object().shape({
@@ -115,7 +117,7 @@ const ProductInfoScreen = () => {
             console.log("restoring product info from redux, productData:", productData,);
             let productInfoData = _.cloneDeep(productData);
             delete productInfoData.mediaItems
-
+            console.log('productInfoData:', productInfoData);
             reset(productInfoData);
             // if (
             //   !_.isEqual(
@@ -131,8 +133,13 @@ const ProductInfoScreen = () => {
     const saveStateToRedux = useCallback(() => {
         const currentState = getValues(); // Get the latest form values
         console.log("saveStateToRedux:,currentState:", currentState);
-        dispatch(updateField({field: "all", value: currentState}));
-    }, [dispatch, updateField]);
+        if (isNewProduct) {
+            dispatch(updateNewProductField({field: "all", value: currentState}));
+        } else {
+            dispatch(updateEditProductField({field: "all", value: currentState}));
+        }
+
+    }, [dispatch, updateNewProductField, updateEditProductField, isNewProduct]);
 
     const saveStateToReduxAndResetFormData = useCallback(() => {
         const resetFormData = () => {
@@ -321,8 +328,15 @@ const ProductInfoScreen = () => {
     };
 
     const onSubmit = (data) => {
-        dispatch(updateField({field: "all", value: data}));
-        router.push("/Main/(tabs)/AddNewProduct/Preview");
+        if (isNewProduct) {
+            dispatch(updateNewProductField({field: "all", value: data}));
+            router.push("./Preview");
+        } else {
+            dispatch(updateEditProductField({field: "all", value: data}));
+            router.push("./EditPreview");
+        }
+
+
     };
 
     useEffect(() => {
@@ -414,7 +428,7 @@ const ProductInfoScreen = () => {
                             render={({field: {onChange, onBlur, value}}) => (<TextInput
                                     label="Price"
                                     mode="outlined"
-                                    value={value}
+                                    value={value.toString()}
                                     onBlur={onBlur}
                                     onChangeText={onChange}
                                     style={[styles.halfWidthInput, {marginRight: 8}]}
@@ -425,16 +439,18 @@ const ProductInfoScreen = () => {
                         <Controller
                             name="stock"
                             control={control}
-                            render={({field: {onChange, onBlur, value}}) => (<TextInput
-                                    label="Stock"
-                                    mode="outlined"
-                                    value={value}
-                                    onBlur={onBlur}
-                                    onChangeText={onChange}
-                                    style={styles.halfWidthInput}
-                                    keyboardType="numeric"
-                                    error={!!errors.stock}
-                                />)}
+                            render={({field: {onChange, onBlur, value}}) => {
+                                console.log('stock value:', value);
+                                return (<TextInput
+                                label="Stock"
+                                mode="outlined"
+                                value={value.toString()}
+                                onBlur={onBlur}
+                                onChangeText={onChange}
+                                style={[styles.halfWidthInput, {marginRight: 8}]}
+                                keyboardType="numeric"
+                                error={!!errors.price}
+                            />)}}
                         />
                         <View ref={gstInputContainerRef} style={styles.gstInputContainer}>
                             <TextInput
@@ -617,7 +633,9 @@ const ProductInfoScreen = () => {
                                         display: "flex", flexDirection: "row", flexWrap: "wrap",
                                     }}
                                 >
-                                    {existingCollections.map((collection, idx) => (
+                                    {existingCollections.map((collection, idx) => {
+                                        // console.log('c:', collection, ',value:', value);
+                                        return (
                                         <View key={idx} style={styles.checkboxContainer}>
                                             <Checkbox.Android
                                                 status={value.includes(collection.collectionId) ? "checked" : "unchecked"}
@@ -630,7 +648,9 @@ const ProductInfoScreen = () => {
                                                 }}
                                             />
                                             <Text>{collection.collectionName}</Text>
-                                        </View>))}
+                                        </View>)}
+
+                                    )}
                                 </View>
                                 {error && <Text style={styles.errorText}>{error.message}</Text>}
                             </View>)}

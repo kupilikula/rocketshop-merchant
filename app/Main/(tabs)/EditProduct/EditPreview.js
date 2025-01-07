@@ -3,7 +3,7 @@ import {Button, useTheme, Text} from "react-native-paper";
 import ProductDisplayCardCustomerStore from "../../../../components/ProductDisplayCardCustomerStore";
 import {useDispatch, useSelector} from "react-redux";
 import { useContext, useEffect} from "react";
-import {resetNewProduct} from "../../../../store/newProductSlice";
+import {resetEditProduct} from "../../../../store/editProductSlice";
 import {useNavigation, useRouter} from "expo-router";
 import {CommonActions} from "@react-navigation/native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -13,27 +13,16 @@ import * as MediaLibrary from "expo-media-library";
 import * as ImageManipulator from 'expo-image-manipulator';
 import _ from "lodash";
 import {ProductWorkflowContext} from "../../../../components/ProductWorkflowContext";
+import {useQueryClient} from "react-query";
 
-const convertHeicToJpg = async (uri) => {
-    try {
-        const result = await ImageManipulator.manipulateAsync(uri, [], {
-            compress: 1,
-            format: ImageManipulator.SaveFormat.JPEG
-        });
-        console.log('Converted image:', result);
-        return result.uri;
-    } catch (error) {
-        console.error('Image conversion error:', error);
-    }
-};
-
-export default function Preview(props) {
+export default function EditPreview(props) {
+    const {resetWorkflow, isNewProduct, productPreviewPublishRef, isPublishing, setIsPublishing, published, setPublished, publishFailure, setPublishFailure, setShouldResetStack, mediaGalleryKey, setMediaGalleryKey} = useContext(ProductWorkflowContext);
     const dispatch = useDispatch();
     const router = useRouter();
     const theme = useTheme();
-    const newProduct = useSelector((state) => state.newProduct);
+    const editProduct = useSelector((state) => state.editProduct);
     const storeId = useSelector((state) => state.store.storeId); // Access the storeId from Redux
-    const {resetWorkflow, productPreviewPublishRef, isPublishing, setIsPublishing, published, setPublished, publishFailure, setPublishFailure, setShouldResetStack, mediaGalleryKey, setMediaGalleryKey} = useContext(ProductWorkflowContext);
+    const queryClient = useQueryClient();
     const navigation = useNavigation();
 
     const resetNavigationStack = (route) => {
@@ -45,77 +34,9 @@ export default function Preview(props) {
 
     async function publishProduct() {
         try {
-
-            // Generate fileKeys for each mediaItem
-            const fileKeysWithContentTypes = newProduct.mediaItems.map((item) => ({
-                fileKey: `stores/${storeId}/products/${newProduct.productId}/${item.mediaId}`,
-                contentType: item.contentType === 'image/heic' ? 'image/jpg' : item.contentType
-            }));
-            console.log('f:', fileKeysWithContentTypes);
-            const {data: presignedUrls} = await axiosClient.post(`/stores/${storeId}/products/mediaUploadPresignedUrls`, {
-                fileKeysWithContentTypes
-            });
-            console.log('fetched presigned urls');
-            // Request presigned URLs for all mediaItems
-
-            console.log('presignedUrls:', presignedUrls);
-
-            let updatedMediaItems = _.cloneDeep(newProduct.mediaItems);
-            // Upload each mediaItem to Spaces
-            console.log('uploading media');
-            await Promise.all(newProduct.mediaItems.map(async (item, index) => {
-                const presignedUrl = presignedUrls[index].presignedUrl;
-                console.log('pre:', presignedUrl);
-
-                // console.log('line66, blob:', blob);
-                // console.log('line89:, blob.type:', blob.type);
-
-                let convertedItemUri = null;
-                if (item.contentType === 'image/heic') {
-                    convertedItemUri = await convertHeicToJpg(item.uri);
-                    console.log('convertedItemUri:', convertedItemUri);
-                    updatedMediaItems[index].contentType = 'image/jpg';
-                }
-
-                let blob;
-                if (convertedItemUri) {
-                    console.log('computing blob of converted item');
-                    let res = await fetch(convertedItemUri);
-                    blob = res.blob();
-                    console.log('line 87, blob:', blob);
-                } else {
-                    let assetInfo = await MediaLibrary.getAssetInfoAsync(item);
-                    console.log('assetInfo:', assetInfo);
-                    let res = await fetch(assetInfo.localUri || assetInfo.uri);
-                    blob = await res.blob();
-                    console.log('line 94, blob:', blob);
-                }
-
-
-                // Replace the local uri with the Spaces URI after upload
-                console.log('line 58,item.uri:', item.uri);
-                try {
-                    let r = await fetch(presignedUrl, {
-                        method: 'PUT', headers: {
-                            'Content-Type': updatedMediaItems[index].contentType, // Update Content-Type based on your files
-                            'x-amz-acl': 'public-read',
-                        }, body: blob,
-                    });
-                    console.log('r:', r);
-                    // Update the mediaItem with its uploaded URI
-                    updatedMediaItems[index].uri = presignedUrls[index].fileUri;
-                } catch (err) {
-                    console.log('err:', err);
-                    return false;
-                }
-
-            }));
-            console.log('updatedMediaItems:', updatedMediaItems);
             // Send the updated product data to the backend
             console.log('inserting data into db');
-            await axiosClient.post(`/stores/${storeId}/products/addNewProduct`, {
-                ...newProduct, mediaItems: updatedMediaItems,
-            });
+            await axiosClient.put(`/stores/${storeId}/products/${editProduct.productId}/editProduct`, editProduct);
 
             console.log('Product published successfully!');
             return true;
@@ -138,10 +59,8 @@ export default function Preview(props) {
                             setPublished(success);
                             if (!success) {
                                 setPublishFailure(true);
-                            } else {
-                                setShouldResetStack(true);
                             }
-
+                            setShouldResetStack(true);
                     });
                 },
                 // isPublishing: isPublishing
@@ -149,21 +68,13 @@ export default function Preview(props) {
         }
     }, [productPreviewPublishRef]);
 
-    const saveAsDraft = () => {
-        // save draft
-        // reset redux new product to empty
-        dispatch(resetNewProduct());
-        resetWorkflow();
-        resetNavigationStack("Dashboard");
-    };
-
     const discard = () => {
         // reset redux new product to empty
-        console.log("DISCARDING: redux product before reset:", newProduct);
-        dispatch(resetNewProduct());
-        console.log("AFTER DISCARDING: redux product before reset:", newProduct);
-        resetWorkflow();
+        console.log("DISCARDING: redux product before reset:", editProduct);
+        dispatch(resetEditProduct());
+        console.log("AFTER DISCARDING: redux product before reset:", editProduct);
         resetNavigationStack("Dashboard");
+        resetWorkflow();
     };
 
     return (<ScrollView
@@ -184,15 +95,17 @@ export default function Preview(props) {
                     <MaterialIcons name={'check'} size={28} color={theme.colors.black}/>
                     <Text variant={'titleMedium'} style={{marginLeft: 10, color: 'black'}}>Product Published</Text>
                     </View>
-                    <Button onPress={() => {
+                    <Button onPress={async () => {
                         navigation.popToTop();
-                        setMediaGalleryKey(mediaGalleryKey+1);
-                        router.replace('/Main/(tabs)/Products/Product/' + newProduct.productId);
+                        // setMediaGalleryKey(mediaGalleryKey+1);
+                        // resetNavigationStack('/Main/(tabs)/Products/Product/' + editProduct.productId);
+                        await queryClient.invalidateQueries(["merchantProduct", storeId, editProduct.productId])
+                        router.replace('/Main/(tabs)/Products/Product/' + editProduct.productId);
                         setTimeout(() => {
-                            dispatch(resetNewProduct());
+                            dispatch(resetEditProduct());
                             resetWorkflow();
                         }, 500);
-                        }
+                    }
                     }>
                         Go To Product
                     </Button>
@@ -225,20 +138,11 @@ export default function Preview(props) {
                     >
                         Discard
                     </Button>
-                    <Button
-                        onPress={saveAsDraft}
-                        mode={"outlined"}
-                        style={{
-                            borderRadius: 8, borderWidth: 2, borderColor: theme.colors.primary,
-                        }}
-                    >
-                        Save As Draft
-                    </Button>
                 </View>}
                 <ProductDisplayCardCustomerStore
-                    product={newProduct}
+                    product={editProduct}
                     showProductDescription={true}
-                    showRating={newProduct.enableRatings}
+                    showRating={editProduct.enableRatings}
                 />
             </>
         </View>

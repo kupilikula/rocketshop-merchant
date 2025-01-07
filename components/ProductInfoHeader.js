@@ -5,13 +5,13 @@ import {Text} from "react-native-paper";
 import React, {useContext} from "react";
 import {useRouter} from "expo-router";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
-import {AddNewProductWorkflowContext} from "@/components/AddNewProductWorkflowContext";
+import {ProductWorkflowContext} from "@/components/ProductWorkflowContext";
 
 const ProductInfoHeader = (props) => {
 
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const {productInfoFormRef} = useContext(AddNewProductWorkflowContext);
+    const {isNewProduct, productInfoFormRef} = useContext(ProductWorkflowContext);
     const onSubmit = () => {
         if (productInfoFormRef.current) {
             productInfoFormRef.current.submitForm(); // Call the exposed method
@@ -34,6 +34,7 @@ const ProductInfoHeader = (props) => {
                 },
             ]}
         >
+            {isNewProduct ?
             <Pressable
                 onPressIn={() => {
                     router.back();
@@ -44,7 +45,9 @@ const ProductInfoHeader = (props) => {
                     size={36}
                     style={{ color: "black" }}
                 />
-            </Pressable>
+            </Pressable> :
+                <View/>
+            }
             <Text variant={"titleLarge"} style={{ color: "black" }}>
                 Product Info
             </Text>

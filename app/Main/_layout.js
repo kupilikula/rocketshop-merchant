@@ -34,6 +34,7 @@ export default function Layout() {
         header: () => {
           console.log("pathName:", pathName);
           return pathName.startsWith("/Main/AddNewProduct") ||
+          pathName.startsWith("/Main/EditProduct") ||
             pathName.startsWith("/Main/Products/Product") ||
             pathName.startsWith("/Main/Orders/Order") ||
             pathName.startsWith("/Main/Collections/Collection") ||

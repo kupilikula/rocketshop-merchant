@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { FlatList, View, StyleSheet, Pressable } from "react-native";
+import {FlatList, View, StyleSheet, Pressable, ActivityIndicator} from "react-native";
 import {
   Text,
   TextInput,
@@ -412,7 +412,10 @@ const Products = () => {
     if (isLoading) {
     return (
         <Surface style={styles.surface}>
-          <Text style={{ textAlign: "center", marginTop: 20 }}>Loading...</Text>
+            <View style={{height: '100%', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+            <ActivityIndicator size={100} animating={true} color={theme.colors.primary}/>
+            </View>
+          {/*<Text style={{ textAlign: "center", marginTop: 20 }}>Loading...</Text>*/}
         </Surface>
     );
   }

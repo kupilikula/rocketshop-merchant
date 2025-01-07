@@ -1,6 +1,6 @@
 import React from "react";
 import { ActivityIndicator, Text, View, StyleSheet } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import {useLocalSearchParams} from "expo-router";
 import { useSelector } from "react-redux"; // To get storeId from Redux
 import { useStoreProduct } from "../../../../../api/hooks/useStoreProduct";
 import ProductScreenMerchant from "../../../../../components/ProductScreenMerchant";
@@ -10,7 +10,7 @@ const ProductPage = () => {
   const {storeId} = useSelector((state) => state.store); // Get storeId from Redux
 
   const { data: product, isLoading, isError } = useStoreProduct(storeId, productId);
-
+  console.log('line13, product:', product);
   if (isLoading) {
     return (
         <View style={styles.container}>

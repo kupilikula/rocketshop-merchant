@@ -1,10 +1,11 @@
 import React, {createContext, useRef, useState} from "react";
 
-export const AddNewProductWorkflowContext = createContext();
+export const ProductWorkflowContext = createContext();
 
-export const AddNewProductWorkflowProvider = ({ children }) => {
+export const ProductWorkflowProvider = ({ children }) => {
     const productInfoFormRef = useRef();
     const productPreviewPublishRef = useRef();
+    const [isNewProduct, setIsNewProduct] = useState(true);
     const [isPublishing, setIsPublishing] = useState(false);
     const [published, setPublished] = useState(false);
     const [publishFailure, setPublishFailure] = useState(false);
@@ -12,9 +13,22 @@ export const AddNewProductWorkflowProvider = ({ children }) => {
     const [isMediaSelected, setIsMediaSelected] = useState(false);
     const [mediaGalleryKey, setMediaGalleryKey] = useState(0);
 
+    const resetWorkflow = () =>
+    {
+        setIsNewProduct(true);
+        setIsPublishing(false);
+        setPublished(false);
+        setPublishFailure(false);
+        setIsCameraOpen(false);
+        setIsMediaSelected(false);
+        setMediaGalleryKey(0);
+    }
+
     return (
-        <AddNewProductWorkflowContext.Provider
+        <ProductWorkflowContext.Provider
             value={{
+                isNewProduct,
+                setIsNewProduct,
                 isCameraOpen,
                 setIsCameraOpen,
                 isMediaSelected,
@@ -28,10 +42,11 @@ export const AddNewProductWorkflowProvider = ({ children }) => {
                 productInfoFormRef,
                 productPreviewPublishRef,
                 mediaGalleryKey,
-                setMediaGalleryKey
+                setMediaGalleryKey,
+                resetWorkflow
             }}
         >
             {children}
-        </AddNewProductWorkflowContext.Provider>
+        </ProductWorkflowContext.Provider>
     );
 };

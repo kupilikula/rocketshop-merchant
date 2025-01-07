@@ -40,7 +40,7 @@ export default function RootLayout() {
       placeholder: "#8D99AE", // Medium Gray
       disabled: "#E0E0E0", // Light Gray for disabled elements
       warning: "#FFBE0B", // Gold
-      icon: "#4361EE", // Steel Blue for icons
+      icon: "#0196f9", // blue
       info: "#00C4CC", // Turquoise Blue for informational states
     },
     dark: false, // Set to true if creating a dark theme

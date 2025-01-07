@@ -26,7 +26,7 @@ import _ from "lodash";
 import * as Crypto from "expo-crypto";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import mime from 'mime';
-import {AddNewProductWorkflowContext} from "./AddNewProductWorkflowContext";
+import {ProductWorkflowContext} from "./ProductWorkflowContext";
 
 const MediaGallery = (props) => {
   const [media, setMedia] = useState([]);
@@ -35,7 +35,7 @@ const MediaGallery = (props) => {
     setIsCameraOpen,
     isMediaSelected,
     setIsMediaSelected,
-  } = useContext(AddNewProductWorkflowContext);
+  } = useContext(ProductWorkflowContext);
   console.log('isCameraOpen:', isCameraOpen, ', isMediaSelected:', isMediaSelected);
 
   const [selectedItemsIds, setSelectedItemsIds] = useState([]);

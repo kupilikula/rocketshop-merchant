@@ -1,12 +1,12 @@
 import MediaGallery from "../../../../components/MediaGallery";
 import {useLocalSearchParams, useRouter} from "expo-router";
 import {useContext, useEffect} from "react";
-import {AddNewProductWorkflowContext} from "../../../../components/AddNewProductWorkflowContext";
+import {ProductWorkflowContext} from "../../../../components/ProductWorkflowContext";
 import {useSelector} from "react-redux";
 
 export default function AddMediaItems() {
   const params = useLocalSearchParams();
-  const {mediaGalleryKey} = useContext(AddNewProductWorkflowContext);
+  const {mediaGalleryKey} = useContext(ProductWorkflowContext);
 
 
   useEffect(() => {

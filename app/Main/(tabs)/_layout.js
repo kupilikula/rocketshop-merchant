@@ -103,6 +103,13 @@ export default function TabsComponent() {
                 // tabBarButton: () => null, // Hides the tab bar button
             }}
         />
+        <Tabs.Screen
+            name="EditProduct"
+            options={{
+                href: null,
+                // tabBarButton: () => null, // Hides the tab bar button
+            }}
+        />
     </Tabs>
   );
 }

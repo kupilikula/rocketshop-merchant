@@ -4,7 +4,7 @@ import MediaHeader from '@/components/MediaHeader';
 import PreviewHeader from '@/components/PreviewHeader';
 import {ProductWorkflowProvider} from '@/components/ProductWorkflowContext';
 
-export default function AddNewProductStack() {
+export default function EditProductStack() {
 
 
     return (
@@ -12,21 +12,14 @@ export default function AddNewProductStack() {
     <Stack initialRouteName={"index"}>
       <Stack.Screen name={"index"} options={{ header: () => null }} />
       <Stack.Screen
-        name={"AddMediaItems"}
-        options={{
-          title: "Product Media",
-            header: () => <MediaHeader />,
-        }}
-      />
-      <Stack.Screen
-        name={"AddProductInfo"}
+        name={"EditProductInfo"}
         options={{
           title: "Product Info",
             header: () => <ProductInfoHeader/>
         }}
       />
         <Stack.Screen
-            name={"Preview"}
+            name={"EditPreview"}
             options={{
                 title: "Preview",
                 header: () => <PreviewHeader/>

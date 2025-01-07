@@ -157,8 +157,8 @@ const FlatListSlider = forwardRef((props, ref) => {
             };
           }}
           initialNumToRender={3}
-          maxToRenderPerBatch={2}
-          windowSize={1}
+          maxToRenderPerBatch={3}
+          windowSize={3}
           removeClippedSubviews={true}
           updateCellsBatchingPeriod={50}
           onEndReachedThreshold={0.5} // Preload data before reaching the end
