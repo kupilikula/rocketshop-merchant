@@ -9,7 +9,7 @@ import {ProductWorkflowContext} from "@/components/ProductWorkflowContext";
 
 const PreviewHeader = () => {
 
-    const {productPreviewPublishRef, isPublishing, published, publishFailure} = useContext(ProductWorkflowContext);
+    const {isNewProduct, productPreviewPublishRef, isPublishing, published, publishFailure} = useContext(ProductWorkflowContext);
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const theme = useTheme();
@@ -54,7 +54,7 @@ const PreviewHeader = () => {
             <Text variant={"titleLarge"} style={{ color: "black" }}>
                 Product Preview
             </Text>
-            {!isPublishing && !published && !publishFailure ?
+            {!isPublishing && !published && !publishFailure && isNewProduct ?
             <Button
                 onPress={onPublish}
                 mode={"contained"}

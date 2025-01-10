@@ -68,6 +68,9 @@ export default function StoreSearch(props) {
                     uniqueProducts={storeProducts}
                     limitedResults={false}
                     initialSearchQuery={initialSearchQuery}
+                    onSearchResultPressHandler={(p) => router.push(
+                        `/Main/(tabs)/Products/Product/${p.productId}`,
+                    )}
                 />
             </Surface>
         )

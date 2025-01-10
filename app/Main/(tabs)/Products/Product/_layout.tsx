@@ -46,5 +46,5 @@ export default function Layout() {
     );
   };
 
-  return <Stack screenOptions={{ header: ProductScreenMerchantHeader }} />;
+  return <Stack screenOptions={{ header: ProductScreenMerchantHeader, animation: "none" }} />;
 }

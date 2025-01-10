@@ -6,6 +6,10 @@ export const ProductWorkflowProvider = ({ children }) => {
     const productInfoFormRef = useRef();
     const productPreviewPublishRef = useRef();
     const [isNewProduct, setIsNewProduct] = useState(true);
+    const [isNewVariant, setIsNewVariant] = useState(false);
+    const [isClone, setIsClone] = useState(false);
+    const [useSameMediaForClone, setUseSameMediaForClone] = useState(false);
+    const [variantInfo, setVariantInfo] = useState({});
     const [isPublishing, setIsPublishing] = useState(false);
     const [published, setPublished] = useState(false);
     const [publishFailure, setPublishFailure] = useState(false);
@@ -16,6 +20,10 @@ export const ProductWorkflowProvider = ({ children }) => {
     const resetWorkflow = () =>
     {
         setIsNewProduct(true);
+        setIsNewVariant(false);
+        setIsClone(false);
+        setUseSameMediaForClone(false);
+        setVariantInfo({});
         setIsPublishing(false);
         setPublished(false);
         setPublishFailure(false);
@@ -29,6 +37,14 @@ export const ProductWorkflowProvider = ({ children }) => {
             value={{
                 isNewProduct,
                 setIsNewProduct,
+                isNewVariant,
+                setIsNewVariant,
+                isClone,
+                setIsClone,
+                useSameMediaForClone,
+                setUseSameMediaForClone,
+                variantInfo,
+                setVariantInfo,
                 isCameraOpen,
                 setIsCameraOpen,
                 isMediaSelected,

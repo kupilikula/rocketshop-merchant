@@ -47,26 +47,24 @@ export default function EditPreview(props) {
         }
     }
 
-    useEffect(() => {
-        // Attach the `handleSubmit` method to the ref passed in initialParams
-        if (productPreviewPublishRef) {
-            productPreviewPublishRef.current = {
-                publish: () => {
-                    console.log('207 publish');
-                    setIsPublishing(true);
-                    publishProduct().then((success) => {
-                        setIsPublishing(false);
-                            setPublished(success);
-                            if (!success) {
-                                setPublishFailure(true);
-                            }
-                            setShouldResetStack(true);
-                    });
-                },
-                // isPublishing: isPublishing
-            };
-        }
-    }, [productPreviewPublishRef]);
+    const publish = () => {
+        console.log('207 publish');
+        setIsPublishing(true);
+        publishProduct().then((success) => {
+            setIsPublishing(false);
+            setPublished(success);
+            if (!success) {
+                setPublishFailure(true);
+            } else {
+                setTimeout(async () => {
+                    await queryClient.invalidateQueries(["merchantProduct", storeId, editProduct.productId])
+                    router.replace('/Main/(tabs)/Products/Product/' + editProduct.productId);
+                    resetWorkflow()
+                }, 2000);
+            }
+
+        });
+    }
 
     const discard = () => {
         // reset redux new product to empty
@@ -136,7 +134,14 @@ export default function EditPreview(props) {
                         labelStyle={{color: "white"}}
                         style={{borderRadius: 8, backgroundColor: theme.colors.error}}
                     >
-                        Discard
+                        Discard Changes
+                    </Button>
+                    <Button
+                        onPress={publish}
+                        mode={"contained"}
+                        style={{ borderRadius: 8, backgroundColor: theme.colors.success }}
+                    >
+                        Publish Changes
                     </Button>
                 </View>}
                 <ProductDisplayCardCustomerStore

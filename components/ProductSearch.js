@@ -79,6 +79,7 @@ export default function ProductSearch(props) {
               <SearchResultProduct
                 product={item}
                 withCheckBox={props.withCheckbox}
+                onPressHandler={props.onSearchResultPressHandler}
               />
             )}
             ItemSeparatorComponent={() => <Divider style={{marginVertical: 2}}/>}

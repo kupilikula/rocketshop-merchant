@@ -33,7 +33,7 @@ export default function Preview(props) {
     const theme = useTheme();
     const newProduct = useSelector((state) => state.newProduct);
     const storeId = useSelector((state) => state.store.storeId); // Access the storeId from Redux
-    const {resetWorkflow, productPreviewPublishRef, isPublishing, setIsPublishing, published, setPublished, publishFailure, setPublishFailure, setShouldResetStack, mediaGalleryKey, setMediaGalleryKey} = useContext(ProductWorkflowContext);
+    const {isNewVariant, variantInfo, isClone, useSameMediaForClone, resetWorkflow, productPreviewPublishRef, isPublishing, setIsPublishing, published, setPublished, publishFailure, setPublishFailure, setShouldResetStack, mediaGalleryKey, setMediaGalleryKey} = useContext(ProductWorkflowContext);
     const navigation = useNavigation();
 
     const resetNavigationStack = (route) => {
@@ -46,76 +46,85 @@ export default function Preview(props) {
     async function publishProduct() {
         try {
 
-            // Generate fileKeys for each mediaItem
-            const fileKeysWithContentTypes = newProduct.mediaItems.map((item) => ({
-                fileKey: `stores/${storeId}/products/${newProduct.productId}/${item.mediaId}`,
-                contentType: item.contentType === 'image/heic' ? 'image/jpg' : item.contentType
-            }));
-            console.log('f:', fileKeysWithContentTypes);
-            const {data: presignedUrls} = await axiosClient.post(`/stores/${storeId}/products/mediaUploadPresignedUrls`, {
-                fileKeysWithContentTypes
-            });
-            console.log('fetched presigned urls');
-            // Request presigned URLs for all mediaItems
+            let updatedMediaItems;
+            if ((!isNewVariant || (isNewVariant && !variantInfo.useSameMedia) ) && (!isClone || (isClone && !useSameMediaForClone) )){
+                // Generate fileKeys for each mediaItem
+                const fileKeysWithContentTypes = newProduct.mediaItems.map((item) => ({
+                    fileKey: `stores/${storeId}/products/${newProduct.productId}/${item.mediaId}`,
+                    contentType: item.contentType === 'image/heic' ? 'image/jpg' : item.contentType
+                }));
+                console.log('f:', fileKeysWithContentTypes);
+                const {data: presignedUrls} = await axiosClient.post(`/stores/${storeId}/products/mediaUploadPresignedUrls`, {
+                    fileKeysWithContentTypes
+                });
+                console.log('fetched presigned urls');
+                // Request presigned URLs for all mediaItems
 
-            console.log('presignedUrls:', presignedUrls);
+                console.log('presignedUrls:', presignedUrls);
 
-            let updatedMediaItems = _.cloneDeep(newProduct.mediaItems);
-            // Upload each mediaItem to Spaces
-            console.log('uploading media');
-            await Promise.all(newProduct.mediaItems.map(async (item, index) => {
-                const presignedUrl = presignedUrls[index].presignedUrl;
-                console.log('pre:', presignedUrl);
+                updatedMediaItems = _.cloneDeep(newProduct.mediaItems);
+                // Upload each mediaItem to Spaces
+                console.log('uploading media');
+                await Promise.all(newProduct.mediaItems.map(async (item, index) => {
+                    const presignedUrl = presignedUrls[index].presignedUrl;
+                    console.log('pre:', presignedUrl);
 
-                // console.log('line66, blob:', blob);
-                // console.log('line89:, blob.type:', blob.type);
+                    // console.log('line66, blob:', blob);
+                    // console.log('line89:, blob.type:', blob.type);
 
-                let convertedItemUri = null;
-                if (item.contentType === 'image/heic') {
-                    convertedItemUri = await convertHeicToJpg(item.uri);
-                    console.log('convertedItemUri:', convertedItemUri);
-                    updatedMediaItems[index].contentType = 'image/jpg';
-                }
+                    let convertedItemUri = null;
+                    if (item.contentType === 'image/heic') {
+                        convertedItemUri = await convertHeicToJpg(item.uri);
+                        console.log('convertedItemUri:', convertedItemUri);
+                        updatedMediaItems[index].contentType = 'image/jpg';
+                    }
 
-                let blob;
-                if (convertedItemUri) {
-                    console.log('computing blob of converted item');
-                    let res = await fetch(convertedItemUri);
-                    blob = res.blob();
-                    console.log('line 87, blob:', blob);
-                } else {
-                    let assetInfo = await MediaLibrary.getAssetInfoAsync(item);
-                    console.log('assetInfo:', assetInfo);
-                    let res = await fetch(assetInfo.localUri || assetInfo.uri);
-                    blob = await res.blob();
-                    console.log('line 94, blob:', blob);
-                }
+                    let blob;
+                    if (convertedItemUri) {
+                        console.log('computing blob of converted item');
+                        let res = await fetch(convertedItemUri);
+                        blob = res.blob();
+                        console.log('line 87, blob:', blob);
+                    } else {
+                        let assetInfo = await MediaLibrary.getAssetInfoAsync(item);
+                        console.log('assetInfo:', assetInfo);
+                        let res = await fetch(assetInfo.localUri || assetInfo.uri);
+                        blob = await res.blob();
+                        console.log('line 94, blob:', blob);
+                    }
 
 
-                // Replace the local uri with the Spaces URI after upload
-                console.log('line 58,item.uri:', item.uri);
-                try {
-                    let r = await fetch(presignedUrl, {
-                        method: 'PUT', headers: {
-                            'Content-Type': updatedMediaItems[index].contentType, // Update Content-Type based on your files
-                            'x-amz-acl': 'public-read',
-                        }, body: blob,
-                    });
-                    console.log('r:', r);
-                    // Update the mediaItem with its uploaded URI
-                    updatedMediaItems[index].uri = presignedUrls[index].fileUri;
-                } catch (err) {
-                    console.log('err:', err);
-                    return false;
-                }
+                    // Replace the local uri with the Spaces URI after upload
+                    console.log('line 58,item.uri:', item.uri);
+                    try {
+                        let r = await fetch(presignedUrl, {
+                            method: 'PUT', headers: {
+                                'Content-Type': updatedMediaItems[index].contentType, // Update Content-Type based on your files
+                                'x-amz-acl': 'public-read',
+                            }, body: blob,
+                        });
+                        console.log('r:', r);
+                        // Update the mediaItem with its uploaded URI
+                        updatedMediaItems[index].uri = presignedUrls[index].fileUri;
+                    } catch (err) {
+                        console.log('err:', err);
+                        return false;
+                    }
 
-            }));
-            console.log('updatedMediaItems:', updatedMediaItems);
+                }));
+                console.log('updatedMediaItems:', updatedMediaItems);
+            } else {
+                updatedMediaItems = newProduct.mediaItems;
+            }
+
+            let data = {...newProduct, mediaItems: updatedMediaItems}
+            if (isNewVariant) {
+                data.variantInfo = variantInfo;
+            }
+
             // Send the updated product data to the backend
             console.log('inserting data into db');
-            await axiosClient.post(`/stores/${storeId}/products/addNewProduct`, {
-                ...newProduct, mediaItems: updatedMediaItems,
-            });
+            await axiosClient.post(`/stores/${storeId}/products/addNewProduct`, data);
 
             console.log('Product published successfully!');
             return true;
@@ -135,12 +144,23 @@ export default function Preview(props) {
                     setIsPublishing(true);
                     publishProduct().then((success) => {
                         setIsPublishing(false);
-                            setPublished(success);
-                            if (!success) {
-                                setPublishFailure(true);
-                            } else {
-                                setShouldResetStack(true);
-                            }
+                        setPublished(success);
+                        if (!success) {
+                            setPublishFailure(true);
+                            setTimeout(() => {
+                                resetWorkflow();
+                                router.replace('/Main/(tabs)/Dashboard');
+                            }, 2000);
+                        } else {
+                            setTimeout(async () => {
+                                await queryClient.invalidateQueries(["merchantProduct", storeId, newProduct.productId])
+                                router.replace('/Main/(tabs)/Products/Product/' + newProduct.productId);
+                                resetWorkflow()
+                            }, 2000);
+
+                        }
+
+
 
                     });
                 },

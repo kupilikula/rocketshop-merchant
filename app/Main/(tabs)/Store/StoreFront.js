@@ -8,7 +8,7 @@ import { fetchStoreFrontData } from "../../../../api/hooks/useStoreFrontData"; /
 import { fetchStoreProducts } from "../../../../api/hooks/useStoreProducts"; // Extracted query function
 import ProductSearch from "../../../../components/ProductSearch";
 import StoreFrontCollectionCard from "../../../../components/StoreFrontCollectionCard";
-import { useLocalSearchParams } from "expo-router";
+import {useLocalSearchParams, useRouter} from "expo-router";
 import {useSelector} from "react-redux";
 
 const getUniqueProducts = (products) => {
@@ -17,7 +17,7 @@ const getUniqueProducts = (products) => {
 
 export default function StoreFront(props) {
     const { storeId } = useSelector((state) => state.store);
-
+    const router = useRouter();
     const merchant = useSelector((state) => state.merchant);
     const store = useSelector((state) => state.store);
     console.log('store:', store);
@@ -186,6 +186,9 @@ export default function StoreFront(props) {
                         </Card>
                         <ProductSearch
                             uniqueProducts={uniqueProducts}
+                            onSearchResultPressHandler={(product) => router.push(
+                                `/Main/(tabs)/Products/Product/${product.productId}`,
+                            )}
                             limitedResults={true}
                             resultsLimit={5}
                             initialSearchQuery={""}

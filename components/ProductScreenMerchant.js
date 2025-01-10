@@ -1,39 +1,171 @@
-import { View, StyleSheet, ScrollView, Switch } from "react-native";
+import {View, StyleSheet, ScrollView, Switch, Pressable} from "react-native";
 import {
-  Card,
-  Chip,
-  IconButton,
-  Surface,
-  Text,
-  useTheme,
+    Card,
+    Chip, FAB,
+    IconButton, Menu,
+    Surface,
+    Text,
+    useTheme,
 } from "react-native-paper";
 import FlatListSlider from "./MediaSlider/FlatListSlider";
 import MediaItem from "./MediaSlider/MediaItem";
 import { Rating } from "@kolking/react-native-rating";
 import React, { useState } from "react";
 import {useRouter} from "expo-router";
+import axiosClient from "../api/client";
+import {useDispatch, useSelector} from "react-redux";
+import {useQueryClient} from "react-query";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import GenerateVariantModal from "./GenerateVariantModal";
+import {updateField} from "../store/newProductSlice";
+import MarkAsVariantModal from "./MarkAsVariantModal";
+import CloneProductModal from "./CloneProductModal";
 
 export default function ProductScreenMerchant(props) {
   // const router = useRouter();
   const theme = useTheme();
   const router = useRouter();
+  const dispatch = useDispatch();
   const styles = makeStyles(theme);
-  console.log("props:", props.product.productId);
+  const queryClient = useQueryClient();
+  const {storeId} = useSelector((state) => state.store);
+    const [generateVariantModalVisible, setGenerateVariantModalVisible] = useState(false);
+    const [markAsVariantModalVisible, setMarkAsVariantModalVisible] = useState(false);
+    const [isCloneModalVisible, setIsCloneModalVisible] = useState(false);
+    const [fabOpen, setFabOpen] = useState(false);
+
+    const handleFabToggle = () => setFabOpen(!fabOpen);
   const [isActive, setIsActive] = useState(props.product.isActive);
 
-  const handleStatusChange = (status) => {
-    console.log("status:", status);
-    setIsActive(status);
-    console.log(`Product status changed to: ${status}`);
+  const handleStatusChange = async (status) => {
+      console.log("status:", status);
+      setIsActive(status);
+      await axiosClient.put(`/stores/${storeId}/products/${props.product.productId}/editProduct`, {isActive: status});
+      await queryClient.invalidateQueries(["merchantProduct", storeId, props.product.productId])
+
+      console.log(`Product status changed to: ${status}`);
   };
 
-  // const handleArchive = () => {
+    const handleEditProduct = () => {
+        router.push({
+            pathname: "/Main/(tabs)/EditProduct",
+            params: { productId: props.product.productId },
+        });
+    };
+
+    const handleToggleIsActive = () => {
+        setIsActive(!isActive);
+        console.log(`Product status changed to: ${!isActive}`);
+    };
+
+
+    const handleGenerateVariant = () => {
+        setFabOpen(false);
+        setGenerateVariantModalVisible(true);
+    };
+
+    const handleGenerateVariantModalClose = () => {
+        setGenerateVariantModalVisible(false);
+    };
+
+    const handleGenerateVariantSubmit = (differingAttributes, useSameMedia) => {
+        const updatedAttributes = props.product.attributes.map((attr) => {
+            // Check if the attribute is in differingAttributes
+            const differingAttr = differingAttributes.find((diff) => diff.key === attr.key);
+            return differingAttr ? { key: attr.key, value: differingAttr.value } : attr;
+        });
+        console.log('props.product.productId:', props.product.productId);
+        const prePopulatedData = {
+            ...props.product,
+            collections: props.product.collections.map((c) => c.collectionId),
+            attributes: updatedAttributes,
+            mediaItems: useSameMedia ? props.product.mediaItems : [],
+        };
+        delete prePopulatedData.productId;
+        delete prePopulatedData.variants;
+
+        dispatch(updateField({ field: "all", value: prePopulatedData }));
+        router.push({
+            pathname: "/Main/(tabs)/AddNewProduct",
+            params: {  isNewVariant: true, useSameMedia, parentProductId: props.product.productId, differingAttributes: JSON.stringify(differingAttributes) },
+        });
+        setGenerateVariantModalVisible(false);
+    };
+
+
+    const handleMarkAsVariantProductSelect = (selectedProduct) => {
+        setMarkAsVariantModalVisible(false);
+        // Validate differing attributes and submit to the backend
+        console.log("Selected Product:", selectedProduct);
+
+        const differingAttributes = computeDifferingAttributes(props.product, selectedProduct);
+
+        if (differingAttributes.length === 0) {
+            alert("Products must differ in at least one attribute.");
+            return;
+        }
+
+        // Submit to backend
+        submitMarkAsVariant(props.product.productId, selectedProduct.productId, differingAttributes);
+    };
+
+    const computeDifferingAttributes = (product1, product2) => {
+        const attributes1 =product1.attributes || [];
+        const attributes2 = product2.attributes || [];
+
+        return attributes1.filter(
+            (attr) =>
+                !attributes2.some(
+                    (attr2) => attr.key === attr2.key && attr.value === attr2.value
+                )
+        );
+    };
+
+    const submitMarkAsVariant = async (productId, parentProductId, differingAttributes) => {
+        try {
+            const response = await axiosClient.post(`/stores/${storeId}/products/markAsVariant`, {productId, parentProductId, differingAttributes})
+            await Promise.all([queryClient.invalidateQueries(["merchantProduct", storeId, productId]), queryClient.invalidateQueries(["merchantProduct", storeId, parentProductId]) ])
+        } catch (err) {
+            console.error(err);
+            alert("An error occurred while marking the product as a variant.");
+        }
+    };
+    const handleMarkAsVariant = () => {
+        setFabOpen(false);
+        setMarkAsVariantModalVisible(true);
+        console.log("Mark as Variant of Another Product");
+    };
+
+    const handleCloneProduct = () => {
+        setFabOpen(false);
+        setIsCloneModalVisible(true);
+        console.log("Clone Product");
+    };
+
+    const submitCloneProduct = (useSameMedia) => {
+        const prePopulatedData = {
+            ...props.product,
+            collections: props.product.collections.map((c) => c.collectionId),
+            mediaItems: useSameMedia ? props.product.mediaItems : [],
+        };
+        delete prePopulatedData.productId;
+        delete prePopulatedData.variants;
+
+        dispatch(updateField({ field: "all", value: prePopulatedData }));
+        router.push({
+            pathname: "/Main/(tabs)/AddNewProduct",
+            params: {  isClone: true, useSameMediaForClone: useSameMedia },
+        });
+        setGenerateVariantModalVisible(false);
+    }
+    // const handleArchive = () => {
   //   console.log(`Product ${props.product.productId} archived`);
   // };
 
   console.log("props.product:", props.product);
   // console.log('size:', size);
   return (
+          <View style={styles.container}>
     <ScrollView>
       <Surface
         style={{
@@ -171,6 +303,62 @@ export default function ProductScreenMerchant(props) {
                 </Text>
               </View>
             )}
+              {props.product.variants?.length > 0 &&
+                  <>
+                      <Text variant="titleMedium" style={{marginVertical: 8}}>Variants</Text>
+                      <View
+                          style={{
+                              display: "flex",
+                              flexDirection: "row",
+                              alignItems: "center",
+                              justifyContent: "flex-start",
+                              flexWrap: "wrap",
+                          }}
+                      >
+                          {props.product.variants.map((v) => {
+                              return (
+                                  <Pressable
+                                      key={v.productId}
+                                      style={{
+                                          alignSelf: "flex-start", // Ensures Pressable fits its child
+                                          marginRight: 8, // Adds spacing between Pressables
+                                          marginVertical: 4
+                                      }}
+                                      onPress={() =>
+                                          router.replace("/Main/(tabs)/Products/Product/" + v.productId)
+                                      }
+                                  >
+                                      <View
+                                          style={{
+                                              display: "flex",
+                                              alignItems: "center",
+                                              padding: 8,
+                                              borderRadius: 8,
+                                              backgroundColor: theme.colors.softPrimary,
+                                              borderWidth: 1,
+                                          }}
+                                      >
+                                          {v.differingAttributes.map((a, index) => (
+                                              <View
+                                                  key={index}
+                                                  style={{
+                                                      display: "flex",
+                                                      flexDirection: "row",
+                                                      justifyContent: "flex-start",
+                                                      alignItems: "center",
+                                                  }}
+                                              >
+                                                  <Text variant="titleSmall">{a.key + ": "}</Text>
+                                                  <Text variant="titleSmall">{a.value}</Text>
+                                              </View>
+                                          ))}
+                                      </View>
+                                  </Pressable>
+                              );
+                          })}
+                      </View>
+                  </>
+              }
             <View style={{ marginTop: 10 }}>
               <Text variant={"bodyLarge"} style={{ color: "black" }}>
                 {props.product.description}
@@ -215,6 +403,54 @@ export default function ProductScreenMerchant(props) {
         </Card>
       </Surface>
     </ScrollView>
+              <View style={styles.fabContainer}>
+                  <Menu
+                      visible={fabOpen}
+                      onDismiss={() => setFabOpen(false)}
+                      style={{backgroundColor: theme.colors.softSecondary}}
+                      contentStyle={{backgroundColor: theme.colors.softSecondary}}
+                      mode={'elevated'}
+                      anchor={
+                          <FAB
+                              icon={fabOpen ? "close" : "plus"}
+                              color={'white'}
+                              style={styles.fab}
+                              onPress={handleFabToggle}
+                          />
+                      }
+                  >
+
+                      <Menu.Item onPress={handleCloneProduct} title="Clone Product" leadingIcon={({size, color}) => <MaterialIcons name={'file-copy'} size={size}/>} />
+                      <Menu.Item
+                          onPress={handleGenerateVariant}
+                          title="Generate Variant"
+                          leadingIcon="plus-circle"
+                      />
+                      <Menu.Item
+                          onPress={handleMarkAsVariant}
+                          title="Mark as Variant"
+                          leadingIcon="palette-swatch-variant"
+                      />
+                  </Menu>
+              </View>
+              <GenerateVariantModal
+                  visible={generateVariantModalVisible}
+                  onClose={handleGenerateVariantModalClose}
+                  product={props.product}
+                  onGenerate={handleGenerateVariantSubmit}
+              />
+              <MarkAsVariantModal
+                  visible={markAsVariantModalVisible}
+                  onClose={() => setMarkAsVariantModalVisible(false)}
+                  onProductSelect={handleMarkAsVariantProductSelect}
+              />
+              <CloneProductModal
+                  visible={isCloneModalVisible}
+                  onClose={() => setIsCloneModalVisible(false)}
+                  onConfirm={submitCloneProduct}
+              />
+          </View>
+
   );
 }
 
@@ -304,4 +540,29 @@ const makeStyles = (theme) =>
       backgroundColor: theme.colors.secondary,
       color: theme.colors.white,
     },
+      container: {
+          flex: 1,
+          position: "relative",
+      },
+      scrollView: {
+          flex: 1,
+          paddingHorizontal: 16,
+      },
+      fabContainer: {
+          position: "absolute",
+          bottom: 16,
+          right: 16,
+      },
+      fab: {
+        color: 'white',
+          backgroundColor: theme.colors.secondary, // Adjust the color as needed
+      },
+
+      menu: {
+          position: "absolute",
+          // left: 20,
+          // top: 80,
+          backgroundColor: theme.colors.surface,
+          borderRadius: 8,
+      },
   });

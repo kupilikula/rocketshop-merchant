@@ -5,7 +5,7 @@ import {ProductWorkflowContext} from "../../../../components/ProductWorkflowCont
 import {useSelector} from "react-redux";
 
 export default function AddMediaItems() {
-  const params = useLocalSearchParams();
+  // const params = useLocalSearchParams();
   const {mediaGalleryKey} = useContext(ProductWorkflowContext);
 
 
@@ -16,6 +16,6 @@ export default function AddMediaItems() {
     };
   }, []);
 
-  console.log("params:", params);
+  // console.log("params:", params);
   return <MediaGallery key ={mediaGalleryKey}/>;
 }

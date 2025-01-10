@@ -1,5 +1,6 @@
 import React from "react";
-import { ActivityIndicator, Text, View, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+import {Text, ActivityIndicator} from 'react-native-paper';
 import {useLocalSearchParams} from "expo-router";
 import { useSelector } from "react-redux"; // To get storeId from Redux
 import { useStoreProduct } from "../../../../../api/hooks/useStoreProduct";
@@ -15,7 +16,6 @@ const ProductPage = () => {
     return (
         <View style={styles.container}>
           <ActivityIndicator size="large" color="#0000ff" />
-          <Text style={styles.loadingText}>Loading product details...</Text>
         </View>
     );
   }
@@ -29,7 +29,7 @@ const ProductPage = () => {
         </View>
     );
   }
-  console.log('product:', product);
+  // console.log('product.variants[0]:', product.variants[0].differingAttributes);
   return (
       <ProductScreenMerchant product={product} showProductDescription={true} />
   );

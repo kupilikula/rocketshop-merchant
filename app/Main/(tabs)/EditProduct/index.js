@@ -23,6 +23,7 @@ const EditProduct = () => {
     if (productId) {
       let modifiedData  = _.cloneDeep(productData);
       modifiedData.collections = modifiedData.collections.map((c) => c.collectionId);
+      delete modifiedData.variants;
       console.log('mod:', modifiedData);
       dispatch(updateEditProductField({field: "all", value: modifiedData}));
       router.replace(
