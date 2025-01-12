@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { StyleSheet, Pressable, View } from "react-native";
 import {Image} from 'expo-image';
 import { useVideoPlayer, VideoView } from "expo-video";
@@ -20,16 +20,23 @@ export default function MediaItem({
   scrollToIndex,
 }) {
   // Initialize video player and event hook unconditionally
-  const videoPlayer = useVideoPlayer(
-    item.mediaType === "video" ? item.uri : null,
-    (player) => {
-      // Optional setup for the player
-    },
-  );
+  const videoPlayer = item.mediaType === "video" && item.uri
+      ? useVideoPlayer(item.uri)
+      : null;
 
-  const { isPlaying } = useEvent(videoPlayer, "playingChange", {
-    isPlaying: videoPlayer ? videoPlayer.playing : false,
-  });
+  useEffect(() => {
+    return () => {
+      if (videoPlayer) {
+        videoPlayer.dispose(); // Ensure player cleanup
+      }
+    };
+  }, [videoPlayer]);
+
+  // Hook into videoPlayer events only if it exists
+  const { isPlaying } = videoPlayer ? useEvent(videoPlayer, "playingChange", {
+    isPlaying: videoPlayer?.playing || false,
+  }) : { isPlaying: false };
+
 
   const playVideo = () => {
     if (item.mediaType === "video") {

@@ -17,7 +17,7 @@ export default function TabsComponent() {
         animation: "fade",
         tabBarStyle: {
           backgroundColor: "white",
-          paddingBottom: Platform.OS==='android' ? 80 : 0,
+          paddingBottom: Platform.OS==='android' ? 70 : 0,
           paddingTop: 3,
         },
         tabBarActiveTintColor: theme.colors.secondary,
