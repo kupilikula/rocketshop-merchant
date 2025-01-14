@@ -4,19 +4,20 @@
     "slug": "merchant",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/PocketShopIconOrange.png",
     "scheme": "myapp",
     "sdkVersion": "52.0.0",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kadai.merchant"
+      "bundleIdentifier": "com.kadai.merchant",
+      "icon": "./assets/images/PocketShopIconOrangeIOS.png"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/PocketShopIconOrangeAndroid.png",
+        "backgroundColor": "#FF6F59"
       },
       "package": "com.kadai.merchant"
     },

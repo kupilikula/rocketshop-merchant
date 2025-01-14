@@ -57,7 +57,8 @@ export default function EditPreview(props) {
                 setPublishFailure(true);
             } else {
                 setTimeout(async () => {
-                    await queryClient.invalidateQueries(["merchantProduct", storeId, editProduct.productId])
+                    await queryClient.invalidateQueries(["merchantProduct", storeId, editProduct.productId]);
+                    await queryClient.invalidateQueries("storeProducts");
                     router.replace('/Main/(tabs)/Products/Product/' + editProduct.productId);
                     resetWorkflow()
                 }, 2000);

@@ -153,7 +153,8 @@ export default function Preview(props) {
                             }, 2000);
                         } else {
                             setTimeout(async () => {
-                                await queryClient.invalidateQueries(["merchantProduct", storeId, newProduct.productId])
+                                await queryClient.invalidateQueries(["merchantProduct", storeId, newProduct.productId]);
+                                await queryClient.invalidateQueries("storeProducts");
                                 router.replace('/Main/(tabs)/Products/Product/' + newProduct.productId);
                                 resetWorkflow()
                             }, 2000);
