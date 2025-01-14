@@ -10,6 +10,7 @@ import ProductSearch from "../../../../components/ProductSearch";
 import StoreFrontCollectionCard from "../../../../components/StoreFrontCollectionCard";
 import {useLocalSearchParams, useRouter} from "expo-router";
 import {useSelector} from "react-redux";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const getUniqueProducts = (products) => {
     return [...new Set(products)];
@@ -169,17 +170,23 @@ export default function StoreFront(props) {
                                             " Collections"}
                                     </Text>
                                 </View>
+                                <View>
+                                    <Text variant={"titleMedium"} style={{ color: textColor }}>
+                                        {storeFrontData.followerCount +
+                                            " Followers"}
+                                    </Text>
+                                </View>
                                 <View style={{ marginTop: 10 }}>
                                     <Button
                                         mode={"elevated"}
                                         elevation={5}
                                         buttonColor={"white"}
                                         textColor={"black"}
-                                        style={{ borderRadius: 5 }}
-                                        labelStyle={{ fontSize: 18 }}
-                                        onPress={onFollowButtonPress}
+                                        style={{borderRadius: 8}}
+                                        icon={({size, color}) => <MaterialIcons name={'settings'} size={size}/>}
+                                        onPress={() => {}}
                                     >
-                                        Follow
+                                        Settings
                                     </Button>
                                 </View>
                             </View>
