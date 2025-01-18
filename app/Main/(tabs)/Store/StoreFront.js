@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ScrollView, View } from "react-native";
+import {Pressable, ScrollView, View} from "react-native";
 import { Image } from "expo-image";
 import { Button, Card, Surface, Text } from "react-native-paper";
 import { foregroundColor } from "../../../../utils/foregroundColor";
@@ -171,10 +171,12 @@ export default function StoreFront(props) {
                                     </Text>
                                 </View>
                                 <View>
+                                    <Pressable onPress={() => router.push('./FollowersList')}>
                                     <Text variant={"titleMedium"} style={{ color: textColor }}>
                                         {storeFrontData.followerCount +
                                             " Followers"}
                                     </Text>
+                                    </Pressable>
                                 </View>
                                 <View style={{ marginTop: 10 }}>
                                     <Button

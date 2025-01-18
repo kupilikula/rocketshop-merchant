@@ -7,11 +7,24 @@ import {useRouter} from "expo-router";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {ProductWorkflowContext} from "@/components/ProductWorkflowContext";
 
+const headerTitle = (isNewProduct, isNewVariant, isClone) => {
+
+    if (isNewVariant) {
+        return 'New Variant Info';
+    } else if (isClone) {
+        return 'New Clone Info';
+    } else if (isNewProduct) {
+        return 'New Product Info';
+    } else {
+        return 'Edit Product Info';
+    }
+}
+
 const ProductInfoHeader = (props) => {
 
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const {isNewProduct, productInfoFormRef} = useContext(ProductWorkflowContext);
+    const {isNewProduct, isNewVariant, isClone, productInfoFormRef} = useContext(ProductWorkflowContext);
     const onSubmit = () => {
         if (productInfoFormRef.current) {
             productInfoFormRef.current.submitForm(); // Call the exposed method
@@ -49,7 +62,7 @@ const ProductInfoHeader = (props) => {
                 <View/>
             }
             <Text variant={"titleLarge"} style={{ color: "black" }}>
-                Product Info
+                {headerTitle(isNewProduct, isNewVariant, isClone)}
             </Text>
             <Pressable onPressIn={onSubmit}>
                 <MaterialIcons

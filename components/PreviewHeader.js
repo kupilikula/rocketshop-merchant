@@ -7,9 +7,21 @@ import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {useContext} from "react";
 import {ProductWorkflowContext} from "@/components/ProductWorkflowContext";
 
+const headerTitle = (isNewProduct, isNewVariant, isClone) => {
+
+    if (isNewVariant) {
+        return 'New Variant Preview';
+    } else if (isClone) {
+        return 'New Clone Preview';
+    } else if (isNewProduct) {
+        return 'New Product Preview';
+    } else {
+        return 'Edited Product Preview';
+    }
+}
 const PreviewHeader = () => {
 
-    const {isNewProduct, productPreviewPublishRef, isPublishing, published, publishFailure} = useContext(ProductWorkflowContext);
+    const {isNewProduct, isNewVariant, isClone, productPreviewPublishRef, isPublishing, published, publishFailure} = useContext(ProductWorkflowContext);
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const theme = useTheme();
@@ -52,19 +64,9 @@ const PreviewHeader = () => {
                 <View/>
             }
             <Text variant={"titleLarge"} style={{ color: "black" }}>
-                Product Preview
+                {headerTitle(isNewProduct, isNewVariant, isClone)}
             </Text>
-            {!isPublishing && !published && !publishFailure && isNewProduct ?
-            <Button
-                onPress={onPublish}
-                mode={"contained"}
-                style={{ borderRadius: 8, backgroundColor: theme.colors.success }}
-            >
-                Publish
-            </Button>
-                :
-                <View/>
-            }
+            <View/>
         </View>
     );
 };

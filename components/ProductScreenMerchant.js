@@ -166,7 +166,7 @@ export default function ProductScreenMerchant(props) {
   // console.log('size:', size);
   return (
           <View style={styles.container}>
-    <ScrollView>
+              <ScrollView contentContainerStyle={{flexGrow: 1}}>
       <Surface
         style={{
           flex: 1,

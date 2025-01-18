@@ -11,7 +11,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kadai.merchant",
+      "bundleIdentifier": "com.pocketshop.merchant",
       "icon": "./assets/images/PocketShopIconOrangeIOS.png"
     },
     "android": {
@@ -19,7 +19,7 @@
         "foregroundImage": "./assets/images/PocketShopIconOrangeAndroid.png",
         "backgroundColor": "#FF6F59"
       },
-      "package": "com.kadai.merchant"
+      "package": "com.pocketshop.merchant"
     },
     "web": {
       "bundler": "metro",

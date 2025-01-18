@@ -13,6 +13,7 @@ import * as MediaLibrary from "expo-media-library";
 import * as ImageManipulator from 'expo-image-manipulator';
 import _ from "lodash";
 import {ProductWorkflowContext} from "../../../../components/ProductWorkflowContext";
+import {useQueryClient} from "react-query";
 
 const convertHeicToJpg = async (uri) => {
     try {
@@ -35,7 +36,7 @@ export default function Preview(props) {
     const storeId = useSelector((state) => state.store.storeId); // Access the storeId from Redux
     const {isNewVariant, variantInfo, isClone, useSameMediaForClone, resetWorkflow, productPreviewPublishRef, isPublishing, setIsPublishing, published, setPublished, publishFailure, setPublishFailure, setShouldResetStack, mediaGalleryKey, setMediaGalleryKey} = useContext(ProductWorkflowContext);
     const navigation = useNavigation();
-
+    const queryClient = useQueryClient();
     const resetNavigationStack = (route) => {
         // Reset the navigation stack to the Dashboard tab
         navigation.dispatch(CommonActions.reset({
@@ -135,40 +136,29 @@ export default function Preview(props) {
         }
     }
 
-    useEffect(() => {
-        // Attach the `handleSubmit` method to the ref passed in initialParams
-        if (productPreviewPublishRef) {
-            productPreviewPublishRef.current = {
-                publish: () => {
-                    console.log('207 publish');
-                    setIsPublishing(true);
-                    publishProduct().then((success) => {
-                        setIsPublishing(false);
-                        setPublished(success);
-                        if (!success) {
-                            setPublishFailure(true);
-                            setTimeout(() => {
-                                resetWorkflow();
-                                router.replace('/Main/(tabs)/Dashboard');
-                            }, 2000);
-                        } else {
-                            setTimeout(async () => {
-                                await queryClient.invalidateQueries(["merchantProduct", storeId, newProduct.productId]);
-                                await queryClient.invalidateQueries("storeProducts");
-                                router.replace('/Main/(tabs)/Products/Product/' + newProduct.productId);
-                                resetWorkflow()
-                            }, 2000);
+    const publish = () => {
+        console.log('207 publish');
+        setIsPublishing(true);
+        publishProduct().then((success) => {
+            setIsPublishing(false);
+            setPublished(success);
+            if (!success) {
+                setPublishFailure(true);
+                setTimeout(() => {
+                    resetWorkflow();
+                    router.replace('/Main/(tabs)/Dashboard');
+                }, 2000);
+            } else {
+                setTimeout(async () => {
+                    await queryClient.invalidateQueries(["merchantProduct", storeId, newProduct.productId]);
+                    await queryClient.invalidateQueries("storeProducts");
+                    router.replace('/Main/(tabs)/Products/Product/' + newProduct.productId);
+                    resetWorkflow()
+                }, 2000);
 
-                        }
-
-
-
-                    });
-                },
-                // isPublishing: isPublishing
-            };
-        }
-    }, [productPreviewPublishRef]);
+            }
+        });
+    }
 
     const saveAsDraft = () => {
         // save draft
@@ -247,13 +237,11 @@ export default function Preview(props) {
                         Discard
                     </Button>
                     <Button
-                        onPress={saveAsDraft}
-                        mode={"outlined"}
-                        style={{
-                            borderRadius: 8, borderWidth: 2, borderColor: theme.colors.primary,
-                        }}
+                        onPress={publish}
+                        mode={"contained"}
+                        style={{ borderRadius: 8, backgroundColor: theme.colors.success }}
                     >
-                        Save As Draft
+                        Publish
                     </Button>
                 </View>}
                 <ProductDisplayCardCustomerStore

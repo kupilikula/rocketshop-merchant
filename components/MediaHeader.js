@@ -10,13 +10,24 @@ import {useDispatch} from "react-redux";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {ProductWorkflowContext} from "@/components/ProductWorkflowContext";
 
+const headerTitle = (isNewProduct, isNewVariant, isClone) => {
+
+    if (isNewVariant) {
+        return 'New Variant Media';
+    } else if (isClone) {
+        return 'New Clone Media';
+    } else if (isNewProduct) {
+        return 'New Product Media';
+    }
+}
+
 const MediaHeader = () => {
 
     const navigation = useNavigation();
     const dispatch = useDispatch();
     const router = useRouter();
     const insets = useSafeAreaInsets();
-    const {isCameraOpen, isMediaSelected} = useContext(ProductWorkflowContext);
+    const {isNewProduct, isNewVariant, isClone, isCameraOpen, isMediaSelected} = useContext(ProductWorkflowContext);
 
     const resetNavigationStack = useCallback(() => {
         // Reset the navigation stack to the Dashboard tab
@@ -67,12 +78,12 @@ const MediaHeader = () => {
                 <Text
                     variant="titleLarge"
                     style={{
-                        flex: 2, // Allow the title to occupy its space while centering
+                        flex: 3, // Allow the title to occupy its space while centering
                         textAlign: "center",
                         color: "white",
                     }}
                 >
-                    Product Media
+                    {headerTitle(isNewProduct, isNewVariant, isClone)}
                 </Text>
 
                 {/* Right Icon (Forward Button) */}
