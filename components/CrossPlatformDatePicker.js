@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { Portal, Modal, Text, Button } from 'react-native-paper';
 import DatePicker from 'react-native-date-picker';
@@ -11,8 +11,22 @@ const CrossPlatformDatePicker = ({
                                      theme,
                                  }) => {
     const [visible, setVisible] = useState(false);
-    const [selectedDate, setSelectedDate] = useState(initialDate);
+    const [selectedDate, setSelectedDate] = useState(() => {
+        return initialDate instanceof Date ? initialDate : new Date();
+    });
 
+    useEffect(() => {
+        if (initialDate instanceof Date) {
+            console.log('line20, initialdate:', initialDate);
+            setSelectedDate(initialDate);
+        }
+    }, [initialDate]);
+    console.log('initialDate:', initialDate);
+    console.log('typeof iD:', typeof initialDate);
+    console.log('instanceof iD:', initialDate instanceof Date);
+    console.log('!nan iD:', !isNaN(initialDate));
+    console.log('selectedDate:', selectedDate);
+    console.log('selectedDate.toLS:', selectedDate.toLocaleDateString());
     const openModal = () => setVisible(true);
     const closeModal = () => setVisible(false);
 

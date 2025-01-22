@@ -15,7 +15,6 @@ import {
     Surface,
     Switch,
 } from "react-native-paper";
-// import DatePicker from "@react-native-community/datetimepicker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ProductPickerModal from "../../../../../components/ProductPickerModal";
 import CollectionPickerModal from "../../../../../components/CollectionPickerModal";
@@ -23,6 +22,7 @@ import TagPickerModal from "../../../../../components/TagPickerModal";
 import { useOffer } from "../../../../../api/hooks/useOffer";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import {useSelector} from "react-redux";
+import CrossPlatformDatePicker from "../../../../../components/CrossPlatformDatePicker";
 
 const PublishOfferScreen = () => {
     const theme = useTheme();
@@ -40,7 +40,7 @@ const PublishOfferScreen = () => {
     const [discountDetails, setDiscountDetails] = useState({});
     const [applicableTo, setApplicableTo] = useState({});
     const [conditions, setConditions] = useState({});
-    const [validityDateRange, setValidityDateRange] = useState({});
+    const [validityDateRange, setValidityDateRange] = useState({validFrom: new Date(), validUntil: new Date()});
     const [offerStatus, setOfferStatus] = useState(false);
 
     const [showStartDatePicker, setShowStartDatePicker] = useState(false);
@@ -55,6 +55,7 @@ const PublishOfferScreen = () => {
 
     useEffect(() => {
         if (offer) {
+            console.log('line59:', offer.validityDateRange);
             setOfferType(offer.offerType);
             setOfferName(offer.offerName);
             setOfferDescription(offer.offerDescription);
@@ -114,6 +115,7 @@ const PublishOfferScreen = () => {
         // });
     };
 
+    console.log('validityDateRange:', validityDateRange);
     if (isLoading) {
         return (
             <Surface style={styles.container}>
@@ -191,19 +193,24 @@ const PublishOfferScreen = () => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Validity</Text>
             <View style={styles.dateRow}>
-              <TouchableOpacity
-                onPress={() => setShowStartDatePicker(true)}
-                style={styles.dateInput}
-              >
-                <MaterialCommunityIcons
-                  name="calendar"
-                  size={20}
-                  color={theme.colors.primary}
+                <CrossPlatformDatePicker
+                    label="Valid From"
+                    initialDate={new Date(validityDateRange.validFrom)}
+                    onDateChange={(newDate) => setValidityDateRange((prev) => ({ ...prev, validFrom: newDate }))}
                 />
-                <Text style={styles.dateText}>
-                  {new Date(validityDateRange.validFrom).toLocaleDateString() || "Start Date"}
-                </Text>
-              </TouchableOpacity>
+              {/*<TouchableOpacity*/}
+              {/*  onPress={() => setShowStartDatePicker(true)}*/}
+              {/*  style={styles.dateInput}*/}
+              {/*>*/}
+              {/*  <MaterialCommunityIcons*/}
+              {/*    name="calendar"*/}
+              {/*    size={20}*/}
+              {/*    color={theme.colors.primary}*/}
+              {/*  />*/}
+              {/*  <Text style={styles.dateText}>*/}
+              {/*    {new Date(validityDateRange.validFrom).toLocaleDateString() || "Start Date"}*/}
+              {/*  </Text>*/}
+              {/*</TouchableOpacity>*/}
               {/*{showStartDatePicker && (*/}
               {/*  <DatePicker*/}
               {/*    mode="date"*/}
@@ -216,20 +223,25 @@ const PublishOfferScreen = () => {
               {/*  />*/}
               {/*)}*/}
 
-              <TouchableOpacity
-                onPress={() => setShowEndDatePicker(true)}
-                style={styles.dateInput}
-              >
-                <MaterialCommunityIcons
-                  name="calendar"
-                  size={20}
-                  color={theme.colors.primary}
+                <CrossPlatformDatePicker
+                    label="Valid Until"
+                    initialDate={new Date(validityDateRange.validUntil)}
+                    onDateChange={(newDate) => setValidityDateRange((prev) => ({ ...prev, validUntil: newDate }))}
                 />
-                <Text style={styles.dateText}>
-                  {new Date(validityDateRange.validUntil).toLocaleDateString()
-                    || "End Date"}
-                </Text>
-              </TouchableOpacity>
+              {/*<TouchableOpacity*/}
+              {/*  onPress={() => setShowEndDatePicker(true)}*/}
+              {/*  style={styles.dateInput}*/}
+              {/*>*/}
+              {/*  <MaterialCommunityIcons*/}
+              {/*    name="calendar"*/}
+              {/*    size={20}*/}
+              {/*    color={theme.colors.primary}*/}
+              {/*  />*/}
+              {/*  <Text style={styles.dateText}>*/}
+              {/*    {new Date(validityDateRange.validUntil).toLocaleDateString()*/}
+              {/*      || "End Date"}*/}
+              {/*  </Text>*/}
+              {/*</TouchableOpacity>*/}
               {/*{showEndDatePicker && (*/}
               {/*  <DatePicker*/}
               {/*    mode="date"*/}
