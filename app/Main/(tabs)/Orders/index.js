@@ -436,7 +436,7 @@ const Orders = () => {
                   >
                     <CrossPlatformDatePicker
                         label="Start Date"
-                        initialDate={filterDates.endDate}
+                        initialDate={filterDates.startDate}
                         onDateChange={(newDate) => handleStartDateChange(newDate)}
                     />
                   </View>

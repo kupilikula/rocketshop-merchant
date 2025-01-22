@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
-import { Portal, Modal, Text, Button } from 'react-native-paper';
+import { View, StyleSheet, TouchableOpacity, Platform, } from 'react-native';
+import { Portal,  Text, Button, Modal } from 'react-native-paper';
 import DatePicker from 'react-native-date-picker';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -55,6 +55,7 @@ const CrossPlatformDatePicker = ({
                     visible={visible}
                     onDismiss={closeModal}
                     contentContainerStyle={styles.modalContainer}
+                    dismissable={false}
                 >
                     <View style={styles.pickerWrapper}>
                         <DatePicker

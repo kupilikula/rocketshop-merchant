@@ -193,66 +193,32 @@ const PublishOfferScreen = () => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Validity</Text>
             <View style={styles.dateRow}>
+                <View
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        flex: 0.48,
+                    }}
+                >
                 <CrossPlatformDatePicker
                     label="Valid From"
                     initialDate={new Date(validityDateRange.validFrom)}
                     onDateChange={(newDate) => setValidityDateRange((prev) => ({ ...prev, validFrom: newDate }))}
                 />
-              {/*<TouchableOpacity*/}
-              {/*  onPress={() => setShowStartDatePicker(true)}*/}
-              {/*  style={styles.dateInput}*/}
-              {/*>*/}
-              {/*  <MaterialCommunityIcons*/}
-              {/*    name="calendar"*/}
-              {/*    size={20}*/}
-              {/*    color={theme.colors.primary}*/}
-              {/*  />*/}
-              {/*  <Text style={styles.dateText}>*/}
-              {/*    {new Date(validityDateRange.validFrom).toLocaleDateString() || "Start Date"}*/}
-              {/*  </Text>*/}
-              {/*</TouchableOpacity>*/}
-              {/*{showStartDatePicker && (*/}
-              {/*  <DatePicker*/}
-              {/*    mode="date"*/}
-              {/*    value={new Date(validityDateRange.validFrom) || new Date()}*/}
-              {/*    onChange={(event, date) => {*/}
-              {/*      setShowStartDatePicker(false);*/}
-              {/*      if (date)*/}
-              {/*        setValidityDateRange((prev) => ({ ...prev, validFrom: date }));*/}
-              {/*    }}*/}
-              {/*  />*/}
-              {/*)}*/}
-
+                </View>
+                <View
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        flex: 0.48,
+                    }}
+                >
                 <CrossPlatformDatePicker
                     label="Valid Until"
                     initialDate={new Date(validityDateRange.validUntil)}
                     onDateChange={(newDate) => setValidityDateRange((prev) => ({ ...prev, validUntil: newDate }))}
                 />
-              {/*<TouchableOpacity*/}
-              {/*  onPress={() => setShowEndDatePicker(true)}*/}
-              {/*  style={styles.dateInput}*/}
-              {/*>*/}
-              {/*  <MaterialCommunityIcons*/}
-              {/*    name="calendar"*/}
-              {/*    size={20}*/}
-              {/*    color={theme.colors.primary}*/}
-              {/*  />*/}
-              {/*  <Text style={styles.dateText}>*/}
-              {/*    {new Date(validityDateRange.validUntil).toLocaleDateString()*/}
-              {/*      || "End Date"}*/}
-              {/*  </Text>*/}
-              {/*</TouchableOpacity>*/}
-              {/*{showEndDatePicker && (*/}
-              {/*  <DatePicker*/}
-              {/*    mode="date"*/}
-              {/*    value={new Date(validityDateRange.validUntil) || new Date()}*/}
-              {/*    onChange={(event, date) => {*/}
-              {/*      setShowEndDatePicker(false);*/}
-              {/*      if (date)*/}
-              {/*        setValidityDateRange((prev) => ({ ...prev, validUntil: date }));*/}
-              {/*    }}*/}
-              {/*  />*/}
-              {/*)}*/}
+                </View>
             </View>
           </View>
 
