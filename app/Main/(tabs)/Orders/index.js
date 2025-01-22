@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { FlatList, View, StyleSheet, TouchableOpacity } from "react-native";
+import {FlatList, View, StyleSheet, TouchableOpacity, Platform, Modal} from "react-native";
 import {
   Card,
   Text,
@@ -20,8 +20,8 @@ import {
   orderStatusColors,
   orderStatusList,
 } from "../../../../utils/dataValues";
-import DatePicker from "@react-native-community/datetimepicker";
 import { List } from "react-native-paper";
+import CrossPlatformDatePicker from "../../../../components/CrossPlatformDatePicker";
 
 const Orders = () => {
   const router = useRouter();
@@ -150,6 +150,25 @@ const Orders = () => {
   //   );
   //   setOrders(updatedOrders);
   // };
+
+  const handleStartDateChange = (date) => {
+    // setShowStartPicker(false); // Close picker
+    if (date) {
+      setFilterDates((prev) => ({
+        ...prev,
+        startDate: date,
+      }));
+    }
+  };
+  const handleEndDateChange = (date) => {
+    // setShowStartPicker(false); // Close picker
+    if (date) {
+      setFilterDates((prev) => ({
+        ...prev,
+        endDate: date,
+      }));
+    }
+  };
 
   const renderOrderItem = ({ item }) => (
     <Card
@@ -415,39 +434,12 @@ const Orders = () => {
                       flex: 0.48,
                     }}
                   >
-                    <Text variant={"bodySmall"}>Start Date</Text>
-                    <TouchableOpacity
-                      onPress={() => setShowStartPicker(true)}
-                      style={styles.dateInput}
-                    >
-                      <MaterialCommunityIcons
-                        name="calendar"
-                        size={20}
-                        color={theme.colors.primary}
-                      />
-                      <Text style={styles.dateText}>
-                        {filterDates.startDate
-                          ? filterDates.startDate.toLocaleDateString()
-                          : "Start Date"}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  {showStartPicker && (
-                    <DatePicker
-                      style={{ backgroundColor: theme.colors.primary }}
-                      accentColor={theme.colors.primary}
-                      mode="date"
-                      value={filterDates.startDate || new Date()}
-                      onChange={(event, date) => {
-                        setShowStartPicker(false);
-                        if (date)
-                          setFilterDates((prev) => ({
-                            ...prev,
-                            startDate: date,
-                          }));
-                      }}
+                    <CrossPlatformDatePicker
+                        label="Start Date"
+                        initialDate={filterDates.endDate}
+                        onDateChange={(newDate) => handleStartDateChange(newDate)}
                     />
-                  )}
+                  </View>
                   <View
                     style={{
                       display: "flex",
@@ -455,38 +447,13 @@ const Orders = () => {
                       flex: 0.48,
                     }}
                   >
-                    <Text variant={"bodySmall"}>Stop Date</Text>
-                    <TouchableOpacity
-                      onPress={() => setShowEndPicker(true)}
-                      style={styles.dateInput}
-                    >
-                      <MaterialCommunityIcons
-                        name="calendar"
-                        size={20}
-                        color={theme.colors.primary}
-                      />
-                      <Text style={styles.dateText}>
-                        {filterDates.endDate
-                          ? filterDates.endDate.toLocaleDateString()
-                          : "End Date"}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  {showEndPicker && (
-                    <DatePicker
-                      mode="date"
-                      value={filterDates.endDate || new Date()}
-                      onChange={(event, date) => {
-                        setShowEndPicker(false);
-                        if (date)
-                          setFilterDates((prev) => ({
-                            ...prev,
-                            endDate: date,
-                          }));
-                      }}
+                    <CrossPlatformDatePicker
+                        label="End Date"
+                        initialDate={filterDates.endDate}
+                        onDateChange={(newDate) => handleEndDateChange(newDate)}
                     />
-                  )}
                 </View>
+              </View>
               </View>
 
               <View style={{ marginHorizontal: 10 }}>
@@ -760,6 +727,42 @@ const makeStyles = ({ colors }) =>
       color: "#333",
       marginLeft: 8, // Space between the icon and the text
       fontWeight: "500",
+    },
+    dateInput: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 8,
+      padding: 8,
+    },
+    dateText: {
+      marginLeft: 8,
+      fontSize: 16,
+    },
+    modalContainer: {
+      flex: 1,
+      justifyContent: 'flex-end', // Align at the bottom
+      backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent background
+    },
+    pickerContainer: {
+      backgroundColor: '#fff',
+      borderTopLeftRadius: 16,
+      borderTopRightRadius: 16,
+      padding: 16,
+    },
+    doneButton: {
+      marginTop: 16,
+      backgroundColor: '#007AFF',
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 5,
+      alignSelf: 'center',
+    },
+    doneText: {
+      color: '#fff',
+      fontWeight: 'bold',
+      fontSize: 16,
     },
   });
 export default Orders;

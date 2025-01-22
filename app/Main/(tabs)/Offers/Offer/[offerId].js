@@ -15,7 +15,7 @@ import {
     Surface,
     Switch,
 } from "react-native-paper";
-import DatePicker from "@react-native-community/datetimepicker";
+// import DatePicker from "@react-native-community/datetimepicker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ProductPickerModal from "../../../../../components/ProductPickerModal";
 import CollectionPickerModal from "../../../../../components/CollectionPickerModal";
@@ -204,17 +204,17 @@ const PublishOfferScreen = () => {
                   {new Date(validityDateRange.validFrom).toLocaleDateString() || "Start Date"}
                 </Text>
               </TouchableOpacity>
-              {showStartDatePicker && (
-                <DatePicker
-                  mode="date"
-                  value={new Date(validityDateRange.validFrom) || new Date()}
-                  onChange={(event, date) => {
-                    setShowStartDatePicker(false);
-                    if (date)
-                      setValidityDateRange((prev) => ({ ...prev, validFrom: date }));
-                  }}
-                />
-              )}
+              {/*{showStartDatePicker && (*/}
+              {/*  <DatePicker*/}
+              {/*    mode="date"*/}
+              {/*    value={new Date(validityDateRange.validFrom) || new Date()}*/}
+              {/*    onChange={(event, date) => {*/}
+              {/*      setShowStartDatePicker(false);*/}
+              {/*      if (date)*/}
+              {/*        setValidityDateRange((prev) => ({ ...prev, validFrom: date }));*/}
+              {/*    }}*/}
+              {/*  />*/}
+              {/*)}*/}
 
               <TouchableOpacity
                 onPress={() => setShowEndDatePicker(true)}
@@ -230,17 +230,17 @@ const PublishOfferScreen = () => {
                     || "End Date"}
                 </Text>
               </TouchableOpacity>
-              {showEndDatePicker && (
-                <DatePicker
-                  mode="date"
-                  value={new Date(validityDateRange.validUntil) || new Date()}
-                  onChange={(event, date) => {
-                    setShowEndDatePicker(false);
-                    if (date)
-                      setValidityDateRange((prev) => ({ ...prev, validUntil: date }));
-                  }}
-                />
-              )}
+              {/*{showEndDatePicker && (*/}
+              {/*  <DatePicker*/}
+              {/*    mode="date"*/}
+              {/*    value={new Date(validityDateRange.validUntil) || new Date()}*/}
+              {/*    onChange={(event, date) => {*/}
+              {/*      setShowEndDatePicker(false);*/}
+              {/*      if (date)*/}
+              {/*        setValidityDateRange((prev) => ({ ...prev, validUntil: date }));*/}
+              {/*    }}*/}
+              {/*  />*/}
+              {/*)}*/}
             </View>
           </View>
 

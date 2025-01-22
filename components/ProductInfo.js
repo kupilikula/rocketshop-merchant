@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef, useCallback, forwardRef, useImperativeHandle, useContext} from "react";
 import {
-    View, StyleSheet, TouchableOpacity, ScrollView, Switch,
+    View, StyleSheet, TouchableOpacity, ScrollView, Switch, TextInput as RNTextInput
 } from "react-native";
 import {
     TextInput, Button, Text, IconButton, useTheme, Checkbox, Menu, Chip, Surface,
@@ -432,7 +432,7 @@ const ProductInfoScreen = (props) => {
                                     onBlur={onBlur}
                                     onChangeText={onChange}
                                     style={[styles.halfWidthInput, {marginRight: 8}]}
-                                    keyboardType="numeric"
+                                    inputMode={'numeric'}
                                     error={!!errors.price}
                                 />)}
                         />
@@ -448,7 +448,7 @@ const ProductInfoScreen = (props) => {
                                 onBlur={onBlur}
                                 onChangeText={onChange}
                                 style={[styles.halfWidthInput, {marginRight: 8}]}
-                                keyboardType="numeric"
+                                inputMode={'numeric'}
                                 error={!!errors.price}
                             />)}}
                         />
@@ -494,7 +494,6 @@ const ProductInfoScreen = (props) => {
                                 </Menu>)}
                         />
                     </View>
-
                     <Controller
                         name="description"
                         control={control}

@@ -1,7 +1,8 @@
 export const orderStatusList = [
-  "Order Placed", // Order has been placed by the customer
-  "Payment Pending", // Payment is not yet confirmed
+  "Order Created", // Order has been placed by the customer
+  "Payment Initiated", // Payment is not yet confirmed
   "Payment Received", // Payment has been successfully processed
+  "Payment Failed", // Payment has been successfully processed
   "Processing", // Order is being prepared
   "Ready for Pickup", // For pickup orders, when ready at the store
   "Awaiting Shipment", // Order is packed but not shipped
@@ -17,9 +18,10 @@ export const orderStatusList = [
 ];
 
 export const orderStatusColors = {
-  "Order Placed": "#E3F2FD", // Soft Primary Blue
-  "Payment Pending": "#FFBE0B", // Warning Gold
+  "Order Created": "#E3F2FD", // Soft Primary Blue
+  "Payment Initiated": "#FFBE0B", // Warning Gold
   "Payment Received": "#DFF3E2", // Soft Success Green
+  "Payment Failed": "#D72638", // Soft Success Green
   Processing: "#FFF9C4", // Light Yellow (neutral)
   "Ready for Pickup": "#FFD180", // Soft Orange (pickup indicator)
   "Awaiting Shipment": "#FFE0B2", // Pale Orange
