@@ -1,8 +1,7 @@
 import axios from "axios";
-import {store} from '../store/store';
+import {store} from '@/store/store';
 // Base URL for the Merchant App Backend
-const BASE_URL = "https://api.merchant.pocketshop.in"; // Replace with your actual backend URL
-
+export const BASE_URL = "https://api.merchant.pocketshop.in"; // Replace with your actual backend URL
 // Function to retrieve the JWT (update this function as per your auth setup)
 // const getJWT = () => {
 //     // Replace with your logic to retrieve the JWT (e.g., from localStorage, AsyncStorage, Redux store, etc.)
@@ -25,7 +24,7 @@ axiosClient.interceptors.request.use(
         const state = store.getState();
         // const token = getJWT();
         // if (token) {
-            config.headers.Authorization = state.merchant.merchantId;
+            config.headers.Authorization = 'merchantId=' + state.merchant.merchantId;
         // }
         return config;
     },
