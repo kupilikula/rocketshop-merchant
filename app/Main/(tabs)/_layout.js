@@ -15,6 +15,7 @@ export default function TabsComponent() {
         header: () => null,
         tabBarShowLabel: false,
         animation: "fade",
+          tabBarHideOnKeyboard: true,
         tabBarStyle: {
           backgroundColor: "white",
           paddingBottom: Platform.OS==='android' ? 70 : 0,

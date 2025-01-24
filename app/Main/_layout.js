@@ -39,6 +39,7 @@ export default function Layout() {
             pathName.startsWith("/Main/Orders/Order") ||
             pathName.startsWith("/Main/Collections/Collection") ||
             pathName.startsWith("/Main/Customers/Customer") ||
+            pathName.startsWith("/Main/Messaging") ||
             pathName.startsWith("/Main/Offers/Offer") ? null : (
             <AppHeader />
           );
