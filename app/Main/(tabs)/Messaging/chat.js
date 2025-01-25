@@ -10,7 +10,7 @@ import {
 import { Button, ActivityIndicator, Card, Text, useTheme, TextInput } from 'react-native-paper';
 import { useQuery, useQueryClient } from 'react-query';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
-import { useSelector } from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import axiosClient from "../../../../api/client";
 import { getSocket } from "../../../../api/websocket";
@@ -19,6 +19,7 @@ import GenericHeader from "../../../../components/GenericHeader";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns';
 import {v4 as uuidv4} from 'uuid';
+import {removeUnreadMessages} from "../../../../store/badgesSlice";
 
 const fetchChatMessages = async (chatId) => {
     const response = await axiosClient.get(`/chats/${chatId}/messages`);
@@ -32,6 +33,7 @@ const ChatScreen = () => {
     const queryClient = useQueryClient();
     const router = useRouter();
     const socket = getSocket();
+    const dispatch = useDispatch();
     const flatListRef = useRef();
     const theme = useTheme();
     const styles = makeStyles(theme);
@@ -232,6 +234,8 @@ const ChatScreen = () => {
                     readerId: merchantId, // or merchantId, depending on the app
                 });
             });
+
+            dispatch(removeUnreadMessages({chatId, messageIds: newReadMessageIds}));
 
             // Optimistically update the local cache to set `read_at` for these messages
             queryClient.setQueryData(['messages', chatId], (oldMessages) =>

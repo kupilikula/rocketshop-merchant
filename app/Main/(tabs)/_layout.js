@@ -98,6 +98,13 @@ export default function TabsComponent() {
         }}
       />
         <Tabs.Screen
+            name="Messaging"
+            options={{
+                href: null,
+                // tabBarButton: () => null, // Hides the tab bar button
+            }}
+        />
+        <Tabs.Screen
             name="Settings"
             options={{
                 href: null,

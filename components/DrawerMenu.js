@@ -1,15 +1,21 @@
 import { DrawerContentScrollView } from "@react-navigation/drawer";
-import { Drawer, Text } from "react-native-paper";
+import {Badge, Drawer, Text, useTheme} from "react-native-paper";
 import { useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { View } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { StoreLogo } from "@/components/StoreLogo";
 import { faker } from "@faker-js/faker";
+import {useSelector} from "react-redux";
 
 export default function DrawerMenu(props) {
   const router = useRouter();
+  const theme = useTheme();
+  const styles = makeStyles(theme);
   const storeLogoImage = faker.image.url();
-
+  const unreadCount = useSelector(
+      (state) =>
+          Object.values(state.badges.unreadMessages || {}).flat().length // Total unread messages
+  );
   // console.log('props:', JSON.stringify(props));
   return (
     <DrawerContentScrollView
@@ -77,6 +83,18 @@ export default function DrawerMenu(props) {
           <MaterialIcons name={"discount"} size={size} />
         )}
       />
+      <Drawer.Item label={<Text variant={'titleLarge'}>Messages</Text>}
+                   style={{padding: 0, borderRadius: 5, marginLeft: 0}}
+                   onPress={() => {router.push('/Main/(tabs)/Messaging')}}
+                   icon={({ size, color }) => (
+                       <View style={styles.iconContainer}>
+                         <MaterialIcons name="chat" size={size} color={color} />
+                         {unreadCount > 0 && (
+                             <Badge style={styles.badge}>{unreadCount}</Badge>
+                         )}
+                       </View>
+                   )}
+      />
       <Drawer.Item
         label={<Text variant={"titleLarge"}>Settings</Text>}
         style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}
@@ -88,3 +106,26 @@ export default function DrawerMenu(props) {
     </DrawerContentScrollView>
   );
 }
+
+const makeStyles  = (theme) => StyleSheet.create({
+  iconContainer: {
+    position: 'relative',
+    // width: 40, // Ensures enough space for the icon and badge
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: 'red',
+    color: 'white',
+    fontSize: 10,
+    height: 18,
+    minWidth: 18,
+    borderRadius: 9,
+    textAlign: 'center',
+    lineHeight: 18,
+    overflow: 'hidden',
+  },
+})

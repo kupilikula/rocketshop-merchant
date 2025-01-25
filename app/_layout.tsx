@@ -11,9 +11,13 @@ import { store } from "@/store/store";
 import * as NavigationBar from "expo-navigation-bar";
 import {QueryClient, QueryClientProvider} from "react-query";
 import 'react-native-get-random-values';
+import {setupSocketListeners} from "@/api/globalSocketListeners";
+import {connectSocket} from "@/api/websocket";
 
 const queryClient = new QueryClient();
 // const isLoggedIn = true;
+
+
 export default function RootLayout() {
   const customTheme = {
     ...DefaultTheme,
@@ -45,6 +49,18 @@ export default function RootLayout() {
     },
     dark: false, // Set to true if creating a dark theme
   };
+
+  useEffect(() => {
+    const socket = connectSocket();
+
+    // Setup listeners
+    setupSocketListeners(store);
+
+    // Clean up on unmount
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     const configureNavigationBar = async () => {
