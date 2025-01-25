@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
     Keyboard,
     ScrollView,
@@ -17,6 +17,8 @@ import { getSocket } from "../../../../api/websocket";
 import KeyboardSpacer from "../../../../components/KeyboardSpacer";
 import GenericHeader from "../../../../components/GenericHeader";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns';
+import {v4 as uuidv4} from 'uuid';
 
 const fetchChatMessages = async (chatId) => {
     const response = await axiosClient.get(`/chats/${chatId}/messages`);
@@ -32,8 +34,12 @@ const ChatScreen = () => {
     const socket = getSocket();
     const flatListRef = useRef();
     const theme = useTheme();
+    const styles = makeStyles(theme);
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
+    const [otherUserIsTyping, setOtherUserIsTyping] = useState(false); // Tracks if the other user is typing
+    const typingDebounceRef = useRef(null); // Debounce timer for `typing` event
+    const stopTypingTimeoutRef = useRef(null); // Timeout for `stopTyping` event
 
     const { data: messages, isLoading } = useQuery(['messages', chatId], () => fetchChatMessages(chatId));
 
@@ -71,10 +77,10 @@ const ChatScreen = () => {
             senderId: merchantId,
             senderType: 'Merchant',
             message,
-            messageId: Date.now().toString(),
+            messageId: uuidv4(),
             created_at: new Date(),
         };
-
+        socket.emit('stopTyping', { chatId, senderId: merchantId }); // Stop typing when a message is sent
         socket.emit('sendMessage', newMessage);
 
         queryClient.setQueryData(['messages', chatId], (oldMessages) => [
@@ -83,6 +89,28 @@ const ChatScreen = () => {
         ]);
 
         setMessage('');
+    };
+
+
+    const handleTyping = (text) => {
+        setMessage(text);
+
+        // Clear the existing `stopTyping` timeout if user types again
+        clearTimeout(stopTypingTimeoutRef.current);
+
+        // Debounce `typing` event to reduce the frequency of emissions
+        if (!typingDebounceRef.current) {
+            socket.emit('typing', { chatId, senderId: merchantId }); // Emit `typing` event
+            typingDebounceRef.current = setTimeout(() => {
+                typingDebounceRef.current = null; // Reset debounce
+            }, 1000); // Emit `typing` event every 1 second max while typing
+        }
+
+        // Set a timeout to emit `stopTyping` when user stops typing
+        stopTypingTimeoutRef.current = setTimeout(() => {
+            socket.emit('stopTyping', { chatId, senderId: merchantId }); // Emit `stopTyping` event
+            stopTypingTimeoutRef.current = null; // Clear the timeout
+        }, 1000); // Emit `stopTyping` after 1 second of inactivity
     };
 
     useEffect(() => {
@@ -96,9 +124,18 @@ const ChatScreen = () => {
     }, []);
 
     useEffect(() => {
+        const joinRoom = () => {
+            console.log('Reconnected. Rejoining chat room...');
+            socket.emit('joinChat', { chatId, userId: merchantId, userType: 'Customer' });
+        };
+
+        // Emit `joinChat` when the connection is established or re-established
+        socket.on('connect', joinRoom);
+
         socket.emit('joinChat', { chatId, userId: merchantId, userType: 'Merchant' });
 
         const handleReceiveMessage = (newMessage) => {
+            console.log('new message received in merchant app from customer app:', newMessage);
             queryClient.setQueryData(['messages', chatId], (oldMessages) => [
                 ...(oldMessages || []),
                 newMessage,
@@ -107,11 +144,106 @@ const ChatScreen = () => {
 
         socket.on('receiveMessage', handleReceiveMessage);
 
+        const handleMessageRead = ({ messageId }) => {
+            console.log('handleMessageRead, messageId:', messageId);
+            queryClient.setQueryData(['messages', chatId], (oldMessages) => {
+
+                console.log('oldM:',oldMessages);
+            return    oldMessages.map((message) =>
+                    message.messageId === messageId ? { ...message, read_at: new Date() } : message
+                )
+            }
+            );
+        };
+
+        socket.on('messageRead', handleMessageRead);
+
+        const handleTypingIndicator = ({ senderId }) => {
+            if (senderId !== merchantId) setOtherUserIsTyping(true); // Show typing indicator
+        };
+
+        const handleStopTypingIndicator = ({ senderId }) => {
+            if (senderId !== merchantId) setOtherUserIsTyping(false); // Hide typing indicator
+        };
+        socket.on('typing', handleTypingIndicator);
+        socket.on('stopTyping', handleStopTypingIndicator);
+
         return () => {
+            socket.off('connect', joinRoom); // Cleanup the `connect` listener
             socket.off('receiveMessage', handleReceiveMessage);
+            socket.off('messageRead', handleMessageRead);
+            socket.off('typing', handleTypingIndicator);
+            socket.off('stopTyping', handleStopTypingIndicator);
             socket.emit('leaveChat', { chatId, userId: merchantId });
         };
     }, [chatId, merchantId]);
+
+    // Helper to format timestamps
+    const formatTimestamp = (date) => format(new Date(date), 'hh:mm a');
+
+// Helper to group messages by day
+    const groupMessagesByDay = (messages) => {
+        const groupedMessages = [];
+        let lastDay = null;
+
+        messages.forEach((message) => {
+            const messageDay = format(new Date(message.created_at), 'yyyy-MM-dd');
+
+            if (messageDay !== lastDay) {
+                lastDay = messageDay;
+
+                const dayLabel = isToday(new Date(message.created_at))
+                    ? 'Today'
+                    : isYesterday(new Date(message.created_at))
+                        ? 'Yesterday'
+                        : format(new Date(message.created_at), 'dd MMMM, yyyy');
+
+                // Add a marker for the day
+                groupedMessages.push({ type: 'dayMarker', dayLabel });
+            }
+
+            // Add the message
+            groupedMessages.push({ type: 'message', ...message });
+        });
+        groupedMessages.push({type: 'typingIndicator'});
+        return groupedMessages;
+    };
+
+    const groupedMessages = groupMessagesByDay(messages || []);
+
+    const handleViewableItemsChanged = useCallback(({ viewableItems }) => {
+        // console.log('m:', viewableItems.map((it)=>it.item));
+        // Filter out messages that are already marked as read
+        const newReadMessageIds = viewableItems
+            .map((item) => item.item)
+            .filter( (item) => item.type==='message')
+            .filter((message) => message.senderId!==merchantId && !message.read_at) // Check if `read_at` is null
+            .map((message) => message.messageId); // Extract message IDs
+
+        if (newReadMessageIds.length > 0) {
+            // Mark messages as read in the database
+            axiosClient.post(`/chats/${chatId}/messages/read`, { messageIds: newReadMessageIds });
+
+            // Emit read receipts via WebSocket
+            newReadMessageIds.forEach((messageId) => {
+                socket.emit('messageRead', {
+                    chatId,
+                    messageId,
+                    readerId: merchantId, // or merchantId, depending on the app
+                });
+            });
+
+            // Optimistically update the local cache to set `read_at` for these messages
+            queryClient.setQueryData(['messages', chatId], (oldMessages) =>
+                oldMessages.map((message) =>
+                    newReadMessageIds.includes(message.messageId)
+                        ? { ...message, read_at: new Date().toISOString() } // Set `read_at` timestamp
+                        : message
+                )
+            );
+        }
+    }, [chatId, socket, merchantId, queryClient]);
+
 
     if (isLoading) {
         return <ActivityIndicator animating={true} size="large" style={{ flex: 1 }} />;
@@ -121,38 +253,87 @@ const ChatScreen = () => {
             <View style={styles.container}>
                 <FlatList
                     ref={flatListRef}
-                    data={messages} // Use the messages array as the data source
-                    keyExtractor={(item) => item.messageId} // Provide a unique key for each message
-                    renderItem={({ item }) => (
-                        <Card
-                            style={{
-                                margin: 8,
-                                alignSelf: item.senderType === 'Customer' ? 'flex-start' : 'flex-end',
-                                backgroundColor:
-                                    item.senderType === 'Customer'
-                                        ? theme.colors.softPrimary
-                                        : theme.colors.softSecondary,
-                            }}
-                        >
-                            <Card.Content>
-                                <Text>{item.message}</Text>
-                            </Card.Content>
-                        </Card>
-                    )}
+                    data={groupedMessages} // Use the messages array as the data source
                     contentContainerStyle={{
                         paddingBottom: 16,
                         width: '100%',
                         flexGrow: 1, // Ensure content takes up full available height
                         justifyContent: 'flex-end', // Align messages to the bottom
                     }}
+                    keyExtractor={(item, index) => `${item.type}-${index}`} // Provide a unique key for each message
+                    onViewableItemsChanged={handleViewableItemsChanged}
+                    viewabilityConfig={{ itemVisiblePercentThreshold: 80 }} // Detect when 80% of the item is visible
+                    renderItem={({ item }) => {
+                        if (item.type==='typingIndicator') {
+                            return otherUserIsTyping ?
+                                <View
+                                    style={{
+                                        ...styles.typingIndicator,
+                                        alignSelf: isMyMessage ? "flex-end" : "flex-start",
+                                        backgroundColor: isMyMessage ? theme.colors.primary : theme.colors.secondary,
+
+                                    }}
+                                >
+                                    <MaterialIcons name={'more-horiz'} size={28} color={'white'}/>
+                                </View>
+                                : null
+                        }
+                        if (item.type === 'dayMarker') {
+                            return (
+                                <Card style={styles.dayMarker}><Text style={styles.dayMarkerText}>{item.dayLabel}</Text></Card>
+                            );
+                        }
+                        let isMyMessage = item.senderType==='Merchant';
+
+                        return (
+                            <View
+                                style={{
+                                    ...styles.messageContainer,
+                                    alignSelf: isMyMessage ? "flex-end" : "flex-start",
+                                    backgroundColor: isMyMessage ? theme.colors.primary : theme.colors.secondary,
+
+                                }}
+                            >
+                                <Text
+                                    // variant={'titleMedium'}
+                                    style={{
+                                        ...styles.messageText,
+                                        // left: isMyMessage ? 10 : 0,
+                                        // marginHorizontal: 20
+                                    }}
+                                >
+                                    {item.message}
+                                </Text>
+                                <View
+                                    style={{
+                                        ...styles.timeAndReadContainer,
+                                    }}
+                                >
+                                    <Text style={styles.timeText}>
+                                        {formatTimestamp(item.created_at)}
+                                    </Text>
+                                    {isMyMessage &&
+                                    <View style={{marginLeft: 4}}>
+                                        {!item.read_at ? (
+                                            <MaterialIcons name={'check'} size={16} color={'white'}/>
+                                        ) : (
+                                            <MaterialIcons name={'done-all'} size={16} color={'white'}/>
+                                        )}
+                                    </View>
+                                    }
+                                </View>
+                            </View>)
+
+                    }}
                     onContentSizeChange={scrollToEnd} // Automatically scroll to the end when the content changes
                     keyboardShouldPersistTaps="handled" // Ensure taps dismiss the keyboard when necessary
                 />
+
                 <View style={styles.inputContainer}>
                     <TextInput
                         mode={'outlined'}
                         value={message}
-                        onChangeText={setMessage}
+                        onChangeText={handleTyping}
                         placeholder="Type a message"
                         style={[styles.textInput, {paddingVertical: Platform.OS==='android' ? 8: 0}]}
                         // numberOfLines={5}
@@ -170,7 +351,7 @@ const ChatScreen = () => {
 
 export default ChatScreen;
 
-const styles = StyleSheet.create({
+const makeStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'white',
@@ -193,5 +374,71 @@ const styles = StyleSheet.create({
     },
     sendButton: {
         alignSelf: 'center',
+    },
+    dayMarker: {
+        alignSelf: 'center',
+        textAlign: 'center',
+        marginVertical: 16,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 20,
+        // borderWidth: 1,
+        // borderColor: '#eee',
+        backgroundColor: theme.colors.softSuccess
+    },
+    dayMarkerText: {
+        alignSelf: 'center',
+        textAlign: 'center',
+        // marginVertical: 16,
+        // paddingHorizontal: 16,
+        // paddingVertical: 8,
+        // borderRadius: 16,
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: 'black',
+    },
+    messageContainer: {
+        minWidth: 100,
+        maxWidth: "70%",
+        marginVertical: 3,
+        marginHorizontal: 16,
+        // paddingVertical: 10,
+        flexDirection: "row",
+        borderRadius: 10,
+        // padding: 16,
+        backgroundColor: 'blue'
+
+    },
+    messageText: {
+        fontSize: 16,
+        maxWidth: "70%",
+        color: 'white',
+        marginTop: 8,
+        marginHorizontal: 16,
+        marginBottom: 24,
+        // backgroundColor: 'blue'
+    },
+    timeAndReadContainer: {
+        position: 'absolute',
+        bottom: 4,
+        right: 4,
+        // paddingBottom: 2,
+        // paddingHorizontal: 8,
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        flexDirection: 'row',
+        // backgroundColor:'black'
+    },
+    timeText: {
+        fontSize: 12,
+        color: 'white',
+    },
+    typingIndicator: {
+        marginVertical: 3,
+        marginHorizontal: 16,
+        paddingHorizontal: 10,
+        flexDirection: "row",
+        borderRadius: 10,
+
     },
 });
