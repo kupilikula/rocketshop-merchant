@@ -7,7 +7,7 @@ import {
     Platform,
     TouchableWithoutFeedback, FlatList, Pressable,
 } from 'react-native';
-import { Button, ActivityIndicator, Card, Text, useTheme, TextInput } from 'react-native-paper';
+import {Button, ActivityIndicator, Card, Text, useTheme, TextInput, Snackbar} from 'react-native-paper';
 import { useQuery, useQueryClient } from 'react-query';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import {useDispatch, useSelector} from 'react-redux';
@@ -20,6 +20,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns';
 import {v4 as uuidv4} from 'uuid';
 import {removeUnreadMessages} from "../../../../store/badgesSlice";
+import {copyContent} from "../../../../utils/copyToClipboard";
 
 const fetchChatMessages = async (chatId) => {
     const response = await axiosClient.get(`/chats/${chatId}/messages`);
@@ -46,6 +47,7 @@ const ChatScreen = () => {
     const { data: messages, isLoading } = useQuery(['messages', chatId], () => fetchChatMessages(chatId));
 
     const [message, setMessage] = useState('');
+    const [isSnackbarVisible, setSnackbarVisible] = useState(false);
 
     useEffect(() => {
         if (!chatId) {
@@ -290,43 +292,42 @@ const ChatScreen = () => {
                         let isMyMessage = item.senderType==='Merchant';
 
                         return (
-                            <View
-                                style={{
-                                    ...styles.messageContainer,
-                                    alignSelf: isMyMessage ? "flex-end" : "flex-start",
-                                    backgroundColor: isMyMessage ? theme.colors.primary : theme.colors.secondary,
-
+                            <Pressable
+                                onLongPress={async () => {
+                                    await copyContent(item.message);
+                                    setSnackbarVisible(true); // Show snackbar
                                 }}
+                                style={({ pressed }) => [
+                                    {
+                                        alignSelf: isMyMessage ? "flex-end" : "flex-start",
+                                    },
+                                    pressed && { opacity: 0.7 }, // Optional visual feedback on long press
+                                ]}
                             >
-                                <Text
-                                    // variant={'titleMedium'}
-                                    style={{
-                                        ...styles.messageText,
-                                        // left: isMyMessage ? 10 : 0,
-                                        // marginHorizontal: 20
-                                    }}
-                                >
-                                    {item.message}
-                                </Text>
                                 <View
                                     style={{
-                                        ...styles.timeAndReadContainer,
+                                        ...styles.messageContainer,
+                                        backgroundColor: isMyMessage ? theme.colors.primary : theme.colors.secondary,
                                     }}
                                 >
-                                    <Text style={styles.timeText}>
-                                        {formatTimestamp(item.created_at)}
-                                    </Text>
-                                    {isMyMessage &&
-                                    <View style={{marginLeft: 4}}>
-                                        {!item.read_at ? (
-                                            <MaterialIcons name={'check'} size={16} color={'white'}/>
-                                        ) : (
-                                            <MaterialIcons name={'done-all'} size={16} color={'white'}/>
+                                    <Text style={styles.messageText}>{item.message}</Text>
+                                    <View style={styles.timeAndReadContainer}>
+                                        <Text style={styles.timeText}>
+                                            {formatTimestamp(item.created_at)}
+                                        </Text>
+                                        {isMyMessage && (
+                                            <View style={{ marginLeft: 4 }}>
+                                                {!item.read_at ? (
+                                                    <MaterialIcons name="check" size={16} color="white" />
+                                                ) : (
+                                                    <MaterialIcons name="done-all" size={16} color="white" />
+                                                )}
+                                            </View>
                                         )}
                                     </View>
-                                    }
                                 </View>
-                            </View>)
+                            </Pressable>
+                                )
 
                     }}
                     onContentSizeChange={scrollToEnd} // Automatically scroll to the end when the content changes
@@ -349,6 +350,16 @@ const ChatScreen = () => {
                     </Button>
                 </View>
                 {Platform.OS === 'ios' && <KeyboardSpacer />}
+                <Snackbar
+                    visible={isSnackbarVisible}
+                    onDismiss={() => setSnackbarVisible(false)}
+                    duration={2000}
+                    wrapperStyle={{top: 0}}
+                    style={{backgroundColor: theme.colors.softSuccess, }}
+                    theme={{ colors: { inverseOnSurface: 'black'}}}
+                >
+                    Message copied!
+                </Snackbar>
             </View>
     );
 };
@@ -402,6 +413,7 @@ const makeStyles = (theme) => StyleSheet.create({
         color: 'black',
     },
     messageContainer: {
+        position: 'relative',
         minWidth: 100,
         maxWidth: "70%",
         marginVertical: 3,
@@ -410,7 +422,7 @@ const makeStyles = (theme) => StyleSheet.create({
         flexDirection: "row",
         borderRadius: 10,
         // padding: 16,
-        backgroundColor: 'blue'
+        // backgroundColor: 'blue'
 
     },
     messageText: {

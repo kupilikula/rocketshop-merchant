@@ -13,11 +13,11 @@ const badgesSlice = createSlice({
         },
         removeUnreadMessage: (state, action) => {
             const {chatId, messageId} = action.payload;
-            state.unreadMessages[chatId] = [...state.unreadMessages[chatId].filter((m) => m.messageId!==messageId)];
+            state.unreadMessages[chatId] = [...(state.unreadMessages[chatId] ?? []).filter((m) => m.messageId!==messageId)];
         },
         removeUnreadMessages: (state, action) => {
             const {chatId, messageIds} = action.payload;
-            state.unreadMessages[chatId] = [...state.unreadMessages[chatId].filter((m) => !messageIds.includes(m.messageId))];
+            state.unreadMessages[chatId] = [...(state.unreadMessages[chatId] ?? []).filter((m) => !messageIds.includes(m.messageId))];
         },
         clearUnreadMessages: (state, action) => {
             const { chatId } = action.payload;

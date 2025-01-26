@@ -15,7 +15,7 @@ const merchantSlice = createSlice({
         return {...state, ...action.payload};
       }
     },
-    logoutMerchant: () => {
+    clearMerchant: () => {
       console.log("resetting: ", { ...initialState });
       return { ...initialState };
     },
@@ -23,7 +23,7 @@ const merchantSlice = createSlice({
 
 export const {
     setMerchant,
-    logoutMerchant
+    clearMerchant
 } = merchantSlice.actions;
 
 export default merchantSlice.reducer;

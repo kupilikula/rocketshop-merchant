@@ -1,4 +1,4 @@
-import { Stack } from "expo-router";
+import {Stack, useRouter} from "expo-router";
 import { PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Platform } from "react-native";
@@ -13,12 +13,16 @@ import {QueryClient, QueryClientProvider} from "react-query";
 import 'react-native-get-random-values';
 import {setupSocketListeners} from "@/api/globalSocketListeners";
 import {connectSocket} from "@/api/websocket";
+import {setAxiosDependencies} from "@/api/client";
 
 const queryClient = new QueryClient();
 // const isLoggedIn = true;
 
 
 export default function RootLayout() {
+
+  const router = useRouter();
+
   const customTheme = {
     ...DefaultTheme,
     colors: {
@@ -50,11 +54,15 @@ export default function RootLayout() {
     dark: false, // Set to true if creating a dark theme
   };
 
+
   useEffect(() => {
     const socket = connectSocket();
 
     // Setup listeners
     setupSocketListeners(store);
+
+    setAxiosDependencies(store.dispatch, router);
+
 
     // Clean up on unmount
     return () => {
