@@ -13,7 +13,7 @@ import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import {useDispatch, useSelector} from 'react-redux';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import axiosClient from "../../../../api/client";
-import { getSocket } from "../../../../api/websocket";
+import {connectSocket, getSocket} from "../../../../api/websocket";
 import KeyboardSpacer from "../../../../components/KeyboardSpacer";
 import GenericHeader from "../../../../components/GenericHeader";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -33,7 +33,7 @@ const ChatScreen = () => {
     const { merchantId } = useSelector((state) => state.merchant);
     const queryClient = useQueryClient();
     const router = useRouter();
-    const socket = getSocket();
+    const [socket, setSocket] = useState(null);
     const dispatch = useDispatch();
     const flatListRef = useRef();
     const theme = useTheme();
@@ -74,7 +74,7 @@ const ChatScreen = () => {
     };
 
     const handleSendMessage = () => {
-        if (!message.trim()) return;
+        if (!message.trim() || !socket) return;
 
         const newMessage = {
             chatId,
@@ -102,19 +102,21 @@ const ChatScreen = () => {
         // Clear the existing `stopTyping` timeout if user types again
         clearTimeout(stopTypingTimeoutRef.current);
 
-        // Debounce `typing` event to reduce the frequency of emissions
-        if (!typingDebounceRef.current) {
-            socket.emit('typing', { chatId, senderId: merchantId }); // Emit `typing` event
-            typingDebounceRef.current = setTimeout(() => {
-                typingDebounceRef.current = null; // Reset debounce
-            }, 1000); // Emit `typing` event every 1 second max while typing
-        }
+        if (socket) {
+            // Debounce `typing` event to reduce the frequency of emissions
+            if (!typingDebounceRef.current) {
+                socket.emit('typing', {chatId, senderId: merchantId}); // Emit `typing` event
+                typingDebounceRef.current = setTimeout(() => {
+                    typingDebounceRef.current = null; // Reset debounce
+                }, 1000); // Emit `typing` event every 1 second max while typing
+            }
 
-        // Set a timeout to emit `stopTyping` when user stops typing
-        stopTypingTimeoutRef.current = setTimeout(() => {
-            socket.emit('stopTyping', { chatId, senderId: merchantId }); // Emit `stopTyping` event
-            stopTypingTimeoutRef.current = null; // Clear the timeout
-        }, 1000); // Emit `stopTyping` after 1 second of inactivity
+            // Set a timeout to emit `stopTyping` when user stops typing
+            stopTypingTimeoutRef.current = setTimeout(() => {
+                socket.emit('stopTyping', {chatId, senderId: merchantId}); // Emit `stopTyping` event
+                stopTypingTimeoutRef.current = null; // Clear the timeout
+            }, 1000); // Emit `stopTyping` after 1 second of inactivity
+        }
     };
 
     useEffect(() => {
@@ -128,59 +130,72 @@ const ChatScreen = () => {
     }, []);
 
     useEffect(() => {
-        const joinRoom = () => {
-            console.log('Reconnected. Rejoining chat room...');
-            socket.emit('joinChat', { chatId, userId: merchantId, userType: 'Customer' });
+        let socketInstance;
+
+        const initializeSocket = async () => {
+            socketInstance = await connectSocket(); // Ensure the socket is initialized and connected
+            setSocket(socketInstance); // Update state with the initialized socket
+
+            const joinRoom = () => {
+                console.log('Reconnected. Rejoining chat room...');
+                socketInstance.emit('joinChat', { chatId, userId: merchantId, userType: 'Merchant' });
+            };
+
+            // Emit `joinChat` when the connection is established or re-established
+            socketInstance.on('connect', joinRoom);
+
+            // Join the room immediately after initialization
+            socketInstance.emit('joinChat', { chatId, userId: merchantId, userType: 'Merchant' });
+
+            // Handle incoming messages
+            const handleReceiveMessage = (newMessage) => {
+                console.log('New message received in merchant app from customer app:', newMessage);
+                queryClient.setQueryData(['messages', chatId], (oldMessages) => [
+                    ...(oldMessages || []),
+                    newMessage,
+                ]);
+            };
+            socketInstance.on('receiveMessage', handleReceiveMessage);
+
+            // Handle message read events
+            const handleMessageRead = ({ messageId }) => {
+                console.log('Message read, messageId:', messageId);
+                queryClient.setQueryData(['messages', chatId], (oldMessages) =>
+                    oldMessages.map((message) =>
+                        message.messageId === messageId ? { ...message, read_at: new Date() } : message
+                    )
+                );
+            };
+            socketInstance.on('messageRead', handleMessageRead);
+
+            // Handle typing indicators
+            const handleTypingIndicator = ({ senderId }) => {
+                if (senderId !== merchantId) setOtherUserIsTyping(true);
+            };
+
+            const handleStopTypingIndicator = ({ senderId }) => {
+                if (senderId !== merchantId) setOtherUserIsTyping(false);
+            };
+            socketInstance.on('typing', handleTypingIndicator);
+            socketInstance.on('stopTyping', handleStopTypingIndicator);
         };
 
-        // Emit `joinChat` when the connection is established or re-established
-        socket.on('connect', joinRoom);
-
-        socket.emit('joinChat', { chatId, userId: merchantId, userType: 'Merchant' });
-
-        const handleReceiveMessage = (newMessage) => {
-            console.log('new message received in merchant app from customer app:', newMessage);
-            queryClient.setQueryData(['messages', chatId], (oldMessages) => [
-                ...(oldMessages || []),
-                newMessage,
-            ]);
-        };
-
-        socket.on('receiveMessage', handleReceiveMessage);
-
-        const handleMessageRead = ({ messageId }) => {
-            console.log('handleMessageRead, messageId:', messageId);
-            queryClient.setQueryData(['messages', chatId], (oldMessages) => {
-
-                console.log('oldM:',oldMessages);
-            return    oldMessages.map((message) =>
-                    message.messageId === messageId ? { ...message, read_at: new Date() } : message
-                )
-            }
-            );
-        };
-
-        socket.on('messageRead', handleMessageRead);
-
-        const handleTypingIndicator = ({ senderId }) => {
-            if (senderId !== merchantId) setOtherUserIsTyping(true); // Show typing indicator
-        };
-
-        const handleStopTypingIndicator = ({ senderId }) => {
-            if (senderId !== merchantId) setOtherUserIsTyping(false); // Hide typing indicator
-        };
-        socket.on('typing', handleTypingIndicator);
-        socket.on('stopTyping', handleStopTypingIndicator);
+        initializeSocket();
 
         return () => {
-            socket.off('connect', joinRoom); // Cleanup the `connect` listener
-            socket.off('receiveMessage', handleReceiveMessage);
-            socket.off('messageRead', handleMessageRead);
-            socket.off('typing', handleTypingIndicator);
-            socket.off('stopTyping', handleStopTypingIndicator);
-            socket.emit('leaveChat', { chatId, userId: merchantId });
+            if (socketInstance) {
+                // Emit `leaveChat` when the component unmounts or dependencies change
+                socketInstance.emit('leaveChat', { chatId, userId: merchantId });
+
+                // Remove all event listeners
+                socketInstance.off('connect');
+                socketInstance.off('receiveMessage');
+                socketInstance.off('messageRead');
+                socketInstance.off('typing');
+                socketInstance.off('stopTyping');
+            }
         };
-    }, [chatId, merchantId]);
+    }, [chatId, merchantId, queryClient]);
 
     // Helper to format timestamps
     const formatTimestamp = (date) => format(new Date(date), 'hh:mm a');
@@ -228,14 +243,17 @@ const ChatScreen = () => {
             // Mark messages as read in the database
             axiosClient.post(`/chats/${chatId}/messages/read`, { messageIds: newReadMessageIds });
 
-            // Emit read receipts via WebSocket
-            newReadMessageIds.forEach((messageId) => {
-                socket.emit('messageRead', {
-                    chatId,
-                    messageId,
-                    readerId: merchantId, // or merchantId, depending on the app
+
+            if (socket) {
+                // Emit read receipts via WebSocket
+                newReadMessageIds.forEach((messageId) => {
+                    socket.emit('messageRead', {
+                        chatId,
+                        messageId,
+                        readerId: merchantId, // or merchantId, depending on the app
+                    });
                 });
-            });
+            }
 
             dispatch(removeUnreadMessages({chatId, messageIds: newReadMessageIds}));
 

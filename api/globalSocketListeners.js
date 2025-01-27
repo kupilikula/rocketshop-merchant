@@ -1,13 +1,11 @@
-// socketListeners.js
-import {addUnreadMessage} from '@/store/badgesSlice';
-import { getSocket } from './websocket';
+import { addUnreadMessage } from '../store/badgesSlice';
+import { connectSocket } from './websocket';
 
-export const setupSocketListeners = (store) => {
-    const socket = getSocket();
+export const setupSocketListeners = async (store) => {
+    const socket = await connectSocket(); // Ensure socket is connected
 
-    // Listen for new messages
+    // Listen for global events
     socket.on('newMessage', (message) => {
-        console.log('newMessage: ', message);
         // Update the badge count for the chat
         store.dispatch(addUnreadMessage(message));
     });

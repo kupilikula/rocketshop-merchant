@@ -6,13 +6,13 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { DefaultTheme } from "react-native-paper";
-import {Provider, useDispatch} from "react-redux";
+import {Provider} from "react-redux";
 import { store } from "@/store/store";
 import * as NavigationBar from "expo-navigation-bar";
 import {QueryClient, QueryClientProvider} from "react-query";
 import 'react-native-get-random-values';
 import {setupSocketListeners} from "@/api/globalSocketListeners";
-import {connectSocket} from "@/api/websocket";
+import {connectSocket, disconnectSocket} from "@/api/websocket";
 import {setAxiosDependencies} from "@/api/client";
 
 const queryClient = new QueryClient();
@@ -56,18 +56,22 @@ export default function RootLayout() {
 
 
   useEffect(() => {
-    const socket = connectSocket();
-
-    // Setup listeners
-    setupSocketListeners(store);
-
+    // Pass `dispatch` and `router` to Axios
     setAxiosDependencies(store.dispatch, router);
 
-
-    // Clean up on unmount
-    return () => {
-      socket.disconnect();
+    // Connect the socket and setup global listeners
+    const initializeSocket = async () => {
+      await connectSocket();
+      setupSocketListeners(store); // Set up global listeners
     };
+
+    initializeSocket();
+
+    // Clean up the socket connection on unmount
+    return () => {
+      disconnectSocket();
+    };
+
   }, []);
 
   useEffect(() => {
