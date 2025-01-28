@@ -1,23 +1,18 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
-    Keyboard,
-    ScrollView,
-    View,
-    StyleSheet,
-    Platform,
-    TouchableWithoutFeedback, FlatList, Pressable,
+    Keyboard, ScrollView, View, StyleSheet, Platform, TouchableWithoutFeedback, FlatList, Pressable,
 } from 'react-native';
 import {Button, ActivityIndicator, Card, Text, useTheme, TextInput, Snackbar} from 'react-native-paper';
-import { useQuery, useQueryClient } from 'react-query';
-import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import {useQuery, useQueryClient} from 'react-query';
+import {useLocalSearchParams, useNavigation, useRouter} from 'expo-router';
 import {useDispatch, useSelector} from 'react-redux';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import axiosClient from "../../../../api/client";
 import {connectSocket, disconnectSocket, getSocket, logActiveSockets} from "../../../../api/websocket";
 import KeyboardSpacer from "../../../../components/KeyboardSpacer";
 import GenericHeader from "../../../../components/GenericHeader";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns';
+import {format, isToday, isYesterday, formatDistanceToNow} from 'date-fns';
 import {v4 as uuidv4} from 'uuid';
 import {removeUnreadMessages} from "../../../../store/badgesSlice";
 import {copyContent} from "../../../../utils/copyToClipboard";
@@ -31,9 +26,9 @@ const fetchChatMessages = async (chatId) => {
 };
 
 const ChatScreen = () => {
-    const { chatId, customerId, customerName } = useLocalSearchParams();
+    const {chatId, customerId, customerName} = useLocalSearchParams();
     console.log('customerName:', customerName, ' , customerId:', customerId);
-    const { merchantId } = useSelector((state) => state.merchant);
+    const {merchantId} = useSelector((state) => state.merchant);
     const queryClient = useQueryClient();
     const router = useRouter();
     const [socket, setSocket] = useState(null);
@@ -46,7 +41,7 @@ const ChatScreen = () => {
     const [otherUserIsTyping, setOtherUserIsTyping] = useState(false); // Tracks if the other user is typing
     const typingDebounceRef = useRef(null); // Debounce timer for `typing` event
     const stopTypingTimeoutRef = useRef(null); // Timeout for `stopTyping` event
-    const { data: messages, isLoading } = useQuery(['messages', chatId], () => fetchChatMessages(chatId));
+    const {data: messages, isLoading} = useQuery(['messages', chatId], () => fetchChatMessages(chatId));
 
     const [message, setMessage] = useState('');
     const [isSnackbarVisible, setSnackbarVisible] = useState(false);
@@ -57,7 +52,6 @@ const ChatScreen = () => {
             router.replace('/Main/(tabs)/Messaging');
         }
     }, [chatId]);
-
 
 
     useEffect(() => {
@@ -98,15 +92,15 @@ const ChatScreen = () => {
         });
     }, [customerName]);
 
-    const scrollToEnd = (animated = false, useDelay = true) => {
+    const scrollToLatest = (animated = false, useDelay = true) => {
         console.log('line 102, animated:', animated, ', useDelay:', useDelay);
         if (useDelay) {
             let delay = Platform.OS === 'android' ? 500 : 200;
             setTimeout(() => {
-                flatListRef.current?.scrollToEnd({ animated: animated });
+                flatListRef.current?.scrollToIndex({index: 0, animated: animated});
             }, delay);
         } else {
-            flatListRef.current?.scrollToEnd({ animated: animated });
+            flatListRef.current?.scrollToIndex({index: 0, animated: animated});
         }
 
     };
@@ -117,24 +111,15 @@ const ChatScreen = () => {
         if (!message.trim() || !socket) return;
 
         const newMessage = {
-            chatId,
-            senderId: merchantId,
-            senderType: 'Merchant',
-            message,
-            messageId: uuidv4(),
-            created_at: new Date(),
+            chatId, senderId: merchantId, senderType: 'Merchant', message, messageId: uuidv4(), created_at: new Date(),
         };
         try {
             socket.emit('stopTyping', {chatId, senderId: merchantId}); // Stop typing when a message is sent
             socket.emit('sendMessage', newMessage);
-        }
-        catch (err) {
+        } catch (err) {
             console.log('merchant hsm err', err);
         }
-        queryClient.setQueryData(['messages', chatId], (oldMessages) => [
-            ...(oldMessages || []),
-            newMessage,
-        ]);
+        queryClient.setQueryData(['messages', chatId], (oldMessages) => [...(oldMessages || []), newMessage,]);
 
         setMessage('');
     };
@@ -165,8 +150,8 @@ const ChatScreen = () => {
     };
 
     useEffect(() => {
-        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', scrollToEnd);
-        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', scrollToEnd);
+        const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', scrollToLatest);
+        const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', scrollToLatest);
 
         return () => {
             keyboardDidShowListener.remove();
@@ -192,41 +177,37 @@ const ChatScreen = () => {
 
             const joinRoom = () => {
                 console.log("Reconnected. Rejoining chat room...");
-                socketInstance.emit("joinChat", { chatId, userId: merchantId, userType: "Merchant" });
+                socketInstance.emit("joinChat", {chatId, userId: merchantId, userType: "Merchant"});
             };
 
             // Emit `joinChat` on connection or reconnection
             socketInstance.on("connect", joinRoom);
 
             // Join the room immediately after initialization
-            socketInstance.emit("joinChat", { chatId, userId: merchantId, userType: "Merchant" });
+            socketInstance.emit("joinChat", {chatId, userId: merchantId, userType: "Merchant"});
 
             // Handle incoming messages
             const handleReceiveMessage = (newMessage) => {
                 console.log("New message received in merchant app from customer app:", newMessage);
-                queryClient.setQueryData(["messages", chatId], (oldMessages) => [
-                    ...(oldMessages || []),
-                    newMessage,
-                ]);
+                queryClient.setQueryData(["messages", chatId], (oldMessages) => [...(oldMessages || []), newMessage,]);
             };
             socketInstance.on("receiveMessage", handleReceiveMessage);
 
             // Handle message read events
-            const handleMessageRead = ({ messageId }) => {
+            const handleMessageRead = ({messageId}) => {
                 console.log("Message read, messageId:", messageId);
-                queryClient.setQueryData(["messages", chatId], (oldMessages) =>
-                    oldMessages.map((message) =>
-                        message.messageId === messageId ? { ...message, read_at: new Date() } : message
-                    )
-                );
+                queryClient.setQueryData(["messages", chatId], (oldMessages) => oldMessages.map((message) => message.messageId === messageId ? {
+                    ...message,
+                    read_at: new Date()
+                } : message));
             };
             socketInstance.on("messageRead", handleMessageRead);
 
             // Handle typing indicators
-            const handleTypingIndicator = ({ senderId }) => {
+            const handleTypingIndicator = ({senderId}) => {
                 if (senderId !== merchantId) setOtherUserIsTyping(true);
             };
-            const handleStopTypingIndicator = ({ senderId }) => {
+            const handleStopTypingIndicator = ({senderId}) => {
                 if (senderId !== merchantId) setOtherUserIsTyping(false);
             };
             socketInstance.on("typing", handleTypingIndicator);
@@ -245,7 +226,7 @@ const ChatScreen = () => {
                     console.log("Cleaning up socket for chatID:", chatId);
 
                     // Emit `leaveChat` before unmounting
-                    socketInstance.emit("leaveChat", { chatId, userId: merchantId });
+                    socketInstance.emit("leaveChat", {chatId, userId: merchantId});
 
                     // Remove all event listeners for this socket
                     socketInstance.off("connect");
@@ -278,18 +259,14 @@ const ChatScreen = () => {
             if (messageDay !== lastDay) {
                 lastDay = messageDay;
 
-                const dayLabel = isToday(new Date(message.created_at))
-                    ? 'Today'
-                    : isYesterday(new Date(message.created_at))
-                        ? 'Yesterday'
-                        : format(new Date(message.created_at), 'dd MMMM, yyyy');
+                const dayLabel = isToday(new Date(message.created_at)) ? 'Today' : isYesterday(new Date(message.created_at)) ? 'Yesterday' : format(new Date(message.created_at), 'dd MMMM, yyyy');
 
                 // Add a marker for the day
-                groupedMessages.push({ type: 'dayMarker', dayLabel });
+                groupedMessages.push({type: 'dayMarker', dayLabel});
             }
 
             // Add the message
-            groupedMessages.push({ type: 'message', ...message });
+            groupedMessages.push({type: 'message', ...message});
         });
         groupedMessages.push({type: 'typingIndicator'});
         return groupedMessages;
@@ -297,27 +274,25 @@ const ChatScreen = () => {
 
     const groupedMessages = groupMessagesByDay(messages || []);
 
-    const handleViewableItemsChanged = useCallback(({ viewableItems }) => {
+    const handleViewableItemsChanged = useCallback(({viewableItems}) => {
         // console.log('m:', viewableItems.map((it)=>it.item));
         // Filter out messages that are already marked as read
         const newReadMessageIds = viewableItems
             .map((item) => item.item)
-            .filter( (item) => item.type==='message')
-            .filter((message) => message.senderId!==merchantId && !message.read_at) // Check if `read_at` is null
+            .filter((item) => item.type === 'message')
+            .filter((message) => message.senderId !== merchantId && !message.read_at) // Check if `read_at` is null
             .map((message) => message.messageId); // Extract message IDs
 
         if (newReadMessageIds.length > 0) {
             // Mark messages as read in the database
-            axiosClient.post(`/chats/${chatId}/messages/read`, { messageIds: newReadMessageIds });
+            axiosClient.post(`/chats/${chatId}/messages/read`, {messageIds: newReadMessageIds});
 
 
             if (socket) {
                 // Emit read receipts via WebSocket
                 newReadMessageIds.forEach((messageId) => {
                     socket.emit('messageRead', {
-                        chatId,
-                        messageId,
-                        readerId: merchantId, // or merchantId, depending on the app
+                        chatId, messageId, readerId: merchantId, // or merchantId, depending on the app
                     });
                 });
             }
@@ -325,227 +300,178 @@ const ChatScreen = () => {
             dispatch(removeUnreadMessages({chatId, messageIds: newReadMessageIds}));
 
             // Optimistically update the local cache to set `read_at` for these messages
-            queryClient.setQueryData(['messages', chatId], (oldMessages) =>
-                oldMessages.map((message) =>
-                    newReadMessageIds.includes(message.messageId)
-                        ? { ...message, read_at: new Date().toISOString() } // Set `read_at` timestamp
-                        : message
-                )
-            );
+            queryClient.setQueryData(['messages', chatId], (oldMessages) => oldMessages.map((message) => newReadMessageIds.includes(message.messageId) ? {
+                    ...message,
+                    read_at: new Date().toISOString()
+                } // Set `read_at` timestamp
+                : message));
         }
     }, [chatId, socket, merchantId, queryClient]);
 
-
+    useEffect(() => {
+        console.log('M useEff');
+        scrollToLatest(false, false);
+    }, [groupedMessages])
 
     if (isLoading) {
-        return <ActivityIndicator animating={true} size="large" style={{ flex: 1 }} />;
+        return <ActivityIndicator animating={true} size="large" style={{flex: 1}}/>;
     }
 
-    return (
-            <View style={{...styles.container, backgroundColor: isExpired ? 'red' : 'white'}}>
-                {/*<TokenMonitor/>*/}
-                <FlatList
-                    ref={flatListRef}
-                    snapToEnd={true}
-                    data={groupedMessages} // Use the messages array as the data source
-                    contentContainerStyle={{
-                        paddingBottom: 16,
-                        width: '100%',
-                        flexGrow: 1, // Ensure content takes up full available height
-                        justifyContent: 'flex-end', // Align messages to the bottom
-                    }}
-                    keyExtractor={(item, index) => `${item.type}-${index}`} // Provide a unique key for each message
-                    onContentSizeChange={() => {
-                        // Disable `initialScrollIndex` after first render
-                        scrollToEnd(false);
-                    }}
-                    onViewableItemsChanged={handleViewableItemsChanged}
-                    viewabilityConfig={{ itemVisiblePercentThreshold: 80 }} // Detect when 80% of the item is visible
-                    keyboardShouldPersistTaps="handled" // Ensure taps dismiss the keyboard when necessary
-                    renderItem={({ item }) => {
-                        if (item.type==='typingIndicator') {
-                            return otherUserIsTyping ?
-                                <View
-                                    style={{
-                                        ...styles.typingIndicator,
-                                        alignSelf: isMyMessage ? "flex-end" : "flex-start",
-                                        backgroundColor: isMyMessage ? theme.colors.primary : theme.colors.secondary,
+    return (<View style={{...styles.container, backgroundColor: isExpired ? 'red' : 'white'}}>
+            {/*<TokenMonitor/>*/}
+            <FlatList
+                ref={flatListRef}
+                snapToEnd={true}
+                data={[...groupedMessages].reverse()} // Use the messages array as the data source
+                contentContainerStyle={{
+                    paddingBottom: 16, width: '100%', flexGrow: 1, // Ensure content takes up full available height
+                    justifyContent: 'flex-end', // Align messages to the bottom
+                }}
+                keyExtractor={(item, index) => `${item.type}-${index}`} // Provide a unique key for each message
+                onContentSizeChange={() => {
+                    // Disable `initialScrollIndex` after first render
+                    console.log('onCSC');
+                    // scrollToEnd(false);
+                }}
+                onLayout={() => {
+                    // Disable `initialScrollIndex` after first render
+                    console.log('onLayout');
+                    // scrollToEnd(false);
+                }}
+                onViewableItemsChanged={handleViewableItemsChanged}
+                viewabilityConfig={{itemVisiblePercentThreshold: 80}} // Detect when 80% of the item is visible
+                keyboardShouldPersistTaps="handled" // Ensure taps dismiss the keyboard when necessary
+                renderItem={({item}) => {
+                    if (item.type === 'typingIndicator') {
+                        return otherUserIsTyping ? <View
+                            style={{
+                                ...styles.typingIndicator,
+                                alignSelf: isMyMessage ? "flex-end" : "flex-start",
+                                backgroundColor: isMyMessage ? theme.colors.primary : theme.colors.secondary,
 
-                                    }}
-                                >
-                                    <MaterialIcons name={'more-horiz'} size={28} color={'white'}/>
-                                </View>
-                                : null
-                        }
-                        if (item.type === 'dayMarker') {
-                            return (
-                                <Card style={styles.dayMarker}><Text style={styles.dayMarkerText}>{item.dayLabel}</Text></Card>
-                            );
-                        }
-                        let isMyMessage = item.senderType==='Merchant';
+                            }}
+                        >
+                            <MaterialIcons name={'more-horiz'} size={28} color={'white'}/>
+                        </View> : null
+                    }
+                    if (item.type === 'dayMarker') {
+                        return (<Card style={styles.dayMarker}><Text style={styles.dayMarkerText}>{item.dayLabel}</Text></Card>);
+                    }
+                    let isMyMessage = item.senderType === 'Merchant';
 
-                        return (
-                            <Pressable
-                                onLongPress={async () => {
-                                    await copyContent(item.message);
-                                    setSnackbarVisible(true); // Show snackbar
+                    return (<Pressable
+                            onLongPress={async () => {
+                                await copyContent(item.message);
+                                setSnackbarVisible(true); // Show snackbar
+                            }}
+                            style={({pressed}) => [{alignSelf: isMyMessage ? "flex-end" : "flex-start",}, pressed && {opacity: 0.7},]}
+                        >
+                            <View
+                                style={{
+                                    ...styles.messageContainer,
+                                    backgroundColor: isMyMessage ? theme.colors.primary : theme.colors.secondary,
                                 }}
-                                style={({ pressed }) => [
-                                    {
-                                        alignSelf: isMyMessage ? "flex-end" : "flex-start",
-                                    },
-                                    pressed && { opacity: 0.7 }, // Optional visual feedback on long press
-                                ]}
                             >
-                                <View
-                                    style={{
-                                        ...styles.messageContainer,
-                                        backgroundColor: isMyMessage ? theme.colors.primary : theme.colors.secondary,
-                                    }}
-                                >
-                                    <Text style={styles.messageText}>{item.message}</Text>
-                                    <View style={styles.timeAndReadContainer}>
-                                        <Text style={styles.timeText}>
-                                            {formatTimestamp(item.created_at)}
-                                        </Text>
-                                        {isMyMessage && (
-                                            <View style={{ marginLeft: 4 }}>
-                                                {!item.read_at ? (
-                                                    <MaterialIcons name="check" size={16} color="white" />
-                                                ) : (
-                                                    <MaterialIcons name="done-all" size={16} color="white" />
-                                                )}
-                                            </View>
-                                        )}
-                                    </View>
+                                <Text style={styles.messageText}>{item.message}</Text>
+                                <View style={styles.timeAndReadContainer}>
+                                    <Text style={styles.timeText}>
+                                        {formatTimestamp(item.created_at)}
+                                    </Text>
+                                    {isMyMessage && (<View style={{marginLeft: 4}}>
+                                            {!item.read_at ? (<MaterialIcons name="check" size={16} color="white"/>) : (
+                                                <MaterialIcons name="done-all" size={16} color="white"/>)}
+                                        </View>)}
                                 </View>
-                            </Pressable>
-                                )
+                            </View>
+                        </Pressable>)
 
-                    }}
+                }}
+                inverted={true}
+            />
+
+            <View style={styles.inputContainer}>
+                <TextInput
+                    mode={'outlined'}
+                    value={message}
+                    onChangeText={handleTyping}
+                    placeholder="Type a message"
+                    style={[styles.textInput, {paddingVertical: Platform.OS === 'android' ? 8 : 0}]}
+                    // numberOfLines={5}
+                    multiline
+                    dense={Platform.OS === 'ios'}
                 />
-
-                <View style={styles.inputContainer}>
-                    <TextInput
-                        mode={'outlined'}
-                        value={message}
-                        onChangeText={handleTyping}
-                        placeholder="Type a message"
-                        style={[styles.textInput, {paddingVertical: Platform.OS==='android' ? 8: 0}]}
-                        // numberOfLines={5}
-                        multiline
-                        dense={Platform.OS==='ios'}
-                    />
-                    <Button mode="contained" onPress={handleSendMessage} style={styles.sendButton}>
-                        Send
-                    </Button>
-                </View>
-                {Platform.OS === 'ios' && <KeyboardSpacer />}
-                <Snackbar
-                    visible={isSnackbarVisible}
-                    onDismiss={() => setSnackbarVisible(false)}
-                    duration={2000}
-                    wrapperStyle={{top: 0}}
-                    style={{backgroundColor: theme.colors.softSuccess, }}
-                    theme={{ colors: { inverseOnSurface: 'black'}}}
-                >
-                    Message copied!
-                </Snackbar>
+                <Button mode="contained" onPress={handleSendMessage} style={styles.sendButton}>
+                    Send
+                </Button>
             </View>
-    );
+            {Platform.OS === 'ios' && <KeyboardSpacer/>}
+            <Snackbar
+                visible={isSnackbarVisible}
+                onDismiss={() => setSnackbarVisible(false)}
+                duration={2000}
+                wrapperStyle={{top: 0}}
+                style={{backgroundColor: theme.colors.softSuccess,}}
+                theme={{colors: {inverseOnSurface: 'black'}}}
+            >
+                Message copied!
+            </Snackbar>
+        </View>);
 };
 
 export default ChatScreen;
 
 const makeStyles = (theme) => StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: 'white',
-        position: 'relative'
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 8,
-        backgroundColor: '#fff',
-    },
-    textInput: {
-        flex: 1,
-        // borderWidth: 1,
-        borderColor: 'black',
-        // borderRadius: 8,
+        flex: 1, backgroundColor: 'white', position: 'relative'
+    }, inputContainer: {
+        flexDirection: 'row', alignItems: 'center', padding: 8, backgroundColor: '#fff',
+    }, textInput: {
+        flex: 1, // borderWidth: 1,
+        borderColor: 'black', // borderRadius: 8,
         // padding: 8,
-        marginRight: 8,
-        backgroundColor: 'white',
-    },
-    sendButton: {
+        marginRight: 8, backgroundColor: 'white',
+    }, sendButton: {
         alignSelf: 'center',
-    },
-    dayMarker: {
+    }, dayMarker: {
         alignSelf: 'center',
         textAlign: 'center',
         marginVertical: 16,
         paddingHorizontal: 20,
         paddingVertical: 10,
-        borderRadius: 20,
-        // borderWidth: 1,
+        borderRadius: 20, // borderWidth: 1,
         // borderColor: '#eee',
         backgroundColor: theme.colors.softSuccess
-    },
-    dayMarkerText: {
-        alignSelf: 'center',
-        textAlign: 'center',
-        // marginVertical: 16,
+    }, dayMarkerText: {
+        alignSelf: 'center', textAlign: 'center', // marginVertical: 16,
         // paddingHorizontal: 16,
         // paddingVertical: 8,
         // borderRadius: 16,
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: 'black',
-    },
-    messageContainer: {
+        fontSize: 16, fontWeight: 'bold', color: 'black',
+    }, messageContainer: {
         position: 'relative',
         minWidth: 100,
         maxWidth: "70%",
         marginVertical: 3,
-        marginHorizontal: 16,
-        // paddingVertical: 10,
+        marginHorizontal: 16, // paddingVertical: 10,
         flexDirection: "row",
-        borderRadius: 10,
-        // padding: 16,
+        borderRadius: 10, // padding: 16,
         // backgroundColor: 'blue'
 
-    },
-    messageText: {
+    }, messageText: {
         fontSize: 16,
         maxWidth: "70%",
         color: 'white',
         marginTop: 8,
         marginHorizontal: 16,
-        marginBottom: 24,
-        // backgroundColor: 'blue'
-    },
-    timeAndReadContainer: {
-        position: 'absolute',
-        bottom: 4,
-        right: 4,
-        // paddingBottom: 2,
+        marginBottom: 24, // backgroundColor: 'blue'
+    }, timeAndReadContainer: {
+        position: 'absolute', bottom: 4, right: 4, // paddingBottom: 2,
         // paddingHorizontal: 8,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        flexDirection: 'row',
-        // backgroundColor:'black'
-    },
-    timeText: {
-        fontSize: 12,
-        color: 'white',
-    },
-    typingIndicator: {
-        marginVertical: 3,
-        marginHorizontal: 16,
-        paddingHorizontal: 10,
-        flexDirection: "row",
-        borderRadius: 10,
+        justifyContent: 'flex-end', alignItems: 'center', flexDirection: 'row', // backgroundColor:'black'
+    }, timeText: {
+        fontSize: 12, color: 'white',
+    }, typingIndicator: {
+        marginVertical: 3, marginHorizontal: 16, paddingHorizontal: 10, flexDirection: "row", borderRadius: 10,
 
     },
 });
