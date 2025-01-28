@@ -6,7 +6,6 @@ import { useRouter } from 'expo-router';
 import {useQuery, useQueryClient} from 'react-query';
 import axiosClient from "../../../../api/client";
 import {useSelector} from "react-redux";
-import {connectSocket, getSocket} from "../../../../api/websocket";
 
 const fetchChats = async (storeId) => {
     const response = await axiosClient.get('/chats', {params: {storeId: storeId}}); // Replace with your API endpoint
@@ -17,40 +16,8 @@ const ChatListScreen = () => {
     const { data: chats, isLoading, isError } = useQuery('chats', () => fetchChats(storeId));
     const router = useRouter();
     const theme = useTheme();
-    const queryClient = useQueryClient();
     const {storeId} = useSelector( (state) => state.store);
     const {unreadMessages} = useSelector((state)=> state.badges);
-
-    useEffect(() => {
-        let socketInstance;
-
-        const initializeSocket = async () => {
-            socketInstance = await connectSocket();
-
-            // Listen for newMessage events
-            const handleNewMessage = (newMessage) => {
-                console.log('New message received:', newMessage);
-                // Invalidate the chats query to refresh the data
-                queryClient.invalidateQueries(['chats']);
-            };
-
-            socketInstance.on('newMessage', handleNewMessage);
-
-            // Cleanup function
-            return () => {
-                socketInstance.off('newMessage', handleNewMessage);
-            };
-        };
-
-        // Call initializeSocket and cleanup properly
-        initializeSocket();
-
-        return () => {
-            if (socketInstance) {
-                socketInstance.off('newMessage');
-            }
-        };
-    }, [queryClient]);
 
     const handleChatPress = (chatId, customerId, customerName, customerPhone) => {
         router.push({ pathname: '/Main/(tabs)/Messaging/chat', params: { chatId, customerId, customerName, customerPhone } });

@@ -5,11 +5,13 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { View, StyleSheet } from "react-native";
 import { StoreLogo } from "@/components/StoreLogo";
 import { faker } from "@faker-js/faker";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
+import {logout} from "../store/actions/logout";
 
 export default function DrawerMenu(props) {
   const router = useRouter();
   const theme = useTheme();
+  const dispatch = useDispatch();
   const styles = makeStyles(theme);
   const storeLogoImage = faker.image.url();
   const unreadCount = useSelector(
@@ -103,6 +105,16 @@ export default function DrawerMenu(props) {
           <MaterialIcons name={"settings"} size={size} />
         )}
       />
+      <Drawer.Item label={<Text variant={'titleLarge'}>Log out</Text>}
+                   style={{padding: 0, borderRadius: 5, marginLeft: 0}}
+                   onPress={ async () => {
+                     try {
+                       await logout(dispatch, router); // Pass `dispatch` and `router` to logout
+                     } catch (err) {
+                       console.log('error during logout:', err);
+                     }
+                   }}
+                   icon={({size, color}) => <MaterialIcons name={'logout'} size={size}/>}/>
     </DrawerContentScrollView>
   );
 }

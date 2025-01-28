@@ -22,7 +22,7 @@ export default function Authentication() {
     // Get storeId and merchantId from backend
         const authenticate = async () => {
             try {
-                const response = await axiosClient.post('/auth/login', { phone: phone, otp: otp, storeIndex: 10 });
+                const response = await axiosClient.post('/auth/login', { phone: phone, otp: otp, storeIndex: 1 });
                 const { accessToken, merchant, store } = response.data;
                 console.log('login response.data', response.data);
                 dispatch(setMerchant(merchant));

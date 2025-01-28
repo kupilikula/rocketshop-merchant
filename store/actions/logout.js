@@ -1,11 +1,36 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axiosClient from "../../api/client";
-import {clearMerchant} from "../merchantSlice";
-import {clearStore} from '../storeSlice';
+import { clearStore } from "../storeSlice";
+import { clearMerchant } from "../merchantSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {disconnectAllSockets} from "@/api/websocket";
+import axios from "axios";
+const BASE_URL = "https://api.merchant.pocketshop.in"; // Replace with your actual backend URL
+
 export const logout = async (dispatch, router) => {
-        AsyncStorage.removeItem('accessToken');
-        axiosClient.post('/auth/logout');
-        dispatch(clearMerchant());
-        dispatch(clearStore());
-        router.push('/Authentication');
+        try {
+                console.log('logging out. Calling /auth/logout');
+
+                // Make logout API call
+                await axios.post(`${BASE_URL}/auth/logout`,
+                    {},
+                    { withCredentials: true });
+
+                console.log('Logout API call succeeded.');
+        } catch (error) {
+                console.error('Error during logout:', error.message || error);
+        } finally {
+                // Clear access token from AsyncStorage
+                await AsyncStorage.removeItem('accessToken');
+
+                // Disconnect all active sockets
+                disconnectAllSockets();
+
+                // Clear Redux state
+                dispatch(clearMerchant());
+                dispatch(clearStore());
+
+                console.log('Logged out locally.');
+
+                // Navigate to the Authentication screen
+                router.replace('/Authentication');
+        }
 };

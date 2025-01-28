@@ -8,13 +8,13 @@ const storeSlice = createSlice({
   name: "store",
   initialState,
   reducers: {
-    setStore: (state, action) => {
-        return {...state, ...action.payload};
-      }
-    },
-    clearStore: () => {
-      return { ...initialState };
-    },
+      setStore: (state, action) => {
+          return {...state, ...action.payload};
+      },
+      clearStore: (state, action) => {
+          return {...initialState};
+      },
+  }
 });
 
 export const {

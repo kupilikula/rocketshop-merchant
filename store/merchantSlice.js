@@ -12,13 +12,15 @@ const merchantSlice = createSlice({
   initialState,
   reducers: {
     setMerchant: (state, action) => {
-        return {...state, ...action.payload};
-      }
+      return {...state, ...action.payload};
+    }
+    ,
+    clearMerchant: (state, action) => {
+      console.log('clearing merchant');
+      console.log("resetting: ", {...initialState});
+      return {...initialState};
     },
-    clearMerchant: () => {
-      console.log("resetting: ", { ...initialState });
-      return { ...initialState };
-    },
+  }
 });
 
 export const {

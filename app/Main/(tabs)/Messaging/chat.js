@@ -13,7 +13,7 @@ import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import {useDispatch, useSelector} from 'react-redux';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import axiosClient from "../../../../api/client";
-import {connectSocket, getSocket} from "../../../../api/websocket";
+import {connectSocket, disconnectSocket, getSocket, logActiveSockets} from "../../../../api/websocket";
 import KeyboardSpacer from "../../../../components/KeyboardSpacer";
 import GenericHeader from "../../../../components/GenericHeader";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -21,6 +21,9 @@ import { format, isToday, isYesterday, formatDistanceToNow } from 'date-fns';
 import {v4 as uuidv4} from 'uuid';
 import {removeUnreadMessages} from "../../../../store/badgesSlice";
 import {copyContent} from "../../../../utils/copyToClipboard";
+import TokenMonitor from "../../../../components/TokenMonitor";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {isTokenExpired} from "../../../../utils/isTokenExpired";
 
 const fetchChatMessages = async (chatId) => {
     const response = await axiosClient.get(`/chats/${chatId}/messages`);
@@ -43,17 +46,46 @@ const ChatScreen = () => {
     const [otherUserIsTyping, setOtherUserIsTyping] = useState(false); // Tracks if the other user is typing
     const typingDebounceRef = useRef(null); // Debounce timer for `typing` event
     const stopTypingTimeoutRef = useRef(null); // Timeout for `stopTyping` event
-
     const { data: messages, isLoading } = useQuery(['messages', chatId], () => fetchChatMessages(chatId));
 
     const [message, setMessage] = useState('');
     const [isSnackbarVisible, setSnackbarVisible] = useState(false);
+    const [isExpired, setIsExpired] = useState(null);
 
     useEffect(() => {
         if (!chatId) {
             router.replace('/Main/(tabs)/Messaging');
         }
     }, [chatId]);
+
+
+
+    useEffect(() => {
+        const monitorToken = async () => {
+            const token = await AsyncStorage.getItem("accessToken");
+            if (!token) {
+                setIsExpired(true); // No token found, consider it expired
+                console.log("No token found. Token is expired.");
+                return;
+            }
+
+            const expired = isTokenExpired(token);
+            setIsExpired(expired);
+
+            // Log the status to the console
+            console.log(`Token is ${expired ? "expired" : "valid"}`);
+        };
+
+        // Check token status every 30 seconds
+        const intervalId = setInterval(monitorToken, 1000);
+
+        // Run once immediately on component mount
+        monitorToken();
+
+        // Clear the interval on component unmount
+        return () => clearInterval(intervalId);
+    }, []);
+
 
     useEffect(() => {
         navigation.setOptions({
@@ -66,14 +98,22 @@ const ChatScreen = () => {
         });
     }, [customerName]);
 
-    const scrollToEnd = () => {
-        let delay = Platform.OS === 'android' ? 500 : 200;
-        setTimeout(() => {
-            flatListRef.current?.scrollToEnd({ animated: true });
-        }, delay);
+    const scrollToEnd = (animated = false, useDelay = true) => {
+        console.log('line 102, animated:', animated, ', useDelay:', useDelay);
+        if (useDelay) {
+            let delay = Platform.OS === 'android' ? 500 : 200;
+            setTimeout(() => {
+                flatListRef.current?.scrollToEnd({ animated: animated });
+            }, delay);
+        } else {
+            flatListRef.current?.scrollToEnd({ animated: animated });
+        }
+
     };
 
     const handleSendMessage = () => {
+
+        console.log('handleSendMessage, socket:', socket);
         if (!message.trim() || !socket) return;
 
         const newMessage = {
@@ -84,9 +124,13 @@ const ChatScreen = () => {
             messageId: uuidv4(),
             created_at: new Date(),
         };
-        socket.emit('stopTyping', { chatId, senderId: merchantId }); // Stop typing when a message is sent
-        socket.emit('sendMessage', newMessage);
-
+        try {
+            socket.emit('stopTyping', {chatId, senderId: merchantId}); // Stop typing when a message is sent
+            socket.emit('sendMessage', newMessage);
+        }
+        catch (err) {
+            console.log('merchant hsm err', err);
+        }
         queryClient.setQueryData(['messages', chatId], (oldMessages) => [
             ...(oldMessages || []),
             newMessage,
@@ -98,11 +142,12 @@ const ChatScreen = () => {
 
     const handleTyping = (text) => {
         setMessage(text);
-
+        console.log('handleTyping');
         // Clear the existing `stopTyping` timeout if user types again
         clearTimeout(stopTypingTimeoutRef.current);
 
         if (socket) {
+            console.log('handleTyping inside if socket');
             // Debounce `typing` event to reduce the frequency of emissions
             if (!typingDebounceRef.current) {
                 socket.emit('typing', {chatId, senderId: merchantId}); // Emit `typing` event
@@ -130,73 +175,95 @@ const ChatScreen = () => {
     }, []);
 
     useEffect(() => {
-        let socketInstance;
+        const socketType = "chat"; // Define socket type
+        console.log("Chat window socket useEffect");
 
         const initializeSocket = async () => {
-            socketInstance = await connectSocket(); // Ensure the socket is initialized and connected
-            setSocket(socketInstance); // Update state with the initialized socket
+            console.log("Initializing socket in chat window for chatID:", chatId);
+
+            // Get or create a socket for the chat context
+            const socketInstance = await getSocket(socketType, chatId);
+            if (!socketInstance) {
+                console.error("Failed to initialize the chat socket.");
+                return;
+            }
+
+            setSocket(socketInstance); // Store the socket instance in state
 
             const joinRoom = () => {
-                console.log('Reconnected. Rejoining chat room...');
-                socketInstance.emit('joinChat', { chatId, userId: merchantId, userType: 'Merchant' });
+                console.log("Reconnected. Rejoining chat room...");
+                socketInstance.emit("joinChat", { chatId, userId: merchantId, userType: "Merchant" });
             };
 
-            // Emit `joinChat` when the connection is established or re-established
-            socketInstance.on('connect', joinRoom);
+            // Emit `joinChat` on connection or reconnection
+            socketInstance.on("connect", joinRoom);
 
             // Join the room immediately after initialization
-            socketInstance.emit('joinChat', { chatId, userId: merchantId, userType: 'Merchant' });
+            socketInstance.emit("joinChat", { chatId, userId: merchantId, userType: "Merchant" });
 
             // Handle incoming messages
             const handleReceiveMessage = (newMessage) => {
-                console.log('New message received in merchant app from customer app:', newMessage);
-                queryClient.setQueryData(['messages', chatId], (oldMessages) => [
+                console.log("New message received in merchant app from customer app:", newMessage);
+                queryClient.setQueryData(["messages", chatId], (oldMessages) => [
                     ...(oldMessages || []),
                     newMessage,
                 ]);
             };
-            socketInstance.on('receiveMessage', handleReceiveMessage);
+            socketInstance.on("receiveMessage", handleReceiveMessage);
 
             // Handle message read events
             const handleMessageRead = ({ messageId }) => {
-                console.log('Message read, messageId:', messageId);
-                queryClient.setQueryData(['messages', chatId], (oldMessages) =>
+                console.log("Message read, messageId:", messageId);
+                queryClient.setQueryData(["messages", chatId], (oldMessages) =>
                     oldMessages.map((message) =>
                         message.messageId === messageId ? { ...message, read_at: new Date() } : message
                     )
                 );
             };
-            socketInstance.on('messageRead', handleMessageRead);
+            socketInstance.on("messageRead", handleMessageRead);
 
             // Handle typing indicators
             const handleTypingIndicator = ({ senderId }) => {
                 if (senderId !== merchantId) setOtherUserIsTyping(true);
             };
-
             const handleStopTypingIndicator = ({ senderId }) => {
                 if (senderId !== merchantId) setOtherUserIsTyping(false);
             };
-            socketInstance.on('typing', handleTypingIndicator);
-            socketInstance.on('stopTyping', handleStopTypingIndicator);
+            socketInstance.on("typing", handleTypingIndicator);
+            socketInstance.on("stopTyping", handleStopTypingIndicator);
+
+            console.log("Chat socket listeners initialized.");
         };
 
         initializeSocket();
 
+        // Cleanup on component unmount or dependency change
         return () => {
-            if (socketInstance) {
-                // Emit `leaveChat` when the component unmounts or dependencies change
-                socketInstance.emit('leaveChat', { chatId, userId: merchantId });
+            const cleanupSocket = async () => {
+                const socketInstance = await getSocket(socketType, chatId); // Get the socket for this context
+                if (socketInstance) {
+                    console.log("Cleaning up socket for chatID:", chatId);
 
-                // Remove all event listeners
-                socketInstance.off('connect');
-                socketInstance.off('receiveMessage');
-                socketInstance.off('messageRead');
-                socketInstance.off('typing');
-                socketInstance.off('stopTyping');
-            }
+                    // Emit `leaveChat` before unmounting
+                    socketInstance.emit("leaveChat", { chatId, userId: merchantId });
+
+                    // Remove all event listeners for this socket
+                    socketInstance.off("connect");
+                    socketInstance.off("receiveMessage");
+                    socketInstance.off("messageRead");
+                    socketInstance.off("typing");
+                    socketInstance.off("stopTyping");
+
+                    // Disconnect and remove the socket from the registry
+                    disconnectSocket(socketType, chatId);
+                }
+            };
+
+            cleanupSocket();
         };
     }, [chatId, merchantId, queryClient]);
 
+    logActiveSockets();
     // Helper to format timestamps
     const formatTimestamp = (date) => format(new Date(date), 'hh:mm a');
 
@@ -269,14 +336,17 @@ const ChatScreen = () => {
     }, [chatId, socket, merchantId, queryClient]);
 
 
+
     if (isLoading) {
         return <ActivityIndicator animating={true} size="large" style={{ flex: 1 }} />;
     }
 
     return (
-            <View style={styles.container}>
+            <View style={{...styles.container, backgroundColor: isExpired ? 'red' : 'white'}}>
+                {/*<TokenMonitor/>*/}
                 <FlatList
                     ref={flatListRef}
+                    snapToEnd={true}
                     data={groupedMessages} // Use the messages array as the data source
                     contentContainerStyle={{
                         paddingBottom: 16,
@@ -285,8 +355,13 @@ const ChatScreen = () => {
                         justifyContent: 'flex-end', // Align messages to the bottom
                     }}
                     keyExtractor={(item, index) => `${item.type}-${index}`} // Provide a unique key for each message
+                    onContentSizeChange={() => {
+                        // Disable `initialScrollIndex` after first render
+                        scrollToEnd(false);
+                    }}
                     onViewableItemsChanged={handleViewableItemsChanged}
                     viewabilityConfig={{ itemVisiblePercentThreshold: 80 }} // Detect when 80% of the item is visible
+                    keyboardShouldPersistTaps="handled" // Ensure taps dismiss the keyboard when necessary
                     renderItem={({ item }) => {
                         if (item.type==='typingIndicator') {
                             return otherUserIsTyping ?
@@ -348,8 +423,6 @@ const ChatScreen = () => {
                                 )
 
                     }}
-                    onContentSizeChange={scrollToEnd} // Automatically scroll to the end when the content changes
-                    keyboardShouldPersistTaps="handled" // Ensure taps dismiss the keyboard when necessary
                 />
 
                 <View style={styles.inputContainer}>

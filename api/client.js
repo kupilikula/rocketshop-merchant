@@ -1,13 +1,14 @@
 import axios from "axios";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {clearMerchant} from "@/store/merchantSlice";
-import {clearStore} from "@/store/storeSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { reconnectAllSockets, disconnectAllSockets } from "@/api/websocket";
+import { refreshAccessToken } from "@/api/refreshAccessToken";
+import { logout } from "@/store/actions/logout";
 
 // Base URL for the Merchant App Backend
 export const BASE_URL = "https://api.merchant.pocketshop.in"; // Replace with your actual backend URL
 
-
 let isRefreshing = false; // Track if a refresh attempt is already in progress
+let logoutInProgress = false; // Track if logout is in progress
 let failedQueue = []; // Queue to store requests while the refresh token is being processed
 let dispatch = null; // To hold the Redux dispatch function
 let router = null; // To hold the Expo Router navigation function
@@ -24,8 +25,7 @@ const processQueue = (error, token = null) => {
 };
 
 // Create an Axios instance with the baseURL
-const axiosClientGetter = ()  => {
-
+const axiosClientGetter = () => {
     let instance = axios.create({
         baseURL: BASE_URL,
         headers: {
@@ -36,7 +36,13 @@ const axiosClientGetter = ()  => {
 
     instance.interceptors.request.use(
         async (config) => {
-            const token = await AsyncStorage.getItem('accessToken'); // Retrieve token from storage
+            if (logoutInProgress) {
+                // Block all API requests while logout is in progress
+                console.warn("Logout is in progress. Blocking API request:", config.url);
+                return Promise.reject({ message: "Logout in progress" });
+            }
+
+            const token = await AsyncStorage.getItem("accessToken"); // Retrieve token from storage
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`; // Add token to Authorization header
             }
@@ -50,14 +56,29 @@ const axiosClientGetter = ()  => {
         async (error) => {
             const originalRequest = error.config;
 
+            // Exclude all /auth/* endpoints from triggering retries or logout
+            if (originalRequest.url.includes("/auth")) {
+                return Promise.reject(error);
+            }
+
+            console.log("Interceptor caught error:", error.response?.status, error.config);
+
             // If the error is a 401 and not a retry of the refresh token itself
             if (error.response.status === 401 && !originalRequest._retry) {
+                console.log("401 detected - attempting refresh...");
+
+                if (logoutInProgress) {
+                    console.warn("Logout is already in progress. Ignoring further 401 handling.");
+                    return Promise.reject(error);
+                }
+
                 if (isRefreshing) {
+                    console.log("isRefreshing in progress, so queuing.");
                     // If a refresh is already in progress, queue the current request
                     return new Promise((resolve, reject) => {
                         failedQueue.push({
                             resolve: (token) => {
-                                originalRequest.headers['Authorization'] = `Bearer ${token}`;
+                                originalRequest.headers["Authorization"] = `Bearer ${token}`;
                                 resolve(instance(originalRequest));
                             },
                             reject: (err) => reject(err),
@@ -69,47 +90,53 @@ const axiosClientGetter = ()  => {
                 isRefreshing = true; // Set the refreshing flag
 
                 try {
-                    console.log('attempting to refresh token');
-                    const response = await instance.post('/auth/refreshToken', {}, { withCredentials: true });
-                    const newAccessToken = response.data.accessToken;
-                    console.log('attempting to refresh token, newAT:', newAccessToken);
-                    // Save the new access token
-                    await AsyncStorage.setItem('accessToken', newAccessToken);
+                    console.log("Attempting to refresh token...");
+                    const newAccessToken = await refreshAccessToken();
+                    console.log("New access token:", newAccessToken);
+
+                    // Reconnect all WebSocket connections with the new token
+                    await reconnectAllSockets();
 
                     // Update headers of queued requests with the new token
                     processQueue(null, newAccessToken);
 
                     // Retry the original request with the new access token
-                    originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+                    originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
                     return instance(originalRequest);
                 } catch (refreshError) {
-                    console.error('Refresh token expired or invalid:', refreshError);
+                    console.error("Refresh token expired or invalid:", refreshError);
                     processQueue(refreshError, null); // Reject queued requests
 
-                    // Redirect to login or handle logout
-                    AsyncStorage.removeItem('accessToken');
-                    instance.post('/auth/logout');
-                    dispatch(clearMerchant());
-                    dispatch(clearStore);
-                    router.push('/Authentication');
+                    // Initiate logout if refresh fails
+                    if (!logoutInProgress) {
+                        logoutInProgress = true; // Prevent multiple logout calls
+                        console.log("Initiating logout due to failed token refresh...");
+                        try {
+                            await logout(dispatch, router); // Pass `dispatch` and `router` to logout
+                        } finally {
+                            logoutInProgress = false; // Reset the flag
+                        }
+                    }
 
-                    // Redirect user to login page, e.g., navigation.navigate('/login');
                     return Promise.reject(refreshError);
                 } finally {
                     isRefreshing = false; // Reset the refreshing flag
                 }
             }
-            console.log('error is not 401');
+
+            console.log("Error is not 401");
             // Reject any other errors
             return Promise.reject(error);
         }
     );
+
     return instance;
-}
+};
 
 const axiosClient = axiosClientGetter();
 export default axiosClient;
 
+// Pass the Redux `dispatch` and `router` to the Axios client
 export const setAxiosDependencies = (reduxDispatch, expoRouter) => {
     dispatch = reduxDispatch;
     router = expoRouter;

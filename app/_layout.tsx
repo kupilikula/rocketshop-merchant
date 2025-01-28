@@ -11,17 +11,15 @@ import { store } from "@/store/store";
 import * as NavigationBar from "expo-navigation-bar";
 import {QueryClient, QueryClientProvider} from "react-query";
 import 'react-native-get-random-values';
-import {setupSocketListeners} from "@/api/globalSocketListeners";
-import {connectSocket, disconnectSocket} from "@/api/websocket";
+import TokenMonitor from '../components/TokenMonitor';
 import {setAxiosDependencies} from "@/api/client";
 
 const queryClient = new QueryClient();
 // const isLoggedIn = true;
 
-
 export default function RootLayout() {
 
-  const router = useRouter();
+    const router = useRouter();
 
   const customTheme = {
     ...DefaultTheme,
@@ -56,25 +54,6 @@ export default function RootLayout() {
 
 
   useEffect(() => {
-    // Pass `dispatch` and `router` to Axios
-    setAxiosDependencies(store.dispatch, router);
-
-    // Connect the socket and setup global listeners
-    const initializeSocket = async () => {
-      await connectSocket();
-      setupSocketListeners(store); // Set up global listeners
-    };
-
-    initializeSocket();
-
-    // Clean up the socket connection on unmount
-    return () => {
-      disconnectSocket();
-    };
-
-  }, []);
-
-  useEffect(() => {
     const configureNavigationBar = async () => {
       await NavigationBar.setVisibilityAsync('hidden'); // Hide initially
       await NavigationBar.setBehaviorAsync('overlay-swipe'); // Allow swipe-up to reveal
@@ -84,9 +63,12 @@ export default function RootLayout() {
     if (Platform.OS==='android') {
       configureNavigationBar();
     }
-
   }, []);
 
+
+  useEffect(() => {
+    setAxiosDependencies(store.dispatch, router);
+  }, [store.dispatch, router])
 
   return (
       <QueryClientProvider client={queryClient}>
