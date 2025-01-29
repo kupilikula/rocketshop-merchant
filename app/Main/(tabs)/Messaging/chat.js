@@ -46,6 +46,7 @@ const ChatScreen = () => {
     const [message, setMessage] = useState('');
     const [isSnackbarVisible, setSnackbarVisible] = useState(false);
     const [isExpired, setIsExpired] = useState(null);
+    const processedMessagesRef = useRef(new Set()); // Tracks processed messageIds
 
     useEffect(() => {
         if (!chatId) {
@@ -194,14 +195,27 @@ const ChatScreen = () => {
             socketInstance.on("receiveMessage", handleReceiveMessage);
 
             // Handle message read events
-            const handleMessageRead = ({messageId}) => {
-                console.log("Message read, messageId:", messageId);
-                queryClient.setQueryData(["messages", chatId], (oldMessages) => oldMessages.map((message) => message.messageId === messageId ? {
-                    ...message,
-                    read_at: new Date()
-                } : message));
+// Handle bulk messagesRead events
+            const handleMessagesRead = ({ chatId, messageIds, readerId }) => {
+                console.log("Messages read event received:", { chatId, messageIds, readerId });
+
+                // Update the messages in the local cache to set `read_at` for the specified `messageIds`
+                queryClient.setQueryData(["messages", chatId], (oldMessages) => {
+                    if (!oldMessages) return oldMessages; // If no messages exist, return as is
+
+                    return oldMessages.map((message) =>
+                        messageIds.includes(message.messageId)
+                            ? {
+                                ...message,
+                                read_at: new Date(), // Set the read_at timestamp
+                            }
+                            : message
+                    );
+                });
             };
-            socketInstance.on("messageRead", handleMessageRead);
+
+// Attach the listener for the messagesRead event
+            socketInstance.on("messagesRead", handleMessagesRead);
 
             // Handle typing indicators
             const handleTypingIndicator = ({senderId}) => {
@@ -274,37 +288,48 @@ const ChatScreen = () => {
 
     const groupedMessages = groupMessagesByDay(messages || []);
 
-    const handleViewableItemsChanged = useCallback(({viewableItems}) => {
-        // console.log('m:', viewableItems.map((it)=>it.item));
-        // Filter out messages that are already marked as read
+    const handleViewableItemsChanged = useCallback(({ viewableItems }) => {
         const newReadMessageIds = viewableItems
             .map((item) => item.item)
-            .filter((item) => item.type === 'message')
-            .filter((message) => message.senderId !== merchantId && !message.read_at) // Check if `read_at` is null
-            .map((message) => message.messageId); // Extract message IDs
+            .filter((item) => item.type === "message")
+            .filter(
+                (message) =>
+                    message.senderId !== merchantId &&
+                    !message.read_at &&
+                    !processedMessagesRef.current.has(message.messageId) // Avoid duplicates
+            )
+            .map((message) => message.messageId);
 
         if (newReadMessageIds.length > 0) {
+            // Add processed messages to the Set
+            newReadMessageIds.forEach((id) => processedMessagesRef.current.add(id));
+
             // Mark messages as read in the database
-            axiosClient.post(`/chats/${chatId}/messages/read`, {messageIds: newReadMessageIds});
+            axiosClient.post(`/chats/${chatId}/messages/read`, {
+                messageIds: newReadMessageIds,
+            });
 
-
+            // Emit read receipts via WebSocket
             if (socket) {
-                // Emit read receipts via WebSocket
-                newReadMessageIds.forEach((messageId) => {
-                    socket.emit('messageRead', {
-                        chatId, messageId, readerId: merchantId, // or merchantId, depending on the app
-                    });
+                socket.emit("messagesRead", {
+                    chatId,
+                    messageIds: newReadMessageIds,
+                    readerId: merchantId, // or merchantId
                 });
             }
 
-            dispatch(removeUnreadMessages({chatId, messageIds: newReadMessageIds}));
+            dispatch(
+                removeUnreadMessages({ chatId, messageIds: newReadMessageIds })
+            );
 
-            // Optimistically update the local cache to set `read_at` for these messages
-            queryClient.setQueryData(['messages', chatId], (oldMessages) => oldMessages.map((message) => newReadMessageIds.includes(message.messageId) ? {
-                    ...message,
-                    read_at: new Date().toISOString()
-                } // Set `read_at` timestamp
-                : message));
+            // Optimistically update the local cache
+            queryClient.setQueryData(["messages", chatId], (oldMessages) =>
+                oldMessages.map((message) =>
+                    newReadMessageIds.includes(message.messageId)
+                        ? { ...message, read_at: new Date().toISOString() }
+                        : message
+                )
+            );
         }
     }, [chatId, socket, merchantId, queryClient]);
 
