@@ -349,20 +349,12 @@ const ChatScreen = () => {
                 snapToEnd={true}
                 data={[...groupedMessages].reverse()} // Use the messages array as the data source
                 contentContainerStyle={{
-                    paddingBottom: 16, width: '100%', flexGrow: 1, // Ensure content takes up full available height
+                    paddingBottom: 16, width: '100%',
                     justifyContent: 'flex-end', // Align messages to the bottom
+                    backgroundColor: 'green'
                 }}
+                ItemSeparatorComponent={() => <View style={{height:10}}/>}
                 keyExtractor={(item, index) => `${item.type}-${index}`} // Provide a unique key for each message
-                onContentSizeChange={() => {
-                    // Disable `initialScrollIndex` after first render
-                    console.log('onCSC');
-                    // scrollToEnd(false);
-                }}
-                onLayout={() => {
-                    // Disable `initialScrollIndex` after first render
-                    console.log('onLayout');
-                    // scrollToEnd(false);
-                }}
                 onViewableItemsChanged={handleViewableItemsChanged}
                 viewabilityConfig={{itemVisiblePercentThreshold: 80}} // Detect when 80% of the item is visible
                 keyboardShouldPersistTaps="handled" // Ensure taps dismiss the keyboard when necessary
@@ -447,7 +439,10 @@ export default ChatScreen;
 
 const makeStyles = (theme) => StyleSheet.create({
     container: {
-        flex: 1, backgroundColor: 'white', position: 'relative'
+        flex: 1, backgroundColor: 'white', position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
     }, inputContainer: {
         flexDirection: 'row', alignItems: 'center', padding: 8, backgroundColor: '#fff',
     }, textInput: {
