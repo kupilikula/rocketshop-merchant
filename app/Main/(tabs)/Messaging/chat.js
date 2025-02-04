@@ -342,7 +342,7 @@ const ChatScreen = () => {
         return <ActivityIndicator animating={true} size="large" style={{flex: 1}}/>;
     }
 
-    return (<View style={{...styles.container, backgroundColor: isExpired ? 'red' : 'white'}}>
+    return (<View style={{...styles.container, backgroundColor: isExpired ? 'white' : 'white'}}>
             {/*<TokenMonitor/>*/}
             <FlatList
                 ref={flatListRef}

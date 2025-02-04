@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import {Pressable, ScrollView, View} from "react-native";
+import {Pressable, ScrollView, View, StyleSheet} from "react-native";
 import { Image } from "expo-image";
-import { Button, Card, Surface, Text } from "react-native-paper";
+import {Button, Card, Surface, Text, useTheme} from "react-native-paper";
 import { foregroundColor } from "../../../../utils/foregroundColor";
 import { useQueries } from "react-query";
 import { fetchStoreFrontData } from "../../../../api/hooks/useStoreFrontData"; // Extracted query function
@@ -11,6 +11,7 @@ import StoreFrontCollectionCard from "../../../../components/StoreFrontCollectio
 import {useLocalSearchParams, useRouter} from "expo-router";
 import {useSelector} from "react-redux";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import {Rating} from "@kolking/react-native-rating";
 
 const getUniqueProducts = (products) => {
     return [...new Set(products)];
@@ -19,6 +20,8 @@ const getUniqueProducts = (products) => {
 export default function StoreFront(props) {
     const { storeId } = useSelector((state) => state.store);
     const router = useRouter();
+    const theme = useTheme();
+    const styles = makeStyles(theme);
     const merchant = useSelector((state) => state.merchant);
     const store = useSelector((state) => state.store);
     console.log('store:', store);
@@ -44,17 +47,12 @@ export default function StoreFront(props) {
     const storeProductsData = storeProductsQuery.data;
 
     const [uniqueProducts, setUniqueProducts] = useState([]);
-    const [textColor, setTextColor] = useState(null);
 
     // Extract unique products and set text color when data is fetched
     useEffect(() => {
         if (storeProductsData) {
             const uniqueProducts = getUniqueProducts(storeProductsData);
             setUniqueProducts(uniqueProducts);
-        }
-        if (storeFrontData) {
-            const { textColor: t } = foregroundColor(storeFrontData.storeBrandColor);
-            setTextColor(t);
         }
     }, [storeFrontData, storeProductsData]);
 
@@ -123,69 +121,107 @@ export default function StoreFront(props) {
                     >
                         <Card
                             style={{
-                                width: "100%",
+                                flex: 1,
                                 height: "auto",
-                                padding: 10,
-                                display: "flex",
-                                flexDirection: "column",
+                                // paddingVertical: 16,
+                                padding: 16,
                                 alignItems: "center",
-                                backgroundColor: storeFrontData.storeBrandColor,
+                                backgroundColor: theme.colors.white,
                             }}
                         >
-                            <View
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    width: "100%",
-                                    height: "auto",
-                                }}
-                            >
-                                <Image
-                                    source={storeFrontData.storeLogoImage}
+                            <View style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                // margin: 16,
+                                // width: '100%',
+                                alignSelf: 'stretch',
+                                // backgroundColor: 'yellow'
+                            }}>
+                                <View
                                     style={{
-                                        height: 80,
-                                        width: 80,
-                                        borderRadius: 40,
-                                        borderStyle: "solid",
-                                        borderWidth: 2,
-                                        borderColor: textColor,
-                                        margin: 0,
-                                        padding: 0,
+                                        display: "flex",
+                                        flexDirection: "row",
+                                        alignItems: "center",
+                                        justifyContent: 'center',
+                                        alignSelf: 'stretch',
+                                        // width: "100%",
+                                        height: "auto",
+                                        // backgroundColor: 'green'
                                     }}
-                                />
-                                <View>
-                                    <Text
-                                        variant={"displaySmall"}
-                                        style={{ marginTop: 10, color: textColor }}
-                                    >
-                                        {storeFrontData.storeName}
-                                    </Text>
+                                >
+                                    <Image
+                                        source={storeFrontData.storeLogoImage}
+                                        style={{
+                                            height: 80,
+                                            width: 80,
+                                            borderRadius: 40,
+                                            borderStyle: "solid",
+                                            borderWidth: 2,
+                                            borderColor: 'black',
+                                            margin: 0,
+                                            padding: 0,
+                                        }}
+                                    />
+                                    <View style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'flex-start',
+                                        marginLeft: 8,
+                                        flex: 1
+                                    }}>
+                                        <Text
+                                            // variant={"displaySmall"}
+                                            style={{color: 'black', fontSize: 20}}
+                                            // adjustsFontSizeToFit={true}
+                                            numberOfLines={2}
+                                        >
+                                            {storeFrontData.storeName}
+                                        </Text>
+                                        <View>
+                                            <Text variant={"titleMedium"} style={{color: 'black'}}>
+                                                {storeProductsData.length.toString() + " Products " + storeFrontData.collections.length + " Collection" + (storeFrontData.collections.length > 1 ? 's' : '')}
+                                            </Text>
+                                        </View>
+                                        <View>
+                                            <Pressable onPress={() => router.push('./FollowersList')}>
+                                                <Text variant={"titleMedium"} style={{ color: 'black' }}>
+                                                    {storeFrontData.followerCount +
+                                                        " Followers"}
+                                                </Text>
+                                            </Pressable>
+                                        </View>
+                                        <View style={styles.rating}>
+                                            <Rating
+                                                disabled={true}
+                                                variant={"stars-outline"}
+                                                fillColor={"#faaf00"}
+                                                baseColor={"black"}
+                                                size={18}
+                                                rating={3.5 || 0}
+                                                onChange={() => {
+                                                }}
+                                            />
+                                            {true && (<Text style={styles.ratingText} variant={"bodyLarge"}>
+                                                {'3.5' + "/5 " + "(" + '78' + ")"}
+                                            </Text>)}
+                                        </View>
+                                    </View>
+
                                 </View>
-                                <View>
-                                    <Text variant={"titleMedium"} style={{ color: textColor }}>
-                                        {storeProductsData.length.toString() +
-                                            " Products " +
-                                            storeFrontData.collections.length +
-                                            " Collections"}
+                                <View style={{ width:'100%', marginTop: 10}}>
+                                    <Text variant={"bodyLarge"} style={{color: 'black'}}>
+                                        {storeFrontData.storeDescription}
                                     </Text>
-                                </View>
-                                <View>
-                                    <Pressable onPress={() => router.push('./FollowersList')}>
-                                    <Text variant={"titleMedium"} style={{ color: textColor }}>
-                                        {storeFrontData.followerCount +
-                                            " Followers"}
-                                    </Text>
-                                    </Pressable>
                                 </View>
                                 <View style={{ marginTop: 10 }}>
                                     <Button
                                         mode={"elevated"}
                                         elevation={5}
-                                        buttonColor={"white"}
-                                        textColor={"black"}
+                                        buttonColor={theme.colors.primary}
+                                        textColor={"white"}
                                         style={{borderRadius: 8}}
-                                        icon={({size, color}) => <MaterialIcons name={'settings'} size={size}/>}
+                                        icon={({size, color}) => <MaterialIcons name={'settings'} size={size} color={'white'}/>}
                                         onPress={() => {}}
                                     >
                                         Settings
@@ -221,3 +257,53 @@ export default function StoreFront(props) {
         )
     );
 }
+
+const makeStyles = (theme) => StyleSheet.create({
+
+    followButton: {
+        borderRadius: 5,
+    },
+    followingButtonContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-around",
+        backgroundColor: theme.colors.white,
+        borderRadius: 5,
+        borderWidth: 1,
+        borderColor: theme.colors.secondary,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        marginHorizontal: 10
+    },
+    followButtonContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-around",
+        backgroundColor: theme.colors.secondary,
+        borderRadius: 5,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        marginHorizontal: 10
+    }, messageButtonContainer: {
+        flexDirection: "row",
+        alignItems: "flex-end",
+        justifyContent: "space-around",
+        backgroundColor: theme.colors.secondary,
+        borderRadius: 5,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        marginHorizontal: 10
+    }, followingText: {
+        fontSize: 16, fontWeight: "600", color: "black",
+    }, unfollowButton: {
+        justifyContent: "center", alignItems: "center",
+    }, buttonLabel: {
+        fontSize: 18, fontWeight: "600",
+    }, buttonContent: {
+        flexDirection: "row", justifyContent: "center",
+    }, rating: {
+        display: "flex", flexDirection: "row", justifyContent: "flex-start", marginVertical: 0,
+    }, ratingText: {
+        marginLeft: 10,
+    },
+})
