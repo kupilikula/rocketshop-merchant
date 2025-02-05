@@ -31,18 +31,18 @@ const OffersScreen = () => {
                                     flexDirection: "row",
                                 }}
                             >
-                                {item.applicableTo.products.length > 0 && (
+                                {item.applicableTo.products?.length > 0 && (
                                     <Text variant={"bodyLarge"}>
                                         {item.applicableTo.products.length.toString() + " Products  "}
                                     </Text>
                                 )}
-                                {item.applicableTo.collections.length > 0 && (
+                                {item.applicableTo.collections?.length > 0 && (
                                     <Text variant={"bodyLarge"}>
                                         {item.applicableTo.collections.length.toString() +
                                             " Collections  "}
                                     </Text>
                                 )}
-                                {item.applicableTo.tags.length > 0 && (
+                                {item.applicableTo.tags?.length > 0 && (
                                     <Text variant={"bodyLarge"}>
                                         {item.applicableTo.tags.length.toString() + " Tags  "}
                                     </Text>
@@ -136,7 +136,7 @@ const OffersScreen = () => {
                     >
                         <Button
                             onPress={() =>
-                                router.push("/Main/(tabs)/Offers/Offer/New")
+                                router.push("/Main/(tabs)/Offers/Offer/NewOffer")
                             }
                             mode={"contained"}
                             icon={"plus"}

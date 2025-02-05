@@ -1,18 +1,19 @@
-import React from "react";
-import { ListRenderItemInfo, Pressable, View } from "react-native";
+import React, {useState} from "react";
+import { ListRenderItemInfo, Pressable, View, StyleSheet } from "react-native";
 import ReorderableList, {
     ReorderableListItem,
     ReorderableListReorderEvent,
     reorderItems,
     useReorderableDrag,
 } from "react-native-reorderable-list";
-import { Text, Surface, useTheme } from "react-native-paper";
+import {Text, Surface, useTheme, Button, Portal, Modal, Chip, Switch, RadioButton, Card} from "react-native-paper";
 import { useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useCollections } from "@/api/hooks/useCollections";
 import { useUpdateCollectionOrder } from "@/api/hooks/useUpdateCollectionOrder";
 import CollectionListItem from "../../../../components/CollectionListItem";
 import {useSelector} from "react-redux";
+import {AddNewCollectionModal} from '@/components/AddNewCollectionModal';
 
 interface ListElementProps {
     collectionId: string;
@@ -50,6 +51,7 @@ const CollectionsScreen = () => {
 
     // React Query: Mutation for updating order
     const { mutate: updateCollectionOrder } = useUpdateCollectionOrder(storeId);
+    const [showNewCollectionModal, setShowNewCollectionModal] = useState(false);
 
     const handleReorder = ({ from, to }: ReorderableListReorderEvent) => {
         const newData = reorderItems(collections, from, to);
@@ -141,12 +143,17 @@ const CollectionsScreen = () => {
                                     (nInactive !== 1 ? "s" : "")}
                             </Text>
                         </View>
+                        <View style={{display: 'flex', flexDirection: 'row', alignSelf: 'center', marginVertical: 10}}>
+                            <Button mode={'outlined'} onPress={() => setShowNewCollectionModal(true)} style={{borderColor: theme.colors.success}} labelStyle={{color: theme.colors.success}} icon={'plus'}>Add New Collection</Button>
+                        </View>
+
                         <Text variant={"bodyMedium"} style={{ marginLeft: 10 }}>
                             Drag & drop to reorder
                         </Text>
                     </>
                 }
             />
+            <AddNewCollectionModal isVisible={showNewCollectionModal} onDismiss={() => setShowNewCollectionModal(false)}/>
         </Surface>
     );
 };

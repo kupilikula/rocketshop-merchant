@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { FlatList, View, StyleSheet, Modal } from "react-native";
+import {FlatList, View, StyleSheet, Modal, Keyboard, TouchableWithoutFeedback} from "react-native";
 import {
   TextInput,
   Checkbox,
@@ -7,23 +7,28 @@ import {
   Text,
   Surface,
   Divider,
-  useTheme,
+  useTheme, Portal,
 } from "react-native-paper";
 import Fuse from "fuse.js";
 import { faker } from "@faker-js/faker";
 import { getCollection } from "../utils/fakeDataMethods";
 import CollectionListItem from "./CollectionListItem";
+import {useCollections} from "../api/hooks/useCollections";
+import {useSelector} from "react-redux";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 const initialCollections = faker.helpers.multiple(getCollection, { count: 10 });
 
-const CollectionPickerModal = ({ visible, onClose, onApply }) => {
+const CollectionPickerModal = ({ visible, onClose, onApply, offerName, existingSelectedCollectionIds }) => {
   const theme = useTheme();
-  const styles = makeStyles(theme);
-
+  const insets = useSafeAreaInsets();
+  const styles = makeStyles(theme, insets);
+  const {storeId} = useSelector((state) => state.store);
   // State for product selection
-  const [collections, setCollections] = useState(initialCollections);
+  // const [collections, setCollections] = useState(initialCollections);
+  const {data: collections} = useCollections(storeId);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCollectionIds, setSelectedCollectionIds] = useState([]);
+  const [selectedCollectionIds, setSelectedCollectionIds] = useState(existingSelectedCollectionIds);
   const fuse = useMemo(() => {
     return new Fuse(collections, {
       keys: ["collectionName"],
@@ -50,7 +55,7 @@ const CollectionPickerModal = ({ visible, onClose, onApply }) => {
   };
 
   const allSelected = () => {
-    return filteredCollections.reduce(
+    return filteredCollections?.reduce(
       (A, f) => A && selectedCollectionIds.includes(f.collectionId),
       true,
     );
@@ -76,6 +81,7 @@ const CollectionPickerModal = ({ visible, onClose, onApply }) => {
   };
 
   const renderCollectionItem = ({ item }) => (
+      <TouchableWithoutFeedback>
     <View style={styles.collectionItem}>
       <View style={{ zIndex: 100, width: "90%" }}>
         <CollectionListItem
@@ -94,21 +100,25 @@ const CollectionPickerModal = ({ visible, onClose, onApply }) => {
         onPress={() => toggleCollectionSelection(item.collectionId)}
       />
     </View>
+      </TouchableWithoutFeedback>
   );
 
   return (
+      <Portal>
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <Surface style={styles.modalContainer}>
+        <Text variant={'titleMedium'} style={{marginVertical: 16}}>{`Select Collections for Offer ${offerName}`}</Text>
         {/* Search Bar */}
         <TextInput
           label="Search Collections"
-          value={searchQuery}
+          // value={searchQuery}
           onChangeText={setSearchQuery}
           style={styles.searchBar}
           mode="outlined"
         />
-        <View>
-          <Button mode={"text"} onPress={handleSelectAllFiltered}>
+        <View style={{display: 'flex', flexDirection: 'row', alignSelf:'center'}}>
+          <Button mode={"outlined"} onPress={handleSelectAllFiltered}>
             {!allSelected() ? "Select All Results" : "Unselect All Results"}
           </Button>
         </View>
@@ -136,16 +146,20 @@ const CollectionPickerModal = ({ visible, onClose, onApply }) => {
           </Button>
         </View>
       </Surface>
+      </TouchableWithoutFeedback>
     </Modal>
+      </Portal>
   );
 };
 
-const makeStyles = (theme) =>
+const makeStyles = (theme, insets) =>
   StyleSheet.create({
     modalContainer: {
-      flex: 1,
-      padding: 10,
-      backgroundColor: theme.colors.background,
+      height: "100%",
+      paddingHorizontal: 16,
+      paddingTop: insets.top + 16,
+      paddingBottom: insets.bottom,
+      backgroundColor: theme.colors.surface,
     },
     searchBar: {
       marginBottom: 10,

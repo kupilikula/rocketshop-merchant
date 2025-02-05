@@ -134,7 +134,6 @@ export default function CollectionPage() {
             {collection?.storeFrontDisplay && (
                 <View style={{ marginTop: 15 }}>
                     <Text variant={"titleMedium"}>Number of Items on Store Front</Text>
-                    <View style={styles.radioButtonGroup}>
                         <RadioButton.Group
                             onValueChange={(value) =>
                                 handleToggleSettings("storeFrontDisplayNumberOfItems", value)
@@ -143,19 +142,13 @@ export default function CollectionPage() {
                         >
                             <View style={styles.radioGroup}>
                                 {[2, 4, 6, 8].map((number) => (
-                                    <RadioButton.Item
-                                        key={number}
-                                        label={number.toString()}
-                                        value={number}
-                                        mode="android"
-                                        color={theme.colors.primary}
-                                        position="leading"
-                                        style={styles.radioButtonItem}
-                                    />
+                                    <View key={number} style={styles.radioButtonContainer}>
+                                        <RadioButton.Android value={number} color={theme.colors.primary} />
+                                        <Text>{number.toString()}</Text>
+                                    </View>
                                 ))}
                             </View>
                         </RadioButton.Group>
-                    </View>
                 </View>
             )}
         </Card>
@@ -223,8 +216,21 @@ const makeStyles = ({ colors }) =>
         radioButtonGroup: {
             display: "flex",
             flexDirection: "row",
+            flexWrap: 'wrap',
+            backgroundColor: 'yellow'
         },
         radioButtonItem: {
             marginRight: 10,
+            backgroundColor: 'red'
+        },
+        radioGroup: {
+            flexDirection: "row",
+            alignItems: "center",
+            flexWrap: "wrap", // Ensures wrapping if needed
+        },
+        radioButtonContainer: {
+            flexDirection: "row",
+            alignItems: "center",
+            marginRight: 15,
         },
     });

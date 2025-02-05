@@ -4,7 +4,7 @@ import StoreFrontProductCard from "./StoreFrontProductCard";
 import { Link } from "expo-router";
 
 export default function StoreFrontCollectionCard(props) {
-    console.log('c:',props.collection);
+    // console.log('c:',props.collection);
   return (
     <Card
       style={{
