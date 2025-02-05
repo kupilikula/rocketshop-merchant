@@ -58,14 +58,14 @@ const TagPickerModal = ({ visible, onClose, onApply, offerName, existingSelected
           {tags.map((tag) => (
             <Chip
               key={tag}
-              selected={selectedTags.includes(tag)}
+              selected={(selectedTags || []).includes(tag)}
               onPress={() => toggleTagSelection(tag)}
               style={[
                 styles.chip,
-                selectedTags.includes(tag) && styles.chipSelected,
+                  (selectedTags||[]).includes(tag) && styles.chipSelected,
               ]}
               textStyle={{
-                color: selectedTags.includes(tag) ? "white" : "black",
+                color: (selectedTags || []).includes(tag) ? "white" : "black",
               }}
               selectedColor={"white"}
             >

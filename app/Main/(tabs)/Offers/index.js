@@ -31,20 +31,20 @@ const OffersScreen = () => {
                                     flexDirection: "row",
                                 }}
                             >
-                                {item.applicableTo.products?.length > 0 && (
+                                {item.applicableTo.productIds?.length > 0 && (
                                     <Text variant={"bodyLarge"}>
-                                        {item.applicableTo.products.length.toString() + " Products  "}
+                                        {item.applicableTo.productIds.length.toString() + " Products  "}
                                     </Text>
                                 )}
-                                {item.applicableTo.collections?.length > 0 && (
+                                {item.applicableTo.collectionIds?.length > 0 && (
                                     <Text variant={"bodyLarge"}>
-                                        {item.applicableTo.collections.length.toString() +
+                                        {item.applicableTo.collectionIds.length.toString() +
                                             " Collections  "}
                                     </Text>
                                 )}
-                                {item.applicableTo.tags?.length > 0 && (
+                                {item.applicableTo.productTags?.length > 0 && (
                                     <Text variant={"bodyLarge"}>
-                                        {item.applicableTo.tags.length.toString() + " Tags  "}
+                                        {item.applicableTo.productTags.length.toString() + " Tags  "}
                                     </Text>
                                 )}
                             </View>

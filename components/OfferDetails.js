@@ -50,9 +50,9 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
     const [collectionPickerVisible, setCollectionPickerVisible] = useState(false);
     const [tagPickerVisible, setTagPickerVisible] = useState(false);
 
-    const [selectedProducts, setSelectedProducts] = useState([]);
-    const [selectedCollections, setSelectedCollections] = useState([]);
-    const [selectedTags, setSelectedTags] = useState([]);
+    const [selectedProductIds, setSelectedProductIds] = useState([]);
+    const [selectedCollectionIds, setSelectedCollectionIds] = useState([]);
+    const [selectedProductTags, setSelectedProductTags] = useState([]);
 
     useEffect(() => {
         if (offer) {
@@ -64,27 +64,27 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
             setRequireCode(offer.requireCode);
             setDiscountDetails(offer.discountDetails);
             setApplicableTo(offer.applicableTo);
-            setConditions(offer.conditions);
+            setConditions(offer.conditions || {});
             setValidityDateRange(offer.validityDateRange);
             setOfferStatus(offer.isActive);
-            setSelectedProducts(offer.applicableTo.productIds || []);
-            setSelectedCollections(offer.applicableTo.collectionIds || []);
-            setSelectedTags(offer.applicableTo.tags || []);
+            setSelectedProductIds(offer.applicableTo.productIds || []);
+            setSelectedCollectionIds(offer.applicableTo.collectionIds || []);
+            setSelectedProductTags(offer.applicableTo.productTags || []);
         }
     }, [offer]);
 
     const handleApplyProducts = (products) => {
-        setSelectedProducts(products);
+        setSelectedProductIds(products);
         setProductPickerVisible(false);
     };
 
     const handleApplyCollections = (collections) => {
-        setSelectedCollections(collections);
+        setSelectedCollectionIds(collections);
         setCollectionPickerVisible(false);
     };
 
     const handleApplyTags = (tags) => {
-        setSelectedTags(tags);
+        setSelectedProductTags(tags);
         setTagPickerVisible(false);
     };
 
@@ -123,7 +123,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
         }
 
         // ✅ Ensure at least one product, collection, or tag is selected
-        if (selectedProducts.length === 0 && selectedCollections.length === 0 && selectedTags.length === 0) {
+        if (selectedProductIds.length === 0 && selectedCollectionIds.length === 0 && selectedProductTags.length === 0) {
             errors.push("At least one Product, Collection, or Tag must be selected.");
         }
 
@@ -142,9 +142,9 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
             requireCode,
             discountDetails,
             applicableTo: {
-                productIds: selectedProducts,
-                collectionIds: selectedCollections,
-                tags: selectedTags,
+                productIds: selectedProductIds,
+                collectionIds: selectedCollectionIds,
+                tags: selectedProductTags,
             },
             conditions,
             validityDateRange,
@@ -165,7 +165,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
         //     validity,
         // });
     };
-
+    console.log('offer:', offer);
 
     return (<ScrollView>
             <Surface style={styles.container}>
@@ -321,9 +321,9 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                             keyboardType="numeric"
                             mode="outlined"
                             style={styles.input}
-                            value={discountDetails.fixedAmount.toString()}
+                            value={discountDetails.fixedAmount?.toString()}
                             onChangeText={(value) =>
-                                setDiscountDetails({ fixedAmount: parseFloat(value) })
+                                setDiscountDetails({ fixedAmount: parseFloat(value || 0) })
                             }
                         />
                     )}
@@ -334,7 +334,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                                 keyboardType="numeric"
                                 mode="outlined"
                                 style={styles.inputHalf}
-                                value={discountDetails.buyN.toString()}
+                                value={discountDetails.buyN?.toString() || ''}
                                 onChangeText={(value) =>
                                     setDiscountDetails((prev) => ({ ...prev, buyN: parseInt(value) }))
                                 }
@@ -344,7 +344,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                                 keyboardType="numeric"
                                 mode="outlined"
                                 style={styles.inputHalf}
-                                value={discountDetails.getK.toString()}
+                                value={discountDetails.getK?.toString() || ''}
                                 onChangeText={(value) =>
                                     setDiscountDetails((prev) => ({ ...prev, getK: parseInt(value) }))
                                 }
@@ -368,9 +368,9 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                     >
                         <View>
                             <Text variant={"titleMedium"}>Products</Text>
-                            {selectedProducts.length > 0 && (
+                            {selectedProductIds.length > 0 && (
                                 <Text variant={"bodyMedium"}>
-                                    {selectedProducts.length.toString() + " Products selected"}
+                                    {selectedProductIds.length.toString() + " Products selected"}
                                 </Text>
                             )}
                         </View>
@@ -388,7 +388,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                     <ProductPickerModal
                         visible={productPickerVisible}
                         offerName={offer.offerName}
-                        existingSelectedProductIds = {offer.applicableTo.productIds}
+                        existingSelectedProductIds = {offer.applicableTo.productIds || []}
                         onClose={() => setProductPickerVisible(false)}
                         onApply={handleApplyProducts}
                     />
@@ -405,9 +405,9 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                     >
                         <View>
                             <Text variant={"titleMedium"}>Collections</Text>
-                            {selectedCollections.length > 0 && (
+                            {selectedCollectionIds.length > 0 && (
                                 <Text variant={"bodyMedium"}>
-                                    {selectedCollections.length.toString() +
+                                    {selectedCollectionIds.length.toString() +
                                         " Collections selected"}
                                 </Text>
                             )}
@@ -426,7 +426,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                     <CollectionPickerModal
                         visible={collectionPickerVisible}
                         onClose={() => setCollectionPickerVisible(false)}
-                        existingSelectedCollectionIds={offer.applicableTo.collectionIds}
+                        existingSelectedCollectionIds={offer.applicableTo.collectionIds || []}
                         onApply={handleApplyCollections}
                         offerName={offer.offerName}
                     />
@@ -458,7 +458,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                         visible={tagPickerVisible}
                         onClose={() => setTagPickerVisible(false)}
                         onApply={handleApplyTags}
-                        existingSelectedTags={offer.applicableTo.tags}
+                        existingSelectedTags={offer.applicableTo.productTags || []}
                         offerName={offer.offerName}
                     />
                     <View
@@ -469,7 +469,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                             margin: 10,
                         }}
                     >
-                        {selectedTags.map((t) => (
+                        {selectedProductTags.map((t) => (
                             <View
                                 key={t}
                                 style={{ display: "flex", flexDirection: "row", margin: 5 }}
@@ -497,7 +497,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                         onChangeText={(value) =>
                             setConditions((prev) => ({
                                 ...prev,
-                                minimumPurchaseAmount: parseFloat(value),
+                                minimumPurchaseAmount: parseFloat(value || 0),
                             }))
                         }
                     />

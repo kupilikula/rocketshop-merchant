@@ -56,7 +56,7 @@ const CollectionPickerModal = ({ visible, onClose, onApply, offerName, existingS
 
   const allSelected = () => {
     return filteredCollections?.reduce(
-      (A, f) => A && selectedCollectionIds.includes(f.collectionId),
+      (A, f) => A && selectedCollectionIds?.includes(f.collectionId),
       true,
     );
   };
@@ -93,7 +93,7 @@ const CollectionPickerModal = ({ visible, onClose, onApply, offerName, existingS
       </View>
       <Checkbox.Android
         status={
-          selectedCollectionIds.includes(item.collectionId)
+          selectedCollectionIds?.includes(item.collectionId)
             ? "checked"
             : "unchecked"
         }

@@ -48,11 +48,11 @@ const ProductPickerModal = ({ visible, onClose, onApply, offerName, existingSele
 
   useEffect(() => {
     if (productsData) {
-      const uniqueProducts = getUniqueProducts(productsData);
-      setUniqueProducts(uniqueProducts);
+      setUniqueProducts(getUniqueProducts(productsData));
     }
   }, [productsData]);
 
+  // console.log('uniqueP:', uniqueProducts);
   // 🔹 Fuse instance for searching products
   const fuse = useMemo(() => {
     return new Fuse(uniqueProducts, {
@@ -77,6 +77,8 @@ const ProductPickerModal = ({ visible, onClose, onApply, offerName, existingSele
     );
   }, []);
 
+  // console.log('filteredProds:', filteredProducts.map((p) => p.productId));
+
   const handleSelectAllFiltered = () => {
     if (allSelected()) {
       let newList = selectedProductIds.filter(
@@ -97,7 +99,7 @@ const ProductPickerModal = ({ visible, onClose, onApply, offerName, existingSele
 
   const allSelected = () => {
     return filteredProducts.reduce(
-        (A, f) => A && selectedProductIds.includes(f.productId),
+        (A, f) => A && selectedProductIds?.includes(f.productId),
         true,
     );
   };
