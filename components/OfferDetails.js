@@ -18,11 +18,9 @@ import {
 import ProductPickerModal from "./ProductPickerModal";
 import CollectionPickerModal from "./CollectionPickerModal";
 import TagPickerModal from "./TagPickerModal";
-import { useOffer } from "../api/hooks/useOffer";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import {useSelector} from "react-redux";
 import CrossPlatformDatePicker from "./CrossPlatformDatePicker";
-import {useUpdateOffer} from "../api/hooks/useUpdateOffer";
 
 const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardHandler, discardButtonLabel}) => {
     const theme = useTheme();
@@ -50,6 +48,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
     const [collectionPickerVisible, setCollectionPickerVisible] = useState(false);
     const [tagPickerVisible, setTagPickerVisible] = useState(false);
 
+    const [storeWide, setStoreWide] = useState(false);
     const [selectedProductIds, setSelectedProductIds] = useState([]);
     const [selectedCollectionIds, setSelectedCollectionIds] = useState([]);
     const [selectedProductTags, setSelectedProductTags] = useState([]);
@@ -67,6 +66,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
             setConditions(offer.conditions || {});
             setValidityDateRange(offer.validityDateRange);
             setOfferStatus(offer.isActive);
+            setStoreWide(offer.applicableTo.storeWide || false);
             setSelectedProductIds(offer.applicableTo.productIds || []);
             setSelectedCollectionIds(offer.applicableTo.collectionIds || []);
             setSelectedProductTags(offer.applicableTo.productTags || []);
@@ -123,7 +123,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
         }
 
         // ✅ Ensure at least one product, collection, or tag is selected
-        if (selectedProductIds.length === 0 && selectedCollectionIds.length === 0 && selectedProductTags.length === 0) {
+        if (!storeWide && selectedProductIds.length === 0 && selectedCollectionIds.length === 0 && selectedProductTags.length === 0) {
             errors.push("At least one Product, Collection, or Tag must be selected.");
         }
 
@@ -142,9 +142,10 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
             requireCode,
             discountDetails,
             applicableTo: {
+                storeWide: storeWide,
                 productIds: selectedProductIds,
                 collectionIds: selectedCollectionIds,
-                tags: selectedProductTags,
+                productTags: selectedProductTags,
             },
             conditions,
             validityDateRange,
@@ -336,7 +337,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                                 style={styles.inputHalf}
                                 value={discountDetails.buyN?.toString() || ''}
                                 onChangeText={(value) =>
-                                    setDiscountDetails((prev) => ({ ...prev, buyN: parseInt(value) }))
+                                    setDiscountDetails((prev) => ({ ...prev, buyN: parseInt(value || 0) }))
                                 }
                             />
                             <TextInput
@@ -346,7 +347,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                                 style={styles.inputHalf}
                                 value={discountDetails.getK?.toString() || ''}
                                 onChangeText={(value) =>
-                                    setDiscountDetails((prev) => ({ ...prev, getK: parseInt(value) }))
+                                    setDiscountDetails((prev) => ({ ...prev, getK: parseInt(value || 0) }))
                                 }
                             />
                         </View>
@@ -356,6 +357,17 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                 {/* Applicability */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Apply To</Text>
+                    <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', }}>
+                        <Text variant={'titleMedium'} style={{marginRight: 16}}>StoreWide</Text>
+                        <Switch
+                            // style={ Platform.OS==='ios' ? { transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }]} : {}}
+                            value={storeWide}
+                            onValueChange={() => setStoreWide(!requireCode)}
+                            color={storeWide ? theme.colors.success : "#aaaaaa"} // Green for Active, Red for Draft
+                        />
+                    </View>
+                    {!storeWide &&
+                    <>
                     <View
                         style={{
                             width: "100%",
@@ -483,6 +495,8 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                             </View>
                         ))}
                     </View>
+                    </>
+                    }
                 </View>
 
                 {/* Conditions */}

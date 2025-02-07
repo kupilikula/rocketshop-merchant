@@ -61,7 +61,7 @@ const ProductPickerModal = ({ visible, onClose, onApply, offerName, existingSele
       includeScore: false,
       ignoreLocation: true,
     });
-  }, []);
+  }, [uniqueProducts]);
 
   // 🔹 Compute filtered products only when searchQuery changes
   const filteredProducts = useMemo(() => {

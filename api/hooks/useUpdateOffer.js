@@ -13,6 +13,7 @@ export const useUpdateOffer = (storeId, offerId) => {
         onSuccess: () => {
             // Invalidate the specific offer query to refetch updated data
             queryClient.invalidateQueries(["offer", storeId, offerId]);
+            queryClient.invalidateQueries(["offers", storeId]);
         },
         onError: (error) => {
             console.error("Error updating offer:", error);
