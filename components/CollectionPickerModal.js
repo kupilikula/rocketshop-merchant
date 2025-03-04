@@ -19,7 +19,7 @@ import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 const initialCollections = faker.helpers.multiple(getCollection, { count: 10 });
 
-const CollectionPickerModal = ({ visible, onClose, onApply, offerName, existingSelectedCollectionIds }) => {
+const CollectionPickerModal = ({ visible, onClose, onApply, name, existingSelectedCollectionIds }) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const styles = makeStyles(theme, insets);
@@ -28,7 +28,7 @@ const CollectionPickerModal = ({ visible, onClose, onApply, offerName, existingS
   // const [collections, setCollections] = useState(initialCollections);
   const {data: collections} = useCollections(storeId);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCollectionIds, setSelectedCollectionIds] = useState(existingSelectedCollectionIds);
+  const [selectedCollectionIds, setSelectedCollectionIds] = useState(existingSelectedCollectionIds || []);
   const fuse = useMemo(() => {
     return new Fuse(collections, {
       keys: ["collectionName"],
@@ -108,7 +108,7 @@ const CollectionPickerModal = ({ visible, onClose, onApply, offerName, existingS
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <Surface style={styles.modalContainer}>
-        <Text variant={'titleMedium'} style={{marginVertical: 16}}>{`Select Collections for Offer ${offerName}`}</Text>
+        <Text variant={'titleMedium'} style={{marginVertical: 16}}>{`Select Collections for ${name}`}</Text>
         {/* Search Bar */}
         <TextInput
           label="Search Collections"

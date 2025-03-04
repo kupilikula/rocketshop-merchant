@@ -399,7 +399,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                     </View>
                     <ProductPickerModal
                         visible={productPickerVisible}
-                        offerName={offer.offerName}
+                        name={offer.offerName}
                         existingSelectedProductIds = {offer.applicableTo.productIds || []}
                         onClose={() => setProductPickerVisible(false)}
                         onApply={handleApplyProducts}
@@ -440,7 +440,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                         onClose={() => setCollectionPickerVisible(false)}
                         existingSelectedCollectionIds={offer.applicableTo.collectionIds || []}
                         onApply={handleApplyCollections}
-                        offerName={offer.offerName}
+                        name={offer.offerName}
                     />
 
                     <View
@@ -471,7 +471,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                         onClose={() => setTagPickerVisible(false)}
                         onApply={handleApplyTags}
                         existingSelectedTags={offer.applicableTo.productTags || []}
-                        offerName={offer.offerName}
+                        name={offer.offerName}
                     />
                     <View
                         style={{

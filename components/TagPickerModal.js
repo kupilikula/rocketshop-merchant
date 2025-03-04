@@ -12,7 +12,7 @@ import {useProductTags} from "../api/hooks/useProductTags";
 import {useSelector} from "react-redux";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 
-const TagPickerModal = ({ visible, onClose, onApply, offerName, existingSelectedTags }) => {
+const TagPickerModal = ({ visible, onClose, onApply, name, existingSelectedTags }) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const styles = makeStyles(theme, insets);
@@ -20,7 +20,7 @@ const TagPickerModal = ({ visible, onClose, onApply, offerName, existingSelected
   const {data: existingTags} = useProductTags(storeId);
 
   const [tags, setTags] = useState(existingTags || []);
-  const [selectedTags, setSelectedTags] = useState(existingSelectedTags);
+  const [selectedTags, setSelectedTags] = useState(existingSelectedTags || []);
   const [newTag, setNewTag] = useState("");
 
   const handleAddTag = () => {
@@ -40,7 +40,7 @@ const TagPickerModal = ({ visible, onClose, onApply, offerName, existingSelected
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <Surface style={styles.modalContainer}>
-          <Text variant={'titleMedium'} style={{marginVertical: 16}}>{`Select Product Tags for Offer ${offerName}`}</Text>
+          <Text variant={'titleMedium'} style={{marginVertical: 16}}>{`Select Product Tags for Offer ${name}`}</Text>
         {/* Tag Input */}
         <TextInput
           label="Add New Tag"

@@ -48,6 +48,8 @@ export default function RootLayout() {
       warning: "#FFBE0B", // Gold
       icon: "#0196f9", // blue
       info: "#00C4CC", // Turquoise Blue for informational states
+      secondaryContainer: "#FF6F59",
+      onSecondaryContainer: 'white'
     },
     dark: false, // Set to true if creating a dark theme
   };

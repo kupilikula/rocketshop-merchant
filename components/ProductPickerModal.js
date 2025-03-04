@@ -33,7 +33,7 @@ const getUniqueProducts = (products) => {
   return [...new Set(products)];
 };
 
-const ProductPickerModal = ({ visible, onClose, onApply, offerName, existingSelectedProductIds }) => {
+const ProductPickerModal = ({ visible, onClose, onApply, name, existingSelectedProductIds }) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const styles = makeStyles(theme, insets);
@@ -68,8 +68,9 @@ const ProductPickerModal = ({ visible, onClose, onApply, offerName, existingSele
     return searchQuery.trim() ? fuse.search(searchQuery).map((res) => res.item) : uniqueProducts;
   }, [searchQuery, uniqueProducts, fuse]);
 
-  const [selectedProductIds, setSelectedProductIds] = useState(existingSelectedProductIds);
-
+  const [selectedProductIds, setSelectedProductIds] = useState(existingSelectedProductIds || []);
+  console.log('existingPIDs:', existingSelectedProductIds);
+  console.log('selectedPIDs:', selectedProductIds);
   // 🔹 Stable function to prevent FlatList re-renders
   const toggleProductSelection = useCallback((productId) => {
     setSelectedProductIds((prev) =>
@@ -136,7 +137,7 @@ const ProductPickerModal = ({ visible, onClose, onApply, offerName, existingSele
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <Surface style={styles.modalContainer}>
             {/* 🔹 Search Bar */}
-            <Text variant={'titleMedium'} style={{marginVertical: 16}}>{`Select Products for Offer ${offerName}`}</Text>
+            <Text variant={'titleMedium'} style={{marginVertical: 16}}>{`Select Products for ${name}`}</Text>
             <TextInput
                 label="Search Products"
                 // value={searchQuery}
