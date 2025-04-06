@@ -6,9 +6,6 @@ import ReorderableList, {
     reorderItems,
     useReorderableDrag,
 } from "react-native-reorderable-list";
-import * as yup from 'yup';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
 import {useRouter} from "expo-router";
 import { useGetShippingRules } from '../../../../api/hooks/useGetShippingRules';
 import { useReorderShippingRules } from '../../../../api/hooks/useReorderShippingRules';
@@ -18,43 +15,41 @@ import {useSelector} from "react-redux";
 const RuleElement = React.memo(({ rule }) => {
     const drag = useReorderableDrag();
     const theme = useTheme();
+    const styles = makeStyles(theme);
     const router = useRouter();
 
     return (
         <ReorderableListItem>
             <Pressable onLongPress={drag}>
                 <Card style={styles.ruleCard}>
-                    <Card.Title
-                        title={rule.ruleName}
-                        subtitle={<Text>Priority: {rule.priority}</Text>}
-                        right={(props) => (
-                            <View style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end'}}>
-                            <Chip
-                                mode="flat"
-                                style={[
-                                    styles.statusChip,
-                                    {
-                                        backgroundColor: rule.isActive
-                                            ? theme.colors.active
-                                            : theme.colors.inactive
-                                    }
-                                ]}
-                            >
-                                {rule.isActive ? 'Active' : 'Inactive'}
-                            </Chip>
-                            <IconButton
-                                {...props}
-                                icon="pencil"
-                                onPress={() => router.push(`/Main/(tabs)/Shipping/AddEditShippingRule?ruleId=${rule.ruleId}`)}
-                            />
-                            </View>
-                        )}
-                    />
-                    <Card.Content>
-                        <Text>Base Cost: ${rule.baseCost}</Text>
-                        <Text>Shipping Cost: ${rule.formula}</Text>
-                        {/* Render conditions */}
-                    </Card.Content>
+                    <View style={{display: 'flex', flexDirection: 'column'}}>
+                        <Text variant={'titleMedium'}>{rule.ruleName}</Text>
+                        <Text variant={'bodyLarge'}>Base Cost: ₹{rule.baseCost}</Text>
+                        <Text variant={'bodyLarge'}>Shipping Cost: {rule.formula}</Text>
+                        <View style={{alignSelf: 'flex-start'}}>
+                        <Chip
+                            mode="flat"
+                            style={[
+                                styles.statusChip,
+                                {
+                                    backgroundColor: rule.isActive
+                                        ? theme.colors.active
+                                        : theme.colors.inactive
+                                }
+                            ]}
+                        >
+                            {rule.isActive ? 'Active' : 'Inactive'}
+                        </Chip>
+                        </View>
+                    </View>
+                    <View style={{position: 'absolute', top: 0, right: 0, display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                        <IconButton
+                            style={{}}
+                            icon="pencil"
+                            onPress={() => router.push(`/Main/(tabs)/Shipping/AddEditShippingRule?ruleId=${rule.ruleId}`)}
+                        />
+                        <View style={{width: 30, height: 30, borderRadius: 15, backgroundColor: theme.colors.primary, display: 'flex', justifyContent: 'center', alignItems: 'center', alignContent: 'center'}}><Text variant={'bodyLarge'} style={{color: 'white', textAlign: 'center'}}>{rule.priority}</Text></View>
+                    </View>
                 </Card>
             </Pressable>
         </ReorderableListItem>
@@ -64,6 +59,7 @@ const RuleElement = React.memo(({ rule }) => {
 export default function ShippingScreen() {
     const theme = useTheme();
     const router = useRouter();
+    const styles = makeStyles(theme);
     const {storeId} = useSelector((state) => state.store);
     const {
         data: rules = [],
@@ -112,7 +108,7 @@ export default function ShippingScreen() {
     return (
         <View style={styles.container}>
             <Text style={styles.description}>
-                Configure shipping rules for your store. Rules are applied in order of priority.
+                Configure shipping rules for your store. Rules are evaluated in ascending order of priority. The first rule applicable to a cart item (or group of cart items) that can compute a valid shipping cost will be applied for the item(s). Drag & Drop the rules to reorder them.
             </Text>
 
             <ReorderableList
@@ -133,18 +129,21 @@ export default function ShippingScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const makeStyles =  (theme) => StyleSheet.create({
     container: {
         flex: 1,
         padding: 16,
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.surface,
     },
     description: {
         marginBottom: 16,
         color: '#666',
     },
     ruleCard: {
-        marginBottom: 12,
+        marginVertical: 10,
+        position: 'relative',
+        padding: 16,
+        backgroundColor: 'white'
     },
     addButton: {
         marginTop: 16,
@@ -152,7 +151,7 @@ const styles = StyleSheet.create({
     },
     statusChip: {
         // height: 24,
-        margin: 8
+        marginVertical: 8
     },
 
 });

@@ -342,10 +342,6 @@ const AddEditShippingRule = () => {
 
     return (<>
         <ScrollView style={styles.container}>
-            <Text variant="headlineSmall" style={styles.title}>
-                {isEditing ? 'Edit Shipping Rule' : 'Add Shipping Rule'}
-            </Text>
-
             <Controller
                 control={control}
                 name="ruleName"

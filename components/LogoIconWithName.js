@@ -23,7 +23,7 @@ export default function LogoIconWithName() {
       }}
     >
       <Image
-        source={require("../assets/images/PocketShopIcon.png")}
+        source={require("../assets/images/RocketShopIconOrange.png")}
         style={{ width: 50, height: 50, margin: 5 }}
       />
         {fontsLoaded &&
@@ -38,7 +38,7 @@ export default function LogoIconWithName() {
           lineHeight: 50,
         }}
       >
-        PocketShop
+        RocketShop
       </Text>}
     </View>
   );
