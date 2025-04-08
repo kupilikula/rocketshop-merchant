@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { refreshAccessToken } from "@/api/refreshAccessToken";
 
 const socketRegistry = []; // Array to track all active sockets
-const BASE_URL = "https://api.merchant.pocketshop.in"; // Replace with your backend URL
+import {BASE_URL} from "@/config/config";
 
 /**
  * Get or connect a socket based on type and context.

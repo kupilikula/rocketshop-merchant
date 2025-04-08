@@ -4,22 +4,22 @@
     "slug": "merchant",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/PocketShopIconOrange.png",
+    "icon": "./assets/images/RocketShopIconOrange.png",
     "scheme": "myapp",
     "sdkVersion": "52.0.0",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.pocketshop.merchant",
-      "icon": "./assets/images/PocketShopIconOrangeIOS.png"
+      "bundleIdentifier": "com.rocketshop.merchant",
+      "icon": "./assets/images/RocketShopIconOrangeIOS.png"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/PocketShopIconOrangeAndroid.png",
+        "foregroundImage": "./assets/images/RocketShopIconOrangeAndroid.png",
         "backgroundColor": "#FF6F59"
       },
-      "package": "com.pocketshop.merchant"
+      "package": "com.rocketshop.merchant"
     },
     "web": {
       "bundler": "metro",

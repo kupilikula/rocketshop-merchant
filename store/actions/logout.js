@@ -3,7 +3,7 @@ import { clearMerchant } from "../merchantSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {disconnectAllSockets} from "@/api/websocket";
 import axios from "axios";
-const BASE_URL = "https://api.merchant.pocketshop.in"; // Replace with your actual backend URL
+import {BASE_URL} from '@/config/config';
 
 export const logout = async (dispatch, router) => {
         try {

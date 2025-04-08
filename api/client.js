@@ -5,7 +5,7 @@ import { refreshAccessToken } from "@/api/refreshAccessToken";
 import { logout } from "@/store/actions/logout";
 
 // Base URL for the Merchant App Backend
-export const BASE_URL = "https://api.merchant.pocketshop.in"; // Replace with your actual backend URL
+import {BASE_URL} from '@/config/config';
 
 let isRefreshing = false; // Track if a refresh attempt is already in progress
 let logoutInProgress = false; // Track if logout is in progress
