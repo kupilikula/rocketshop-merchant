@@ -4,7 +4,7 @@
     "slug": "merchant",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/RocketShopIconOrange.png",
+    "icon": "./assets/images/RocketShopIconOrange1024.png",
     "scheme": "myapp",
     "sdkVersion": "52.0.0",
     "userInterfaceStyle": "automatic",
@@ -12,14 +12,21 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.rocketshop.merchant",
-      "icon": "./assets/images/RocketShopIconOrangeIOS.png"
+      "icon": "./assets/images/RocketShopIconOrangeIOS1024.png"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/RocketShopIconOrangeAndroid.png",
+        "foregroundImage": "./assets/images/RocketShopIconOrangeAndroid1024.png",
         "backgroundColor": "#FF6F59"
       },
-      "package": "com.rocketshop.merchant"
+      "package": "com.rocketshop.merchant",
+      "permissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -28,7 +35,7 @@
     },
     "androidNavigationBar": {
       "visible": "sticky-immersive",
-      "backgroundColor": "#00000000",
+      "backgroundColor": "#00000000"
     },
     "plugins": [
       "expo-router",
@@ -66,7 +73,16 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-video"
+      "expo-video",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "kotlinVersion": "1.9.25",
+            "composeCompilerVersion": "1.5.15"
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

@@ -23,7 +23,7 @@ export default function LogoIconWithName() {
       }}
     >
       <Image
-        source={require("../assets/images/RocketShopIconOrange.png")}
+        source={require("../assets/images/RocketShopIconOrange1024.png")}
         style={{ width: 50, height: 50, margin: 5 }}
       />
         {fontsLoaded &&

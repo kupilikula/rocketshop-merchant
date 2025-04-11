@@ -13,7 +13,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import { Button, Card, Surface, Text, useTheme } from "react-native-paper";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import * as FileSystem from "expo-file-system"; // Import FileSystem
+import * as FileSystem from "expo-file-system";
 import { Audio } from "expo-av";
 import { gestureHandlerRootHOC, FlatList } from "react-native-gesture-handler";
 import { useMemo } from "react";
@@ -92,7 +92,7 @@ const MediaGallery = (props) => {
 
   useEffect(() => {
       setIsMediaSelected(previewMediaItems.length > 0);
-  },[previewMediaItems.length])
+  },[previewMediaItems.length]);
 
   const savePhotoToGallery = async (photoUri) => {
     let asset;
@@ -112,31 +112,44 @@ const MediaGallery = (props) => {
 
   const generateThumbnails = async (assets) => {
     console.log("generate:", assets.length);
-    if (assets.length > 0) {
-      const thumbnailMap = {};
-      for (const asset of assets) {
-        try {
-          let assetUri = null;
-          if (Platform.OS === "ios") {
-            let assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
-            assetUri = assetInfo.localUri;
-          } else {
-            assetUri = asset.uri;
-          }
+    if (assets.length === 0) return;
 
-          const { uri } = await VideoThumbnails.getThumbnailAsync(assetUri, {
-            time: 1000, // Extract frame at 1 second
-          });
-          thumbnailMap[asset.id] = uri;
-        } catch (e) {
-          console.error(`Failed to generate thumbnail for ${asset.id}:`, e);
+    const thumbnailMap = {};
+
+    for (const asset of assets) {
+      try {
+        let assetUri = null;
+
+        if (Platform.OS === "ios") {
+          const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
+          console.log("assetInfo:", assetInfo);
+
+          const localUri = assetInfo.localUri?.split("#")[0];
+          const filename = encodeURIComponent(asset.filename || asset.id) + ".mov";
+          const cachePath = FileSystem.cacheDirectory + filename;
+
+          console.log("Copying asset to:", cachePath);
+          await FileSystem.copyAsync({ from: localUri || asset.uri, to: cachePath });
+          assetUri = cachePath;
+
+        } else {
+          assetUri = asset.uri?.split("#")[0];
         }
+
+        console.log("Generating thumbnail for:", assetUri);
+
+        const { uri } = await VideoThumbnails.getThumbnailAsync(assetUri, {
+          time: 1000,
+        });
+
+        thumbnailMap[asset.id] = uri;
+
+      } catch (e) {
+        console.error(`Failed to generate thumbnail for ${asset.id}:`, e);
       }
-      // console.log('t:', thumbnails.current);
-      // console.log('T:', {...thumbnails.current, ...thumbnailMap});
-      // thumbnails.current = {...thumbnails.current, ...thumbnailMap};
-      setThumbnails({ ...thumbnails, ...thumbnailMap });
     }
+
+    setThumbnails((prev) => ({ ...prev, ...thumbnailMap }));
   };
 
   const toggleSelection = useCallback((item) => {
@@ -225,7 +238,8 @@ const MediaGallery = (props) => {
             if (item.mediaType === "video" && Platform.OS === "ios") {
               console.log('line225, item:', item);
               let assetInfo = await MediaLibrary.getAssetInfoAsync(item);
-              localUri = assetInfo.localUri;
+              localUri = assetInfo.localUri?.split('#')[0];
+              console.log('line227, localUri:', localUri);
             }
           } catch (e) {
             console.log("line206, e:", e);
@@ -403,9 +417,7 @@ const MediaGallery = (props) => {
           const { status, canAskAgain } =
             await MediaLibrary.requestPermissionsAsync();
           if (status !== "granted" && canAskAgain) {
-            const fullPermission = await MediaLibrary.requestPermissionsAsync({
-              writeOnly: false,
-            });
+            const fullPermission = await MediaLibrary.requestPermissionsAsync();
             console.log("Full permission status:", fullPermission.status);
           }
 

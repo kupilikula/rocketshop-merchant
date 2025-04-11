@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef, useCallback, forwardRef, useImperativeHandle, useContext} from "react";
 import {
-    View, StyleSheet, TouchableOpacity, ScrollView, Switch, TextInput as RNTextInput
+    Platform, View, StyleSheet, TouchableOpacity, ScrollView, Switch, TextInput as RNTextInput, KeyboardAvoidingView
 } from "react-native";
 import {
     TextInput, Button, Text, IconButton, useTheme, Checkbox, Menu, Chip, Surface,
@@ -16,6 +16,7 @@ import {Controller, useFieldArray, useForm} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
 import {useCollections} from "../api/hooks/useCollections";
 import {ProductWorkflowContext} from "./ProductWorkflowContext";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 const ProductInfoScreen = (props) => {
     const dispatch = useDispatch();
@@ -53,7 +54,7 @@ const ProductInfoScreen = (props) => {
     });
 
     const router = useRouter();
-
+    const insets = useSafeAreaInsets();
     const theme = useTheme();
     const styles = makeStyles(theme);
 
@@ -401,8 +402,13 @@ const ProductInfoScreen = (props) => {
     console.log("451, productData:", productData);
     console.log("452, getValues(prodcutName):", getValues("productName"));
 
-    return (<ScrollView contentContainerStyle={styles.scrollContainer}>
-            <Surface style={styles.container}>
+    return (
+        <KeyboardAvoidingView
+            style={{ flex: 1, backgroundColor: theme.colors.surface }} // Fill the screen
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined} // Or 'height'
+            // keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} // Adjust for header/navbar height
+        >
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.section}>
                     <Text style={styles.header}>Details</Text>
                     {/* Product Name */}
@@ -762,16 +768,16 @@ const ProductInfoScreen = (props) => {
                         </Button>
                     </View>
                 </View>
-            </Surface>
-        </ScrollView>);
+        </ScrollView>
+        </KeyboardAvoidingView>
+        );
 };
 
 const makeStyles = ({colors}) => StyleSheet.create({
-    container: {
-        flex: 1, backgroundColor: colors.surface, padding: 16,
-    }, scrollContainer: {
-        // flex: 1,
-        // backgroundColor: 'green',
+    scrollContainer: {
+        flexGrow: 1,
+        backgroundColor: colors.surface,
+        padding: 16,
         // marginTop: 60,
         // paddingTop: 80,
         // padding: 16,
