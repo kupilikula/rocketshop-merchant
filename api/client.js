@@ -6,6 +6,7 @@ import { logout } from "@/store/actions/logout";
 
 // Base URL for the Merchant App Backend
 import {BASE_URL} from '@/config/config';
+import {setPendingRequest, setRedirectAfterAuth} from "@/store/authSlice";
 
 let isRefreshing = false; // Track if a refresh attempt is already in progress
 let logoutInProgress = false; // Track if logout is in progress
@@ -86,6 +87,18 @@ const axiosClientGetter = () => {
                     });
                 }
 
+                const token = await AsyncStorage.getItem("accessToken");
+
+                if (!token) {
+                    // User is a guest → show login modal instead of refresh
+                    console.log("Guest user triggered 401. Skipping refresh. Showing Auth modal.");
+                    const safelySerializableRequest = getSerializableRequestConfig(originalRequest);
+                    dispatch(setPendingRequest(safelySerializableRequest));
+                    dispatch(setRedirectAfterAuth({redirectTo: router.pathname}))
+                    router.push('/Authentication')
+                    return Promise.reject(error);
+                }
+
                 originalRequest._retry = true; // Mark this request as already retried
                 isRefreshing = true; // Set the refreshing flag
 
@@ -141,3 +154,14 @@ export const setAxiosDependencies = (reduxDispatch, expoRouter) => {
     dispatch = reduxDispatch;
     router = expoRouter;
 };
+
+function getSerializableRequestConfig(config) {
+    return {
+        url: config.url,
+        method: config.method,
+        data: config.data,
+        params: config.params,
+        headers: config.headers ? JSON.parse(JSON.stringify(config.headers)) : undefined,
+        withCredentials: config.withCredentials ?? true,
+    };
+}

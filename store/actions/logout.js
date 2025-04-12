@@ -4,6 +4,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {disconnectAllSockets} from "@/api/websocket";
 import axios from "axios";
 import {BASE_URL} from '@/config/config';
+import {clearAllStores} from "@/store/allStoresSlice";
+import {setAuthenticationStatus} from "@/store/authSlice";
 
 export const logout = async (dispatch, router) => {
         try {
@@ -24,13 +26,17 @@ export const logout = async (dispatch, router) => {
                 // Disconnect all active sockets
                 disconnectAllSockets();
 
+
                 // Clear Redux state
+                dispatch(setAuthenticationStatus('UNAUTHENTICATED'));
+                router.replace('/Authentication');
                 dispatch(clearMerchant());
                 dispatch(clearStore());
+                dispatch(clearAllStores());
 
                 console.log('Logged out locally.');
 
                 // Navigate to the Authentication screen
-                router.replace('/Authentication');
+
         }
 };

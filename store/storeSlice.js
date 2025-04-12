@@ -2,6 +2,12 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   storeId: null,
+    storeName: null,
+    storeLogoImage: null,
+    storeDescription: null,
+    storeHandle: null,
+    storeTags: null,
+    isActive: null,
 };
 
 const storeSlice = createSlice({

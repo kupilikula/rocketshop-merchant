@@ -13,6 +13,7 @@ import {QueryClient, QueryClientProvider} from "react-query";
 import 'react-native-get-random-values';
 import TokenMonitor from '../components/TokenMonitor';
 import {setAxiosDependencies} from "@/api/client";
+import AppShell from "@/components/AppShell";
 
 const queryClient = new QueryClient();
 // const isLoggedIn = true;
@@ -79,7 +80,7 @@ export default function RootLayout() {
             <Provider store={store}>
               <PaperProvider theme={customTheme}>
                 <StatusBar style="dark" />
-                <Stack screenOptions={{ header: () => null }} />
+                <AppShell/>
               </PaperProvider>
             </Provider>
           </GestureHandlerRootView>

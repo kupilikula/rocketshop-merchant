@@ -7,13 +7,16 @@ import { StoreLogo } from "@/components/StoreLogo";
 import { faker } from "@faker-js/faker";
 import {useDispatch, useSelector} from "react-redux";
 import {logout} from "../store/actions/logout";
+import MaterialCommunityIcon from "react-native-paper/src/components/MaterialCommunityIcon";
+import {MaterialCommunityIcons} from "@expo/vector-icons";
 
 export default function DrawerMenu(props) {
   const router = useRouter();
   const theme = useTheme();
   const dispatch = useDispatch();
   const styles = makeStyles(theme);
-  const storeLogoImage = faker.image.url();
+  const {storeLogoImage} = useSelector(state => state.store.storeLogoImage);
+  const stores = useSelector(state => state.allStores.stores);
   const unreadCount = useSelector(
       (state) =>
           Object.values(state.badges.unreadMessages || {}).flat().length // Total unread messages
@@ -113,6 +116,11 @@ export default function DrawerMenu(props) {
           <MaterialIcons name={"settings"} size={size} />
         )}
       />
+      {stores.length > 1 &&
+      <Drawer.Item label={<Text variant={'titleLarge'}>Change Store</Text>}
+                   style={{padding: 0, borderRadius: 5, marginLeft: 0}}
+                   onPress={  () => router.push("/StoreSelector")}
+                   icon={({size, color}) => <MaterialCommunityIcons name={'store-cog'} size={size}/>}/>}
       <Drawer.Item label={<Text variant={'titleLarge'}>Log out</Text>}
                    style={{padding: 0, borderRadius: 5, marginLeft: 0}}
                    onPress={ async () => {

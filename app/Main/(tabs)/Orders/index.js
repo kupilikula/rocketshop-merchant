@@ -728,18 +728,14 @@ const makeStyles = ({ colors }) =>
       marginLeft: 8, // Space between the icon and the text
       fontWeight: "500",
     },
-    dateInput: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: '#ccc',
-      borderRadius: 8,
-      padding: 8,
-    },
-    dateText: {
-      marginLeft: 8,
-      fontSize: 16,
-    },
+    // dateInput: {
+    //   flexDirection: 'row',
+    //   alignItems: 'center',
+    //   borderWidth: 1,
+    //   borderColor: '#ccc',
+    //   borderRadius: 8,
+    //   padding: 8,
+    // },
     modalContainer: {
       flex: 1,
       justifyContent: 'flex-end', // Align at the bottom

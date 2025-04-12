@@ -3,10 +3,9 @@ import {useSelector} from "react-redux";
 
 export default function Index() {
 
-  const merchantId = useSelector((state) => state.merchant.merchantId);
+  const isAuthenticated = useSelector((state) => state.auth.authenticationStatus==='AUTHENTICATED');
 
-  const isLoggedIn = merchantId;
-  if (isLoggedIn) {
+  if (isAuthenticated) {
     return <Redirect href={"/Main"} />;
   } else {
     return <Redirect href={"/Authentication"} />;
