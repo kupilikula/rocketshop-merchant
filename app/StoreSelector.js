@@ -36,13 +36,7 @@ export default function StoreSelector() {
                 </Text>
             )}
 
-            {stores.length === 0 ? (
-                <View style={styles.emptyState}>
-                    <Text variant="titleMedium" style={{ marginBottom: 16 }}>
-                        No stores found.
-                    </Text>
-                </View>
-            ) : (
+            {stores.length > 0 && (
                 <View style={styles.listContainer}>
                     {stores.map((item) => {
                         const isActive = activeStoreId === item.storeId;

@@ -32,8 +32,9 @@ export default function StoreSelectorHeader(props) {
         },
       ]}
     >
+
       <LogoIconWithName />
-        <IconButton icon="logout" size={24} onPress={() => logout(dispatch, router)}/>
+        <IconButton icon="logout" size={32} iconColor={theme.colors.secondary} onPress={() => logout(dispatch, router)}/>
     </View>);
 
 }
