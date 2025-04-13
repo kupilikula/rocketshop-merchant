@@ -134,7 +134,7 @@ const Authentication = () => {
                 } else if (selectedStoreId) {
                     router.replace('/Main/(tabs)/Dashboard');
                 } else {
-                    router.replace('/StoreSelector');
+                    router.replace('/StoreSelector?exitToLogout=true');
                 }
             };
 

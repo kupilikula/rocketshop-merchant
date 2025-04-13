@@ -3,19 +3,19 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import LogoIconWithName from "./LogoIconWithName";
 
 import {useRouter} from "expo-router";
-import {IconButton, useTheme} from "react-native-paper";
+import {Button, IconButton, useTheme} from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { generateBoxShadowStyle } from "../styles/generateShadow";
+import { generateBoxShadowStyle } from "@/styles/generateShadow";
 import {useDispatch, useSelector} from "react-redux";
-import {logout} from "../store/actions/logout";
+import {logout} from "@/store/actions/logout";
 
-export default function StoreSelectorHeader(props) {
+export default function StoreSelectorHeader({exitToLogout}) {
+
     const theme = useTheme();
   const styles = makeStyles(theme);
   const dispatch = useDispatch();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-
 
   return (
     <View
@@ -34,7 +34,9 @@ export default function StoreSelectorHeader(props) {
     >
 
       <LogoIconWithName />
-        <IconButton icon="logout" size={32} iconColor={theme.colors.secondary} onPress={() => logout(dispatch, router)}/>
+        {exitToLogout ? <IconButton icon="logout" size={32} iconColor={theme.colors.secondary} onPress={() => logout(dispatch, router)}/>
+            : <Button mode={'contained'} style={{backgroundColor: theme.colors.error, borderRadius: 8, marginHorizontal: 10}}  onPress={() => router.back()}>Cancel</Button>
+        }
     </View>);
 
 }

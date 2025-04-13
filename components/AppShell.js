@@ -12,7 +12,7 @@ export default function AppShell() {
                 <Stack.Screen name="index"  options={{ headerShown: false }}/>
                 <Stack.Screen name="Main"  options={{ headerShown: false }}/>
                 <Stack.Screen name="Authentication"  options={{ headerShown: false }}/>
-                <Stack.Screen name="StoreSelector"  options={{ header: () => <StoreSelectorHeader /> }}/>
+                <Stack.Screen name="StoreSelector"  options={{ headerShown: false }}/>
                 <Stack.Screen name="CreateStore"  options={{ headerShown: false }}/>
             </Stack>
         </View>

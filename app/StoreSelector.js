@@ -4,11 +4,13 @@ import { Text, Card, useTheme, IconButton, Button } from "react-native-paper";
 import { useSelector, useDispatch } from "react-redux";
 import { Image } from "expo-image";
 import { setStore } from "../store/storeSlice";
-import { useRouter } from "expo-router";
+import {useLocalSearchParams, useRouter} from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {useGetMerchantStores} from "../api/hooks/useGetMerchantStores";
+import StoreSelectorHeader from "../components/StoreSelectorHeader";
 
 export default function StoreSelector() {
+    const params = useLocalSearchParams();
     const theme = useTheme();
     const merchantId = useSelector((state) => state.merchant.merchantId);
     const { data: stores = [], isLoading } = useGetMerchantStores(merchantId);
@@ -18,12 +20,16 @@ export default function StoreSelector() {
     const insets = useSafeAreaInsets();
     const styles = makeStyles(theme);
 
+    console.log('params:', params);
+    const {exitToLogout} = params;
+
     const handleSelect = (store) => {
         dispatch(setStore(store));
         router.push("/Main/(tabs)/Dashboard");
     };
 
-    return (
+    return (<>
+        <StoreSelectorHeader exitToLogout={exitToLogout}/>
         <ScrollView
             style={[styles.screen]}
             contentContainerStyle={{
@@ -85,6 +91,7 @@ export default function StoreSelector() {
             </View>
 
         </ScrollView>
+        </>
     );
 }
 
