@@ -15,7 +15,7 @@ export default function DrawerMenu(props) {
   const theme = useTheme();
   const dispatch = useDispatch();
   const styles = makeStyles(theme);
-  const {storeLogoImage} = useSelector(state => state.store.storeLogoImage);
+  const {storeLogoImage} = useSelector(state => state.store);
   const stores = useSelector(state => state.allStores.stores);
   const unreadCount = useSelector(
       (state) =>

@@ -6,10 +6,12 @@ import { Image } from "expo-image";
 import { setStore } from "../store/storeSlice";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {useGetMerchantStores} from "../api/hooks/useGetMerchantStores";
 
 export default function StoreSelector() {
     const theme = useTheme();
-    const stores = useSelector((state) => state.allStores.stores);
+    const merchantId = useSelector((state) => state.merchant.merchantId);
+    const { data: stores = [], isLoading } = useGetMerchantStores(merchantId);
     const activeStoreId = useSelector((state) => state.store.storeId);
     const dispatch = useDispatch();
     const router = useRouter();

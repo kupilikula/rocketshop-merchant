@@ -106,17 +106,15 @@ export default function StoreFront(props) {
                     height: "100%",
                     display: "flex",
                     flexDirection: "column",
-                    alignItems: "center",
                 }}
             >
-                <ScrollView>
+                <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: 'green', width: '100%' }} style={{ flexGrow: 1, width: '100%' }}>
                     <View
                         style={{
                             padding: 10,
                             width: "100%",
                             display: "flex",
                             flexDirection: "column",
-                            alignItems: "center",
                         }}
                     >
                         <Card
@@ -125,18 +123,16 @@ export default function StoreFront(props) {
                                 height: "auto",
                                 // paddingVertical: 16,
                                 padding: 16,
-                                alignItems: "center",
                                 backgroundColor: theme.colors.white,
                             }}
                         >
                             <View style={{
                                 display: 'flex',
                                 flexDirection: 'column',
-                                alignItems: 'center',
                                 // margin: 16,
-                                // width: '100%',
+                                width: '100%',
                                 alignSelf: 'stretch',
-                                // backgroundColor: 'yellow'
+                                backgroundColor: 'yellow'
                             }}>
                                 <View
                                     style={{
@@ -214,7 +210,7 @@ export default function StoreFront(props) {
                                         {storeFrontData.storeDescription}
                                     </Text>
                                 </View>
-                                <View style={{ marginTop: 10 }}>
+                                <View style={{ marginTop: 10, alignSelf: 'center'}}>
                                     <Button
                                         mode={"elevated"}
                                         elevation={5}

@@ -55,7 +55,7 @@ export default function Preview(props) {
                     contentType: item.contentType === 'image/heic' ? 'image/jpg' : item.contentType
                 }));
                 console.log('f:', fileKeysWithContentTypes);
-                const {data: presignedUrls} = await axiosClient.post(`/stores/${storeId}/products/mediaUploadPresignedUrls`, {
+                const {data: presignedUrls} = await axiosClient.post(`/stores/${storeId}/mediaUploadPresignedUrls`, {
                     fileKeysWithContentTypes
                 });
                 console.log('fetched presigned urls');

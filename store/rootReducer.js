@@ -7,7 +7,7 @@ import storeReducer from './storeSlice';
 import allStoresReducer from './allStoresSlice';
 import badgesReducer from './badgesSlice';
 import authReducer from './authSlice';
-
+import newStoreReducer from './newStoreSlice';
 
 const rootReducer = combineReducers({
     merchant: merchantReducer,
@@ -15,6 +15,7 @@ const rootReducer = combineReducers({
     editProduct: editProductReducer,
     store: storeReducer,
     allStores: allStoresReducer,
+    newStore: newStoreReducer,
     badges: badgesReducer,
     auth: authReducer,
 });
