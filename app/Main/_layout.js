@@ -124,6 +124,7 @@ export default function Layout() {
             pathName.startsWith("/Main/Messaging") ||
           pathName.startsWith("/Main/Shipping") ||
             pathName.startsWith("/Main/Offers/Offer") ||
+          pathName.startsWith("/Main/StoreSettings") ||
             pathName.startsWith("/CreateStore")
               ? null : (
             <AppHeader />

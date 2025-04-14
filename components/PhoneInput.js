@@ -18,18 +18,12 @@ const PhoneInput = ({  setPhone }) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        marginBottom: 16,
-        flex: 1
-    },
     input: {
         // flex: 1,
         backgroundColor: 'white',
         // marginLeft: 8,
-        flex: 1,
-        marginRight: 10,
+        // flex: 1,
+        // marginRight: 10,
     },
 });
 

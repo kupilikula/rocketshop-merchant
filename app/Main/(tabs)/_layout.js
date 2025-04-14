@@ -113,7 +113,14 @@ export default function TabsComponent() {
             }}
         />
         <Tabs.Screen
-            name="Settings"
+            name="StoreSettings"
+            options={{
+                href: null,
+                // tabBarButton: () => null, // Hides the tab bar button
+            }}
+        />
+        <Tabs.Screen
+            name="MerchantSettings"
             options={{
                 href: null,
                 // tabBarButton: () => null, // Hides the tab bar button

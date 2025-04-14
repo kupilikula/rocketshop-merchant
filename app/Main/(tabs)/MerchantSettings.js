@@ -3,7 +3,7 @@ import { View, StyleSheet, Image } from 'react-native';
 import { TextInput, Button, Avatar, Switch, Text, Divider } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
 
-const SettingsScreen = () => {
+const MerchantSettingsScreen = () => {
     const [storeName, setStoreName] = useState("Store Name");
     const [storeLogo, setStoreLogo] = useState(null);
     const [isRazorpayConnected, setRazorpayConnected] = useState(false);
@@ -146,4 +146,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default SettingsScreen;
+export default MerchantSettingsScreen;

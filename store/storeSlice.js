@@ -7,6 +7,7 @@ const initialState = {
     storeDescription: null,
     storeHandle: null,
     storeTags: null,
+    merchantRole: null,
     isActive: null,
 };
 

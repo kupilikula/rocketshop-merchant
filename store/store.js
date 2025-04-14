@@ -4,4 +4,7 @@ export const store = configureStore({
   reducer: rootReducer,
 });
 
-global.store = store;
+if (__DEV__) {
+  global.store = store;
+}
+

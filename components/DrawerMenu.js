@@ -109,18 +109,22 @@ export default function DrawerMenu(props) {
                    )}
       />
       <Drawer.Item
-        label={<Text variant={"titleLarge"}>Settings</Text>}
+        label={<Text variant={"titleLarge"}>Store Settings</Text>}
         style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}
-        onPress={() => router.push("/Main/(tabs)/Settings")}
+        onPress={() => router.push("/Main/(tabs)/StoreSettings")}
         icon={({ size, color }) => (
-          <MaterialIcons name={"settings"} size={size} />
+          <MaterialCommunityIcons name={"store-cog"} size={size} />
         )}
       />
+      <Drawer.Item label={<Text variant={'titleLarge'}>Merchant Settings</Text>}
+                   style={{padding: 0, borderRadius: 5, marginLeft: 0}}
+                   onPress={  () => router.push("/MerchantSettings")}
+                   icon={({size, color}) => <MaterialIcons name={'manage-accounts'} size={size}/>}/>
       {stores.length > 1 &&
-      <Drawer.Item label={<Text variant={'titleLarge'}>Change Store</Text>}
+      <Drawer.Item label={<Text variant={'titleLarge'}>Switch Store</Text>}
                    style={{padding: 0, borderRadius: 5, marginLeft: 0}}
                    onPress={  () => router.push("/StoreSelector")}
-                   icon={({size, color}) => <MaterialCommunityIcons name={'store-cog'} size={size}/>}/>}
+                   icon={({size, color}) => <MaterialIcons name={'change-circle'} size={size}/>}/>}
       <Drawer.Item label={<Text variant={'titleLarge'}>Log out</Text>}
                    style={{padding: 0, borderRadius: 5, marginLeft: 0}}
                    onPress={ async () => {
