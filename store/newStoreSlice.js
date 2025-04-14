@@ -7,48 +7,57 @@ const initialState = {
     storeLogoImage: null,  // { uri, contentType, fileKey }
     storeTags: [],
     firstCollectionName: '',
+    storeSettings: {
+        defaultGstRate: null,
+        defaultGstInclusive: null,
+    }
 };
 
 const newStoreSlice = createSlice({
     name: 'newStore',
     initialState,
     reducers: {
-        setStoreName: (state, action) => {
+        setNewStoreName: (state, action) => {
             state.storeName = action.payload;
         },
-        setStoreHandle: (state, action) => {
+        setNewStoreHandle: (state, action) => {
             state.storeHandle = action.payload;
         },
-        setStoreDescription: (state, action) => {
+        setNewStoreDescription: (state, action) => {
             state.storeDescription = action.payload;
         },
-        setStoreLogoImage: (state, action) => {
+        setNewStoreLogoImage: (state, action) => {
             state.storeLogoImage = action.payload;
         },
-        addStoreTag: (state, action) => {
+        addNewStoreTag: (state, action) => {
             if (!state.storeTags.includes(action.payload)) {
                 state.storeTags.push(action.payload);
             }
         },
-        removeStoreTag: (state, action) => {
+        removeNewStoreTag: (state, action) => {
             state.storeTags = state.storeTags.filter((tag) => tag !== action.payload);
         },
-        setFirstCollectionName: (state, action) => {
+        setNewStoreFirstCollectionName: (state, action) => {
             state.firstCollectionName = action.payload;
         },
-        resetStoreCreateState: () => initialState,
+        setNewStoreSettings: (state, action) => {
+            state.storeSettings = action.payload;
+        },
+        resetNewStore: () => initialState,
+
     },
 });
 
 export const {
-    setStoreName,
-    setStoreHandle,
-    setStoreDescription,
-    setStoreLogoImage,
-    addStoreTag,
-    removeStoreTag,
-    setFirstCollectionName,
-    resetStoreCreateState,
+    setNewStoreName,
+    setNewStoreHandle,
+    setNewStoreDescription,
+    setNewStoreLogoImage,
+    addNewStoreTag,
+    removeNewStoreTag,
+    setNewStoreFirstCollectionName,
+    setNewStoreSettings,
+    resetNewStore,
 } = newStoreSlice.actions;
 
 export default newStoreSlice.reducer;

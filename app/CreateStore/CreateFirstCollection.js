@@ -3,7 +3,7 @@ import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 're
 import { Text, TextInput, Button, useTheme } from 'react-native-paper';
 import { useDispatch } from 'react-redux';
 import { useRouter } from 'expo-router';
-import { setFirstCollectionName } from '../../store/newStoreSlice';
+import { setNewStoreFirstCollectionName } from '../../store/newStoreSlice';
 import LogoIconWithName from "../../components/LogoIconWithName";
 
 export default function CreateFirstCollection() {
@@ -20,8 +20,8 @@ export default function CreateFirstCollection() {
             return;
         }
 
-        dispatch(setFirstCollectionName(collectionName.trim()));
-        router.push('/CreateStore/StoreSummary');
+        dispatch(setNewStoreFirstCollectionName(collectionName.trim()));
+        router.push('/CreateStore/StoreSettings');
     };
 
     return (

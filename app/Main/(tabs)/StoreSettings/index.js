@@ -1,13 +1,18 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, List, useTheme, Divider, Switch } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useSelector } from 'react-redux';
+import GstRateDropdown from "../../../../components/GstRateDropdown";
 
 export default function StoreSettingsScreen() {
     const theme = useTheme();
     const router = useRouter();
-    const store = useSelector((state) => state.store.storeData); // Assuming full storeData is stored
+    const store = useSelector((state) => state.store);
+    const [defaultGstRate, setDefaultGstRate] = useState(18);
+    const [defaultGstEnabled, setDefaultGstEnabled] = useState(true);
+    const [defaultGstInclusive, setDefaultGstInclusive] = useState(true);
+
 
     return (
         <ScrollView style={{backgroundColor: 'white'}} contentContainerStyle={styles.container}>
@@ -36,51 +41,48 @@ export default function StoreSettingsScreen() {
                 />
                 <Divider />
 
-            <List.Section title="Store Wide Defaults" titleStyle={styles.sectionTitle}>
-                <List.Item
-                    title="GST Enabled"
-                    titleStyle={{fontSize: 16}}
-                    right={() => (
-                        <Switch
-                            value={true}
-                            onValueChange={() => {}}
-                            style={{marginLeft: 16}}
-                        />
-                    )}
-                    style={styles.listItem}
-                />
-            <List.Item
-                title="GST Inclusive"
-                titleStyle={{fontSize: 16}}
-                right={() => (
-                    <Switch
-                        value={true}
-                        onValueChange={() => {}}
-                        style={{marginLeft: 16}}
-                    />
-                )}
-                style={styles.listItem}
+            <List.Item title="GST Settings"
+                       titleStyle={styles.sectionTitle}
+                       style={styles.listItem}
+                       onPress={() => router.push('/Main/(tabs)/StoreSettings/GstSettings')}
             />
-                <List.Item
-                    title="Enable Ratings & Reviews"
-                    titleStyle={{fontSize: 16}}
-                    right={() => (
-                        <Switch
-                            value={true}
-                            onValueChange={() => {}}
-                            style={{marginLeft: 16}}
-                        />
-                    )}
-                    style={styles.listItem}
-                />
-            </List.Section>
-            <Divider />
-                <List.Item
-                    title="Switch Store"
-                    titleStyle={{fontSize: 20}}
-                    onPress={() => router.replace('/StoreSelector')}
-                    style={styles.listItem}
-                />
+            {/*    <List.Item*/}
+            {/*        title="GST Enabled"*/}
+            {/*        titleStyle={{fontSize: 16}}*/}
+            {/*        right={() => (*/}
+            {/*            <Switch*/}
+            {/*                value={defaultGstEnabled}*/}
+            {/*                onValueChange={setDefaultGstEnabled}*/}
+            {/*                style={{marginLeft: 16}}*/}
+            {/*            />*/}
+            {/*        )}*/}
+            {/*        style={styles.listItem}*/}
+            {/*    />*/}
+            {/*<List.Item*/}
+            {/*    title="GST Inclusive"*/}
+            {/*    titleStyle={{fontSize: 16}}*/}
+            {/*    right={() => (*/}
+            {/*        <Switch*/}
+            {/*            value={defaultGstInclusive}*/}
+            {/*            onValueChange={setDefaultGstInclusive}*/}
+            {/*            style={{marginLeft: 16}}*/}
+            {/*        />*/}
+            {/*    )}*/}
+            {/*    style={styles.listItem}*/}
+            {/*/>*/}
+            {/*    <List.Item*/}
+            {/*        title="Default GST Rate"*/}
+            {/*        titleStyle={{fontSize: 16}}*/}
+            {/*        style={styles.listItem}*/}
+            {/*        right={() => (*/}
+            {/*            <GstRateDropdown*/}
+            {/*                value={defaultGstRate}*/}
+            {/*                onChange={(rate) => setDefaultGstRate(rate)}*/}
+            {/*                label="Default GST Rate"*/}
+            {/*            />*/}
+            {/*        )}*/}
+            {/*    />*/}
+
             <Divider />
                 <List.Item
                     title="Deactivate Store"

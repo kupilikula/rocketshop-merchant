@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView} from 'react-native';
 import { Text, TextInput, Button, useTheme } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
-import { setStoreDescription } from '../../store/newStoreSlice';
+import { setNewStoreDescription } from '../../store/newStoreSlice';
 import { useRouter } from 'expo-router';
 import LogoIconWithName from "../../components/LogoIconWithName";
 
@@ -21,7 +21,7 @@ export default function StoreDescription() {
             return;
         }
 
-        dispatch(setStoreDescription(description.trim()));
+        dispatch(setNewStoreDescription(description.trim()));
         router.push('/CreateStore/StoreLogo');
     };
 

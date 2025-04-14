@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView} from 'react-native';
 import { Text, TextInput, Button, useTheme } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
-import { setStoreName } from '../../store/newStoreSlice';
+import { setNewStoreName } from '../../store/newStoreSlice';
 import { useRouter } from 'expo-router';
 import LogoIconWithName from "../../components/LogoIconWithName";
 
@@ -20,7 +20,7 @@ export default function StoreNameScreen() {
             // setError('Store name is required');
             return;
         }
-        dispatch(setStoreName(localStoreName.trim()));
+        dispatch(setNewStoreName(localStoreName.trim()));
         router.push('/CreateStore/StoreHandle'); // Move to next step
     };
 

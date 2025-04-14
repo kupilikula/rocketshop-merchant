@@ -4,7 +4,7 @@ import { Text, Button, useTheme, ActivityIndicator, Card, Chip } from 'react-nat
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'expo-router';
 import axiosClient from '../../api/client';
-import {resetStoreCreateState, setStoreLogoImage} from '../../store/newStoreSlice';
+import {resetNewStore, setNewStoreLogoImage} from '../../store/newStoreSlice';
 import { v4 as uuidv4 } from 'uuid';
 import {useQueryClient} from "react-query";
 import {setStore} from "../../store/storeSlice";
@@ -24,7 +24,8 @@ export default function StoreSummary() {
         storeDescription,
         storeLogoImage,
         storeTags,
-        firstCollectionName
+        firstCollectionName,
+        storeSettings,
     } = useSelector((state) => state.newStore);
 
     const { merchantId } = useSelector((state) => state.merchant);
@@ -44,6 +45,7 @@ export default function StoreSummary() {
                 storeHandle,
                 storeDescription,
                 storeTags,
+                storeSettings,
             });
             console.log('Store created:', res);
 
@@ -87,7 +89,7 @@ export default function StoreSummary() {
                 collectionName: firstCollectionName,
             });
 
-            dispatch(resetStoreCreateState());
+            dispatch(resetNewStore());
             await queryClient.invalidateQueries(['merchantStores', merchantId]);
             // router.reset('/StoreSelector');
             router.replace('/StoreSelector');

@@ -8,24 +8,22 @@ import {useLocalSearchParams, useRouter} from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {useGetMerchantStores} from "../api/hooks/useGetMerchantStores";
 import StoreSelectorHeader from "../components/StoreSelectorHeader";
+import {useSelectStore} from "../api/hooks/useSelectStore";
 
 export default function StoreSelector() {
-    const params = useLocalSearchParams();
+    const {exitToLogout} = useLocalSearchParams();
     const theme = useTheme();
     const merchantId = useSelector((state) => state.merchant.merchantId);
-    const { data: stores = [], isLoading } = useGetMerchantStores(merchantId);
-    const activeStoreId = useSelector((state) => state.store.storeId);
     const dispatch = useDispatch();
     const router = useRouter();
+    const { data: stores = [], isLoading } = useGetMerchantStores(merchantId);
+    const selectStoreMutation = useSelectStore(dispatch, router);
+    const activeStoreId = useSelector((state) => state.store.storeId);
     const insets = useSafeAreaInsets();
     const styles = makeStyles(theme);
 
-    console.log('params:', params);
-    const {exitToLogout} = params;
-
     const handleSelect = (store) => {
-        dispatch(setStore(store));
-        router.push("/Main/(tabs)/Dashboard");
+        selectStoreMutation.mutate(store);
     };
 
     return (<>

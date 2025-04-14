@@ -8,12 +8,14 @@ import allStoresReducer from './allStoresSlice';
 import badgesReducer from './badgesSlice';
 import authReducer from './authSlice';
 import newStoreReducer from './newStoreSlice';
+import storeSettingsReducer from './storeSettingsSlice';
 
 const rootReducer = combineReducers({
     merchant: merchantReducer,
     newProduct: newProductReducer,
     editProduct: editProductReducer,
     store: storeReducer,
+    storeSettings: storeSettingsReducer,
     allStores: allStoresReducer,
     newStore: newStoreReducer,
     badges: badgesReducer,

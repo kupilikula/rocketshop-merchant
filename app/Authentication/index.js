@@ -163,6 +163,7 @@ const Authentication = () => {
                             <View style={styles.row}>
                                 <PhoneInput
                                     setPhone={setLocalPhone}
+                                    style={{flex: 1, marginRight: 10}}
                                 />
                                 <Button
                                     mode="contained"

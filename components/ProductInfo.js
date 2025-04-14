@@ -17,6 +17,7 @@ import {yupResolver} from "@hookform/resolvers/yup";
 import {useCollections} from "../api/hooks/useCollections";
 import {ProductWorkflowContext} from "./ProductWorkflowContext";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
+import GstRateDropdown from "./GstRateDropdown";
 
 const ProductInfoScreen = (props) => {
     const dispatch = useDispatch();
@@ -43,16 +44,8 @@ const ProductInfoScreen = (props) => {
 
     // const [variants, setVariants] = useState([]); // Generated variants
     const [variantSelectedAttributes, setVariantSelectedAttributes] = useState([],); // Selected attributes for variant generation
-    const [gstRate, setGstRate] = useState(18); // Default GST Rate
-    const [gstMenuVisible, setGstMenuVisible] = useState(false); // For Dropdown visibility
 
-    const gstRates = [0, 5, 12, 18, 28]; // GST Rates
     const isFocused = useIsFocused();
-    const gstInputContainerRef = useRef(null); // Reference to the GST TextInput
-    const [gstDropdownPosition, setGstDropdownPosition] = useState({
-        x: 0, y: 0, width: 0,
-    });
-
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const theme = useTheme();
@@ -364,12 +357,6 @@ const ProductInfoScreen = (props) => {
             setVariantSelectedAttributes([...variantSelectedAttributes, attributeKey,]);
         }
     };
-    const openGstMenu = () => {
-        gstInputContainerRef.current.measureInWindow((x, y, width, height) => {
-            setGstDropdownPosition({x, y: y + 2 * height, width});
-            setGstMenuVisible(true);
-        });
-    };
 
     // Add a tag
     const addTag = (tag) => {
@@ -458,46 +445,12 @@ const ProductInfoScreen = (props) => {
                                 error={!!errors.price}
                             />)}}
                         />
-                        <View ref={gstInputContainerRef} style={styles.gstInputContainer}>
-                            <TextInput
-                                label="GST (%)"
-                                mode="outlined"
-                                value={gstRate.toString() + "%"}
-                                editable={false} // Make it read-only
-                                style={styles.gstInput}
-                                right={<TextInput.Icon icon="chevron-down" onPress={openGstMenu}/>}
-                            />
-                        </View>
-                        {/* GST Rate Dropdown */}
-
                         <Controller
                             name="gstRate"
                             control={control}
-                            render={({field: {onChange, onBlur, value}}) => (
-
-                                <Menu
-                                    visible={gstMenuVisible}
-                                    onDismiss={() => setGstMenuVisible(false)}
-                                    anchor={{x: gstDropdownPosition.x, y: gstDropdownPosition.y}}
-                                    style={{width: gstDropdownPosition.width}} // Match width of the TextInput
-                                >
-                                    {gstRates.map((rate) => (<Button
-                                            key={rate}
-                                            mode="text"
-                                            onPress={() => {
-                                                onChange(rate);
-                                                setGstRate(rate);
-                                                setGstMenuVisible(false);
-                                            }}
-                                            contentStyle={{
-                                                justifyContent: "flex-start", width: gstDropdownPosition.width, // Match dropdown width
-                                            }}
-                                            labelStyle={{color: "black", fontSize: 16}}
-                                            style={styles.gstDropdownItem}
-                                        >
-                                            {rate.toString() + "%"}
-                                        </Button>))}
-                                </Menu>)}
+                            render={({ field: { value, onChange } }) => (
+                                <GstRateDropdown value={value} onChange={onChange} />
+                            )}
                         />
                     </View>
                     <Controller

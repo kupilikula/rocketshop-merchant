@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { Text, TextInput, Button, Chip, useTheme, IconButton } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
-import { addStoreTag, removeStoreTag } from '../../store/newStoreSlice';
+import { addNewStoreTag, removeNewStoreTag } from '../../store/newStoreSlice';
 import { useRouter } from 'expo-router';
 import LogoIconWithName from "../../components/LogoIconWithName";
 
@@ -17,12 +17,12 @@ export default function StoreTags() {
     const handleAddTag = () => {
         if (tagInput.trim() === '') return;
         if (storeTags.includes(tagInput.trim())) return;
-        dispatch(addStoreTag(tagInput.trim()));
+        dispatch(addNewStoreTag(tagInput.trim()));
         setTagInput('');
     };
 
     const handleRemoveTag = (tag) => {
-        dispatch(removeStoreTag(tag));
+        dispatch(removeNewStoreTag(tag));
     };
 
     return (

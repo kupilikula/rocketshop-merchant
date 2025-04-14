@@ -3,7 +3,7 @@ import {View, StyleSheet, Alert, ScrollView} from 'react-native';
 import { Text, Button, useTheme, Avatar } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
 import { useDispatch, useSelector } from 'react-redux';
-import { setStoreLogoImage } from '../../store/newStoreSlice';
+import { setNewStoreLogoImage } from '../../store/newStoreSlice';
 import { useRouter } from 'expo-router';
 import LogoIconWithName from "../../components/LogoIconWithName";
 
@@ -38,7 +38,7 @@ export default function StoreLogo() {
     const handleNext = () => {
         console.log('localImage:', localImage);
         if (!localImage) return;
-        dispatch(setStoreLogoImage(localImage));
+        dispatch(setNewStoreLogoImage(localImage));
         router.push('/CreateStore/StoreTags');
     };
 
