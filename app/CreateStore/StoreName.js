@@ -67,9 +67,6 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         padding: 20,
         justifyContent: 'center',
-        backgroundColor: 'red',
-        borderColor: 'green',
-        borderWidth: 2,
     },
     heading: {
         marginBottom: 16,

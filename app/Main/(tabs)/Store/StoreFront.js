@@ -132,7 +132,6 @@ export default function StoreFront(props) {
                                 // margin: 16,
                                 width: '100%',
                                 alignSelf: 'stretch',
-                                backgroundColor: 'yellow'
                             }}>
                                 <View
                                     style={{

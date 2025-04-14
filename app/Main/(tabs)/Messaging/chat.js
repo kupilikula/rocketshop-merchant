@@ -351,7 +351,7 @@ const ChatScreen = () => {
                 contentContainerStyle={{
                     paddingBottom: 16, width: '100%',
                     justifyContent: 'flex-end', // Align messages to the bottom
-                    backgroundColor: 'green'
+                    backgroundColor: 'white'
                 }}
                 ItemSeparatorComponent={() => <View style={{height:10}}/>}
                 keyExtractor={(item, index) => `${item.type}-${index}`} // Provide a unique key for each message

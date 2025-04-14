@@ -217,11 +217,9 @@ const makeStyles = ({ colors }) =>
             display: "flex",
             flexDirection: "row",
             flexWrap: 'wrap',
-            backgroundColor: 'yellow'
         },
         radioButtonItem: {
             marginRight: 10,
-            backgroundColor: 'red'
         },
         radioGroup: {
             flexDirection: "row",
