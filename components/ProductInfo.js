@@ -23,6 +23,7 @@ const ProductInfoScreen = (props) => {
     const dispatch = useDispatch();
     const {isNewProduct, productInfoFormRef} = useContext(ProductWorkflowContext);
     const {storeId} = useSelector((state) => state.store);
+    const {defaultGstRate, defaultGstInclusive} = useSelector((state) => state.storeSettings);
     const productData = useSelector((state) => isNewProduct ? state.newProduct : state.editProduct);
     const navigation = useNavigation();
 
@@ -81,8 +82,8 @@ const ProductInfoScreen = (props) => {
             stock: "",
             description: "",
             collections: [],
-            gstRate: 18,
-            gstInclusive: true,
+            gstRate: defaultGstRate,
+            gstInclusive: defaultGstInclusive,
             attributes: [],
             productTags: [],
             rating: null,
