@@ -13,6 +13,7 @@ export default function Layout() {
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const {merchantId} = useSelector((state)=> state.merchant);
+  const { storeId } = useSelector((state) => state.store);
 
   useEffect(() => {
       console.log('Mounting MAIN');

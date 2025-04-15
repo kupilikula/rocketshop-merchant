@@ -148,7 +148,7 @@ export default function EditPreview(props) {
                 <ProductDisplayCardCustomerStore
                     product={editProduct}
                     showProductDescription={true}
-                    showRating={editProduct.enableRatings}
+                    showRating={true}
                 />
             </>
         </View>

@@ -4,17 +4,20 @@ import { Text, List, useTheme, Divider, Switch } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useSelector } from 'react-redux';
 import GstRateDropdown from "../../../../components/GstRateDropdown";
+import ConfirmDeactivateStoreModal from "../../../../components/ConfirmDeactivateStoreModal";
+import ConfirmActivateStoreModal from "../../../../components/ConfirmActivateStoreModal";
+import ConfirmDeleteStoreModal from "../../../../components/ConfirmDeleteStoreModal";
 
 export default function StoreSettingsScreen() {
     const theme = useTheme();
     const router = useRouter();
     const store = useSelector((state) => state.store);
-    const [defaultGstRate, setDefaultGstRate] = useState(18);
-    const [defaultGstEnabled, setDefaultGstEnabled] = useState(true);
-    const [defaultGstInclusive, setDefaultGstInclusive] = useState(true);
-
+    const [deactivateModalVisible, setDeactivateModalVisible] = useState(false);
+    const [activateModalVisible, setActivateModalVisible] = useState(false);
+    const [deleteStoreModalVisible, setDeleteStoreModalVisible] = useState(false);
 
     return (
+        <>
         <ScrollView style={{backgroundColor: 'white'}} contentContainerStyle={styles.container}>
             {/* Store Details */}
                 <List.Item
@@ -46,58 +49,58 @@ export default function StoreSettingsScreen() {
                        style={styles.listItem}
                        onPress={() => router.push('/Main/(tabs)/StoreSettings/GstSettings')}
             />
-            {/*    <List.Item*/}
-            {/*        title="GST Enabled"*/}
-            {/*        titleStyle={{fontSize: 16}}*/}
-            {/*        right={() => (*/}
-            {/*            <Switch*/}
-            {/*                value={defaultGstEnabled}*/}
-            {/*                onValueChange={setDefaultGstEnabled}*/}
-            {/*                style={{marginLeft: 16}}*/}
-            {/*            />*/}
-            {/*        )}*/}
-            {/*        style={styles.listItem}*/}
-            {/*    />*/}
-            {/*<List.Item*/}
-            {/*    title="GST Inclusive"*/}
-            {/*    titleStyle={{fontSize: 16}}*/}
-            {/*    right={() => (*/}
-            {/*        <Switch*/}
-            {/*            value={defaultGstInclusive}*/}
-            {/*            onValueChange={setDefaultGstInclusive}*/}
-            {/*            style={{marginLeft: 16}}*/}
-            {/*        />*/}
-            {/*    )}*/}
-            {/*    style={styles.listItem}*/}
-            {/*/>*/}
-            {/*    <List.Item*/}
-            {/*        title="Default GST Rate"*/}
-            {/*        titleStyle={{fontSize: 16}}*/}
-            {/*        style={styles.listItem}*/}
-            {/*        right={() => (*/}
-            {/*            <GstRateDropdown*/}
-            {/*                value={defaultGstRate}*/}
-            {/*                onChange={(rate) => setDefaultGstRate(rate)}*/}
-            {/*                label="Default GST Rate"*/}
-            {/*            />*/}
-            {/*        )}*/}
-            {/*    />*/}
 
             <Divider />
+            { store.isActive ?
                 <List.Item
                     title="Deactivate Store"
                     titleStyle={{fontSize: 20}}
-                    onPress={() => router.push('/StoreSettings/InactivateStore')}
+                    onPress={() => setDeactivateModalVisible(true)}
                     style={styles.listItem}
-                />
+                /> :
+                <List.Item
+                    title="Activate Store"
+                    titleStyle={{fontSize: 20}}
+                    onPress={() => setActivateModalVisible(true)}
+                    style={styles.listItem}
+                    />
+            }
             <Divider />
+            { !store.isActive &&
                 <List.Item
                     title="Delete Store"
                     titleStyle={{ color: theme.colors.error, fontSize: 20}}
-                    onPress={() => router.push('/StoreSettings/DeleteStore')}
+                    onPress={() => setDeleteStoreModalVisible(true)}
                     style={styles.listItem}
                 />
+            }
         </ScrollView>
+            {store.isActive &&
+    <ConfirmDeactivateStoreModal
+        visible={deactivateModalVisible}
+        onDismiss={() => setDeactivateModalVisible(false)}
+        storeId={store.storeId}
+        storeName={store.storeName}
+    />}
+            {!store.isActive &&
+                <ConfirmActivateStoreModal
+                    visible={activateModalVisible}
+                    onDismiss={() => setActivateModalVisible(false)}
+                    storeId={store.storeId}
+                    storeName={store.storeName}
+                />
+            }
+            {!store.isActive &&
+                <ConfirmDeleteStoreModal
+                    visible={deleteStoreModalVisible}
+                    onDismiss={() => setDeleteStoreModalVisible(false)}
+                    storeId={store.storeId}
+                    storeName={store.storeName}
+                />
+
+            }
+
+    </>
     );
 }
 

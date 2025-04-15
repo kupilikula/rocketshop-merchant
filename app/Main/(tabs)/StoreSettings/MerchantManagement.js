@@ -1,7 +1,7 @@
 // app/StoreSettings/MerchantManagement.js
 
 import React, { useState } from "react";
-import {View, StyleSheet, ScrollView, Alert, } from "react-native";
+import {View, StyleSheet, ScrollView, Alert, Switch,} from "react-native";
 import {Text, Card, Button, IconButton, Menu, useTheme, Chip, TextInput, Portal, Modal, RadioButton} from "react-native-paper";
 import { useSelector } from "react-redux";
 import { useRouter } from "expo-router";
@@ -21,6 +21,8 @@ export default function MerchantManagementScreen() {
     const [newPhone, setNewPhone] = useState('');
     const [newFullName, setNewFullName]  = useState('');
     const [newMerchantRole, setNewMerchantRole]  = useState('Staff');
+    const [newCanReceiveMessages, setNewCanReceiveMessages] = useState(false);
+
 
     const { data: merchants = [], isLoading } = useQuery({
         queryKey: ["storeMerchants", storeId],
@@ -41,13 +43,25 @@ export default function MerchantManagementScreen() {
             phone: newPhone,
             fullName: newFullName,
             merchantRole: newMerchantRole,
+            canReceiveMessages: newCanReceiveMessages,
         });
 
         setAddModalVisible(false);
         setNewPhone('');
         setNewFullName('');
+        setNewMerchantRole('Staff');
+        setNewCanReceiveMessages(true);
         queryClient.invalidateQueries(["storeMerchants", storeId]);
     };
+
+    const handleToggleReceiveMessages = async (merchantId, currentValue) => {
+        await axiosClient.patch(`/stores/${storeId}/updateMerchantCanReceiveMessages/${merchantId}`, {
+            canReceiveMessages: !currentValue,
+        });
+        queryClient.invalidateQueries(["storeMerchants", storeId]);
+        setMenuOpenFor(null);
+    };
+
 
     const handleRemoveMerchant = (merchantId) => {
         Alert.alert(
@@ -93,6 +107,17 @@ export default function MerchantManagementScreen() {
                                         You
                                     </Chip>
                                 )}
+
+                                <Chip
+                                    icon={merchant.canReceiveMessages ? "message" : "message-off"}
+                                    style={{
+                                        backgroundColor: merchant.canReceiveMessages
+                                            ? theme.colors.secondaryContainer
+                                            : theme.colors.errorContainer,
+                                    }}
+                                >
+                                    {merchant.canReceiveMessages ? "Messages On" : "Messages Off"}
+                                </Chip>
                             </View>
                         </View>
 
@@ -133,6 +158,15 @@ export default function MerchantManagementScreen() {
                                             style={{ backgroundColor: 'white' }}
                                         />
                                     )}
+
+                                {(currentMerchantRole === 'Admin' ||
+                                    (currentMerchantRole === 'Manager' && merchant.merchantRole === 'Staff')) && (
+                                    <Menu.Item
+                                        onPress={() => handleToggleReceiveMessages(merchant.merchantId, merchant.canReceiveMessages)}
+                                        title={merchant.canReceiveMessages ? "Disable Messages" : "Enable Messages"}
+                                        style={{ backgroundColor: 'white' }}
+                                    />
+                                )}
 
                                 {/* Remove Merchant */}
                                 {(currentMerchantRole === 'Admin' ||
@@ -201,6 +235,16 @@ export default function MerchantManagementScreen() {
                                 </View>
                             ))}
                     </RadioButton.Group>
+
+                    <Text variant="titleSmall" style={{ marginBottom: 8 }}>
+                        Receive Messages
+                    </Text>
+
+                    <Switch
+                        value={newCanReceiveMessages}
+                        onValueChange={setNewCanReceiveMessages}
+                        style={{ marginBottom: 16 }}
+                    />
 
                     <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center' }}>
                     <Button

@@ -22,6 +22,7 @@ export default function GstSettingsComponent({rate, inclusive, setRate, setInclu
             </View>
 
             <Checkbox.Item
+                mode={'android'}
                 label="Default GST Inclusive"
                 status={inclusive ? 'checked' : 'unchecked'}
                 onPress={() => setInclusive(!inclusive)}

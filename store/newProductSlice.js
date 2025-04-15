@@ -13,8 +13,6 @@ const initialState = {
   mediaItems: [],
   rating: null,
   numberOfRatings: 0,
-  enableRatings: true,
-  enableReviews: false,
   enableStockTracking: true,
   gstInclusive: true,
   isActive: true,

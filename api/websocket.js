@@ -1,9 +1,9 @@
 import { io } from "socket.io-client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { refreshAccessToken } from "@/api/refreshAccessToken";
+import { BASE_URL } from "@/config/config";
 
-const socketRegistry = []; // Array to track all active sockets
-import {BASE_URL} from "@/config/config";
+const socketRegistry = [];
 
 /**
  * Get or connect a socket based on type and context.

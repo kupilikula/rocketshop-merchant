@@ -247,7 +247,7 @@ export default function Preview(props) {
                 <ProductDisplayCardCustomerStore
                     product={newProduct}
                     showProductDescription={true}
-                    showRating={newProduct.enableRatings}
+                    showRating={true}
                 />
             </>
         </View>

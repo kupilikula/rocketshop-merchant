@@ -88,8 +88,6 @@ const ProductInfoScreen = (props) => {
             productTags: [],
             rating: null,
             numberOfRatings: 0,
-            enableRatings: true,
-            enableReviews: false,
             enableStockTracking: true,
             isActive: true,
         }, shouldUnregister: false, resolver: yupResolver(schema),
@@ -492,50 +490,6 @@ const ProductInfoScreen = (props) => {
                                 />)}
                             />
                             <Text variant={"bodyLarge"}>Active</Text>
-                        </View>
-                        <View
-                            style={{
-                                display: "flex",
-                                flexDirection: "row",
-                                alignItems: "center",
-                                marginVertical: 8,
-                                marginHorizontal: 10,
-                            }}
-                        >
-                            <Controller
-                                name="enableRatings"
-                                control={control}
-                                render={({field: {onChange, onBlur, value}}) => (
-
-                                    <Switch
-                                        value={value}
-                                        onValueChange={onChange}
-                                        style={{marginRight: 16}}
-                                    />)}
-                            />
-                            <Text variant={"bodyLarge"}>Enable Ratings</Text>
-                        </View>
-                        <View
-                            style={{
-                                display: "flex",
-                                flexDirection: "row",
-                                alignItems: "center",
-                                marginVertical: 8,
-                                marginHorizontal: 10,
-                            }}
-                        >
-                            <Controller
-                                name="enableReviews"
-                                control={control}
-                                render={({field: {onChange, onBlur, value}}) => (
-
-                                    <Switch
-                                        value={value}
-                                        onValueChange={onChange}
-                                        style={{marginRight: 16}}
-                                    />)}
-                            />
-                            <Text variant={"bodyLarge"}>Enable Reviews</Text>
                         </View>
                         <View
                             style={{

@@ -16,9 +16,6 @@ import {format, isToday, isYesterday, formatDistanceToNow} from 'date-fns';
 import {v4 as uuidv4} from 'uuid';
 import {removeUnreadMessages} from "../../../../store/badgesSlice";
 import {copyContent} from "../../../../utils/copyToClipboard";
-import TokenMonitor from "../../../../components/TokenMonitor";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import {isTokenExpired} from "../../../../utils/isTokenExpired";
 
 const fetchChatMessages = async (chatId) => {
     const response = await axiosClient.get(`/chats/${chatId}/messages`);
@@ -29,6 +26,7 @@ const ChatScreen = () => {
     const {chatId, customerId, customerName} = useLocalSearchParams();
     console.log('customerName:', customerName, ' , customerId:', customerId);
     const {merchantId} = useSelector((state) => state.merchant);
+    const { storeId } = useSelector((state) => state.store);
     const queryClient = useQueryClient();
     const router = useRouter();
     const [socket, setSocket] = useState(null);
@@ -55,31 +53,6 @@ const ChatScreen = () => {
     }, [chatId]);
 
 
-    useEffect(() => {
-        const monitorToken = async () => {
-            const token = await AsyncStorage.getItem("accessToken");
-            if (!token) {
-                setIsExpired(true); // No token found, consider it expired
-                console.log("No token found. Token is expired.");
-                return;
-            }
-
-            const expired = isTokenExpired(token);
-            setIsExpired(expired);
-
-            // Log the status to the console
-            console.log(`Token is ${expired ? "expired" : "valid"}`);
-        };
-
-        // Check token status every 30 seconds
-        const intervalId = setInterval(monitorToken, 1000);
-
-        // Run once immediately on component mount
-        monitorToken();
-
-        // Clear the interval on component unmount
-        return () => clearInterval(intervalId);
-    }, []);
 
 
     useEffect(() => {
@@ -256,7 +229,7 @@ const ChatScreen = () => {
 
             cleanupSocket();
         };
-    }, [chatId, merchantId, queryClient]);
+    }, [chatId, storeId, merchantId, queryClient]);
 
     logActiveSockets();
     // Helper to format timestamps
