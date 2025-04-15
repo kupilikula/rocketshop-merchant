@@ -141,7 +141,7 @@ const ChatScreen = () => {
             console.log("Initializing socket in chat window for chatID:", chatId);
 
             // Get or create a socket for the chat context
-            const socketInstance = await getSocket(socketType, chatId);
+            const socketInstance = await getSocket(socketType, chatId, storeId);
             if (!socketInstance) {
                 console.error("Failed to initialize the chat socket.");
                 return;
