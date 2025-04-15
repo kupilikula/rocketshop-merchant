@@ -4,18 +4,14 @@ import { refreshAccessToken } from "@/api/refreshAccessToken";
 import { BASE_URL } from "@/config/config";
 
 let socketRegistry = [];
-
-/**
- * Get or connect a socket based on type and context.
- * @param {string} type - The socket type (e.g., 'global', 'chat').
- * @param {string|null} context - The context for the socket (e.g., chatId for chat sockets).
- * @param {string|null} storeId - The store ID for merchant connections.
- * @returns {object} - The socket instance.
- */
+let connectionInProgress = false;
+let connectionPromise = null;
 
 export const getSocket = async (type, context = null, storeId = null) => {
     const existingSocket = socketRegistry.find(
-        (entry) => entry.type === type && entry.context === context
+        (entry) => entry.type === type &&
+            entry.context === context &&
+            entry.socket.connected
     );
 
     if (existingSocket) {
@@ -27,71 +23,181 @@ export const getSocket = async (type, context = null, storeId = null) => {
     return await connectSocket(type, context, storeId);
 };
 
-/**
- * Connect a socket and add it to the registry.
- * @param {string} type - The socket type (e.g., 'global', 'chat').
- * @param {string|null} context - The context for the socket (e.g., chatId for chat sockets).
- * @param {string|null} storeId - The store ID for merchant connections.
- * @returns {object} - The connected socket instance.
- */
-
 export const connectSocket = async (type, context = null, storeId = null) => {
-    // Check if a socket of this type and context already exists
+    console.log(`[${new Date().toISOString()}] Attempting to connect socket:`, {
+        type,
+        context,
+        storeId,
+        existingConnections: socketRegistry.length,
+        connectionInProgress,
+        existingSockets: socketRegistry.map(s => ({
+            type: s.type,
+            context: s.context,
+            id: s.socket.id,
+            connected: s.socket.connected
+        }))
+    });
+
     const existingSocketEntry = socketRegistry.find(
-        (entry) => entry.type === type && entry.context === context
+        (entry) => entry.type === type &&
+            entry.context === context &&
+            entry.socket.connected
     );
 
     if (existingSocketEntry) {
-        const { socket } = existingSocketEntry;
+        console.log(`Reusing existing connected socket: Type=${type}, Context=${context}, ID=${existingSocketEntry.socket.id}`);
+        return existingSocketEntry.socket;
+    }
 
-        if (socket.connected) {
-            console.log(`Reusing existing connected socket: Type=${type}, Context=${context}, ID=${socket.id}`);
+    if (connectionInProgress && connectionPromise) {
+        console.log(`Connection already in progress for type=${type}, context=${context}. Waiting...`);
+        try {
+            const socket = await connectionPromise;
             return socket;
-        } else {
-            console.warn(`Existing socket found but not connected: Type=${type}, Context=${context}, ID=${socket.id}. Reconnecting...`);
-
-            // Attempt to reconnect the socket
-            socket.connect();
-            return socket;
+        } catch (error) {
+            console.error('Error while waiting for existing connection:', error);
         }
     }
 
-    console.log(`Connecting new socket for type: ${type}, context: ${context}...`);
-    const token = await AsyncStorage.getItem("accessToken");
+    connectionInProgress = true;
+    connectionPromise = (async () => {
+        try {
+            const disconnectedSockets = socketRegistry.filter(
+                entry => entry.type === type &&
+                    entry.context === context &&
+                    !entry.socket.connected
+            );
 
-    if (!token) {
-        console.error("No valid token found. Socket connection aborted.");
-        return null;
-    }
+            for (const entry of disconnectedSockets) {
+                console.log(`Cleaning up disconnected socket: ${entry.socket.id}`);
+                entry.socket.removeAllListeners();
+                entry.socket.disconnect();
+                deregisterSocket(type, context);
+            }
 
-    // Create a new socket instance
-    const newSocket = io(BASE_URL, {
-        transports: ["websocket"],
-        autoConnect: false, // Prevent automatic connection
-        auth: {
-            accessToken: token,
-            storeId: storeId
-        }, // Attach the token
-    });
+            console.log(`Creating new socket for type: ${type}, context: ${context}...`);
+            const token = await AsyncStorage.getItem("accessToken");
 
-    attachSocketHandlers(newSocket, type, context);
+            if (!token) {
+                throw new Error("No valid token found. Socket connection aborted.");
+            }
 
-    // Connect the socket
-    newSocket.connect();
+            const newSocket = io(BASE_URL, {
+                transports: ["websocket"],
+                autoConnect: false,
+                auth: {
+                    accessToken: token,
+                    storeId: storeId
+                },
+            });
 
-    // Add to registry
-    socketRegistry.push({ socket: newSocket, type, context });
+            registerSocket(newSocket, type, context);
+            attachSocketHandlers(newSocket, type, context);
+            newSocket.connect();
 
-    console.log(`Socket connected for type: ${type}, context: ${context}, ID: ${newSocket.id}`);
-    return newSocket;
+            await new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error('Connection timeout'));
+                }, 5000);
+
+                newSocket.once('connect', () => {
+                    clearTimeout(timeout);
+                    resolve();
+                });
+
+                newSocket.once('connect_error', (error) => {
+                    clearTimeout(timeout);
+                    reject(error);
+                });
+            });
+
+            console.log(`Socket successfully connected for type: ${type}, context: ${context}, ID: ${newSocket.id}`);
+            return newSocket;
+
+        } catch (error) {
+            console.error(`Socket connection failed for type: ${type}, context: ${context}:`, error);
+            deregisterSocket(type, context);
+            throw error;
+        } finally {
+            connectionInProgress = false;
+            connectionPromise = null;
+        }
+    })();
+
+    return await connectionPromise;
 };
 
-/**
- * Attach handlers to a socket instance.
- * @param {object} socket - The socket instance.
- * @param {string} type - The socket type (e.g., 'global', 'chat').
- * @param {string|null} context - The context for the socket (e.g., chatId for chat sockets).
- */
+const registerSocket = (socket, type, context) => {
+    socketRegistry.push({ socket, type, context });
+    console.log(`Socket registered. Registry now contains ${socketRegistry.length} sockets:`,
+        socketRegistry.map(s => ({
+            type: s.type,
+            context: s.context,
+            id: s.socket.id,
+            connected: s.socket.connected
+        }))
+    );
+};
+
+const deregisterSocket = (type, context) => {
+    const initialLength = socketRegistry.length;
+    socketRegistry = socketRegistry.filter(
+        (entry) => !(entry.type === type && entry.context === context)
+    );
+    const removedCount = initialLength - socketRegistry.length;
+    console.log(`Socket deregistered. Removed ${removedCount} sockets. Registry now contains ${socketRegistry.length} sockets`);
+};
+
+export const disconnectSocket = (type, context = null) => {
+    console.log('Attempting to disconnect socket:', { type, context });
+
+    const entries = socketRegistry.filter(
+        (entry) => entry.type === type && entry.context === context
+    );
+
+    entries.forEach(entry => {
+        console.log('Disconnecting socket:', entry.socket.id);
+        entry.socket.removeAllListeners();
+        entry.socket.disconnect(true);
+    });
+
+    deregisterSocket(type, context);
+
+    if (socketRegistry.length === 0) {
+        connectionInProgress = false;
+        connectionPromise = null;
+    }
+
+    console.log('Current socket registry size:', socketRegistry.length);
+    console.log('Current socket registry:', socketRegistry.map(entry =>
+        `${entry.socket.id} (${entry.type}, ${entry.context})`).join(' | '));
+};
+
+export const disconnectAllSockets = () => {
+    console.log('Disconnecting all sockets...');
+    socketRegistry.forEach(entry => {
+        console.log(`Disconnecting socket: Type=${entry.type}, Context=${entry.context}, ID=${entry.socket.id}`);
+        entry.socket.removeAllListeners();
+        entry.socket.disconnect(true);
+    });
+
+    socketRegistry = [];
+    connectionInProgress = false;
+    connectionPromise = null;
+
+    console.log('All sockets disconnected. Registry cleared.');
+};
+
+export const logActiveSockets = () => {
+    console.log('Active sockets:', socketRegistry.map(entry => ({
+        id: entry.socket.id,
+        type: entry.type,
+        context: entry.context,
+        connected: entry.socket.connected,
+        listeners: entry.socket.listeners
+    })));
+};
+
 const attachSocketHandlers = (socket, type, context) => {
     socket.on("connect", () => {
         console.log(`Socket connected: Type=${type}, Context=${context}, ID=${socket.id}`);
@@ -103,91 +209,29 @@ const attachSocketHandlers = (socket, type, context) => {
             try {
                 console.log("Refreshing token for socket...");
                 const newToken = await refreshAccessToken();
-                console.log('refreshed new accesstoken:', newToken)
-                // Save the new token and reconnect the socket
-                await AsyncStorage.setItem("accessToken", newToken);
-                socket.auth.accessToken = newToken;
-                socket.connect();
+                console.log('Refreshed new accessToken:', newToken);
+                // Socket will automatically reconnect with new token
             } catch (refreshError) {
-                console.error("Failed to refresh token for socket:", refreshError);
-                socket.disconnect();
+                console.error("Failed to refresh token:", refreshError);
             }
         }
     });
 
-    socket.on("disconnect", () => {
-        console.log(`Socket disconnected: Type=${type}, Context=${context}, ID=${socket.id}`);
+    socket.on("disconnect", (reason) => {
+        console.log(`Socket disconnected: Type=${type}, Context=${context}, ID=${socket.id}, Reason=${reason}`);
     });
 };
 
-/**
- * Disconnect a socket and remove it from the registry.
- * @param {string} type - The socket type (e.g., 'global', 'chat').
- * @param {string|null} context - The context for the socket (e.g., chatId for chat sockets).
- */
-export const disconnectSocket = (type, context = null) => {
-    console.log('Attempting to disconnect socket:', { type, context });
-
-    // Find all matching entries (there might be duplicates)
-    const entries = socketRegistry.filter(
-        (entry) => entry.type === type && entry.context === context
-    );
-
-    entries.forEach(entry => {
-        console.log('Disconnecting socket:', entry.socket.id);
-        entry.socket.removeAllListeners();  // Remove all listeners
-        entry.socket.disconnect();
-    });
-
-    // Remove all matching entries from registry
-    socketRegistry = socketRegistry.filter(
-        (entry) => !(entry.type === type && entry.context === context)
-    );
-
-    console.log('Current socket registry size:', socketRegistry.length);
-};
-
-/**
- * Reconnect all sockets in the registry with the updated token.
- */
-export const reconnectAllSockets = async () => {
-    console.log("Reconnecting all sockets with updated token...");
-    const token = await AsyncStorage.getItem("accessToken");
-
-    if (!token) {
-        console.error("No valid token found for reconnecting sockets.");
-        return;
-    }
-
-    for (const entry of socketRegistry) {
-        const { socket, type, context } = entry;
-        console.log(`Reconnecting socket: Type=${type}, Context=${context}, ID=${socket.id}`);
-        socket.auth.accessToken = token;
-        socket.connect();
-    }
-};
-
-/**
- * Debug active sockets in the registry.
- */
-export const logActiveSockets = () => {
-    console.log("Active sockets:");
-    socketRegistry.forEach(({ socket, type, context }) => {
-        console.log(`Type: ${type}, Context: ${context}, ID: ${socket.id}, Connected: ${socket.connected}`);
-    });
-};
-
-/**
- * Disconnect all active sockets and clear the socket registry.
- */
-export const disconnectAllSockets = () => {
-    console.log("Disconnecting all active sockets...");
-    socketRegistry.forEach(({ socket, type, context }) => {
-        if (socket) {
-            console.log(`Disconnecting socket for type: ${type}, context: ${context}, socket ID: ${socket.id}`);
-            socket.disconnect(); // Disconnect the socket
-        }
-    });
-    socketRegistry.length = 0; // Clear the registry
-    console.log("All sockets have been disconnected and registry cleared.");
+// Debug helpers
+export const debugSockets = {
+    logSockets: () => {
+        console.log('Current Socket Registry:', socketRegistry.map(entry => ({
+            id: entry.socket.id,
+            type: entry.type,
+            context: entry.context,
+            connected: entry.socket.connected
+        })));
+    },
+    getSocketCount: () => socketRegistry.length,
+    getRegistry: () => socketRegistry
 };

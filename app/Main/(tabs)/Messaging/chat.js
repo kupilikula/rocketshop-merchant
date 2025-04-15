@@ -208,7 +208,7 @@ const ChatScreen = () => {
         // Cleanup on component unmount or dependency change
         return () => {
             const cleanupSocket = async () => {
-                const socketInstance = await getSocket(socketType, chatId); // Get the socket for this context
+                const socketInstance = await getSocket(socketType, chatId, storeId); // Get the socket for this context
                 if (socketInstance) {
                     console.log("Cleaning up socket for chatID:", chatId);
 

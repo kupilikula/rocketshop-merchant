@@ -27,6 +27,10 @@ export default function Layout() {
         console.log('global useEffect');
         // Function to initialize and manage the global socket connection
         const initializeSocket = async () => {
+            if (!merchantId || !storeId) {
+                console.error("Merchant ID or storeId not found. Cannot initialize global socket.");
+                return;
+            }
             const socket = await getSocket(socketType, null, storeId); // Get or connect the global socket
             if (!socket) {
                 console.error("Failed to initialize the global socket.");
