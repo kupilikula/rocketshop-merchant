@@ -40,8 +40,8 @@ export default function Layout() {
             console.log(`Global socket initialized, ID: ${socket.id} , merchantId: ${merchantId}`);
             console.log(`Existing "newMessage" listeners:`, socket.listeners("newMessage").length);
 
-            // Remove any existing 'newMessage' listeners to prevent duplication
-            socket.off("newMessage");
+            // Remove any existing listeners
+            socket.removeAllListeners("newMessage");
 
             // Add the 'newMessage' listener
             socket.on("newMessage", (message) => {
@@ -77,7 +77,7 @@ export default function Layout() {
         };
 
         const setupSocket = async () => {
-            if (merchantId) {
+            if (merchantId && storeId) {
                 await initializeSocket();
                 await attachReconnectHandler();
             }

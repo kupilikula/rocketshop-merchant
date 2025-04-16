@@ -3,18 +3,58 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { refreshAccessToken } from "@/api/refreshAccessToken";
 import { BASE_URL } from "@/config/config";
 
-let socketRegistry = [];
+let socketRegistry = []; // Array to track all active sockets
 let connectionInProgress = false;
 let connectionPromise = null;
+// Add debugging helpers
+if (global) {
+    global.socketRegistry = socketRegistry;
+    global.debugSockets = {
+        getRegistry: () => socketRegistry,
+        logSockets: () => {
+            console.log('Current Socket Registry:', socketRegistry.map(entry => ({
+                type: entry.type,
+                context: entry.context,
+                id: entry.socket.id,
+                connected: entry.socket.connected
+            })));
+        },
+        getSocketCount: () => socketRegistry.length
+    };
+}
+
+const registerSocket = (socket, type, context) => {
+    // Remove any existing sockets of the same type and context
+    socketRegistry = socketRegistry.filter(
+        entry => !(entry.type === type && entry.context === context)
+    );
+
+    // Add the new socket
+    socketRegistry.push({ socket, type, context });
+    console.log(`Socket registered. Registry now contains ${socketRegistry.length} sockets:`,
+        socketRegistry.map(s => ({
+            type: s.type,
+            context: s.context,
+            id: s.socket.id,
+            connected: s.socket.connected
+        }))
+    );
+};
+
+const deregisterSocket = (type, context) => {
+    const beforeCount = socketRegistry.length;
+    socketRegistry = socketRegistry.filter(
+        entry => !(entry.type === type && entry.context === context)
+    );
+    console.log(`Socket deregistered. Removed ${beforeCount - socketRegistry.length} sockets. Registry now contains ${socketRegistry.length} sockets`);
+};
 
 export const getSocket = async (type, context = null, storeId = null) => {
     const existingSocket = socketRegistry.find(
-        (entry) => entry.type === type &&
-            entry.context === context &&
-            entry.socket.connected
+        (entry) => entry.type === type && entry.context === context
     );
 
-    if (existingSocket) {
+    if (existingSocket && existingSocket.socket.connected) {
         console.log(`Returning existing socket for type: ${type}, context: ${context}`, existingSocket.socket.id);
         return existingSocket.socket;
     }
@@ -38,6 +78,7 @@ export const connectSocket = async (type, context = null, storeId = null) => {
         }))
     });
 
+    // First, check if we already have a valid connected socket
     const existingSocketEntry = socketRegistry.find(
         (entry) => entry.type === type &&
             entry.context === context &&
@@ -49,6 +90,7 @@ export const connectSocket = async (type, context = null, storeId = null) => {
         return existingSocketEntry.socket;
     }
 
+    // If a connection is already in progress, wait for it
     if (connectionInProgress && connectionPromise) {
         console.log(`Connection already in progress for type=${type}, context=${context}. Waiting...`);
         try {
@@ -62,6 +104,7 @@ export const connectSocket = async (type, context = null, storeId = null) => {
     connectionInProgress = true;
     connectionPromise = (async () => {
         try {
+            // Cleanup any existing disconnected sockets
             const disconnectedSockets = socketRegistry.filter(
                 entry => entry.type === type &&
                     entry.context === context &&
@@ -91,8 +134,13 @@ export const connectSocket = async (type, context = null, storeId = null) => {
                 },
             });
 
+            // Register the socket BEFORE connecting
             registerSocket(newSocket, type, context);
+
+            // Attach handlers before connecting
             attachSocketHandlers(newSocket, type, context);
+
+            // Connect the socket
             newSocket.connect();
 
             await new Promise((resolve, reject) => {
@@ -127,25 +175,30 @@ export const connectSocket = async (type, context = null, storeId = null) => {
     return await connectionPromise;
 };
 
-const registerSocket = (socket, type, context) => {
-    socketRegistry.push({ socket, type, context });
-    console.log(`Socket registered. Registry now contains ${socketRegistry.length} sockets:`,
-        socketRegistry.map(s => ({
-            type: s.type,
-            context: s.context,
-            id: s.socket.id,
-            connected: s.socket.connected
-        }))
-    );
-};
+const attachSocketHandlers = (socket, type, context) => {
+    socket.on("connect", () => {
+        console.log(`Socket connected: Type=${type}, Context=${context}, ID=${socket.id}`);
+    });
 
-const deregisterSocket = (type, context) => {
-    const initialLength = socketRegistry.length;
-    socketRegistry = socketRegistry.filter(
-        (entry) => !(entry.type === type && entry.context === context)
-    );
-    const removedCount = initialLength - socketRegistry.length;
-    console.log(`Socket deregistered. Removed ${removedCount} sockets. Registry now contains ${socketRegistry.length} sockets`);
+    socket.on("connect_error", async (error) => {
+        console.log(`Connect error for Type=${type}, Context=${context}:`, error.message);
+        if (error.message === "Unauthorized") {
+            try {
+                console.log("Refreshing token for socket...");
+                const newToken = await refreshAccessToken();
+                console.log('Refreshed new accesstoken:', newToken)
+                socket.auth.accessToken = newToken;
+                socket.connect();
+            } catch (refreshError) {
+                console.error("Failed to refresh token for socket:", refreshError);
+                socket.disconnect();
+            }
+        }
+    });
+
+    socket.on("disconnect", (reason) => {
+        console.log(`Socket disconnected: Type=${type}, Context=${context}, ID=${socket.id}, Reason=${reason}`);
+    });
 };
 
 export const disconnectSocket = (type, context = null) => {
@@ -157,12 +210,15 @@ export const disconnectSocket = (type, context = null) => {
 
     entries.forEach(entry => {
         console.log('Disconnecting socket:', entry.socket.id);
+        // Remove all listeners first
         entry.socket.removeAllListeners();
+        // Force disconnect
         entry.socket.disconnect(true);
     });
 
     deregisterSocket(type, context);
 
+    // Reset connection state if this was the last socket
     if (socketRegistry.length === 0) {
         connectionInProgress = false;
         connectionPromise = null;
@@ -170,7 +226,7 @@ export const disconnectSocket = (type, context = null) => {
 
     console.log('Current socket registry size:', socketRegistry.length);
     console.log('Current socket registry:', socketRegistry.map(entry =>
-        `${entry.socket.id} (${entry.type}, ${entry.context})`).join(' | '));
+        `${entry.socket.id} | ${entry.type} | ${entry.context}`).join(' , '));
 };
 
 export const disconnectAllSockets = () => {
@@ -188,6 +244,23 @@ export const disconnectAllSockets = () => {
     console.log('All sockets disconnected. Registry cleared.');
 };
 
+export const reconnectAllSockets = async () => {
+    console.log("Reconnecting all sockets with updated token...");
+    const token = await AsyncStorage.getItem("accessToken");
+
+    if (!token) {
+        console.error("No valid token found for reconnecting sockets.");
+        return;
+    }
+
+    for (const entry of socketRegistry) {
+        const { socket, type, context } = entry;
+        console.log(`Reconnecting socket: Type=${type}, Context=${context}, ID=${socket.id}`);
+        socket.auth.accessToken = token;
+        socket.connect();
+    }
+};
+
 export const logActiveSockets = () => {
     console.log('Active sockets:', socketRegistry.map(entry => ({
         id: entry.socket.id,
@@ -198,29 +271,7 @@ export const logActiveSockets = () => {
     })));
 };
 
-const attachSocketHandlers = (socket, type, context) => {
-    socket.on("connect", () => {
-        console.log(`Socket connected: Type=${type}, Context=${context}, ID=${socket.id}`);
-    });
 
-    socket.on("connect_error", async (error) => {
-        console.log(`Connect error for Type=${type}, Context=${context}:`, error.message);
-        if (error.message === "Unauthorized") {
-            try {
-                console.log("Refreshing token for socket...");
-                const newToken = await refreshAccessToken();
-                console.log('Refreshed new accessToken:', newToken);
-                // Socket will automatically reconnect with new token
-            } catch (refreshError) {
-                console.error("Failed to refresh token:", refreshError);
-            }
-        }
-    });
-
-    socket.on("disconnect", (reason) => {
-        console.log(`Socket disconnected: Type=${type}, Context=${context}, ID=${socket.id}, Reason=${reason}`);
-    });
-};
 
 // Debug helpers
 export const debugSockets = {
