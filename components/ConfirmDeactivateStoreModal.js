@@ -22,8 +22,8 @@ export default function ConfirmDeactivateStoreModal({ visible, onDismiss, storeI
 
     const handleSendOtp = async () => {
         try {
-            await axiosClient.post(`/stores/${storeId}/sendOtpForStoreAction`, {
-                actionType: "DEACTIVATE",
+            await axiosClient.post(`/sendOtp`, {
+                phone, context: 'DEACTIVATE_STORE', storeId: store.storeId
             });
             setOtpSent(true);
         } catch (err) {
@@ -34,7 +34,7 @@ export default function ConfirmDeactivateStoreModal({ visible, onDismiss, storeI
 
     const handleVerifyOTP = async () => {
         try {
-            await axiosClient.post(`/auth/verifyOtp`, { phone, otp, app: "merchant" });
+            await axiosClient.post(`/verifyOtp`, { phone, otp, context: 'DEACTIVATE_STORE' });
             setOtpVerified(true);
         } catch (err) {
             console.error(err);
@@ -51,7 +51,7 @@ export default function ConfirmDeactivateStoreModal({ visible, onDismiss, storeI
             }
 
             setSubmitting(true);
-            await axiosClient.patch(`/stores/${storeId}/deactivateStore`, { phone, otp, confirmationText });
+            await axiosClient.patch(`/stores/${storeId}/deactivateStore`, { phone, otp });
             dispatch(setStore({ ...store, isActive: false }));
             Alert.alert("Success", "Store has been deactivated.");
             // queryClient.invalidateQueries(["merchantStores"]);

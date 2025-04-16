@@ -21,8 +21,8 @@ export default function ConfirmActivateStoreModal({ visible, onDismiss, storeId,
 
     const handleSendOtp = async () => {
         try {
-            await axiosClient.post(`/stores/${storeId}/sendOtpForStoreAction`, {
-                actionType: "ACTIVATE",
+            await axiosClient.post(`/sendOtp`, {
+                phone, context: 'ACTIVATE_STORE', storeId: store.storeId
             });
             setOtpSent(true);
         } catch (err) {
@@ -33,7 +33,7 @@ export default function ConfirmActivateStoreModal({ visible, onDismiss, storeId,
 
     const handleVerifyOTP = async () => {
         try {
-            await axiosClient.post(`/auth/verifyOtp`, { phone, otp, app: "merchant" });
+            await axiosClient.post(`/verifyOtp`, { phone, otp, context: 'ACTIVATE_STORE' });
             setOtpVerified(true);
         } catch (err) {
             console.error(err);

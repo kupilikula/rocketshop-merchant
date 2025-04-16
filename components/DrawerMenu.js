@@ -121,7 +121,7 @@ export default function DrawerMenu(props) {
       }
       <Drawer.Item label={<Text variant={'titleLarge'}>Merchant Profile</Text>}
                    style={{padding: 0, borderRadius: 5, marginLeft: 0}}
-                   onPress={  () => router.push("/MerchantProfile")}
+                   onPress={  () => router.push("/Main/(tabs)/MerchantProfile")}
                    icon={({size, color}) => <MaterialIcons name={'manage-accounts'} size={size}/>}/>
 
       <Drawer.Item label={<Text variant={'titleLarge'}>Switch Store</Text>}

@@ -6,6 +6,7 @@ import axios from "axios";
 import {BASE_URL} from '@/config/config';
 import {clearAllStores} from "@/store/allStoresSlice";
 import {setAuthenticationStatus} from "@/store/authSlice";
+import {clearStoreSettings} from "@/store/storeSettingsSlice";
 
 export const logout = async (dispatch, router) => {
         try {
@@ -33,6 +34,7 @@ export const logout = async (dispatch, router) => {
                 dispatch(clearMerchant());
                 dispatch(clearStore());
                 dispatch(clearAllStores());
+                dispatch(clearStoreSettings());
 
                 console.log('Logged out locally.');
 

@@ -13,7 +13,9 @@ import OtpInput from '../../components/OtpInput';
 import LogoIconWithName from "../../components/LogoIconWithName";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import PhoneInput from "../../components/PhoneInput";
-import {setAllStores} from "../../store/allStoresSlice";
+import {clearAllStores, setAllStores} from "../../store/allStoresSlice";
+import {clearStore} from "../../store/storeSlice";
+import {clearStoreSettings} from "../../store/storeSettingsSlice";
 
 const Authentication = () => {
     const dispatch = useDispatch();
@@ -39,13 +41,16 @@ const Authentication = () => {
             try {
                 dispatch(setAuthenticationStatus('LOADING'));
                 setOtpError(false);
-                const res = await axiosClient.post('/auth/sendOtp', {phone: localPhone, app: 'merchant'});
+                const res = await axiosClient.post('/sendOtp', {phone: localPhone, context: 'AUTH_LOGIN'});
                 setIsRegistered(res.data.isRegistered);
                 setTooManyAttempts(false);
                 dispatch(setPhone(localPhone));
                 dispatch(setAuthenticationStatus('OTP_SENT'));
             } catch (err) {
                 console.error('Failed to send OTP:', err);
+                dispatch(clearStore());
+                dispatch(clearStoreSettings());
+                dispatch(clearAllStores());
                 dispatch(setAuthenticationStatus('UNAUTHENTICATED'));
             }
         }
@@ -55,10 +60,10 @@ const Authentication = () => {
         try {
             setOtp(otp);
             dispatch(setAuthenticationStatus('LOADING'));
-            await axiosClient.post('/auth/verifyOtp', { phone: localPhone, otp, app: 'merchant' });
+            await axiosClient.post('/verifyOtp', { phone: localPhone, otp, context: 'AUTH_LOGIN' });
 
             if (isRegistered) {
-                const res = await axiosClient.post('/auth/merchantLogin', { phone: localPhone, otp, app: 'merchant' });
+                const res = await axiosClient.post('/auth/merchantLogin', { phone: localPhone, otp});
                 const { accessToken, merchant, stores } = res.data;
                 await AsyncStorage.setItem('accessToken', accessToken);
                 setMerchantName(merchant.fullName);
@@ -76,6 +81,10 @@ const Authentication = () => {
                 // Too many failed attempts
                 setTooManyAttempts(true);
                 // Alert.alert('Error', 'Too many failed attempts. Please request a new OTP.');
+                dispatch(clearStore());
+                dispatch(clearStoreSettings());
+                dispatch(clearAllStores());
+                dispatch(setAuthenticationStatus('UNAUTHENTICATED'));
                 dispatch(setAuthenticationStatus('UNAUTHENTICATED'));
             } else {
                 setOtpError(true);
@@ -86,7 +95,15 @@ const Authentication = () => {
         }
     };
 
-    const registerUser = async (address) => {
+    const cancelRegistration = () => {
+        dispatch(setPhone(''));
+        dispatch(clearStore());
+        dispatch(clearStoreSettings());
+        dispatch(clearAllStores());
+        dispatch(setAuthenticationStatus('UNAUTHENTICATED'));
+    }
+
+    const registerUser = async () => {
         try {
             dispatch(setAuthenticationStatus('LOADING'));
             const res = await axiosClient.post('/auth/register', {
@@ -203,6 +220,16 @@ const Authentication = () => {
                                 onChangeText={setName}
                                 style={[{ marginBottom: 16 }, styles.input]}
                             />
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'center'}}>
+                                <Button
+                                    mode="contained"
+                                    onPress={() => cancelRegistration()}
+                                    style={{ backgroundColor: theme.colors.error, borderRadius: 8 }}
+                                >
+                                    Cancel
+                                </Button>
+                            </View>
                             <View style={{ flexDirection: 'row', justifyContent: 'center'}}>
                             <Button
                                 mode="contained"
@@ -211,6 +238,7 @@ const Authentication = () => {
                             >
                                 Register
                             </Button>
+                            </View>
                             </View>
                         </View>
                     )}

@@ -24,8 +24,8 @@ export default function ConfirmDeleteStoreModal({ visible, onDismiss, storeId, s
 
     const handleSendOtp = async () => {
         try {
-            await axiosClient.post(`/stores/${storeId}/sendOtpForStoreAction`, {
-                actionType: "DELETE",
+            await axiosClient.post(`/sendOtp`, {
+                phone, context: 'DELETE_STORE', storeId: store.storeId
             });
             setOtpSent(true);
         } catch (err) {
@@ -36,7 +36,7 @@ export default function ConfirmDeleteStoreModal({ visible, onDismiss, storeId, s
 
     const handleVerifyOTP = async () => {
         try {
-            await axiosClient.post(`/auth/verifyOtp`, { phone, otp, app: "merchant" });
+            await axiosClient.post(`/verifyOtp`, { phone, otp, context: 'DELETE_STORE'});
             setOtpVerified(true);
         } catch (err) {
             console.error(err);
@@ -54,7 +54,7 @@ export default function ConfirmDeleteStoreModal({ visible, onDismiss, storeId, s
             }
 
             setSubmitting(true);
-            await axiosClient.post(`/stores/${storeId}/deleteStore`, { phone, otp, confirmationText });
+            await axiosClient.post(`/stores/${storeId}/deleteStore`, { phone, otp });
             dispatch(clearStore());
             Alert.alert("Success", "Store has been deleted.");
             router.replace('/StoreSelector?exitToLogout=true')
