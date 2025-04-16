@@ -1,519 +1,216 @@
 import React, { useState } from "react";
-import {View, ScrollView, StyleSheet, Pressable} from "react-native";
+import {
+    View,
+    ScrollView,
+    StyleSheet,
+    Pressable,
+} from "react-native";
 import {
     Card,
     Text,
     Button,
     Divider,
     Surface,
+    useTheme,
+    Banner,
+    ActivityIndicator,
     RadioButton,
-    useTheme, Banner,
 } from "react-native-paper";
-// Use any chart library of choice
 import { useRouter } from "expo-router";
-import { faker } from "@faker-js/faker";
-import {
-  VictoryAxis,
-  VictoryBar,
-  VictoryChart,
-  VictoryTheme,
-} from "victory-native";
-import {
-  getCustomer,
-  getProductForStore,
-} from "../../../utils/fakeDataMethods";
+import { useSelector } from "react-redux";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useQuery } from "react-query";
+import axiosClient from "../../../api/client";
 import { ProductDisplayCompactMerchant } from "../../../components/ProductDisplayCompactMerchant";
 import { CustomerListItem } from "../../../components/CustomerListItem";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import {useSelector} from "react-redux";
+import { VictoryAxis, VictoryBar, VictoryChart, VictoryTheme } from "victory-native";
+import {TopCustomerListItem} from "../../../components/TopCustomerListItem";
 
-const Dashboard = () => {
-  const router = useRouter();
-  const theme = useTheme();
-  const styles = makeStyles(theme);
-  const store = useSelector((state) => state.store);
-
-  const routeToOpenOrders = () => {
-    router.push({ pathname: "/Main/Orders", params: { filter: "open" } });
-  };
-
-  const routeToOrdersToday = () => {
-    router.push({ pathname: "/Main/Orders", params: { filter: "today" } });
-  };
-
-  const data = {
-    orders: {
-      day: faker.number.int({ min: 5, max: 30 }),
-      week: faker.helpers.multiple(
-        () => faker.number.int({ min: 8, max: 25 }),
-        { count: 7 },
-      ),
-      month: faker.helpers.multiple(
-        () => faker.number.int({ min: 50, max: 200 }),
-        { count: 4 },
-      ),
-    },
-    sales: {
-      day: faker.number.int({ min: 1000, max: 20000 }),
-      week: faker.helpers.multiple(
-        () => faker.number.int({ min: 2000, max: 25000 }),
-        { count: 7 },
-      ),
-      month: faker.helpers.multiple(
-        () => faker.number.int({ min: 15000, max: 200000 }),
-        { count: 4 },
-      ),
-    },
-  };
-
-  const [chartTimeWindow, setChartTimeWindow] = useState("week");
-  // const [salesChartTimeWindow, setSalesChartTimeWindow] = useState("week");
-  const [salesOrOrders, setSalesOrOrders] = useState("Sales");
-  function lastNDays(n) {
-    var result = [];
-    for (var i = n - 1; i >= 0; i--) {
-      var d = new Date();
-      d.setDate(d.getDate() - i);
-      result.push(d.getDate() + "/" + (d.getMonth() + 1));
-    }
-    return result;
-  }
-
-  return (
-    <ScrollView contentContainerStyle={styles.scrollContent}>
-      <Surface style={styles.container}>
-        {/* Useful Links */}
-        {/* Summary of Open Orders */}
-          {!store.isActive && (
-              <Banner
-                  visible
-                  icon="alert-circle"
-                  style={{ backgroundColor: theme.colors.errorContainer, marginVertical: 20 }}
-              >
-                  This store is currently <Text style={{ fontWeight: 'bold' }}>Inactive</Text>. Customers cannot view this store. You can activate this store from the store settings.
-              </Banner>
-          )}
-        <View style={{ margin: 4 }}>
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 10,
-              justifyContent: "flex-start",
-            }}
-          >
-            <MaterialIcons
-              name={"today"}
-              size={36}
-              style={{ marginRight: 10 }}
-              color={theme.colors.primary}
-            />
-            <Text
-              variant={"titleLarge"}
-              style={{ color: theme.colors.secondary }}
-            >
-              Today
-            </Text>
-          </View>
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-                // backgroundColor: 'green'
-            }}
-          >
-            {/*<Card style={styles.card}>*/}
-              <Card style={styles.card}>
-                  <Text variant={"titleMedium"} style={{ alignSelf: "center" }}>
-                      Open Orders
-                  </Text>
-                  <Text
-                      variant="headlineLarge"
-                      style={{ alignSelf: "center", marginVertical: 8 }}
-                  >
-                      24
-                  </Text>
-                  <View
-                      style={{
-                          display: "flex",
-                          flexDirection: "row",
-                          alignSelf: "center",
-                          marginVertical: 8,
-                      }}/>
-              </Card>
-            {/*</Card>*/}
-
-
-              <Card style={styles.card}>
-                  <Text variant={"titleMedium"} style={{ alignSelf: "center" }}>
-                      New Orders
-                  </Text>
-                  <Text
-                      variant="headlineLarge"
-                      style={{ alignSelf: "center", marginVertical: 8 }}
-                  >
-                      17
-                  </Text>
-                  <View
-                      style={{
-                          display: "flex",
-                          flexDirection: "row",
-                          alignSelf: "center",
-                          marginVertical: 8,
-                      }}/>
-              </Card>
-
-            <Card style={styles.card}>
-              <Text variant={"titleMedium"} style={{ alignSelf: "center" }}>
-                Sales
-              </Text>
-              <Text
-                variant="headlineLarge"
-                style={{ alignSelf: "center", marginVertical: 8 }}
-              >
-                ₹7854
-              </Text>
-              <View
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  alignSelf: "center",
-                  marginVertical: 8,
-                }}/>
-            </Card>
-          </View>
-        </View>
-        <Divider style={{ marginVertical: 10 }} />
-
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 10,
-            justifyContent: "flex-start",
-          }}
-        >
-          <MaterialIcons
-            name={"launch"}
-            size={36}
-            style={{ marginRight: 10 }}
-            color={theme.colors.primary}
-          />
-          <Text
-            variant={"titleLarge"}
-            style={{ color: theme.colors.secondary }}
-          >
-            Quick Links
-          </Text>
-        </View>
-        <View style={{ marginBottom: 10 }}>
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              flexWrap: "wrap",
-              alignItems: "center",
-              justifyContent: "space-around",
-            }}
-          >
-            <View style={{ display: "flex", flexDirection: "row" }}>
-              <Button
-                icon={"receipt"}
-                mode="contained"
-                style={{ borderRadius: 8, margin: 10 }}
-                onPress={() => routeToOpenOrders()}
-              >
-                Open Orders
-              </Button>
-            </View>
-            <View style={{ display: "flex", flexDirection: "row" }}>
-              <Button
-                icon={"calendar-today"}
-                mode="contained"
-                style={{ borderRadius: 8, margin: 10 }}
-                onPress={() => routeToOrdersToday()}
-              >
-                Orders Today
-              </Button>
-            </View>
-            <View style={{ display: "flex", flexDirection: "row" }}>
-              <Button
-                buttonColor={theme.colors.error}
-                icon={"battery-20"}
-                mode="contained"
-                style={{ borderRadius: 8, margin: 10 }}
-                onPress={() =>
-                  router.push({
-                    pathname: "/Main/Products",
-                    params: { filter: "lowstock" },
-                  })
-                }
-              >
-                Low Stock Products
-              </Button>
-            </View>
-          </View>
-        </View>
-        <Divider style={{ marginVertical: 10 }} />
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 10,
-            justifyContent: "flex-start",
-          }}
-        >
-          <MaterialIcons
-            name={"trending-up"}
-            size={36}
-            style={{ marginRight: 10 }}
-            color={theme.colors.primary}
-          />
-          <Text
-            variant={"titleLarge"}
-            style={{ color: theme.colors.secondary }}
-          >
-            Recent Trend
-          </Text>
-        </View>
-        {/* Sales */}
-        <Card style={styles.card}>
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
-            <Text variant={"titleLarge"}>{salesOrOrders}</Text>
-            <View
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-end",
-              }}
-            >
-              <RadioButton.Group
-                onValueChange={(newValue) => setSalesOrOrders(newValue)}
-                value={salesOrOrders}
-              >
-                <View style={styles.radioRow}>
-                  <RadioButton.Item
-                    label="Sales"
-                    value="Sales"
-                    mode={'android'}
-                    color={theme.colors.primary}
-                    position="leading"
-                    style={styles.radioButton}
-                  />
-                  <RadioButton.Item
-                    label="Orders"
-                    value="Orders"
-                    mode={'android'}
-                    color={theme.colors.primary}
-                    position="leading"
-                    style={styles.radioButton}
-                  />
-                </View>
-              </RadioButton.Group>
-              <RadioButton.Group
-                onValueChange={(newValue) => setChartTimeWindow(newValue)}
-                value={chartTimeWindow}
-              >
-                <View style={styles.radioRow}>
-                  <RadioButton.Item
-                    label="Week"
-                    value="week"
-                    mode={'android'}
-                    color={theme.colors.primary}
-                    position="leading"
-                    style={styles.radioButton}
-                  />
-                  <RadioButton.Item
-                    label="Month"
-                    value="month"
-                    mode={'android'}
-                    color={theme.colors.primary}
-                    position="leading"
-                    style={styles.radioButton}
-                  />
-                </View>
-              </RadioButton.Group>
-            </View>
-          </View>
-          {/*<Card.Content>*/}
-          <View
-            style={{
-              justifyContent: "center",
-              display: "flex",
-              flexDirection: "row",
-            }}
-          >
-            <VictoryChart
-              // domainPadding={{ x: 20 }}
-              theme={VictoryTheme.clean}
-            >
-              <VictoryAxis />
-              <VictoryAxis
-                dependentAxis={true}
-                style={{
-                  axis: { display: "none" },
-                  ticks: { display: "none" },
-                  tickLabels: { display: "none" },
-                }}
-              />
-              {chartTimeWindow === "week" && salesOrOrders === "Sales" && (
-                <VictoryBar
-                  data={data.sales.week.map((v, i) => {
-                    let past7days = lastNDays(7);
-                    return { x: past7days[i], y: v, label: "₹" + v };
-                  })}
-                />
-              )}
-              {chartTimeWindow === "month" && salesOrOrders === "Sales" && (
-                <VictoryBar
-                  data={["Week 1", "Week 2", "Week 3", "Week 4"].map(
-                    (w, i) => ({
-                      x: w,
-                      y: data.sales.month[i],
-                      label: "₹" + data.sales.month[i],
-                    }),
-                  )}
-                />
-              )}
-              {chartTimeWindow === "week" && salesOrOrders === "Orders" && (
-                <VictoryBar
-                  data={data.orders.week.map((v, i) => {
-                    let past7days = lastNDays(7);
-                    return { x: past7days[i], y: v, label: v };
-                  })}
-                />
-              )}
-              {chartTimeWindow === "month" && salesOrOrders === "Orders" && (
-                <VictoryBar
-                  data={["Week 1", "Week 2", "Week 3", "Week 4"].map(
-                    (w, i) => ({
-                      x: w,
-                      y: data.orders.month[i],
-                      label: data.orders.month[i].toString(),
-                    }),
-                  )}
-                />
-              )}
-            </VictoryChart>
-          </View>
-        </Card>
-
-        <Divider style={{ marginVertical: 10 }} />
-        {/* Top Products */}
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 10,
-            justifyContent: "flex-start",
-          }}
-        >
-          <MaterialIcons
-            name={"shopping-bag"}
-            size={36}
-            style={{ marginRight: 10 }}
-            color={theme.colors.primary}
-          />
-          <Text
-            variant={"titleLarge"}
-            style={{ color: theme.colors.secondary }}
-          >
-            Top Products
-          </Text>
-        </View>
-        {/*<Card style={styles.card}>*/}
-        {faker.helpers.multiple(getProductForStore, { count: 3 }).map((p) => (
-          <View key={p.productId}>
-              <Pressable onPress={() => router.push('/Main/(tabs)/Products/Product/' + p.productId)}>
-            <ProductDisplayCompactMerchant product={p} key={p.productId} />
-              </Pressable>
-            <Divider style={{ marginVertical: 8 }} />
-          </View>
-        ))}
-        {/*</Card>*/}
-
-        {/* Top Customers */}
-        <Divider style={{ marginVertical: 10 }} />
-        {/* Top Products */}
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 10,
-            justifyContent: "flex-start",
-          }}
-        >
-          <MaterialIcons
-            name={"hail"}
-            size={36}
-            style={{ marginRight: 10 }}
-            color={theme.colors.primary}
-          />
-          <Text
-            variant={"titleLarge"}
-            style={{ color: theme.colors.secondary }}
-          >
-            Top Customers
-          </Text>
-        </View>
-        {faker.helpers.multiple(getCustomer, { count: 3 }).map((c) => (
-          <View key={c.customerId} style={{ padding: 2 }}>
-            <CustomerListItem customer={c} key={c.customerId} />
-            <Divider style={{ marginVertical: 8 }} />
-          </View>
-        ))}
-      </Surface>
-    </ScrollView>
-  );
+const useDashboardData = (storeId) => {
+    return useQuery(['merchantDashboard', storeId], async () => {
+        const { data } = await axiosClient.get(`/stores/${storeId}/dashboard`);
+        return data;
+    });
 };
 
-const makeStyles = (theme) =>
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      padding: 10,
-      backgroundColor: theme.colors.surface,
-    },
-    scrollContent: {
-      // paddingBottom: 20,
-    },
-    card: {
-      // marginBottom: 10,
-      padding: 10,
-      backgroundColor: "white",
-    },
-    row: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      marginVertical: 10,
-    },
-    chart: {
-      marginVertical: 8,
-      borderRadius: 8,
-    },
-    radioRow: {
-      flexDirection: "row", // Arrange items in a row
-      justifyContent: "flex-start",
-      alignItems: "center",
-    },
-    radioButton: {
-      // flex: 1, // Each button occupies equal space
-      width: 120,
-      marginVertical: 0,
-      padding: 0,
-    },
-  });
+const Dashboard = () => {
+    const theme = useTheme();
+    const styles = makeStyles(theme);
+    const router = useRouter();
+    const { storeId } = useSelector((state) => state.store);
+    const { data, isLoading } = useDashboardData(storeId);
+    const [salesOrOrders, setSalesOrOrders] = useState("Sales");
+    const [chartTimeWindow, setChartTimeWindow] = useState("week");
+
+    if (isLoading) {
+        return <ActivityIndicator animating={true} size="large" style={{ flex: 1 }} />;
+    }
+
+    const { banners, quickStats, chartData, productInventory, topProducts, topCustomers } = data;
+
+    console.log('dashboard data:', data);
+
+    return (
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+            <Surface style={styles.container}>
+                <StoreStatusBanner banners={banners} />
+
+                <QuickStatsSection
+                    stats={quickStats}
+                    onPressOpenOrders={() => router.push({ pathname: "/Main/Orders", params: { filter: "open" } })}
+                    onPressNewOrders={() => router.push({ pathname: "/Main/Orders", params: { filter: "today" } })}
+                    onPressSales={() => router.push({ pathname: "/Main/Orders", params: { filter: "today" } })}
+                />
+
+                <Divider style={{ marginVertical: 10 }} />
+                <QuickLinksSection router={router} />
+
+                <Divider style={{ marginVertical: 10 }} />
+                <RecentTrendsSection
+                    salesOrOrders={salesOrOrders}
+                    chartTimeWindow={chartTimeWindow}
+                    setSalesOrOrders={setSalesOrOrders}
+                    setChartTimeWindow={setChartTimeWindow}
+                    chartData={chartData}
+                />
+
+                <Divider style={{ marginVertical: 10 }} />
+                <ProductInventorySection inventory={productInventory} />
+
+                <Divider style={{ marginVertical: 10 }} />
+                <Text variant="titleLarge" style={styles.sectionHeader}>Top Products</Text>
+                {topProducts.map((product) => (
+                    <View key={product.productId}>
+                        <Pressable onPress={() => router.push(`/Main/(tabs)/Products/Product/${product.productId}`)}>
+                            <ProductDisplayCompactMerchant product={product} />
+                        </Pressable>
+                        <Divider style={{ marginVertical: 8 }} />
+                    </View>
+                ))}
+
+                <Divider style={{ marginVertical: 10 }} />
+                <Text variant="titleLarge" style={styles.sectionHeader}>Top Customers</Text>
+                {topCustomers.map((customer) => (
+                    <View key={customer.customerId}>
+                        <TopCustomerListItem customer={customer} />
+                        <Divider style={{ marginVertical: 8 }} />
+                    </View>
+                ))}
+            </Surface>
+        </ScrollView>
+    );
+};
+
+const StoreStatusBanner = ({ banners }) => {
+    const theme = useTheme();
+    return (
+        <View style={{ marginVertical: 10 }}>
+            {!banners.isActive && (
+                <Banner visible icon="alert-circle" style={{ backgroundColor: theme.colors.errorContainer, marginBottom: 10 }}>
+                    This store is currently <Text style={{ fontWeight: 'bold' }}>Inactive</Text>. Activate in Store Settings.
+                </Banner>
+            )}
+            {banners.noProducts && (
+                <Banner visible icon="package-variant" style={{ backgroundColor: theme.colors.secondaryContainer, marginBottom: 10 }}>
+                    Your store doesn’t have any products yet. Add products to start receiving orders.
+                </Banner>
+            )}
+            {banners.noOrders && !banners.noProducts && (
+                <Banner visible icon="shopping" style={{ backgroundColor: theme.colors.primaryContainer }}>
+                    You’ve added products but haven’t received any orders yet. Share your store with customers.
+                </Banner>
+            )}
+        </View>
+    );
+};
+
+const QuickStatsSection = ({ stats, onPressOpenOrders, onPressNewOrders, onPressSales }) => {
+    const theme = useTheme();
+    const styles = makeStyles(theme);
+    return (
+        <View style={{ marginVertical: 16 }}>
+            <View style={styles.sectionHeaderRow}>
+                <MaterialIcons name="today" size={28} style={{ marginRight: 8 }} color={theme.colors.primary} />
+                <Text variant="titleLarge" style={{ color: theme.colors.secondary }}>Today</Text>
+            </View>
+            <View style={styles.cardRow}>
+                <Pressable onPress={onPressOpenOrders} style={{ flex: 1 }}>
+                    <Card style={styles.statsCard}><Text variant="titleMedium" style={styles.cardTitle}>Open Orders</Text><Text variant="headlineLarge" style={styles.cardValue}>{stats.openOrders}</Text></Card>
+                </Pressable>
+                <Pressable onPress={onPressNewOrders} style={{ flex: 1 }}>
+                    <Card style={styles.statsCard}><Text variant="titleMedium" style={styles.cardTitle}>New Orders</Text><Text variant="headlineLarge" style={styles.cardValue}>{stats.newOrders}</Text></Card>
+                </Pressable>
+                <Pressable onPress={onPressSales} style={{ flex: 1 }}>
+                    <Card style={styles.statsCard}><Text variant="titleMedium" style={styles.cardTitle}>Sales</Text><Text variant="headlineLarge" style={styles.cardValue}>₹{stats.salesToday}</Text></Card>
+                </Pressable>
+            </View>
+        </View>
+    );
+};
+
+const QuickLinksSection = ({ router }) => {
+    return (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around' }}>
+            <Button icon="receipt" mode="contained" style={{ margin: 8 }} onPress={() => router.push("/Main/Orders")}>Orders</Button>
+            <Button icon="plus-box" mode="contained" style={{ margin: 8 }} onPress={() => router.push("/Main/AddNewProduct")}>Add Product</Button>
+            <Button icon="view-grid" mode="contained" style={{ margin: 8 }} onPress={() => router.push("/Main/Collections")}>Collections</Button>
+        </View>
+    );
+};
+
+const RecentTrendsSection = ({ salesOrOrders, chartTimeWindow, setSalesOrOrders, setChartTimeWindow, chartData }) => {
+    const theme = useTheme();
+    const styles = makeStyles(theme);
+    const data = chartData[salesOrOrders.toLowerCase()][chartTimeWindow];
+    return (
+        <Card style={styles.statsCard}>
+            <View style={styles.sectionHeaderRow}>
+                <MaterialIcons name="trending-up" size={28} style={{ marginRight: 8 }} color={theme.colors.primary} />
+                <Text variant="titleLarge">{salesOrOrders} Trend</Text>
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <RadioButton.Group onValueChange={setSalesOrOrders} value={salesOrOrders}>
+                    <View style={styles.radioRow}>
+                        <RadioButton.Item label="Sales" value="Sales" position="leading" style={styles.radioButton} />
+                        <RadioButton.Item label="Orders" value="Orders" position="leading" style={styles.radioButton} />
+                    </View>
+                </RadioButton.Group>
+                <RadioButton.Group onValueChange={setChartTimeWindow} value={chartTimeWindow}>
+                    <View style={styles.radioRow}>
+                        <RadioButton.Item label="Week" value="week" position="leading" style={styles.radioButton} />
+                        <RadioButton.Item label="Month" value="month" position="leading" style={styles.radioButton} />
+                    </View>
+                </RadioButton.Group>
+            </View>
+            <VictoryChart theme={VictoryTheme.clean}><VictoryAxis /><VictoryBar data={data.map(({ label, value }) => ({ x: label, y: value }))} /></VictoryChart>
+        </Card>
+    );
+};
+
+const ProductInventorySection = ({ inventory }) => {
+    const theme = useTheme();
+    const styles = makeStyles(theme);
+    return (
+        <Card style={styles.statsCard}>
+            <Text variant="titleLarge" style={styles.cardTitle}>Inventory Summary</Text>
+            <Text>Total Products: {inventory.total}</Text>
+            <Text>Active: {inventory.active}</Text>
+            <Text>Inactive: {inventory.inactive}</Text>
+        </Card>
+    );
+};
+
+const makeStyles = (theme) => StyleSheet.create({
+    container: { flex: 1, padding: 10, backgroundColor: theme.colors.surface },
+    scrollContent: {},
+    sectionHeader: { fontSize: 20, fontWeight: 'bold', marginVertical: 8, marginHorizontal: 4 },
+    sectionHeaderRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, paddingHorizontal: 4 },
+    cardRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
+    statsCard: { padding: 10, marginHorizontal: 4, backgroundColor: 'white' },
+    cardTitle: { alignSelf: 'center', marginBottom: 8 },
+    cardValue: { alignSelf: 'center', marginVertical: 4 },
+    radioRow: { flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' },
+    radioButton: { width: 120, marginVertical: 0, padding: 0 },
+});
 
 export default Dashboard;
