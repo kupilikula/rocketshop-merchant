@@ -1,8 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
-import newProductReducer from "./newProductSlice";
-
+import rootReducer from "@/store/rootReducer";
 export const store = configureStore({
-  reducer: {
-    newProduct: newProductReducer,
-  },
+  reducer: rootReducer,
 });
+
+if (__DEV__) {
+  global.store = store;
+}
+

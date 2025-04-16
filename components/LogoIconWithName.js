@@ -5,7 +5,7 @@ import { Platform } from "react-native";
 import { Atma_600SemiBold } from "@expo-google-fonts/atma";
 import { useFonts } from "expo-font";
 
-export default function LogoIconWithName() {
+export default function LogoIconWithName({style}) {
   const theme = useTheme();
   let [fontsLoaded] = useFonts({
     Atma_600SemiBold,
@@ -20,10 +20,11 @@ export default function LogoIconWithName() {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "flex-start",
+          ...style
       }}
     >
       <Image
-        source={require("../assets/images/PocketShopIcon.png")}
+        source={require("../assets/images/RocketShopIconOrange1024.png")}
         style={{ width: 50, height: 50, margin: 5 }}
       />
         {fontsLoaded &&
@@ -38,7 +39,7 @@ export default function LogoIconWithName() {
           lineHeight: 50,
         }}
       >
-        PocketShop
+        RocketShop
       </Text>}
     </View>
   );

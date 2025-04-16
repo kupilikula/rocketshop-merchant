@@ -9,14 +9,13 @@ const initialState = {
   gstRate: 18,
   attributes: [],
   collections: [],
-  tags: [],
+  productTags: [],
   mediaItems: [],
   rating: null,
   numberOfRatings: 0,
-  enableRatings: true,
-  enableReviews: false,
   enableStockTracking: true,
   gstInclusive: true,
+  isActive: true,
 };
 
 const newProductSlice = createSlice({

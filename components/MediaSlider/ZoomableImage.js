@@ -16,11 +16,16 @@ import Animated, {
 } from "react-native-reanimated";
 import { Fontisto } from "@expo/vector-icons";
 import { Colors } from "../../styles/Colors";
+import { runOnJS } from "react-native-reanimated";
+import {useTheme} from "react-native-paper";
+
 
 // const { width, height } = Dimensions.get('window');
 const pixelRatio = PixelRatio.get(); // Get the device's pixel density
 
-export default function ZoomableImage({ source, size, simultaneousHandlers }) {
+export default function ZoomableImage({ source, size, simultaneousHandlers, onZoomAndPanEnd }) {
+
+  const theme = useTheme();
   // Shared values for scale and translation
   const scale = useSharedValue(1);
   const translateX = useSharedValue(0);
@@ -92,6 +97,9 @@ export default function ZoomableImage({ source, size, simultaneousHandlers }) {
     },
     onEnd: () => {
       lastScale.current = scale.value;
+      if (onZoomAndPanEnd) {
+        runOnJS(onZoomAndPanEnd)(scale.value, {x: translateX.value, y: translateY.value}); // Pass scale and offset
+      }
     },
   });
 
@@ -140,6 +148,9 @@ export default function ZoomableImage({ source, size, simultaneousHandlers }) {
     },
     onEnd: () => {
       lastOffset.current = { x: translateX.value, y: translateY.value };
+      if (onZoomAndPanEnd) {
+        runOnJS(onZoomAndPanEnd)(scale.value, {x: translateX.value, y: translateY.value}); // Pass scale and offset
+      }
     },
   });
 
@@ -147,9 +158,9 @@ export default function ZoomableImage({ source, size, simultaneousHandlers }) {
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [
-        { scale: scale.value },
-        { translateX: translateX.value },
-        { translateY: translateY.value },
+        { translateX: translateX.value }, // Apply translation first
+        { translateY: translateY.value }, // Apply vertical translation
+        { scale: scale.value },           // Apply scaling after translation
       ],
     };
   });
@@ -164,6 +175,9 @@ export default function ZoomableImage({ source, size, simultaneousHandlers }) {
     if (!lockFullWidth) {
       scale.value = 1;
       translateX.value = 0; // Reset the horizontal translation
+      if (onZoomAndPanEnd) {
+        runOnJS(onZoomAndPanEnd)(scale.value, {x: translateX.value, y: translateY.value}); // Pass scale and offset
+      }
       setLockFullWidth(true);
     } else {
       setLockFullWidth(false);
@@ -177,6 +191,9 @@ export default function ZoomableImage({ source, size, simultaneousHandlers }) {
         (imageWidth / size.width) * (size.height / imageHeight); // Calculate scale to fit the height
       scale.value = scaleFactor;
       translateY.value = 0; // Reset the vertical translation
+      if (onZoomAndPanEnd) {
+        runOnJS(onZoomAndPanEnd)(scale.value, {x: translateX.value, y: translateY.value}); // Pass scale and offset
+      }
       setLockFullHeight(true);
     } else {
       setLockFullHeight(false);
@@ -241,38 +258,40 @@ export default function ZoomableImage({ source, size, simultaneousHandlers }) {
           alignItems: "center",
         }}
       >
-        <TouchableWithoutFeedback onPress={onLockFullWidthToggled}>
+        <TouchableWithoutFeedback onPress={onLockFullHeightToggled}>
           <View
             style={{
-              width: 40,
-              height: 60,
+              // width: 40,
+              // height: 60,
+              paddingVertical: 8,
               marginRight: 5,
-              borderRadius: 15,
-              backgroundColor: lockFullWidth ? Colors.iconBlue : "black",
-              opacity: lockFullWidth ? 1 : 0.5,
+              borderRadius: 8,
+              backgroundColor: lockFullHeight ? theme.colors.icon : "black",
+              opacity: lockFullHeight ? 0.8 : 0.5,
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
             }}
           >
-            <Fontisto name="arrow-v" color="white" size={40} />
+            <Fontisto name="arrow-v" color="white" size={36} />
           </View>
         </TouchableWithoutFeedback>
-        <TouchableWithoutFeedback onPress={onLockFullHeightToggled}>
+        <TouchableWithoutFeedback onPress={onLockFullWidthToggled}>
           <View
             style={{
-              width: 60,
-              height: 40,
-              borderRadius: 15,
-              backgroundColor: lockFullHeight ? Colors.iconBlue : "black",
-              opacity: lockFullHeight ? 1 : 0.5,
+              // width: 60,
+              // height: 40,
+              paddingHorizontal: 8,
+              borderRadius: 8,
+              backgroundColor: lockFullWidth ? theme.colors.icon : "black",
+              opacity: lockFullWidth ? 0.8 : 0.5,
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
             }}
           >
             {/*<MaterialIcons name={'lock'} size={36}/>*/}
-            <Fontisto name="arrow-h" color="white" size={40} />
+            <Fontisto name="arrow-h" color="white" size={36} />
           </View>
         </TouchableWithoutFeedback>
       </View>

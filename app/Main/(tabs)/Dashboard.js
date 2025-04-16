@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import {View, ScrollView, StyleSheet, Pressable} from "react-native";
 import {
-  Card,
-  Text,
-  Button,
-  Divider,
-  Surface,
-  RadioButton,
-  useTheme,
+    Card,
+    Text,
+    Button,
+    Divider,
+    Surface,
+    RadioButton,
+    useTheme, Banner,
 } from "react-native-paper";
 // Use any chart library of choice
 import { useRouter } from "expo-router";
@@ -25,11 +25,14 @@ import {
 import { ProductDisplayCompactMerchant } from "../../../components/ProductDisplayCompactMerchant";
 import { CustomerListItem } from "../../../components/CustomerListItem";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import {useSelector} from "react-redux";
 
 const Dashboard = () => {
   const router = useRouter();
   const theme = useTheme();
   const styles = makeStyles(theme);
+  const store = useSelector((state) => state.store);
+
   const routeToOpenOrders = () => {
     router.push({ pathname: "/Main/Orders", params: { filter: "open" } });
   };
@@ -81,6 +84,15 @@ const Dashboard = () => {
       <Surface style={styles.container}>
         {/* Useful Links */}
         {/* Summary of Open Orders */}
+          {!store.isActive && (
+              <Banner
+                  visible
+                  icon="alert-circle"
+                  style={{ backgroundColor: theme.colors.errorContainer, marginVertical: 20 }}
+              >
+                  This store is currently <Text style={{ fontWeight: 'bold' }}>Inactive</Text>. Customers cannot view this store. You can activate this store from the store settings.
+              </Banner>
+          )}
         <View style={{ margin: 4 }}>
           <View
             style={{

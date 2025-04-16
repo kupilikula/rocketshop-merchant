@@ -1,14 +1,57 @@
-// import { useLocalSearchParams } from "expo-router";
-import { getProductForStore } from "../../../../../utils/fakeDataMethods";
+import React from "react";
+import { View, StyleSheet } from "react-native";
+import {Text, ActivityIndicator} from 'react-native-paper';
+import {useLocalSearchParams} from "expo-router";
+import { useSelector } from "react-redux"; // To get storeId from Redux
+import { useStoreProduct } from "../../../../../api/hooks/useStoreProduct";
 import ProductScreenMerchant from "../../../../../components/ProductScreenMerchant";
 
-export default function ProductPage(props) {
-  // const { productId } = useLocalSearchParams();
+const ProductPage = () => {
+  const { productId } = useLocalSearchParams(); // Get productId from route params
+  const {storeId} = useSelector((state) => state.store); // Get storeId from Redux
 
+  const { data: product, isLoading, isError } = useStoreProduct(storeId, productId);
+  console.log('line13, product:', product);
+  if (isLoading) {
+    return (
+        <View style={styles.container}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+    );
+  }
+
+  if (isError) {
+    return (
+        <View style={styles.container}>
+          <Text style={styles.errorText}>
+            Failed to load product details. Please try again.
+          </Text>
+        </View>
+    );
+  }
+  // console.log('product.variants[0]:', product.variants[0].differingAttributes);
   return (
-    <ProductScreenMerchant
-      product={getProductForStore()}
-      showProductDescription={true}
-    />
+      <ProductScreenMerchant product={product} showProductDescription={true} />
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#555",
+  },
+  errorText: {
+    fontSize: 16,
+    color: "red",
+    textAlign: "center",
+  },
+});
+
+export default ProductPage;

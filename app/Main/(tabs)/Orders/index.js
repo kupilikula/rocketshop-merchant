@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { FlatList, View, StyleSheet, TouchableOpacity } from "react-native";
+import {FlatList, View, StyleSheet, TouchableOpacity, Platform, Modal} from "react-native";
 import {
   Card,
   Text,
@@ -12,23 +12,29 @@ import {
 } from "react-native-paper";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Fuse from "fuse.js";
-import { getOrder } from "../../../../utils/fakeDataMethods";
-import { faker } from "@faker-js/faker";
-// import {DatePickerModal} from "react-native-paper-dates";
-import DatePicker from "@react-native-community/datetimepicker";
-
-import { List } from "react-native-paper";
+import { useSelector } from "react-redux"; // For getting storeId from Redux
+import { useMerchantOrders } from "../../../../api/hooks/useMerchantOrders";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   orderStatusColors,
   orderStatusList,
 } from "../../../../utils/dataValues";
-
-const initialOrders = faker.helpers.multiple(getOrder, { count: 100 });
+import { List } from "react-native-paper";
+import CrossPlatformDatePicker from "../../../../components/CrossPlatformDatePicker";
 
 const Orders = () => {
-  const [orders, setOrders] = useState(initialOrders);
+  const router = useRouter();
+  const theme = useTheme();
+  const styles = makeStyles(theme);
+
+  // Redux: Get the storeId from the global state
+  const storeId = useSelector((state) => state.store.storeId);
+
+  // React Query: Fetch orders
+  const { data: orders = [], isLoading, isError } = useMerchantOrders(storeId);
+
+  // Local State
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState([]);
   const [statusQuickFilter, setStatusQuickFilter] = useState("All");
@@ -39,8 +45,8 @@ const Orders = () => {
     startDate: new Date(new Date().setFullYear(new Date().getFullYear() - 1)),
     endDate: new Date(),
   });
-  const [sortField, setSortField] = useState("orderDate"); // Default sorting
-  const [sortOrder, setSortOrder] = useState("descending"); // Default sorting order
+  const [sortField, setSortField] = useState("orderDate");
+  const [sortOrder, setSortOrder] = useState("descending");
   const [filterExpanded, setFilterExpanded] = useState(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
@@ -61,30 +67,27 @@ const Orders = () => {
     setSortOrder((prev) => (prev === "ascending" ? "descending" : "ascending"));
   };
 
-  const router = useRouter();
-
-  const theme = useTheme();
-  const styles = makeStyles(theme);
   const fuse = useMemo(() => {
     return new Fuse(orders, {
       keys: [
         "orderId",
-        "customer.fullName", // Search customer name
+        "customer.fullName",
         "customer.customerAddress",
         "customer.phone",
-        "customer.email", // Search email
-        "orderItems[].productName", // Search through all items in orderItems array
+        "customer.email",
+        "orderItems[].productName",
         "orderStatus",
         "orderTotal",
       ],
-      threshold: 0.4, // Controls fuzziness
+      threshold: 0.4,
       includeScore: false,
-      ignoreLocation: true, // Ignores match location
+      ignoreLocation: true,
     });
   }, [orders]);
 
-  // Search filter logic
   const filteredOrders = useMemo(() => {
+    if (isLoading || isError) return [];
+
     let result = orders;
 
     if (searchQuery.trim()) {
@@ -92,47 +95,38 @@ const Orders = () => {
       result = searchResults.map((res) => res.item);
     }
 
-    if (statusFilter) {
-      if (!statusFilter.includes("All")) {
-        result = result.filter((order) =>
-          statusFilter.includes(order.orderStatus),
-        );
-      }
+    if (statusFilter.length && !statusFilter.includes("All")) {
+      result = result.filter((order) => statusFilter.includes(order.orderStatus));
     }
-    console.log("result.length before total filtering:", result.length);
-    console.log("minTotal:", minTotal, " ,maxTotal:", maxTotal);
-    // Filter by orderTotal range
+
     if (minTotal || maxTotal) {
       const min = minTotal ? parseInt(minTotal, 10) : Number.NEGATIVE_INFINITY;
       const max = maxTotal ? parseInt(maxTotal, 10) : Number.POSITIVE_INFINITY;
       result = result.filter(
-        (order) => order.orderTotal >= min && order.orderTotal <= max,
+          (order) => order.orderTotal >= min && order.orderTotal <= max
       );
     }
 
     if (filterDates?.startDate && filterDates?.endDate) {
       result = result.filter(
-        (order) =>
-          order.orderDate >= filterDates.startDate &&
-          order.orderDate <= filterDates.endDate,
+          (order) =>
+              new Date(order.orderDate) >= filterDates.startDate &&
+              new Date(order.orderDate) <= filterDates.endDate
       );
     }
 
-    // Sorting
     result = [...result].sort((a, b) => {
       if (sortField === "orderDate") {
         return sortOrder === "ascending"
-          ? new Date(a.orderDate) - new Date(b.orderDate)
-          : new Date(b.orderDate) - new Date(a.orderDate);
+            ? new Date(a.orderDate) - new Date(b.orderDate)
+            : new Date(b.orderDate) - new Date(a.orderDate);
       } else if (sortField === "orderTotal") {
         return sortOrder === "ascending"
-          ? a.orderTotal - b.orderTotal
-          : b.orderTotal - a.orderTotal;
+            ? a.orderTotal - b.orderTotal
+            : b.orderTotal - a.orderTotal;
       }
       return 0;
     });
-
-    console.log("result.length after total filtering:", result.length);
 
     return result;
   }, [
@@ -145,6 +139,8 @@ const Orders = () => {
     sortField,
     sortOrder,
     fuse,
+    isLoading,
+    isError,
   ]);
 
   // Function to update order status
@@ -154,6 +150,25 @@ const Orders = () => {
   //   );
   //   setOrders(updatedOrders);
   // };
+
+  const handleStartDateChange = (date) => {
+    // setShowStartPicker(false); // Close picker
+    if (date) {
+      setFilterDates((prev) => ({
+        ...prev,
+        startDate: date,
+      }));
+    }
+  };
+  const handleEndDateChange = (date) => {
+    // setShowStartPicker(false); // Close picker
+    if (date) {
+      setFilterDates((prev) => ({
+        ...prev,
+        endDate: date,
+      }));
+    }
+  };
 
   const renderOrderItem = ({ item }) => (
     <Card
@@ -169,9 +184,9 @@ const Orders = () => {
         }}
       >
         <View style={{ margin: 10 }}>
-          <Text variant={"bodyLarge"}>{`ID: #${item.orderId}`}</Text>
+          <Text variant={"bodyLarge"}>{`ID: #${item.orderId.slice(0,8)}`}</Text>
           <Text variant={"bodyLarge"}>
-            Date: {item.orderDate.toLocaleDateString()}
+            Date: {new Date(item.orderDate).toLocaleDateString()}
           </Text>
         </View>
         <View
@@ -357,20 +372,17 @@ const Orders = () => {
                     <Chip
                       mode="outlined"
                       style={styles.sortOrderChip}
-                      icon={() => (
-                        <MaterialCommunityIcons
-                          name={
-                            sortOrder === "ascending"
-                              ? "arrow-up-bold"
-                              : "arrow-down-bold"
-                          }
-                          size={20}
-                          color={theme.colors.primary}
-                        />
-                      )}
                       onPress={toggleSortOrder}
                     >
-                      {sortOrder === "ascending" ? "Ascending" : "Descending"}
+                    <MaterialCommunityIcons
+                        name={
+                          sortOrder === "ascending"
+                              ? "arrow-up-bold"
+                              : "arrow-down-bold"
+                        }
+                        size={20}
+                        color={theme.colors.primary}
+                    />
                     </Chip>
                   </View>
                 </View>
@@ -422,39 +434,12 @@ const Orders = () => {
                       flex: 0.48,
                     }}
                   >
-                    <Text variant={"bodySmall"}>Start Date</Text>
-                    <TouchableOpacity
-                      onPress={() => setShowStartPicker(true)}
-                      style={styles.dateInput}
-                    >
-                      <MaterialCommunityIcons
-                        name="calendar"
-                        size={20}
-                        color={theme.colors.primary}
-                      />
-                      <Text style={styles.dateText}>
-                        {filterDates.startDate
-                          ? filterDates.startDate.toLocaleDateString()
-                          : "Start Date"}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  {showStartPicker && (
-                    <DatePicker
-                      style={{ backgroundColor: theme.colors.primary }}
-                      accentColor={theme.colors.primary}
-                      mode="date"
-                      value={filterDates.startDate || new Date()}
-                      onChange={(event, date) => {
-                        setShowStartPicker(false);
-                        if (date)
-                          setFilterDates((prev) => ({
-                            ...prev,
-                            startDate: date,
-                          }));
-                      }}
+                    <CrossPlatformDatePicker
+                        label="Start Date"
+                        initialDate={filterDates.startDate}
+                        onDateChange={(newDate) => handleStartDateChange(newDate)}
                     />
-                  )}
+                  </View>
                   <View
                     style={{
                       display: "flex",
@@ -462,38 +447,13 @@ const Orders = () => {
                       flex: 0.48,
                     }}
                   >
-                    <Text variant={"bodySmall"}>Stop Date</Text>
-                    <TouchableOpacity
-                      onPress={() => setShowEndPicker(true)}
-                      style={styles.dateInput}
-                    >
-                      <MaterialCommunityIcons
-                        name="calendar"
-                        size={20}
-                        color={theme.colors.primary}
-                      />
-                      <Text style={styles.dateText}>
-                        {filterDates.endDate
-                          ? filterDates.endDate.toLocaleDateString()
-                          : "End Date"}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  {showEndPicker && (
-                    <DatePicker
-                      mode="date"
-                      value={filterDates.endDate || new Date()}
-                      onChange={(event, date) => {
-                        setShowEndPicker(false);
-                        if (date)
-                          setFilterDates((prev) => ({
-                            ...prev,
-                            endDate: date,
-                          }));
-                      }}
+                    <CrossPlatformDatePicker
+                        label="End Date"
+                        initialDate={filterDates.endDate}
+                        onDateChange={(newDate) => handleEndDateChange(newDate)}
                     />
-                  )}
                 </View>
+              </View>
               </View>
 
               <View style={{ marginHorizontal: 10 }}>
@@ -596,7 +556,6 @@ const Orders = () => {
       <Divider style={{ marginVertical: 10 }} />
     </>
   );
-
   let nOpen = orders
     .map((o) => orderStatusList.indexOf(o.orderStatus))
     .filter((i) => i < 6).length;
@@ -607,34 +566,28 @@ const Orders = () => {
     .map((o) => orderStatusList.indexOf(o.orderStatus))
     .filter((i) => i > 8).length;
 
+  if (isError) {
+    return (
+        <Surface style={styles.container}>
+          <Text>Error loading orders. Please try again.</Text>
+        </Surface>
+    );
+  }
+
   return (
-    <Surface style={styles.container}>
-      <FlatList
-        data={filteredOrders}
-        keyExtractor={(item) => item.orderId}
-        renderItem={renderOrderItem}
-        ListHeaderComponent={filterAndSortComponent()}
-        ListEmptyComponent={<Text>No Orders Found</Text>}
-        contentContainerStyle={{ overflow: "visible", padding: 2 }}
-        ItemSeparatorComponent={<Divider style={{ marginVertical: 10 }} />}
-      />
-    </Surface>
+      <Surface style={styles.container}>
+        <FlatList
+            data={filteredOrders}
+            keyExtractor={(item) => item.orderId}
+            renderItem={renderOrderItem}
+            ListHeaderComponent={filterAndSortComponent()}
+            ListEmptyComponent={<Text>No Orders Found</Text>}
+            ItemSeparatorComponent={() => <Divider style={{ marginVertical: 10 }} />}
+        />
+      </Surface>
   );
 };
 
-// const styles = StyleSheet.create({
-//     container: { flex: 1, padding: 10 },
-//     searchBar: { marginBottom: 10 },
-//     sectionTitle: { fontSize: 18, fontWeight: 'bold', marginVertical: 10 },
-//     filterSection: { marginBottom: 15 },
-//     chipContainer: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 10 },
-//     chip: { margin: 5 },
-//     chipSelected: { backgroundColor: '#6200ee', color: '#ffffff' },
-//     row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-//     totalInput: { flex: 1, marginHorizontal: 5 },
-//     sortSection: { marginBottom: 10 },
-//     card: { marginVertical: 8 },
-// });
 const makeStyles = ({ colors }) =>
   StyleSheet.create({
     container: {
@@ -648,7 +601,7 @@ const makeStyles = ({ colors }) =>
     flexWrapRow: { flexDirection: "row", flexWrap: "wrap", marginVertical: 10 },
     row: {
       flexDirection: "row",
-      justifyContent: "space-between",
+      justifyContent: "flex-start",
       marginVertical: 0,
       alignItems: "center",
     },
@@ -658,6 +611,7 @@ const makeStyles = ({ colors }) =>
       borderRadius: 8,
       marginVertical: 5,
       backgroundColor: colors.card,
+      padding: 8
     },
     accordionBar: {
       backgroundColor: colors.primary,
@@ -773,6 +727,38 @@ const makeStyles = ({ colors }) =>
       color: "#333",
       marginLeft: 8, // Space between the icon and the text
       fontWeight: "500",
+    },
+    // dateInput: {
+    //   flexDirection: 'row',
+    //   alignItems: 'center',
+    //   borderWidth: 1,
+    //   borderColor: '#ccc',
+    //   borderRadius: 8,
+    //   padding: 8,
+    // },
+    modalContainer: {
+      flex: 1,
+      justifyContent: 'flex-end', // Align at the bottom
+      backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent background
+    },
+    pickerContainer: {
+      backgroundColor: '#fff',
+      borderTopLeftRadius: 16,
+      borderTopRightRadius: 16,
+      padding: 16,
+    },
+    doneButton: {
+      marginTop: 16,
+      backgroundColor: '#007AFF',
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 5,
+      alignSelf: 'center',
+    },
+    doneText: {
+      color: '#fff',
+      fontWeight: 'bold',
+      fontSize: 16,
     },
   });
 export default Orders;

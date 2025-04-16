@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {useCallback, useContext, useEffect, useRef, useState} from "react";
 import {
   View,
   TouchableOpacity,
@@ -13,27 +13,34 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import { Button, Card, Surface, Text, useTheme } from "react-native-paper";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import * as FileSystem from "expo-file-system"; // Import FileSystem
+import * as FileSystem from "expo-file-system";
 import { Audio } from "expo-av";
 import { gestureHandlerRootHOC, FlatList } from "react-native-gesture-handler";
 import { useMemo } from "react";
 import GalleryMediaItem from "./GalleryMediaItem";
-import { useNavigation, useRouter } from "expo-router";
+import {useFocusEffect, useNavigation, useRouter} from "expo-router";
 import { useIsFocused } from "@react-navigation/native";
-import { resetNewProduct, updateField } from "../store/newProductSlice";
+import { updateField } from "../store/newProductSlice";
 import { useDispatch, useSelector } from "react-redux";
 import _ from "lodash";
 import * as Crypto from "expo-crypto";
-import { CommonActions } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { generateBoxShadowStyle } from "../styles/generateShadow";
+import mime from 'mime';
+import {ProductWorkflowContext} from "./ProductWorkflowContext";
 
 const MediaGallery = (props) => {
   const [media, setMedia] = useState([]);
+  const {
+    isCameraOpen,
+    setIsCameraOpen,
+    isMediaSelected,
+    setIsMediaSelected,
+  } = useContext(ProductWorkflowContext);
+  console.log('isCameraOpen:', isCameraOpen, ', isMediaSelected:', isMediaSelected);
+
   const [selectedItemsIds, setSelectedItemsIds] = useState([]);
   const [previewMediaItems, setPreviewMediaItems] = useState([]);
   const [orientation, setOrientation] = useState("landscape");
-  const [openCamera, setOpenCamera] = useState(false);
   const [cameraMode, setCameraMode] = useState("picture");
   const [isRecording, setIsRecording] = useState(false);
   const [videoElapsedTime, setVideoElapsedTime] = useState(0);
@@ -53,17 +60,16 @@ const MediaGallery = (props) => {
   const previewFlatListSliderRef = useRef();
   const libraryFlatListRef = useRef();
   const timerRef = useRef(null);
-
+  const router = useRouter();
   const theme = useTheme();
   const navigation = useNavigation();
-  const router = useRouter();
 
   const isFocused = useIsFocused();
   const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
 
-  const productDataMediaItems = useSelector(
-    (state) => state.newProduct.mediaItems,
+  const {productId, mediaItems: productDataMediaItems } = useSelector(
+    (state) => state.newProduct,
   );
   function toggleCameraFacing() {
     setFacing((current) => (current === "back" ? "front" : "back"));
@@ -76,11 +82,17 @@ const MediaGallery = (props) => {
     };
   }, []);
 
-  const mediaSelected = useMemo(() => {
-    return previewMediaItems.length > 0;
-  }, [previewMediaItems.length]);
+  useFocusEffect(() => {
+    if(!productId) {
+      console.log('null product id, replacing.')
+      router.push('/Main/(tabs)/AddNewProduct')
+    }
+  })
 
-  // const forceUpdate = useCallback(() => setNewAssetTrigger((prev) => ({ ...prev })), []);
+
+  useEffect(() => {
+      setIsMediaSelected(previewMediaItems.length > 0);
+  },[previewMediaItems.length]);
 
   const savePhotoToGallery = async (photoUri) => {
     let asset;
@@ -98,43 +110,46 @@ const MediaGallery = (props) => {
     return asset;
   };
 
-  const resetNavigationStack = useCallback(() => {
-    // Reset the navigation stack to the Dashboard tab
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: "Dashboard" }], // Replace with your Dashboard screen name
-      }),
-    );
-  }, [navigation]);
-
   const generateThumbnails = async (assets) => {
     console.log("generate:", assets.length);
-    if (assets.length > 0) {
-      const thumbnailMap = {};
-      for (const asset of assets) {
-        try {
-          let assetUri = null;
-          if (Platform.OS === "ios") {
-            let assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
-            assetUri = assetInfo.localUri;
-          } else {
-            assetUri = asset.uri;
-          }
+    if (assets.length === 0) return;
 
-          const { uri } = await VideoThumbnails.getThumbnailAsync(assetUri, {
-            time: 1000, // Extract frame at 1 second
-          });
-          thumbnailMap[asset.id] = uri;
-        } catch (e) {
-          console.error(`Failed to generate thumbnail for ${asset.id}:`, e);
+    const thumbnailMap = {};
+
+    for (const asset of assets) {
+      try {
+        let assetUri = null;
+
+        if (Platform.OS === "ios") {
+          const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
+          console.log("assetInfo:", assetInfo);
+
+          const localUri = assetInfo.localUri?.split("#")[0];
+          const filename = encodeURIComponent(asset.filename || asset.id) + ".mov";
+          const cachePath = FileSystem.cacheDirectory + filename;
+
+          console.log("Copying asset to:", cachePath);
+          await FileSystem.copyAsync({ from: localUri || asset.uri, to: cachePath });
+          assetUri = cachePath;
+
+        } else {
+          assetUri = asset.uri?.split("#")[0];
         }
+
+        console.log("Generating thumbnail for:", assetUri);
+
+        const { uri } = await VideoThumbnails.getThumbnailAsync(assetUri, {
+          time: 1000,
+        });
+
+        thumbnailMap[asset.id] = uri;
+
+      } catch (e) {
+        console.error(`Failed to generate thumbnail for ${asset.id}:`, e);
       }
-      // console.log('t:', thumbnails.current);
-      // console.log('T:', {...thumbnails.current, ...thumbnailMap});
-      // thumbnails.current = {...thumbnails.current, ...thumbnailMap};
-      setThumbnails({ ...thumbnails, ...thumbnailMap });
     }
+
+    setThumbnails((prev) => ({ ...prev, ...thumbnailMap }));
   };
 
   const toggleSelection = useCallback((item) => {
@@ -221,21 +236,29 @@ const MediaGallery = (props) => {
           let localUri = null;
           try {
             if (item.mediaType === "video" && Platform.OS === "ios") {
+              console.log('line225, item:', item);
               let assetInfo = await MediaLibrary.getAssetInfoAsync(item);
-              localUri = assetInfo.localUri;
+              localUri = assetInfo.localUri?.split('#')[0];
+              console.log('line227, localUri:', localUri);
             }
           } catch (e) {
             console.log("line206, e:", e);
           }
-          console.log("localuri:", localUri);
 
+
+
+          let correctMediaType = item.mediaType === "photo" ? "image" : "video";
+          let contentType = mime.getType(item.filename);
+          console.log('contentType: ', contentType);
           return {
             ...item,
-            mediaType: item.mediaType === "photo" ? "image" : "video",
+            mediaType: correctMediaType,
+            contentType: contentType,
             uri: localUri || item.uri,
             orientation,
             thumbnail: thumbnails[item.id] || "",
             mediaId: Crypto.randomUUID(),
+            // blob: blob
           };
         });
         const resolvedItems = await Promise.all(itemsWithPromises);
@@ -265,7 +288,7 @@ const MediaGallery = (props) => {
   const closeCamera = () => {
     setVideoElapsedTime(0);
     cameraRef.current = null;
-    setTimeout(() => setOpenCamera(false), 100);
+    setTimeout(() => setIsCameraOpen(false), 100);
 
     console.log("closed camera");
   };
@@ -284,92 +307,19 @@ const MediaGallery = (props) => {
   }, [cameraMode]);
 
   useEffect(() => {
-    console.log("effect: openCamera:", openCamera);
-
-    const MediaHeader = ({ cameraOpen }) => {
-      if (cameraOpen) {
-        return null;
-        // return <View style={{height: 60 + insets.top, backgroundColor: "#000000"}}/>;
-      } else {
-        return (
-          <View
-            style={[
-              generateBoxShadowStyle(0, 4, "#171717", 0.2, 3, 4, "#171717"),
-              {
-                height: 60 + insets.top,
-                paddingTop: insets.top,
-                paddingHorizontal: 15,
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: "black",
-              },
-            ]}
-          >
-            {/* Left Icon (Back Button) */}
-            <Pressable
-              onPressIn={() => {
-                console.log("cancel workflow");
-                dispatch(resetNewProduct());
-                resetNavigationStack();
-              }}
-              style={{ flex: 1 }}
-            >
-              <MaterialIcons
-                name="close"
-                size={36}
-                style={{ color: "white" }}
-              />
-            </Pressable>
-
-            {/* Title */}
-            <Text
-              variant="titleLarge"
-              style={{
-                flex: 2, // Allow the title to occupy its space while centering
-                textAlign: "center",
-                color: "white",
-              }}
-            >
-              Product Media
-            </Text>
-
-            {/* Right Icon (Forward Button) */}
-            <Pressable
-              onPressIn={() => {
-                console.log("press");
-                if (mediaSelected) {
-                  router.push("./AddProductInfo");
-                }
-              }}
-              style={{ flex: 1, alignItems: "flex-end" }}
-            >
-              <MaterialIcons
-                name="arrow-forward"
-                size={36}
-                style={{
-                  color: mediaSelected ? "white" : "black",
-                }}
-              />
-            </Pressable>
-          </View>
-        );
+      if (isCameraOpen) {
+        navigation.getParent().setOptions({
+          tabBarStyle: {display: 'none'}
+        })
       }
-    };
-
-    navigation.setOptions({
-      header: () => <MediaHeader cameraOpen={openCamera} />,
-    });
-    if (openCamera) {
-      navigation.getParent().setOptions({
-        tabBarStyle: {display: 'none'}
-      })
-    }
-    return () => navigation.getParent()?.setOptions({
-      tabBarStyle: undefined
-    });
-
-  }, [navigation, openCamera, mediaSelected, dispatch, insets.top, router]);
+      return () => navigation.getParent()?.setOptions({
+        tabBarStyle: {
+          backgroundColor: "white",
+          paddingBottom: Platform.OS==='android' ? 80 : 0,
+          paddingTop: 3,
+    },
+      });
+  },[isCameraOpen, navigation])
 
   const formatTime = (timeInSeconds) => {
     const minutes = Math.floor(timeInSeconds / 60);
@@ -467,9 +417,7 @@ const MediaGallery = (props) => {
           const { status, canAskAgain } =
             await MediaLibrary.requestPermissionsAsync();
           if (status !== "granted" && canAskAgain) {
-            const fullPermission = await MediaLibrary.requestPermissionsAsync({
-              writeOnly: false,
-            });
+            const fullPermission = await MediaLibrary.requestPermissionsAsync();
             console.log("Full permission status:", fullPermission.status);
           }
 
@@ -491,6 +439,16 @@ const MediaGallery = (props) => {
       saveVideo();
     }
   }, [recordedUri]);
+
+  const handleZoomAndPanEnd = (itemId, scale, offset) => {
+    setPreviewMediaItems((prevItems) =>
+        prevItems.map((item) =>
+            item.mediaId === itemId
+                ? { ...item, scale, offset }
+                : item
+        )
+    );
+  };
 
   const renderItem = useCallback(
     ({ item }) => {
@@ -550,13 +508,15 @@ const MediaGallery = (props) => {
     console.log("preview Media Items", previewMediaItems);
     if (!isFocused) {
       // Save state to Redux when screen loses focus
+      console.log('updating redux media items. before:', productDataMediaItems);
       dispatch(
         updateField({
           field: "mediaItems",
           value: _.cloneDeep(previewMediaItems),
         }),
       );
-      setPreviewMediaItems([]);
+      console.log('updating redux media items. after:', productDataMediaItems);
+      // setPreviewMediaItems([]);
     } else {
       console.log(
         "previewitems:",
@@ -583,7 +543,7 @@ const MediaGallery = (props) => {
     <Surface style={styles.container}>
       <>
 
-        {!openCamera && (
+        {!isCameraOpen && (
           <View
             style={{
               flex: 1,
@@ -601,7 +561,7 @@ const MediaGallery = (props) => {
                 flexDirection: "column",
                 justifyContent: "flex-start",
                 alignItems: "center",
-                backgroundColor: "red",
+                backgroundColor: "black",
                 width: "100%",
                 aspectRatio: orientation === "landscape" ? "1.33" : "0.8",
               }}
@@ -640,6 +600,7 @@ const MediaGallery = (props) => {
                 contentContainerStyle={{ backgroundColor: "black" }}
                 flatListWrapperStyle={{ backgroundColor: "black" }}
                 allowPanZoom={true}
+                onZoomAndPanEnd={handleZoomAndPanEnd}
                 component={<MediaItem />}
               />
             </View>
@@ -662,7 +623,7 @@ const MediaGallery = (props) => {
                   transform: [{ translateX: -25 }],
                 }}
               >
-                <Pressable onPress={() => setOpenCamera(true)}>
+                <Pressable onPress={() => setIsCameraOpen(true)}>
                   <MaterialIcons
                     name={"camera-alt"}
                     color={"black"}
@@ -720,7 +681,7 @@ const MediaGallery = (props) => {
           </View>
         )}
         {/*<View style={{paddingTop: 60 + insets.top}}>*/}
-        {openCamera && (
+        {isCameraOpen && (
           <>
             {!permission?.granted && (
               <Card style={styles.permissionContainer}>

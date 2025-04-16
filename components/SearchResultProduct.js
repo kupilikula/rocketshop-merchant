@@ -9,11 +9,7 @@ export const SearchResultProduct = (props) => {
 
   return (
     <Pressable
-      onPress={() =>
-        router.push(
-          `/Main/(tabs)/Products/Product/${props.product.productId}`,
-        )
-      }
+      onPress={() => props.onPressHandler(props.product)}
     >
       <View
         style={{
@@ -22,6 +18,7 @@ export const SearchResultProduct = (props) => {
             borderWidth: 1,
             borderRadius: 8,
             borderColor: theme.colors.grayBorder,
+            backgroundColor: theme.colors.white,
           // borderBottomWidth: 1,
           // borderRightWidth: 1,
           display: "flex",

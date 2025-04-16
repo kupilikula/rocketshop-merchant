@@ -4,8 +4,18 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FlatListSlider from "./MediaSlider/FlatListSlider";
 import MediaItem from "./MediaSlider/MediaItem";
 import { Rating } from "@kolking/react-native-rating";
+import {useEffect} from "react";
+import {Image} from 'expo-image';
 
 export default function ProductDisplayCardCustomerStore(props) {
+
+  useEffect(() => {
+    props.product.mediaItems.forEach(item => {
+      if (item.mediaType === "image") {
+        Image.prefetch(item.uri);
+      }
+    });
+  }, [props.product.mediaItems]);
   // const router = useRouter();
   return (
     <Card mode={"elevated"} style={styles.card}>

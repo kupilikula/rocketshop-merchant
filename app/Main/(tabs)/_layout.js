@@ -1,8 +1,9 @@
 import { Tabs } from "expo-router";
 import React from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { TouchableOpacity } from "react-native";
+import {Platform, TouchableOpacity} from "react-native";
 import { useTheme } from "react-native-paper";
+import {useSelector} from "react-redux";
 
 export default function TabsComponent() {
   const theme = useTheme();
@@ -15,9 +16,10 @@ export default function TabsComponent() {
         header: () => null,
         tabBarShowLabel: false,
         animation: "fade",
+          tabBarHideOnKeyboard: true,
         tabBarStyle: {
           backgroundColor: "white",
-          paddingBottom: 0,
+          paddingBottom: Platform.OS==='android' ? 70 : 0,
           paddingTop: 3,
         },
         tabBarActiveTintColor: theme.colors.secondary,
@@ -71,7 +73,7 @@ export default function TabsComponent() {
         options={{
           title: "Store",
           tabBarIcon: ({ color }) => (
-            <MaterialIcons name={"storefront"} size={30} color={color} />
+            <MaterialIcons name={"store"} size={30} color={color} />
           ),
         }}
       />
@@ -97,7 +99,35 @@ export default function TabsComponent() {
         }}
       />
         <Tabs.Screen
-            name="Settings"
+            name="Shipping"
+            options={{
+                href: null,
+                // tabBarButton: () => null, // Hides the tab bar button
+            }}
+        />
+        <Tabs.Screen
+            name="Messaging"
+            options={{
+                href: null,
+                // tabBarButton: () => null, // Hides the tab bar button
+            }}
+        />
+        <Tabs.Screen
+            name="StoreSettings"
+            options={{
+                href: null,
+                // tabBarButton: () => null, // Hides the tab bar button
+            }}
+        />
+        <Tabs.Screen
+            name="MerchantProfile"
+            options={{
+                href: null,
+                // tabBarButton: () => null, // Hides the tab bar button
+            }}
+        />
+        <Tabs.Screen
+            name="EditProduct"
             options={{
                 href: null,
                 // tabBarButton: () => null, // Hides the tab bar button

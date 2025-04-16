@@ -12,7 +12,8 @@ const CollectionListItem = ({
 }) => {
   const {
     collectionName,
-    products,
+    activeProducts,
+      inactiveProducts,
     isActive,
     storeFrontDisplay,
     storeFrontDisplayNumberOfItems,
@@ -31,8 +32,11 @@ const CollectionListItem = ({
 
           {/* Number of Products */}
           <Text variant="bodyMedium" style={styles.productCount}>
-            {products.length} products
+            {activeProducts} active products
           </Text>
+            <Text variant="bodyMedium" style={styles.productCount}>
+                {inactiveProducts} inactive products
+            </Text>
 
           {/* Storefront Display */}
 

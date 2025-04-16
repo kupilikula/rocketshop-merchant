@@ -11,10 +11,10 @@ export const CustomerListItem = ({ customer }) => {
     0,
   );
   const mostRecentOrderDate = new Date(
-    Math.max.apply(
-      null,
-      customer.orders.map((o) => o.orderDate),
-    ),
+      Math.max.apply(
+          null,
+          customer.orders.map((o) => new Date(o.orderDate).getTime())
+      )
   );
 
   return (

@@ -1,4 +1,4 @@
-import { Stack } from "expo-router";
+import {Stack, useRouter} from "expo-router";
 import { PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Platform } from "react-native";
@@ -6,12 +6,23 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { DefaultTheme } from "react-native-paper";
-import { Provider } from "react-redux";
+import {Provider} from "react-redux";
 import { store } from "@/store/store";
 import * as NavigationBar from "expo-navigation-bar";
+import {QueryClient, QueryClientProvider} from "react-query";
+import 'react-native-get-random-values';
+// import TokenMonitor from '../components/TokenMonitor';
+import {setAxiosDependencies} from "@/api/client";
+import AppShell from "@/components/AppShell";
+// import {PersistGate} from "redux-persist/integration/react";
 
+const queryClient = new QueryClient();
 // const isLoggedIn = true;
+
 export default function RootLayout() {
+
+    const router = useRouter();
+
   const customTheme = {
     ...DefaultTheme,
     colors: {
@@ -37,29 +48,46 @@ export default function RootLayout() {
       placeholder: "#8D99AE", // Medium Gray
       disabled: "#E0E0E0", // Light Gray for disabled elements
       warning: "#FFBE0B", // Gold
-      icon: "#4361EE", // Steel Blue for icons
+      icon: "#0196f9", // blue
       info: "#00C4CC", // Turquoise Blue for informational states
+      secondaryContainer: "#FF6F59",
+      onSecondaryContainer: 'white'
     },
     dark: false, // Set to true if creating a dark theme
   };
 
+
   useEffect(() => {
-    // Make navigation bar transparent
-    if (Platform.OS === "android") {
-      NavigationBar.setBackgroundColorAsync("white");
+    const configureNavigationBar = async () => {
+      await NavigationBar.setVisibilityAsync('hidden'); // Hide initially
+      await NavigationBar.setBehaviorAsync('overlay-swipe'); // Allow swipe-up to reveal
+      await NavigationBar.setBackgroundColorAsync('#00000000'); // Transparent background
+    };
+
+    if (Platform.OS==='android') {
+      configureNavigationBar();
     }
   }, []);
 
+
+  useEffect(() => {
+    setAxiosDependencies(store.dispatch, router);
+  }, [store.dispatch, router])
+
   return (
-    <SafeAreaProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <Provider store={store}>
-          <PaperProvider theme={customTheme}>
-            <StatusBar style="dark" />
-            <Stack screenOptions={{ header: () => null }} />
-          </PaperProvider>
-        </Provider>
-      </GestureHandlerRootView>
-    </SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+          <SafeAreaProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <Provider store={store}>
+              {/*<PersistGate loading={null} persistor={persistor}>*/}
+              <PaperProvider theme={customTheme}>
+                <StatusBar style="dark" />
+                <AppShell/>
+              </PaperProvider>
+              {/*</PersistGate>*/}
+            </Provider>
+          </GestureHandlerRootView>
+        </SafeAreaProvider>
+      </QueryClientProvider>
   );
 }

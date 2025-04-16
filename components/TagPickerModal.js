@@ -8,18 +8,25 @@ import {
   Surface,
   useTheme,
 } from "react-native-paper";
+import {useProductTags} from "../api/hooks/useProductTags";
+import {useSelector} from "react-redux";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
-const TagPickerModal = ({ visible, existingTags, onClose, onApply }) => {
+const TagPickerModal = ({ visible, onClose, onApply, name, existingSelectedTags }) => {
   const theme = useTheme();
-  const styles = makeStyles(theme);
+  const insets = useSafeAreaInsets();
+  const styles = makeStyles(theme, insets);
+  const {storeId} = useSelector((state) => state.store);
+  const {data: existingTags} = useProductTags(storeId);
 
   const [tags, setTags] = useState(existingTags || []);
-  const [selectedTags, setSelectedTags] = useState([]);
+  const [selectedTags, setSelectedTags] = useState(existingSelectedTags || []);
   const [newTag, setNewTag] = useState("");
 
   const handleAddTag = () => {
     if (newTag.trim() && !tags.includes(newTag.trim())) {
-      setTags((prev) => [...prev, newTag.trim()]);
+      setTags((prev) => [newTag.trim(), ...prev]);
+      toggleTagSelection(newTag.trim());
     }
     setNewTag("");
   };
@@ -33,6 +40,7 @@ const TagPickerModal = ({ visible, existingTags, onClose, onApply }) => {
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <Surface style={styles.modalContainer}>
+          <Text variant={'titleMedium'} style={{marginVertical: 16}}>{`Select Product Tags for Offer ${name}`}</Text>
         {/* Tag Input */}
         <TextInput
           label="Add New Tag"
@@ -41,7 +49,7 @@ const TagPickerModal = ({ visible, existingTags, onClose, onApply }) => {
           onSubmitEditing={handleAddTag}
           style={styles.input}
           mode="outlined"
-          right={<TextInput.Icon name="plus" onPress={handleAddTag} />}
+          right={<TextInput.Icon onPress={handleAddTag}  icon={'plus'}/>}
         />
 
         {/* Tag Chips */}
@@ -50,14 +58,14 @@ const TagPickerModal = ({ visible, existingTags, onClose, onApply }) => {
           {tags.map((tag) => (
             <Chip
               key={tag}
-              selected={selectedTags.includes(tag)}
+              selected={(selectedTags || []).includes(tag)}
               onPress={() => toggleTagSelection(tag)}
               style={[
                 styles.chip,
-                selectedTags.includes(tag) && styles.chipSelected,
+                  (selectedTags||[]).includes(tag) && styles.chipSelected,
               ]}
               textStyle={{
-                color: selectedTags.includes(tag) ? "white" : "black",
+                color: (selectedTags || []).includes(tag) ? "white" : "black",
               }}
               selectedColor={"white"}
             >
@@ -80,13 +88,15 @@ const TagPickerModal = ({ visible, existingTags, onClose, onApply }) => {
   );
 };
 
-const makeStyles = (theme) =>
+const makeStyles = (theme, insets) =>
   StyleSheet.create({
-    modalContainer: {
-      flex: 1,
-      padding: 10,
-      backgroundColor: theme.colors.background,
-    },
+      modalContainer: {
+          height: "100%",
+          paddingHorizontal: 16,
+          paddingTop: insets.top + 16,
+          paddingBottom: insets.bottom,
+          backgroundColor: theme.colors.surface,
+      },
     input: {
       marginBottom: 20,
       backgroundColor: "white",
