@@ -14,6 +14,7 @@ export default function AppHeader(props) {
   const styles = makeStyles(theme);
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const {canReceiveMessages} = useSelector(state => state.store);
 
     const unreadCount = useSelector(
         (state) =>
@@ -37,7 +38,7 @@ export default function AppHeader(props) {
     >
       <LogoIconWithName />
         <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-end'}}>
-            <Pressable
+            {canReceiveMessages && <Pressable
                 onPress={() => router.push('/Main/(tabs)/Messaging')}
                 // style={{backgroundColor: 'red'}}
             >
@@ -59,7 +60,7 @@ export default function AppHeader(props) {
                         )}
                     </View>
                 </View>
-            </Pressable>
+            </Pressable>}
       <Pressable
         onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
       >

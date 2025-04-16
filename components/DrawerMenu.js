@@ -15,7 +15,7 @@ export default function DrawerMenu(props) {
   const theme = useTheme();
   const dispatch = useDispatch();
   const styles = makeStyles(theme);
-  const {storeLogoImage} = useSelector(state => state.store);
+  const {storeLogoImage, canReceiveMessages, merchantRole} = useSelector(state => state.store);
   const stores = useSelector(state => state.allStores.stores);
   const unreadCount = useSelector(
       (state) =>
@@ -40,22 +40,22 @@ export default function DrawerMenu(props) {
           Store Name
         </Text>
       </View>
-      <Drawer.Item
-        label={<Text variant={"titleLarge"}>Store Front</Text>}
-        style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}
-        onPress={() => {
-          router.push("/Main/(tabs)/Store/StoreFront");
-        }}
-        icon={({ size, color }) => <MaterialIcons name={"store"} size={size} />}
-      />
-      <Drawer.Item
-        label={<Text variant={"titleLarge"}>Products</Text>}
-        style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}
-        onPress={() => router.push("/Main/(tabs)/Products")}
-        icon={({ size, color }) => (
-          <MaterialIcons name={"shopping-bag"} size={size} />
-        )}
-      />
+      {/*<Drawer.Item*/}
+      {/*  label={<Text variant={"titleLarge"}>Store Front</Text>}*/}
+      {/*  style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}*/}
+      {/*  onPress={() => {*/}
+      {/*    router.push("/Main/(tabs)/Store/StoreFront");*/}
+      {/*  }}*/}
+      {/*  icon={({ size, color }) => <MaterialIcons name={"store"} size={size} />}*/}
+      {/*/>*/}
+      {/*<Drawer.Item*/}
+      {/*  label={<Text variant={"titleLarge"}>Products</Text>}*/}
+      {/*  style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}*/}
+      {/*  onPress={() => router.push("/Main/(tabs)/Products")}*/}
+      {/*  icon={({ size, color }) => (*/}
+      {/*    <MaterialIcons name={"shopping-bag"} size={size} />*/}
+      {/*  )}*/}
+      {/*/>*/}
       <Drawer.Item
         label={<Text variant={"titleLarge"}>Collections</Text>}
         style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}
@@ -66,14 +66,14 @@ export default function DrawerMenu(props) {
           <MaterialIcons name={"category"} size={size} />
         )}
       />
-      <Drawer.Item
-        label={<Text variant={"titleLarge"}>Orders</Text>}
-        style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}
-        onPress={() => router.push("/Main/(tabs)/Orders")}
-        icon={({ size, color }) => (
-          <MaterialIcons name={"receipt-long"} size={size} />
-        )}
-      />
+      {/*<Drawer.Item*/}
+      {/*  label={<Text variant={"titleLarge"}>Orders</Text>}*/}
+      {/*  style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}*/}
+      {/*  onPress={() => router.push("/Main/(tabs)/Orders")}*/}
+      {/*  icon={({ size, color }) => (*/}
+      {/*    <MaterialIcons name={"receipt-long"} size={size} />*/}
+      {/*  )}*/}
+      {/*/>*/}
       <Drawer.Item
         label={<Text variant={"titleLarge"}>Customers</Text>}
         style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}
@@ -96,6 +96,7 @@ export default function DrawerMenu(props) {
               <MaterialIcons name={"local-shipping"} size={size} />
           )}
       />
+      {canReceiveMessages &&
       <Drawer.Item label={<Text variant={'titleLarge'}>Messages</Text>}
                    style={{padding: 0, borderRadius: 5, marginLeft: 0}}
                    onPress={() => {router.push('/Main/(tabs)/Messaging')}}
@@ -107,7 +108,8 @@ export default function DrawerMenu(props) {
                          )}
                        </View>
                    )}
-      />
+      />}
+      {(merchantRole === 'Admin' || merchantRole === 'Manager') &&
       <Drawer.Item
         label={<Text variant={"titleLarge"}>Store Settings</Text>}
         style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}
@@ -116,15 +118,16 @@ export default function DrawerMenu(props) {
           <MaterialCommunityIcons name={"store-cog"} size={size} />
         )}
       />
-      <Drawer.Item label={<Text variant={'titleLarge'}>Merchant Settings</Text>}
+      }
+      <Drawer.Item label={<Text variant={'titleLarge'}>Merchant Profile</Text>}
                    style={{padding: 0, borderRadius: 5, marginLeft: 0}}
-                   onPress={  () => router.push("/MerchantSettings")}
+                   onPress={  () => router.push("/MerchantProfile")}
                    icon={({size, color}) => <MaterialIcons name={'manage-accounts'} size={size}/>}/>
-      {stores.length > 1 &&
+
       <Drawer.Item label={<Text variant={'titleLarge'}>Switch Store</Text>}
                    style={{padding: 0, borderRadius: 5, marginLeft: 0}}
                    onPress={  () => router.push("/StoreSelector")}
-                   icon={({size, color}) => <MaterialIcons name={'change-circle'} size={size}/>}/>}
+                   icon={({size, color}) => <MaterialIcons name={'change-circle'} size={size}/>}/>
       <Drawer.Item label={<Text variant={'titleLarge'}>Log out</Text>}
                    style={{padding: 0, borderRadius: 5, marginLeft: 0}}
                    onPress={ async () => {

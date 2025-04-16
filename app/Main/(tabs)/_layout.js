@@ -3,6 +3,7 @@ import React from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {Platform, TouchableOpacity} from "react-native";
 import { useTheme } from "react-native-paper";
+import {useSelector} from "react-redux";
 
 export default function TabsComponent() {
   const theme = useTheme();
@@ -72,7 +73,7 @@ export default function TabsComponent() {
         options={{
           title: "Store",
           tabBarIcon: ({ color }) => (
-            <MaterialIcons name={"storefront"} size={30} color={color} />
+            <MaterialIcons name={"store"} size={30} color={color} />
           ),
         }}
       />
@@ -104,7 +105,6 @@ export default function TabsComponent() {
                 // tabBarButton: () => null, // Hides the tab bar button
             }}
         />
-
         <Tabs.Screen
             name="Messaging"
             options={{
@@ -120,7 +120,7 @@ export default function TabsComponent() {
             }}
         />
         <Tabs.Screen
-            name="MerchantSettings"
+            name="MerchantProfile"
             options={{
                 href: null,
                 // tabBarButton: () => null, // Hides the tab bar button
