@@ -3,11 +3,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Pressable, View } from "react-native";
 import { generateBoxShadowStyle } from "@/styles/generateShadow";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { Text } from "react-native-paper";
+import {Text, useTheme} from "react-native-paper";
+import GenericHeader from "@/components/GenericHeader";
 
 export default function Layout() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
 
   const OrderScreenHeader = () => {
     return (
@@ -47,5 +49,5 @@ export default function Layout() {
     );
   };
 
-  return <Stack screenOptions={{ header: OrderScreenHeader }} />;
+  return <Stack screenOptions={{ header: () => <GenericHeader title={"Order Details"}/>, contentStyle: { backgroundColor: theme.colors.surface} }} />;
 }

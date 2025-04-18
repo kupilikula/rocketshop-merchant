@@ -1,9 +1,13 @@
 import { Stack } from 'expo-router';
 import GenericHeader from "@/components/GenericHeader";
+import {useTheme} from "react-native-paper";
 
 export default function ShippingLayout() {
-  return (
-      <Stack >
+
+    const theme = useTheme();
+    return (
+      <Stack
+          screenOptions={{contentStyle: {backgroundColor: theme.colors.surface} }}>
         <Stack.Screen
             name="index"
             options={{

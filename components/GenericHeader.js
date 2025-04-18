@@ -2,10 +2,10 @@ import {Pressable, View} from "react-native";
 import {generateBoxShadowStyle} from "../styles/generateShadow";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Text, useTheme} from "react-native-paper";
-import {useLocalSearchParams, useRouter} from "expo-router";
+import {useRouter} from "expo-router";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 
-const GenericHeader = ({title, right}) => {
+const GenericHeader = ({title, titleSize = 'titleLarge', showBackButton = true, left = null, right = null}) => {
 
     const router = useRouter();
     const insets = useSafeAreaInsets();
@@ -27,24 +27,27 @@ const GenericHeader = ({title, right}) => {
                 },
             ]}
         >
-            <Pressable
-                onPressIn={() => {
-                    router.back();
-                }}
-                style={{width: 60}}
-            >
-                <MaterialIcons
-                    name={"arrow-back"}
-                    size={36}
-                    style={{ color: "black" }}
-                />
-            </Pressable>
-            <Text variant={"titleLarge"} style={{ color: "black" }}>
+            {showBackButton && !left &&
+                <Pressable
+                    onPressIn={() => {
+                        router.back();
+                    }}
+                    style={{width: 90}}
+                >
+                    <MaterialIcons
+                        name={"arrow-back"}
+                        size={36}
+                        style={{ color: "black" }}
+                    />
+                </Pressable>
+            }
+            {left}
+            {!showBackButton && !left && <View style={{width: 90}}/>}
+            <Text variant={titleSize} style={{ color: "black" }}>
                 {title}
             </Text>
-            {right ||
-            <View style={{width: 60}}/>
-            }
+            {!right && <View style={{width: 90}}/>}
+            {right}
         </View>
     );
 };
