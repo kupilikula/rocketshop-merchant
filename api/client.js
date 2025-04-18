@@ -91,7 +91,7 @@ const axiosClientGetter = () => {
 
                 if (!token) {
                     // User is a guest → show login modal instead of refresh
-                    console.log("Guest user triggered 401. Skipping refresh. Showing Auth modal.");
+                    console.log("Guest user triggered 401. Skipping refresh. Redirecting to Auth.");
                     const safelySerializableRequest = getSerializableRequestConfig(originalRequest);
                     dispatch(setPendingRequest(safelySerializableRequest));
                     dispatch(setRedirectAfterAuth({redirectTo: router.pathname}))

@@ -7,10 +7,12 @@ import {disconnectSocket, getSocket} from "../../api/websocket";
 import {useDispatch, useSelector} from "react-redux";
 import {addUnreadMessage} from "../../store/badgesSlice";
 import {useQueryClient} from "react-query";
+import {useTheme} from "react-native-paper";
 
 export default function Layout() {
   const pathName = usePathname();
   const dispatch = useDispatch();
+  const theme = useTheme();
   const queryClient = useQueryClient();
   const {merchantId} = useSelector((state)=> state.merchant);
   const { storeId } = useSelector((state) => state.store);
@@ -98,17 +100,18 @@ export default function Layout() {
       initialRouteName={"(tabs)"}
       backBehavior={"history"}
       screenOptions={({ route }) => ({
+          contentStyle: {backgroundColor: theme.colors.surface},
         drawerPosition: "right",
         drawerType: "front",
         headerShadowVisible: true,
         headerTitle: "",
-        contentContainerStyle: { flex: 1, height: "100%" },
+          contentContainerStyle: {flex: 1, height: "100%", backgroundColor: theme.colors.surface},
         drawerContentStyle: { flex: 1, height: "100%" },
         drawerContentContainerStyle: {
           flex: 1,
           height: "100%", // Ensure full height
         },
-        sceneContainerStyle: { flex: 1, height: "100%" },
+          sceneContainerStyle: {flex: 1, height: "100%", backgroundColor: theme.colors.surface},
         drawerStyle: {
           flex: 1,
           height: "100%",

@@ -14,8 +14,10 @@ export default function TabsComponent() {
       initialRouteName={"Dashboard"}
       screenOptions={{
         header: () => null,
-        tabBarShowLabel: false,
-        animation: "fade",
+          contentStyle: { backgroundColor: theme.colors.surface },
+          sceneContainerStyle: { backgroundColor: theme.colors.surface },
+          tabBarShowLabel: false,
+        animation: "none",
           tabBarHideOnKeyboard: true,
         tabBarStyle: {
           backgroundColor: "white",

@@ -7,7 +7,7 @@ export default function Layout() {
 
     return (
         <Stack
-            screenOptions={{ header: () => null }}
+            screenOptions={{ header: () => null, contentStyle: {backgroundColor: theme.colors.surface} }}
             initialRouteName={"index"}>
             <Stack.Screen name='index' options={{header: ()=> <GenericHeader title='Store Settings'/>}}/>
             <Stack.Screen name='EditStoreDetails' options={{header: ()=> <GenericHeader title='Store Details'/>}}/>
