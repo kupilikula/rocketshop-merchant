@@ -180,29 +180,6 @@ const Products = () => {
     const TopSection = () => (
         <>
             <View style={{ marginVertical: 10 }}>
-                <View
-                    style={{
-                        marginLeft: 8,
-                        marginTop: 8,
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "flex-start",
-                    }}
-                >
-                    <MaterialIcons
-                        name={"shopping-bag"}
-                        size={44}
-                        color={theme.colors.primary}
-                        style={{}}
-                    />
-                    <Text
-                        variant={"displaySmall"}
-                        style={{ marginLeft: 10, color: theme.colors.secondary }}
-                    >
-                        Products
-                    </Text>
-                </View>
                 <Text variant={"bodyLarge"} style={{ marginLeft: 10 }}>
                     {nActive.toString() + " Active Product" + (nActive > 1 ? "s" : "")}
                 </Text>

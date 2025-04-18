@@ -1,9 +1,11 @@
 import { Stack } from "expo-router";
 import GenericHeader from "../../../../components/GenericHeader";
+import {useTheme} from "react-native-paper";
 
 export default function Layout() {
     // const router = useRouter();
     // const pathName = usePathname();
+    const theme = useTheme();
 
     return (
         <Stack

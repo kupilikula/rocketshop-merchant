@@ -14,8 +14,10 @@ export default function StoreFrontCollectionCard(props) {
         display: "flex",
         flexDirection: "column",
         backgroundColor: "white",
-        marginTop: 10,
+          borderRadius: 0,
+        // marginTop: 10,
       }}
+      mode={'contained'}
     >
       <View
         style={{
@@ -28,7 +30,7 @@ export default function StoreFrontCollectionCard(props) {
         <View>
           <Text variant={"titleLarge"}>{props.collection.collectionName}</Text>
           <Text variant={"bodyLarge"}>
-            {props.collection.numberOfActiveProducts.toString() + " Products"}
+            {props.collection.totalNumberOfProducts.toString() + " Products"}
           </Text>
         </View>
         <View>

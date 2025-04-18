@@ -63,7 +63,7 @@ export default function ProductSearch(props) {
         value={searchQuery}
         style={{
           borderRadius: 5,
-          backgroundColor: "#efefef",
+          backgroundColor: "white",
           elevation: 5,
           width: "100%",
             marginBottom: 5,
@@ -72,6 +72,7 @@ export default function ProductSearch(props) {
       {searchQuery !== "" && filteredProducts.length > 0 && (
         <View style={{ flex: 1, width: "100%", ...flatListHeightStyle }}>
           <FlatList
+              keyboardShouldPersistTaps={"handled"}
             style={{ width: "100%" }}
             scrollEnabled={!props.limitedResults}
             data={filteredProducts}

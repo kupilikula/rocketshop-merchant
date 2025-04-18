@@ -54,7 +54,7 @@ export default function ConfirmDeactivateStoreModal({ visible, onDismiss, storeI
             await axiosClient.patch(`/stores/${storeId}/deactivateStore`, { phone, otp });
             dispatch(setStore({ ...store, isActive: false }));
             Alert.alert("Success", "Store has been deactivated.");
-            // queryClient.invalidateQueries(["merchantStores"]);
+            queryClient.invalidateQueries(["merchantStores"]);
             onDismiss();
         } catch (err) {
             console.error(err);

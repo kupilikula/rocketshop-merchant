@@ -20,6 +20,7 @@ import GenerateVariantModal from "./GenerateVariantModal";
 import {updateField} from "../store/newProductSlice";
 import MarkAsVariantModal from "./MarkAsVariantModal";
 import CloneProductModal from "./CloneProductModal";
+import {ProductReviewsList} from "./ProductReviews";
 
 export default function ProductScreenMerchant(props) {
   // const router = useRouter();
@@ -166,18 +167,13 @@ export default function ProductScreenMerchant(props) {
   // console.log('size:', size);
   return (
           <View style={styles.container}>
-              <ScrollView contentContainerStyle={{flexGrow: 1}}>
-      <Surface
-        style={{
-          flex: 1,
-          width: "100%",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: 10,
-          backgroundColor: theme.colors.surface,
-        }}
-      >
-        <Card mode={"elevated"} style={styles.card}>
+              <ScrollView contentContainerStyle={{flexGrow: 1,
+                  width: "100%",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  padding: 0,
+                  backgroundColor: "white",}}>
+        <Card mode={"contained"} style={styles.card}>
           <FlatListSlider
             data={props.product.mediaItems}
             local={false}
@@ -399,9 +395,9 @@ export default function ProductScreenMerchant(props) {
                 </Chip>
               ))}
             </View>
+              <ProductReviewsList productId={props.product.productId} />
           </Card.Content>
         </Card>
-      </Surface>
     </ScrollView>
               <View style={styles.fabContainer}>
                   <Menu
@@ -459,10 +455,8 @@ const makeStyles = (theme) =>
     card: {
       position: "relative",
       width: "100%",
-      borderRadius: 8,
+      borderRadius: 0,
       backgroundColor: "white",
-      borderWidth: 1,
-      borderColor: theme.colors.grayBorder,
       marginVertical: 15,
       overflow: "hidden",
     },

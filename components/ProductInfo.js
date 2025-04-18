@@ -18,6 +18,7 @@ import {useCollections} from "../api/hooks/useCollections";
 import {ProductWorkflowContext} from "./ProductWorkflowContext";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import GstRateDropdown from "./GstRateDropdown";
+import KeyboardAwareScrollableScreen from "./KeyboardAwareScrollableScreen";
 
 const ProductInfoScreen = (props) => {
     const dispatch = useDispatch();
@@ -344,11 +345,6 @@ const ProductInfoScreen = (props) => {
         }
     }, [productInfoFormRef, handleSubmit]);
 
-    const markAsVariant = () => {
-    };
-    const generateVariant = () => {
-    };
-
     const toggleVariantAttributeSelection = (attributeKey) => {
         if (variantSelectedAttributes.includes(attributeKey)) {
             setVariantSelectedAttributes(variantSelectedAttributes.filter((attr) => attr !== attributeKey),);
@@ -389,12 +385,16 @@ const ProductInfoScreen = (props) => {
     console.log("452, getValues(prodcutName):", getValues("productName"));
 
     return (
-        <KeyboardAvoidingView
-            style={{ flex: 1, backgroundColor: theme.colors.surface }} // Fill the screen
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined} // Or 'height'
-            // keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} // Adjust for header/navbar height
+        // <KeyboardAvoidingView
+        //     style={{ flex: 1, backgroundColor: theme.colors.surface }} // Fill the screen
+        //     behavior={Platform.OS === 'ios' ? 'padding' : undefined} // Or 'height'
+        //     // keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} // Adjust for header/navbar height
+        // >
+        // <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <KeyboardAwareScrollableScreen
+            backgroundColor={theme.colors.white}
+            contentContainerStyle={[styles.scrollContainer, {paddingBottom: 100,},]}
         >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.section}>
                     <Text style={styles.header}>Details</Text>
                     {/* Product Name */}
@@ -636,55 +636,16 @@ const ProductInfoScreen = (props) => {
                             </View>)}
                     />
                 </View>
-
-                {/* Attribute Selection */}
-                <View style={styles.section}>
-                    <Text style={styles.header}>Manage Variants</Text>
-                    <Text variant={"bodyMedium"}>Variant Attributes</Text>
-                    <View
-                        style={{display: "flex", flexDirection: "row", flexWrap: "wrap"}}
-                    >
-                        {attributeFormFields?.map((attribute, idx) => attribute.key.trim() !== "" && (
-                            <View key={idx} style={styles.checkboxContainer}>
-                                <Checkbox
-                                    status={variantSelectedAttributes.includes(attribute.key) ? "checked" : "unchecked"}
-                                    onPress={() => toggleVariantAttributeSelection(attribute.key)}
-                                />
-                                <Text>{attribute.key}</Text>
-                            </View>),)}
-                    </View>
-
-                    <View
-                        style={{
-                            display: "flex", flexDirection: "row", justifyContent: "space-between",
-                        }}
-                    >
-                        <Button
-                            mode="outlined"
-                            onPress={markAsVariant}
-                            style={styles.markAsVariantButton}
-                        >
-                            Mark As Variant
-                        </Button>
-                        <Button
-                            icon="plus"
-                            mode="contained"
-                            onPress={generateVariant}
-                            style={styles.generateVariantButton}
-                        >
-                            Generate Variant
-                        </Button>
-                    </View>
-                </View>
-        </ScrollView>
-        </KeyboardAvoidingView>
+        </KeyboardAwareScrollableScreen>
+        // </ScrollView>
+        // </KeyboardAvoidingView>
         );
 };
 
 const makeStyles = ({colors}) => StyleSheet.create({
     scrollContainer: {
-        flexGrow: 1,
-        backgroundColor: colors.surface,
+        // flexGrow: 1,
+        // backgroundColor: colors.surface,
         padding: 16,
         // marginTop: 60,
         // paddingTop: 80,

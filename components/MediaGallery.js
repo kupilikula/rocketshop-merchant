@@ -540,7 +540,7 @@ const MediaGallery = (props) => {
   // }
 
   return (
-    <Surface style={styles.container}>
+    <View style={styles.container}>
       <>
 
         {!isCameraOpen && (
@@ -813,7 +813,7 @@ const MediaGallery = (props) => {
           </>
         )}
       </>
-    </Surface>
+    </View>
   );
 };
 

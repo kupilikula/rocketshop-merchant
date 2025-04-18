@@ -49,7 +49,7 @@ export default function ConfirmActivateStoreModal({ visible, onDismiss, storeId,
             await axiosClient.patch(`/stores/${storeId}/activateStore`, { phone, otp });
             dispatch(setStore({ ...store, isActive: true }));
             Alert.alert("Success", "Store has been Activated.");
-            // queryClient.invalidateQueries(["merchantStores"]);
+            queryClient.invalidateQueries(["merchantStores"]);
             onDismiss();
         } catch (err) {
             console.error(err);

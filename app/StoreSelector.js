@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
-import { Text, Card, useTheme, IconButton, Button } from "react-native-paper";
+import {Text, Card, useTheme, IconButton, Button, Chip} from "react-native-paper";
 import { useSelector, useDispatch } from "react-redux";
 import { Image } from "expo-image";
 import { setStore } from "../store/storeSlice";
@@ -76,6 +76,13 @@ export default function StoreSelector() {
                                             {item.storeName}
                                         </Text>
                                     </View>
+                                    {!item.isActive &&
+                                    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', }}>
+                                        <Chip style={{backgroundColor: theme.colors.inactive}} selectedColor={'black'}>
+                                      Inactive
+                                    </Chip>
+                                    </View>
+                                    }
                                 </Card>
                             </TouchableOpacity>
                         );
@@ -107,6 +114,7 @@ const makeStyles = (theme) => StyleSheet.create({
         padding: 12,
         borderRadius: 8,
         backgroundColor: "white",
+        position: "relative",
     },
     content: {
         flexDirection: "row",

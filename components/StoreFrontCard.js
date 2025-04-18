@@ -10,12 +10,16 @@ export const StoreFrontCard = ({storeLogoImage, storeName, storeDescription}) =>
 
     return (<Card
         style={{
-            // flex: 1,
+            flex: 1,
             height: "auto",
             // paddingVertical: 16,
             padding: 16,
             backgroundColor: theme.colors.white,
+            // width: '100%',
+            borderRadius: 0,
+
         }}
+        mode={'contained'}
     >
         <View style={{
             display: 'flex',

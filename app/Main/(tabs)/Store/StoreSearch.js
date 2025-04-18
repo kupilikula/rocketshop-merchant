@@ -1,12 +1,15 @@
-import { Surface, Text } from "react-native-paper";
-import { useLocalSearchParams } from "expo-router";
+import {Surface, Text, useTheme} from "react-native-paper";
+import {useLocalSearchParams, useRouter} from "expo-router";
 import ProductSearch from "../../../../components/ProductSearch";
 import { useStoreProducts } from "../../../../api/hooks/useStoreProducts";
 import {useSelector} from "react-redux";
+import KeyboardAwareView from "../../../../components/KeyboardAwareView";
 
 export default function StoreSearch(props) {
     const { initialSearchQuery } = useLocalSearchParams();
     const {storeId} = useSelector((state) => state.store);
+    const router = useRouter();
+    const theme = useTheme();
     // Fetch store products using the custom hook
     const { data: storeProducts, isLoading, isError } = useStoreProducts(storeId);
 
@@ -50,17 +53,19 @@ export default function StoreSearch(props) {
 
     return (
         storeProducts && (
-            <Surface
-                mode={"flat"}
-                style={{
-                    backgroundColor: "white",
+            <KeyboardAwareView
+                backgroundColor={theme.colors.surface}
+                containerStyle={{
+                    padding: 10,
+                }}
+                innerStyle={{
+                    width: "100%",
+                    height: "100%",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    paddingHorizontal: 10,
                     flex: 1,
-                    height: "100%",
-                    width: "100%",
+                    backgroundColor: theme.colors.surface,
                 }}
             >
                 <ProductSearch
@@ -72,7 +77,7 @@ export default function StoreSearch(props) {
                         `/Main/(tabs)/Products/Product/${p.productId}`,
                     )}
                 />
-            </Surface>
+            </KeyboardAwareView>
         )
     );
 }

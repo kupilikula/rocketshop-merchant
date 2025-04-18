@@ -95,29 +95,6 @@ const OffersScreen = () => {
         <Surface style={styles.container}>
             <ScrollView>
                 <View style={{ marginVertical: 10 }}>
-                    <View
-                        style={{
-                            marginLeft: 8,
-                            marginTop: 8,
-                            display: "flex",
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "flex-start",
-                        }}
-                    >
-                        <MaterialIcons
-                            name={"discount"}
-                            size={40}
-                            color={theme.colors.primary}
-                            style={{}}
-                        />
-                        <Text
-                            variant={"displaySmall"}
-                            style={{ marginLeft: 10, color: theme.colors.secondary }}
-                        >
-                            Offers
-                        </Text>
-                    </View>
                     <Text variant={"bodyLarge"} style={{ marginLeft: 10 }}>
                         {nActive.toString() + " Active Offer" + (nActive !== 1 ? "s" : "")}
                     </Text>

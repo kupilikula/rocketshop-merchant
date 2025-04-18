@@ -12,6 +12,8 @@ import {useLocalSearchParams, useRouter} from "expo-router";
 import {useSelector} from "react-redux";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {Rating} from "@kolking/react-native-rating";
+import KeyboardAwareScrollableScreen from "../../../../components/KeyboardAwareScrollableScreen";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 const getUniqueProducts = (products) => {
     return [...new Set(products)];
@@ -24,6 +26,7 @@ export default function StoreFront(props) {
     const styles = makeStyles(theme);
     const merchant = useSelector((state) => state.merchant);
     const store = useSelector((state) => state.store);
+    const insets = useSafeAreaInsets();
     console.log('store:', store);
     console.log('merchant:', merchant);
 
@@ -99,19 +102,22 @@ export default function StoreFront(props) {
     return (
         storeFrontData &&
         storeProductsData && (
-            <Surface
-                mode={"flat"}
-                style={{
-                    backgroundColor: "white",
-                    height: "100%",
+            <KeyboardAwareScrollableScreen
+                backgroundColor={theme.colors.surface}
+                innerStyle={{
+                    backgroundColor: theme.colors.surface,
+                    flexGrow: 1,
                     display: "flex",
                     flexDirection: "column",
+                    width: '100%'
                 }}
+                contentContainerStyle={{ width: '100%', padding: 0, alignSelf: 'stretch'}}
+                keyboardVerticalOffset={insets.top + 60}
             >
-                <ScrollView contentContainerStyle={{ flexGrow: 1, backgroundColor: 'green', width: '100%' }} style={{ flexGrow: 1, width: '100%' }}>
                     <View
                         style={{
-                            padding: 10,
+                            flex: 1,
+                            alignItems: 'stretch',
                             width: "100%",
                             display: "flex",
                             flexDirection: "column",
@@ -124,7 +130,9 @@ export default function StoreFront(props) {
                                 // paddingVertical: 16,
                                 padding: 16,
                                 backgroundColor: theme.colors.white,
+                                borderRadius: 0
                             }}
+                            mode={'contained'}
                         >
                             <View style={{
                                 display: 'flex',
@@ -175,7 +183,7 @@ export default function StoreFront(props) {
                                         </Text>
                                         <View>
                                             <Text variant={"titleMedium"} style={{color: 'black'}}>
-                                                {storeProductsData.length.toString() + " Products " + storeFrontData.collections.length + " Collection" + (storeFrontData.collections.length > 1 ? 's' : '')}
+                                                {storeProductsData.length.toString() + " Products " + storeFrontData.totalNumberOfCollections + " Collection" + (storeFrontData.totalNumberOfCollections > 1 ? 's' : '')}
                                             </Text>
                                         </View>
                                         <View>
@@ -198,7 +206,7 @@ export default function StoreFront(props) {
                                                 }}
                                             />
                                             {true && (<Text style={styles.ratingText} variant={"bodyLarge"}>
-                                                {'3.5' + "/5 " + "(" + '78' + ")"}
+                                                {'?.?' + "/5 " + "(" + '??' + ")"}
                                             </Text>)}
                                         </View>
                                     </View>
@@ -232,7 +240,7 @@ export default function StoreFront(props) {
                             limitedResults={true}
                             resultsLimit={5}
                             initialSearchQuery={""}
-                            style={{ marginTop: 10 }}
+                            style={{ paddingHorizontal: 10, marginVertical: 10, alignSelf: 'stretch'}}
                         />
                         <View
                             style={{
@@ -242,13 +250,12 @@ export default function StoreFront(props) {
                                 width: "100%",
                             }}
                         >
-                            {storeFrontData.collections.map((c) => (
+                            {storeFrontData.displayCollections.map((c) => (
                                 <StoreFrontCollectionCard collection={c} key={c.collectionId} />
                             ))}
                         </View>
                     </View>
-                </ScrollView>
-            </Surface>
+            </KeyboardAwareScrollableScreen>
         )
     );
 }

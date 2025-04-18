@@ -268,29 +268,6 @@ const Orders = () => {
   const filterAndSortComponent = () => (
     <>
       <View style={{ marginVertical: 10 }}>
-        <View
-          style={{
-            marginLeft: 8,
-            marginTop: 8,
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "flex-start",
-          }}
-        >
-          <MaterialIcons
-            name={"receipt-long"}
-            size={44}
-            color={theme.colors.primary}
-            style={{}}
-          />
-          <Text
-            variant={"displaySmall"}
-            style={{ marginLeft: 10, color: theme.colors.secondary }}
-          >
-            Orders
-          </Text>
-        </View>
         <Text variant={"bodyLarge"} style={{ marginLeft: 10 }}>
           {nOpen.toString() + " Open Order" + (nOpen !== 1 ? "s" : "")}
         </Text>
