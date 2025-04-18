@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {Pressable, ScrollView, View, StyleSheet} from "react-native";
 import { Image } from "expo-image";
-import {Button, Card, Surface, Text, useTheme} from "react-native-paper";
+import {Button, Card, Divider, Surface, Text, useTheme} from "react-native-paper";
 import { foregroundColor } from "../../../../utils/foregroundColor";
 import { useQueries } from "react-query";
 import { fetchStoreFrontData } from "../../../../api/hooks/useStoreFrontData"; // Extracted query function
@@ -232,6 +232,7 @@ export default function StoreFront(props) {
                                 </View>
                             </View>
                         </Card>
+                        <Divider style={{marginVertical: 2}}/>
                         <ProductSearch
                             uniqueProducts={uniqueProducts}
                             onSearchResultPressHandler={(product) => router.push(
@@ -242,6 +243,7 @@ export default function StoreFront(props) {
                             initialSearchQuery={""}
                             style={{ paddingHorizontal: 10, marginVertical: 10, alignSelf: 'stretch'}}
                         />
+                        <Divider style={{marginVertical: 2}}/>
                         <View
                             style={{
                                 display: "flex",
@@ -251,7 +253,10 @@ export default function StoreFront(props) {
                             }}
                         >
                             {storeFrontData.displayCollections.map((c) => (
-                                <StoreFrontCollectionCard collection={c} key={c.collectionId} />
+                                <View  key={c.collectionId}>
+                                    <StoreFrontCollectionCard storeId={storeId} collection={c}/>
+                                    <Divider style={{marginVertical: 10}}/>
+                                </View>
                             ))}
                         </View>
                     </View>

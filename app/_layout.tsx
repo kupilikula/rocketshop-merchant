@@ -33,7 +33,7 @@ export default function RootLayout() {
       softPrimary: "#E3F2FD",
       secondary: "#FF6F59", // Sunset Orange
       softSecondary: "#FFE8E3",
-      surface: "#E3F2FD", // Soft Primary
+      surface: "#FFFFFF", // Soft Primary
       card: "#FFFFFF", // White
       nestedCard: "#FFE8E3", // Soft Secondary
       text: "#000000", // Black

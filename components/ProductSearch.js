@@ -67,8 +67,10 @@ export default function ProductSearch(props) {
           elevation: 5,
           width: "100%",
             marginBottom: 5,
+            borderWidth: 1,
         }}
       />
+
       {searchQuery !== "" && filteredProducts.length > 0 && (
         <View style={{ flex: 1, width: "100%", ...flatListHeightStyle }}>
           <FlatList

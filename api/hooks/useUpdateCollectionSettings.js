@@ -10,6 +10,8 @@ export const useUpdateCollectionSettings = (storeId, collectionId) => {
         {
             onSuccess: () => {
                 queryClient.invalidateQueries(["collection", collectionId]);
+                queryClient.invalidateQueries(["storeFrontData"]);
+
             },
         }
     );
