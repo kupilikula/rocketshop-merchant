@@ -14,6 +14,7 @@ import 'react-native-get-random-values';
 // import TokenMonitor from '../components/TokenMonitor';
 import {setAxiosDependencies} from "@/api/client";
 import AppShell from "@/components/AppShell";
+import * as Linking from 'expo-linking';
 // import {PersistGate} from "redux-persist/integration/react";
 
 const queryClient = new QueryClient();
@@ -73,6 +74,14 @@ export default function RootLayout() {
   useEffect(() => {
     setAxiosDependencies(store.dispatch, router);
   }, [store.dispatch, router])
+
+
+  useEffect(() => {
+    Linking.getInitialURL().then((url) => {
+      console.log('🔗 Received initial URL:', url);
+    });
+  }, []);
+
 
   return (
       <QueryClientProvider client={queryClient}>

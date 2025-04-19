@@ -5,14 +5,16 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/RocketShopIconOrange1024.png",
-    "scheme": "myapp",
+    "scheme": "rocketshopmerchant",
     "sdkVersion": "52.0.0",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.rocketshop.merchant",
-      "icon": "./assets/images/RocketShopIconOrangeIOS1024.png"
+      "icon": "./assets/images/RocketShopIconOrangeIOS1024.png",
+      "associatedDomains": ["applinks:merchant.rocketshop.in"]
+
     },
     "android": {
       "adaptiveIcon": {
@@ -20,6 +22,18 @@
         "backgroundColor": "#FF6F59"
       },
       "package": "com.rocketshop.merchant",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": {
+            "scheme": "https",
+            "host": "rocketshop.in",
+            "pathPrefix": "/"
+          },
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "permissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",

@@ -15,13 +15,7 @@ import CollectionListItem from "../../../../components/CollectionListItem";
 import {useSelector} from "react-redux";
 import {AddNewCollectionModal} from '@/components/AddNewCollectionModal';
 
-interface ListElementProps {
-    collectionId: string;
-    collectionName: string;
-    isActive: boolean;
-}
-
-const ListElement: React.FC<ListElementProps> = React.memo((collection) => {
+const ListElement = React.memo((collection) => {
     const drag = useReorderableDrag();
     const router = useRouter();
 
@@ -53,13 +47,13 @@ const CollectionsScreen = () => {
     const { mutate: updateCollectionOrder } = useUpdateCollectionOrder(storeId);
     const [showNewCollectionModal, setShowNewCollectionModal] = useState(false);
 
-    const handleReorder = ({ from, to }: ReorderableListReorderEvent) => {
+    const handleReorder = ({ from, to }) => {
         const newData = reorderItems(collections, from, to);
         // Optimistically update UI and send data to the backend
         updateCollectionOrder(newData);
     };
 
-    const renderItem = ({ item }: ListRenderItemInfo<ListElementProps>) => (
+    const renderItem = ({ item }) => (
         <ListElement {...item} />
     );
 
