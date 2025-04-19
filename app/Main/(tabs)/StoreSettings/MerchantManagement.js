@@ -8,6 +8,8 @@ import { useRouter } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import axiosClient from "../../../../api/client";
 import PhoneInput from "../../../../components/PhoneInput";
+import KeyboardAwareScrollableScreen from "../../../../components/KeyboardAwareScrollableScreen";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 export default function MerchantManagementScreen() {
     const theme = useTheme();
@@ -22,7 +24,7 @@ export default function MerchantManagementScreen() {
     const [newFullName, setNewFullName]  = useState('');
     const [newMerchantRole, setNewMerchantRole]  = useState('Staff');
     const [newCanReceiveMessages, setNewCanReceiveMessages] = useState(false);
-
+    const insets = useSafeAreaInsets();
 
     const { data: merchants = [], isLoading } = useQuery({
         queryKey: ["storeMerchants", storeId],
@@ -200,6 +202,7 @@ export default function MerchantManagementScreen() {
                     onDismiss={() => setAddModalVisible(false)}
                     contentContainerStyle={styles.modalContent}
                 >
+                    <KeyboardAwareScrollableScreen keyboardVerticalOffset={insets.top}>
                     <Text variant="titleMedium" style={{ marginBottom: 16 }}>
                         Add Merchant
                     </Text>
@@ -218,26 +221,35 @@ export default function MerchantManagementScreen() {
                         Role
                     </Text>
 
-                    <RadioButton.Group
-                        onValueChange={setNewMerchantRole}
-                        value={newMerchantRole}
-                    >
-                        {["Admin", "Manager", "Staff"]
-                            .filter((role) => {
-                                if (currentMerchantRole === 'Admin') return true;
-                                if (currentMerchantRole === 'Manager') return role !== 'Admin';
-                                return false; // Staff cannot add merchants
-                            })
-                            .map((role) => (
-                                <View key={role} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                                    <RadioButton value={role} />
-                                    <Text>{role}</Text>
-                                </View>
-                            ))}
-                    </RadioButton.Group>
+                        <RadioButton.Group
+                            onValueChange={setNewMerchantRole}
+                            value={newMerchantRole}
+                        >
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                                {["Admin", "Manager", "Staff"]
+                                    .filter((role) => {
+                                        if (currentMerchantRole === 'Admin') return true;
+                                        if (currentMerchantRole === 'Manager') return role !== 'Admin';
+                                        return false; // Staff cannot add merchants
+                                    })
+                                    .map((role) => (
+                                        <View
+                                            key={role}
+                                            style={{
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                marginRight: 16,
+                                            }}
+                                        >
+                                            <RadioButton.Android value={role} />
+                                            <Text>{role}</Text>
+                                        </View>
+                                    ))}
+                            </View>
+                        </RadioButton.Group>
 
                     <Text variant="titleSmall" style={{ marginBottom: 8 }}>
-                        Receive Messages
+                        Messaging Enabled
                     </Text>
 
                     <Switch
@@ -255,6 +267,7 @@ export default function MerchantManagementScreen() {
                         Add
                     </Button>
                     </View>
+                    </KeyboardAwareScrollableScreen>
                 </Modal>
             </Portal>
             </>

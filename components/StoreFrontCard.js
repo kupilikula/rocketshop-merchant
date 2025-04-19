@@ -8,20 +8,7 @@ export const StoreFrontCard = ({storeLogoImage, storeName, storeDescription}) =>
 
     const theme = useTheme();
 
-    return (<Card
-        style={{
-            flex: 1,
-            height: "auto",
-            // paddingVertical: 16,
-            padding: 16,
-            backgroundColor: theme.colors.white,
-            // width: '100%',
-            borderRadius: 0,
-
-        }}
-        mode={'contained'}
-    >
-        <View style={{
+    return <View style={{
             display: 'flex',
             flexDirection: 'column',
             // margin: 16,
@@ -37,7 +24,7 @@ export const StoreFrontCard = ({storeLogoImage, storeName, storeDescription}) =>
                     justifyContent: 'center',
                     alignSelf: 'stretch',
                     // width: "100%",
-                    height: "auto",
+                    // height: "auto",
                     // backgroundColor: 'green'
                 }}
             >
@@ -70,16 +57,6 @@ export const StoreFrontCard = ({storeLogoImage, storeName, storeDescription}) =>
                         {storeName}
                     </Text>
                     <View>
-                        <Text variant={"titleMedium"} style={{color: 'black'}}>
-                            {"0 Products " +  "1 Collection"}
-                        </Text>
-                    </View>
-                    <View>
-                        <Pressable onPress={() => router.push('./FollowersList')}>
-                            <Text variant={"titleMedium"} style={{ color: 'black' }}>
-                                0 Followers
-                            </Text>
-                        </Pressable>
                     </View>
                 </View>
 
@@ -89,6 +66,5 @@ export const StoreFrontCard = ({storeLogoImage, storeName, storeDescription}) =>
                     {storeDescription}
                 </Text>
             </View>
-        </View>
-    </Card>)
+    </View>
 }

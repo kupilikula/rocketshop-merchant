@@ -12,7 +12,7 @@ export default function GstRateDropdown({ value, onChange, label = "GST (%)" , s
 
     const openMenu = () => {
         inputRef.current?.measureInWindow((x, y, width, height) => {
-            setDropdownPosition({ x, y: y + 2*height, width });
+            setDropdownPosition({ x, y: y + height, width });
             setMenuVisible(true);
         });
     };

@@ -201,13 +201,13 @@ export default function StoreFront(props) {
                                                 fillColor={"#faaf00"}
                                                 baseColor={"black"}
                                                 size={18}
-                                                rating={3.5 || 0}
+                                                rating={storeFrontData.rating || 0}
                                                 onChange={() => {
                                                 }}
                                             />
-                                            {true && (<Text style={styles.ratingText} variant={"bodyLarge"}>
-                                                {'?.?' + "/5 " + "(" + '??' + ")"}
-                                            </Text>)}
+                                            <Text style={styles.ratingText} variant={"bodyLarge"}>
+                                                {storeFrontData.rating.toString() + "/5 " + "(" + storeFrontData.numberOfRatings.toString() + ")"}
+                                            </Text>
                                         </View>
                                     </View>
 

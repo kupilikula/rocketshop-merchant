@@ -104,19 +104,73 @@ export default function StoreSummary() {
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <LogoIconWithName style={{alignSelf: 'center', marginBottom: 24}}/>
-            <Text variant="titleLarge" style={{ marginBottom: 16 }}>
-                Store Summary
-            </Text>
-            {/* Store Preview Card */}
-            <StoreFrontCard storeName={storeName} storeLogoImage={storeLogoImage} storeDescription={storeDescription} />
+            <Card style={{
+                display: 'flex',
+                flexDirection: 'column',
+                // margin: 16,
+                // width: '100%',
+                // alignSelf: 'stretch',
+                backgroundColor: 'white',
+                padding: 16
+            }}
+            mode={'elevated'}
+            >
+                <View
+                    style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: 'center',
+                        alignSelf: 'stretch',
+                        // width: "100%",
+                        // height: "auto",
+                        // backgroundColor: 'green'
+                    }}
+                >
+                    <Image
+                        source={storeLogoImage}
+                        style={{
+                            height: 80,
+                            width: 80,
+                            borderRadius: 40,
+                            borderStyle: "solid",
+                            borderWidth: 2,
+                            borderColor: 'black',
+                            margin: 0,
+                            padding: 0,
+                        }}
+                    />
+                    <View style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        marginLeft: 8,
+                        flex: 1
+                    }}>
+                        <Text
+                            // variant={"displaySmall"}
+                            style={{color: 'black', fontSize: 20}}
+                            // adjustsFontSizeToFit={true}
+                            numberOfLines={2}
+                        >
+                            {storeName}
+                        </Text>
+                        <View>
+                        </View>
+                    </View>
 
-            <View style={{ marginTop: 16 }}>
-                <View style={{ display: 'flex', flexDirection: 'row', }}>
+                </View>
+                <View style={{ width:'100%', marginTop: 10}}>
+                    <Text variant={"bodyLarge"} style={{color: 'black'}}>
+                        {storeDescription}
+                    </Text>
+                </View>
+                <View style={{ display: 'flex', flexDirection: 'row', marginTop: 16 }}>
                     <Text variant="titleMedium">Store Handle:</Text>
                     <Text style={{ marginLeft: 8, marginBottom: 8 }} variant={'bodyLarge'}>{storeHandle}</Text>
                 </View>
 
-                <View style={{ display: 'flex', flexDirection: 'row', marginVertical: 16}}>
+                <View style={{ display: 'flex', flexDirection: 'row', marginTop: 16}}>
                     <Text variant="titleMedium" >
                         First Collection Name:
                     </Text>
@@ -124,7 +178,7 @@ export default function StoreSummary() {
                 </View>
 
 
-                <View style={{ marginVertical: 16 }}>
+                <View style={{ marginTop: 16 }}>
                 <Text variant="titleMedium">Store Tags:</Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                     {storeTags.map((tag) => (
@@ -133,7 +187,7 @@ export default function StoreSummary() {
                 </View>
                 </View>
 
-            </View>
+            </Card>
 
             <View style={{display: 'flex', alignSelf: 'center', justifyContent: 'center', marginBottom: 32}}>
             <Button
