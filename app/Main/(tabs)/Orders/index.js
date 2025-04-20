@@ -17,11 +17,78 @@ import { useMerchantOrders } from "../../../../api/hooks/useMerchantOrders";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
+  getCanceledOrFailedOrderStatuses,
+  getFulfilledOrderStatuses,
+  getInProgressOrderStatuses, getOnHoldOrderStatuses,
+  getPendingOrderStatuses, getRefundedOrReturnedOrderStatuses,
   orderStatusColors,
   orderStatusList,
 } from "../../../../utils/dataValues";
 import { List } from "react-native-paper";
 import CrossPlatformDatePicker from "../../../../components/CrossPlatformDatePicker";
+
+
+const statusGroupMap = {
+  pending: getPendingOrderStatuses(),
+  in_progress: getInProgressOrderStatuses(),
+  fulfilled: getFulfilledOrderStatuses(),
+  on_hold: getOnHoldOrderStatuses(),
+  canceled_failed: getCanceledOrFailedOrderStatuses(),
+  refunded_returned: getRefundedOrReturnedOrderStatuses(),
+};
+
+const isSameDay = (d1, d2) =>
+    d1.toDateString() === d2.toDateString();
+
+const isToday = (d) => {
+  const today = new Date();
+  return isSameDay(d, today);
+};
+const isThisWeek = (start, end) => {
+  const now = new Date();
+
+  const startOfWeek = new Date(now);
+  const day = now.getDay();
+  const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Monday as start
+  startOfWeek.setDate(diff);
+
+  const endOfWeek = now;
+
+  return isSameDay(start, startOfWeek) && isSameDay(end, endOfWeek);
+};
+
+const isThisMonth = (start, end) => {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = now;
+
+  return isSameDay(start, startOfMonth) && isSameDay(end, endOfMonth);
+};
+
+const isThisYear = (start, end) => {
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+  const endOfYear = now;
+
+  return isSameDay(start, startOfYear) && isSameDay(end, endOfYear);
+};
+
+const getStartOfWeek = (d) => {
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday (0)
+  return new Date(date.setDate(diff));
+};
+
+const normalizeDateRange = (start, end) => {
+  const normalizedStart = new Date(start);
+  normalizedStart.setHours(0, 0, 0, 0);
+
+  const normalizedEnd = new Date(end);
+  normalizedEnd.setHours(23, 59, 59, 999);
+
+  return { start: normalizedStart, end: normalizedEnd };
+};
 
 const Orders = () => {
   const router = useRouter();
@@ -50,18 +117,66 @@ const Orders = () => {
   const [filterExpanded, setFilterExpanded] = useState(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
+  const [selectedQuickFilters, setSelectedQuickFilters] = useState(["all"]);
 
   const { filter } = useLocalSearchParams();
   console.log("params:", filter);
-  useEffect(() => {
-    console.log("line50:, params:", filter);
-    if (filter === "open") {
-      setStatusFilter(orderStatusList.slice(0, 6));
-    } else if (filter === "today") {
-      setFilterDates({ startDate: new Date(), endDate: new Date() });
-      setStatusQuickFilter("All");
-    }
-  }, [filter]);
+
+  const QUICK_FILTER_ROWS = [
+    [
+      { key: "all", label: "All Orders" },
+      { key: "pending", label: "Pending" },            // Order Created, Payment Initiated
+      { key: "in_progress", label: "In Progress" },     // Payment Received to Awaiting Shipment
+      { key: "fulfilled", label: "Fulfilled" },         // Shipped, Out for Delivery, Delivered
+      { key: "on_hold", label: "On Hold" },             // On Hold
+      { key: "canceled_failed", label: "Canceled / Failed" }, // Canceled, Failed, Payment Failed
+      { key: "refunded_returned", label: "Refunded / Returned" }, // Refund + Return statuses
+    ],
+    [
+      { key: "today", label: "Today" },
+      { key: "this_week", label: "This Week" },
+      { key: "this_month", label: "This Month" },
+      { key: "this_year", label: "This Year" },
+    ],
+    [
+      { key: "highest_order_total", label: "Highest Order Total" },
+      { key: "lowest_order_total", label: "Lowest Order Total" },
+    ],
+    [
+      { key: "most_recent", label: "Most Recent Orders" },
+      { key: "oldest", label: "Oldest Orders" },
+    ]
+  ];
+
+  const INCOMPATIBLE_FILTERS = {
+    all: ["open", "fulfilled", "unfulfilled", "today", "this_week", "this_month", "this_year", "highest_order_total", "lowest_order_total", "most_recent", "oldest"],
+    pending: ["all", "in_progress", "fulfilled", "on_hold", "canceled_failed", "refunded_returned"],
+    in_progress: ["all", "pending", "fulfilled", "on_hold", "canceled_failed", "refunded_returned"],
+    fulfilled: ["all", "pending", "in_progress", "on_hold", "canceled_failed", "refunded_returned"],
+    on_hold: ["all", "pending", "in_progress", "fulfilled", "canceled_failed", "refunded_returned"],
+    canceled_failed: ["all", "pending", "in_progress", "fulfilled", "on_hold", "refunded_returned"],
+    refunded_returned: ["all", "pending", "in_progress", "fulfilled", "on_hold", "canceled_failed"],
+    today: ["this_week", "this_month", "this_year", "all"],
+    this_week: ["today", "this_month", "this_year", "all"],
+    this_month: ["today", "this_week", "this_year", "all"],
+    this_year: ["today", "this_week", "this_month", "all"],
+    highest_order_total: ["lowest_order_total", "all"],
+    lowest_order_total: ["highest_order_total", "all"],
+    most_recent: ["oldest", "all"],
+    oldest: ["most_recent", "all"],
+  };
+
+
+
+  // useEffect(() => {
+  //   console.log("line50:, params:", filter);
+  //   if (filter === "open") {
+  //     setStatusFilter(orderStatusList.slice(0, 6));
+  //   } else if (filter === "today") {
+  //     setFilterDates({ startDate: new Date(), endDate: new Date() });
+  //     setStatusQuickFilter("All");
+  //   }
+  // }, [filter]);
 
   const toggleSortOrder = () => {
     setSortOrder((prev) => (prev === "ascending" ? "descending" : "ascending"));
@@ -88,49 +203,136 @@ const Orders = () => {
   const filteredOrders = useMemo(() => {
     if (isLoading || isError) return [];
 
-    let result = orders;
+    let result = [...orders];
 
+    // Search
     if (searchQuery.trim()) {
       const searchResults = fuse.search(searchQuery);
       result = searchResults.map((res) => res.item);
     }
 
+    // Quick Filter: Fulfillment Status
+    if (!selectedQuickFilters.includes("all")) {
+      if (selectedQuickFilters.includes("open")) {
+        result = result.filter((order) => {
+          const idx = orderStatusList.indexOf(order.orderStatus);
+          return idx >= 0 && idx <= 5;
+        });
+      }
+      if (selectedQuickFilters.includes("fulfilled")) {
+        result = result.filter((order) => {
+          const idx = orderStatusList.indexOf(order.orderStatus);
+          return idx >= 6 && idx <= 8;
+        });
+      }
+      if (selectedQuickFilters.includes("unfulfilled")) {
+        result = result.filter((order) => {
+          const idx = orderStatusList.indexOf(order.orderStatus);
+          return idx > 8;
+        });
+      }
+
+      // Quick Filter: Date Ranges
+      const now = new Date();
+      if (selectedQuickFilters.includes("today")) {
+        const { start, end } = normalizeDateRange(now, now);
+        result = result.filter((order) => {
+          const d = new Date(order.orderDate);
+          return d >= start && d <= end;
+        });
+      }
+
+      if (selectedQuickFilters.includes("this_week")) {
+        const startOfWeek = new Date(now);
+        const day = now.getDay();
+        const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Monday as start
+        startOfWeek.setDate(diff);
+        const { start, end } = normalizeDateRange(startOfWeek, now);
+        result = result.filter((order) => {
+          const d = new Date(order.orderDate);
+          return d >= start && d <= end;
+        });
+      }
+
+      if (selectedQuickFilters.includes("this_month")) {
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const { start, end } = normalizeDateRange(startOfMonth, now);
+        result = result.filter((order) => {
+          const d = new Date(order.orderDate);
+          return d >= start && d <= end;
+        });
+      }
+
+      if (selectedQuickFilters.includes("this_year")) {
+        const startOfYear = new Date(now.getFullYear(), 0, 1);
+        const { start, end } = normalizeDateRange(startOfYear, now);
+        result = result.filter((order) => {
+          const d = new Date(order.orderDate);
+          return d >= start && d <= end;
+        });
+      }
+      // Quick Filter: Sort By Order Total
+      if (selectedQuickFilters.includes("highest_order_total")) {
+        result = result.sort((a, b) => b.orderTotal - a.orderTotal);
+      }
+      if (selectedQuickFilters.includes("lowest_order_total")) {
+        result = result.sort((a, b) => a.orderTotal - b.orderTotal);
+      }
+
+      // Quick Filter: Sort By Order Date
+      if (selectedQuickFilters.includes("most_recent")) {
+        result = result.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+      }
+      if (selectedQuickFilters.includes("oldest")) {
+        result = result.sort((a, b) => new Date(a.orderDate) - new Date(b.orderDate));
+      }
+    }
+
+    // Fallback: Manual Status Filter (if quick filters don’t override it)
     if (statusFilter.length && !statusFilter.includes("All")) {
       result = result.filter((order) => statusFilter.includes(order.orderStatus));
     }
 
+    // Price Range
     if (minTotal || maxTotal) {
       const min = minTotal ? parseInt(minTotal, 10) : Number.NEGATIVE_INFINITY;
       const max = maxTotal ? parseInt(maxTotal, 10) : Number.POSITIVE_INFINITY;
-      result = result.filter(
-          (order) => order.orderTotal >= min && order.orderTotal <= max
-      );
+      result = result.filter((order) => order.orderTotal >= min && order.orderTotal <= max);
     }
 
+// Custom Date Range (inclusive)
     if (filterDates?.startDate && filterDates?.endDate) {
-      result = result.filter(
-          (order) =>
-              new Date(order.orderDate) >= filterDates.startDate &&
-              new Date(order.orderDate) <= filterDates.endDate
-      );
-    }
+      const { start, end } = normalizeDateRange(filterDates.startDate, filterDates.endDate);
 
-    result = [...result].sort((a, b) => {
-      if (sortField === "orderDate") {
-        return sortOrder === "ascending"
-            ? new Date(a.orderDate) - new Date(b.orderDate)
-            : new Date(b.orderDate) - new Date(a.orderDate);
-      } else if (sortField === "orderTotal") {
-        return sortOrder === "ascending"
-            ? a.orderTotal - b.orderTotal
-            : b.orderTotal - a.orderTotal;
-      }
-      return 0;
-    });
+      result = result.filter((order) => {
+        const d = new Date(order.orderDate);
+        return d >= start && d <= end;
+      });
+    }
+    // Fallback Sort (only if no quick sort filter applied)
+    const noQuickSortSelected = !selectedQuickFilters.some((f) =>
+        ["highest_order_total", "lowest_order_total", "most_recent", "oldest"].includes(f)
+    );
+
+    if (noQuickSortSelected) {
+      result = result.sort((a, b) => {
+        if (sortField === "orderDate") {
+          return sortOrder === "ascending"
+              ? new Date(a.orderDate) - new Date(b.orderDate)
+              : new Date(b.orderDate) - new Date(a.orderDate);
+        } else if (sortField === "orderTotal") {
+          return sortOrder === "ascending"
+              ? a.orderTotal - b.orderTotal
+              : b.orderTotal - a.orderTotal;
+        }
+        return 0;
+      });
+    }
 
     return result;
   }, [
     orders,
+    selectedQuickFilters,
     searchQuery,
     statusFilter,
     minTotal,
@@ -142,7 +344,6 @@ const Orders = () => {
     isLoading,
     isError,
   ]);
-
   // Function to update order status
   // const updateOrderStatus = (id, newStatus) => {
   //   const updatedOrders = orders.map((order) =>
@@ -222,86 +423,159 @@ const Orders = () => {
     </Card>
   );
 
+
+
   useEffect(() => {
-    if (statusQuickFilter !== "") {
-      if (statusQuickFilter === "All") {
-        setStatusFilter(orderStatusList);
-      } else if (statusQuickFilter === "Open") {
-        setStatusFilter(orderStatusList.slice(0, 6));
-      } else if (statusQuickFilter === "Fulfilled") {
-        setStatusFilter(orderStatusList.slice(6, 9));
-      } else if (statusQuickFilter === "Unfulfilled") {
-        setStatusFilter(orderStatusList.slice(9));
+    if (selectedQuickFilters.includes("all")) {
+      setStatusFilter(orderStatusList);
+      return;
+    }
+    const selectedGroup = Object.keys(statusGroupMap).find(group =>
+        selectedQuickFilters.includes(group)
+    );
+
+    if (selectedGroup) {
+      setStatusFilter(statusGroupMap[selectedGroup]);
+    }
+  }, [selectedQuickFilters]);
+
+  useEffect(() => {
+    const today = new Date();
+    const now = new Date();
+
+    if (selectedQuickFilters.includes("today")) {
+      setFilterDates({ startDate: today, endDate: today });
+    } else if (selectedQuickFilters.includes("this_week")) {
+      const start = getStartOfWeek(now);
+      setFilterDates({ startDate: start, endDate: now });
+    } else if (selectedQuickFilters.includes("this_month")) {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      setFilterDates({ startDate: start, endDate: now });
+    } else if (selectedQuickFilters.includes("this_year")) {
+      const start = new Date(now.getFullYear(), 0, 1);
+      setFilterDates({ startDate: start, endDate: now });
+    }
+  }, [selectedQuickFilters]);
+
+  useEffect(() => {
+    // Map quick filter keys to their status group values
+
+    const matchedGroupKey = Object.entries(statusGroupMap).find(([key, groupStatuses]) => {
+      const sortedA = [...statusFilter].sort().join(",");
+      const sortedB = [...groupStatuses].sort().join(",");
+      return sortedA === sortedB;
+    })?.[0];
+
+    setSelectedQuickFilters((prev) => {
+      // Remove all status-related quick filters from selection
+      const newFilters = prev.filter((f) => !Object.keys(statusGroupMap).includes(f));
+
+      if (matchedGroupKey) {
+        // Add back the matched group if found
+        return [...newFilters, matchedGroupKey];
       }
-    }
-  }, [statusQuickFilter]);
+
+      return newFilters;
+    });
+  }, [statusFilter]);
 
   useEffect(() => {
-    console.log("line189, dateQuickFilter", dateQuickFilter);
-    if (dateQuickFilter === "Today") {
-      setFilterDates({ startDate: new Date(), endDate: new Date() });
-    } else if (dateQuickFilter === "This Week") {
-      console.log("line 193");
-      let end = new Date();
-      let today = new Date();
-      // Calculate the difference between the date's day of the month and its day of the week
-      var diff = end.getDate() - end.getDay() + (end.getDay() === 0 ? -6 : 1);
+    const { startDate, endDate } = filterDates;
 
-      let start = new Date(today.setDate(diff));
-      console.log("start:", start, ", end:", end);
-      setFilterDates({ startDate: start, endDate: end });
-    } else if (dateQuickFilter === "This Month") {
-      let end = new Date();
-      let today = new Date();
-      let start = new Date(today.getFullYear(), today.getMonth(), 1);
-      // Calculate the difference between the date's day of the month and its day of the week
-      setFilterDates({ startDate: start, endDate: end });
-    } else if (dateQuickFilter === "This Year") {
-      let end = new Date();
-      let today = new Date();
-      let start = new Date(today.getFullYear(), 0, 1);
-      // Calculate the difference between the date's day of the month and its day of the week
-      setFilterDates({ startDate: start, endDate: end });
+    let matchedDateKey = null;
+
+    if (isToday(startDate, endDate)) {
+      matchedDateKey = "today";
+    } else if (isThisWeek(startDate, endDate)) {
+      matchedDateKey = "this_week";
+    } else if (isThisMonth(startDate, endDate)) {
+      matchedDateKey = "this_month";
+    } else if (isThisYear(startDate, endDate)) {
+      matchedDateKey = "this_year";
     }
-  }, [dateQuickFilter]);
+
+    setSelectedQuickFilters((prev) => {
+      const dateFilterKeys = ["today", "this_week", "this_month", "this_year"];
+      const currentDateKey = prev.find((f) => dateFilterKeys.includes(f));
+
+      // ✅ Prevent infinite loop: only update if the matched key is different
+      if (currentDateKey === matchedDateKey) {
+        return prev;
+      }
+
+      const withoutDateFilters = prev.filter((f) => !dateFilterKeys.includes(f));
+
+      if (matchedDateKey) {
+        return [...withoutDateFilters, matchedDateKey];
+      } else {
+        return withoutDateFilters;
+      }
+    });
+  }, [filterDates]);
 
   const filterAndSortComponent = () => (
-    <>
-      <View style={{ marginVertical: 10 }}>
-        <Text variant={"bodyLarge"} style={{ marginLeft: 10 }}>
-          {nOpen.toString() + " Open Order" + (nOpen !== 1 ? "s" : "")}
-        </Text>
-        <Text variant={"bodyLarge"} style={{ marginLeft: 10 }}>
-          {nFulfilled.toString() +
-            " Fulfilled Order" +
-            (nFulfilled !== 1 ? "s" : "")}
-        </Text>
-        <Text variant={"bodyLarge"} style={{ marginLeft: 10 }}>
-          {nUnfulfilled.toString() +
-            " Unfulfilled Order" +
-            (nUnfulfilled !== 1 ? "s" : "")}
-        </Text>
-      </View>
+    <View>
+      <Card style= {{backgroundColor: theme.colors.surface, borderRadius: 0, paddingTop: 16}} mode={'elevated'}>
+        <View style={{ paddingHorizontal: 16 }}>
+          <Text style={{ marginLeft: 10, fontWeight: "bold", fontSize: 16, marginBottom: 10}}>
+            Quick Filters
+          </Text>
+        {QUICK_FILTER_ROWS.map((row, rowIndex) => (
+            <View key={rowIndex} style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 8 }}>
+              {row.map(({ key, label }) => (
+                  <Chip
+                      key={key}
+                      selected={selectedQuickFilters.includes(key)}
+                      onPress={() => {
+                        let updated = [];
 
-      <View style={{ padding: 0, marginBottom: 10 }}>
-        <TextInput
-          label="Search Orders"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          style={styles.searchBar}
-          mode="outlined"
-        />
+                        if (key === "all") {
+                          // Always override and select only "all"
+                          updated = ["all"];
+                        } else {
+                          const isSelected = selectedQuickFilters.includes(key);
 
-        {/* Sort & Filters Accordion */}
-        <View
-          style={{
-            backgroundColor: theme.colors.surface,
-            overflow: "hidden",
-            borderRadius: 8,
-          }}
-        >
+                          if (isSelected) {
+                            // Deselect the chip
+                            updated = selectedQuickFilters.filter(f => f !== key);
+                          } else {
+                            // Add the chip, remove incompatible ones and "all"
+                            const incompatible = INCOMPATIBLE_FILTERS[key] || [];
+                            updated = selectedQuickFilters
+                                .filter(f => f !== "all" && !incompatible.includes(f))
+                                .concat(key);
+                          }
+
+                          // If everything was removed, fallback to "all"
+                          if (updated.length === 0) {
+                            updated = ["all"];
+                          }
+                        }
+
+                        setSelectedQuickFilters(updated);
+                      }}
+                      style={{
+                        margin: 2,
+                        backgroundColor: theme.colors.softPrimary,
+                        borderColor: "black",
+                      }}
+                      textStyle={{
+                        color:
+                            selectedQuickFilters.includes(key)
+                                ? "black"
+                                : theme.colors.primary,
+                      }}
+                      selectedColor={theme.colors.black}
+                  >
+                    {label}
+                  </Chip>
+              ))}
+            </View>
+        ))}
+        </View>
+
           <List.Accordion
-            title={"Sort & Filter"}
+            title={"More Sort & Filter Options"}
             expanded={filterExpanded}
             onPress={() => setFilterExpanded(!filterExpanded)}
             style={styles.accordionBar}
@@ -315,94 +589,11 @@ const Orders = () => {
               />
             )}
           >
-            <Card mode={"elevated"} style={styles.sortFilterContent}>
-              {/* Sort Field Selector */}
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Sort By</Text>
-                <View style={styles.row}>
-                  <RadioButton.Group
-                    onValueChange={(value) => setSortField(value)}
-                    value={sortField}
-                  >
-                    <View style={styles.radioRow}>
-                      {/* Date Option */}
-                      <View style={styles.radioItem}>
-                        <RadioButton.Android
-                          value="orderDate"
-                          color={theme.colors.primary}
-                        />
-                        <Text style={styles.radioLabel}>Date</Text>
-                      </View>
-
-                      {/* Order Total Option */}
-                      <View style={styles.radioItem}>
-                        <RadioButton.Android
-                          value="orderTotal"
-                          color={theme.colors.primary}
-                        />
-                        <Text style={styles.radioLabel}>Order Total</Text>
-                      </View>
-                    </View>
-                  </RadioButton.Group>
-                  {/* Sort Order Toggler */}
-                  <View style={{ display: "flex", flexDirection: "row" }}>
-                    <Chip
-                      mode="outlined"
-                      style={styles.sortOrderChip}
-                      onPress={toggleSortOrder}
-                    >
-                    <MaterialCommunityIcons
-                        name={
-                          sortOrder === "ascending"
-                              ? "arrow-up-bold"
-                              : "arrow-down-bold"
-                        }
-                        size={20}
-                        color={theme.colors.primary}
-                    />
-                    </Chip>
-                  </View>
-                </View>
-              </View>
-
+            <View style={styles.sortFilterContent}>
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Order Date</Text>
                 {/* Display Selected Start and End Dates */}
                 {/* Row Layout for Start and End Date Cards */}
-                <View style={styles.flexWrapRow}>
-                  {["Today", "This Week", "This Month", "This Year"].map(
-                    (f) => {
-                      return (
-                        <Chip
-                          key={f}
-                          selected={dateQuickFilter === f}
-                          onPress={() => {
-                            if (dateQuickFilter === f) {
-                              setDateQuickFilter("");
-                            } else {
-                              setDateQuickFilter(f);
-                            }
-                          }}
-                          style={{
-                            margin: 2,
-                            backgroundColor: theme.colors.softPrimary,
-                            borderColor: "black",
-                          }}
-                          textStyle={{
-                            color:
-                              dateQuickFilter === f
-                                ? "black"
-                                : theme.colors.primary,
-                          }}
-                          selectedColor={theme.colors.black}
-                        >
-                          {f}
-                        </Chip>
-                      );
-                    },
-                  )}
-                </View>
-                <Divider style={{ marginVertical: 2 }} />
                 <View style={styles.dateRow}>
                   <View
                     style={{
@@ -433,40 +624,31 @@ const Orders = () => {
               </View>
               </View>
 
+              <Divider style={{ marginVertical: 2}} />
               <View style={{ marginHorizontal: 10 }}>
-                <Text style={styles.sectionTitle}>Order Status</Text>
-                <View style={styles.flexWrapRow}>
-                  {["All", "Open", "Fulfilled", "Unfulfilled"].map((f) => {
-                    return (
-                      <Chip
-                        key={f}
-                        selected={statusQuickFilter === f}
-                        onPress={() => {
-                          if (statusQuickFilter === f) {
-                            setStatusQuickFilter("");
-                          } else {
-                            setStatusQuickFilter(f);
-                          }
-                        }}
-                        style={{
-                          margin: 2,
-                          backgroundColor: theme.colors.softPrimary,
-                          borderColor: "black",
-                        }}
-                        textStyle={{
-                          color:
-                            statusQuickFilter === f
-                              ? "black"
-                              : theme.colors.primary,
-                        }}
-                        selectedColor={theme.colors.black}
-                      >
-                        {f}
-                      </Chip>
-                    );
-                  })}
+                <Text style={styles.sectionTitle}>Order Total</Text>
+                <View style={styles.row}>
+                  <TextInput
+                      label="Min Total"
+                      value={minTotal}
+                      onChangeText={setMinTotal}
+                      style={styles.input}
+                      mode={"outlined"}
+                      keyboardType="numeric"
+                      dense
+                  />
+                  <TextInput
+                      label="Max Total"
+                      value={maxTotal}
+                      onChangeText={setMaxTotal}
+                      style={styles.input}
+                      mode={"outlined"}
+                      keyboardType="numeric"
+                      dense
+                  />
                 </View>
-                <Divider style={{ marginVertical: 2 }} />
+                <Divider style={{ marginVertical: 6}} />
+                <Text style={styles.sectionTitle}>Order Status</Text>
                 <View style={styles.flexWrapRow}>
                   {orderStatusList.map((status) => (
                     <Chip
@@ -496,52 +678,33 @@ const Orders = () => {
                               : orderStatusColors[status],
                         },
                       ]}
-                      // textStyle={{color: status==='All' ? theme.colors.white : theme.colors.black}}
-                      // selectedColor={'white'}
+                      textStyle={{color: theme.colors.black}}
+                      selectedColor={'black'}
                     >
                       {status}
                     </Chip>
                   ))}
                 </View>
-
-                <Text style={styles.sectionTitle}>Order Total</Text>
-                <View style={styles.row}>
-                  <TextInput
-                    label="Min Total"
-                    value={minTotal}
-                    onChangeText={setMinTotal}
-                    style={styles.input}
-                    mode={"outlined"}
-                    keyboardType="numeric"
-                    dense
-                  />
-                  <TextInput
-                    label="Max Total"
-                    value={maxTotal}
-                    onChangeText={setMaxTotal}
-                    style={styles.input}
-                    mode={"outlined"}
-                    keyboardType="numeric"
-                    dense
-                  />
-                </View>
               </View>
-            </Card>
+            </View>
           </List.Accordion>
-        </View>
+      </Card>
+      <TextInput
+          label="Search Orders"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          style={styles.searchBar}
+          mode="outlined"
+      />
+      <Divider style={{ marginVertical: 10 }} />
+      <View style={{ marginVertical: 0 }}>
+          <Text variant={"bodyLarge"} style={{ marginLeft: 10 }}>
+            {filteredOrders.length.toString() + ' filtered Orders'}
+          </Text>
       </View>
       <Divider style={{ marginVertical: 10 }} />
-    </>
+    </View>
   );
-  let nOpen = orders
-    .map((o) => orderStatusList.indexOf(o.orderStatus))
-    .filter((i) => i < 6).length;
-  let nFulfilled = orders
-    .map((o) => orderStatusList.indexOf(o.orderStatus))
-    .filter((i) => i >= 6 && i <= 8).length;
-  let nUnfulfilled = orders
-    .map((o) => orderStatusList.indexOf(o.orderStatus))
-    .filter((i) => i > 8).length;
 
   if (isError) {
     return (
@@ -552,7 +715,7 @@ const Orders = () => {
   }
 
   return (
-      <Surface style={styles.container}>
+      <View style={styles.container}>
         <FlatList
             data={filteredOrders}
             keyExtractor={(item) => item.orderId}
@@ -560,8 +723,9 @@ const Orders = () => {
             ListHeaderComponent={filterAndSortComponent()}
             ListEmptyComponent={<Text>No Orders Found</Text>}
             ItemSeparatorComponent={() => <Divider style={{ marginVertical: 10 }} />}
+            contentContainerStyle={{ padding: 10 }}
         />
-      </Surface>
+      </View>
   );
 };
 
@@ -570,7 +734,7 @@ const makeStyles = ({ colors }) =>
     container: {
       flex: 1,
       paddingHorizontal: 10,
-      margin: 0,
+      overflow: "visible",
       backgroundColor: colors.surface,
     },
     searchBar: { marginVertical: 10, backgroundColor: "white" },
@@ -585,33 +749,27 @@ const makeStyles = ({ colors }) =>
     input: { flex: 1, marginHorizontal: 5, backgroundColor: colors.white },
     card: { marginVertical: 8 },
     orderCard: {
-      borderRadius: 8,
+      borderRadius: 0,
       marginVertical: 5,
       backgroundColor: colors.card,
       padding: 8
     },
     accordionBar: {
-      backgroundColor: colors.primary,
+      backgroundColor: colors.softPrimary,
       height: 50,
       minHeight: 50,
       paddingVertical: 0,
       justifyContent: "center",
       alignItems: "center",
       verticalAlign: "center",
-      borderTopLeftRadius: 8,
-      borderTopRightRadius: 8,
+      borderRadius: 0,
     },
     accordionContent: { justifyContent: "center" },
-    accordionTitle: { color: "white", fontSize: 16 },
+    accordionTitle: { color: "black", fontSize: 16 },
     sortFilterContent: {
       paddingBottom: 20,
-      borderTopLeftRadius: 0,
-      borderTopRightRadius: 0,
-      borderBottomLeftRadius: 8,
-      borderBottomRightRadius: 8,
+      borderRadius: 0,
       backgroundColor: colors.white,
-      borderWidth: 1,
-      borderColor: colors.grayBorder,
     },
     sortOrderChip: {
       margin: 0,

@@ -321,19 +321,30 @@ const Products = () => {
                                     key={key}
                                     selected={selectedQuickFilters.includes(key)}
                                     onPress={() => {
-                                        const isSelected = selectedQuickFilters.includes(key);
                                         let updated = [];
-
-                                        if (isSelected) {
-                                            updated = selectedQuickFilters.filter(f => f !== key);
+                                        if (key === "all") {
+                                            // Always override and select only "all"
+                                            updated = ["all"];
                                         } else {
-                                            const incompatible = INCOMPATIBLE_FILTERS[key] || [];
-                                            updated = selectedQuickFilters
-                                                .filter(f => !incompatible.includes(f) && f !== "all")
-                                                .concat(key);
+                                            const isSelected = selectedQuickFilters.includes(key);
+
+                                            if (isSelected) {
+                                                // Deselect the chip
+                                                updated = selectedQuickFilters.filter(f => f !== key);
+                                            } else {
+                                                // Add the chip, remove incompatible ones and "all"
+                                                const incompatible = INCOMPATIBLE_FILTERS[key] || [];
+                                                updated = selectedQuickFilters
+                                                    .filter(f => f !== "all" && !incompatible.includes(f))
+                                                    .concat(key);
+                                            }
+
+                                            // If everything was removed, fallback to "all"
+                                            if (updated.length === 0) {
+                                                updated = ["all"];
+                                            }
                                         }
 
-                                        if (updated.length === 0) updated = ["all"];
                                         setSelectedQuickFilters(updated);
                                     }}
                                     style={{
@@ -348,7 +359,6 @@ const Products = () => {
                                                 : theme.colors.primary,
                                     }}
                                     selectedColor={theme.colors.black}
-                                    disabled={selectedQuickFilters.length > 1 && key === "all"}
                                 >
                                     {label}
                                 </Chip>
