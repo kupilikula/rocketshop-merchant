@@ -12,13 +12,13 @@ export const ProductDisplayCompactMerchant = (props) => {
   return (
     <Card
       mode={props.cardMode || "elevated"}
-      style={{ borderRadius: 8, height: 100, backgroundColor: "white" }}
+      style={{ borderRadius: 0, height: 100, backgroundColor: "white" }}
     >
       <View
         style={{
           backgroundColor: "white",
           width: "100%",
-          borderRadius: 8,
+          borderRadius: 0,
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
@@ -29,8 +29,7 @@ export const ProductDisplayCompactMerchant = (props) => {
           style={{
             width: 100,
             height: 100,
-            borderTopLeftRadius: 8,
-            borderBottomLeftRadius: 8,
+            borderRadius: 0,
           }}
         />
         <View

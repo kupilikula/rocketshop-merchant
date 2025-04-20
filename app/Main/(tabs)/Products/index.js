@@ -32,8 +32,86 @@ const Products = () => {
   const [filterExpanded, setFilterExpanded] = useState(false);
   const [selectedCollectionIds, setSelectedCollectionIds] = useState(["All"]);
   const [selectedTags, setSelectedTags] = useState(["All"]);
+    const [selectedQuickFilters, setSelectedQuickFilters] = useState(["all"]);
 
   const styles = makeStyles(theme);
+
+    // const QUICK_FILTERS = [
+    //     { key: "all", label: "All" },
+    //     { key: "active", label: "Active" },
+    //     { key: "inactive", label: "Inactive" },
+    //     { key: "low_stock", label: "Low Stock" },
+    //     { key: "out_of_stock", label: "Out of Stock" },
+    //     { key: "top_selling", label: "Top Selling" },
+    //     { key: "least_selling", label: "Least Selling" },
+    //     { key: "recently_added", label: "Recently Added" },
+    //     { key: "added_long_ago", label: "Added Long Ago" }, // ✅ NEW
+    // ];
+    //
+    // const INCOMPATIBLE_FILTERS = {
+    //     active: ["inactive"],
+    //     inactive: ["active"],
+    //     top_selling: ["least_selling"],
+    //     least_selling: ["top_selling"],
+    //     recently_added: ["added_long_ago"],
+    //     added_long_ago: ["recently_added"],
+    //     all: QUICK_FILTERS.map(f => f.key).filter(k => k !== "all"),
+    // };
+
+    const QUICK_FILTER_ROWS = [
+        [
+            { key: "all", label: "All" },
+            { key: "active", label: "Active" },
+            { key: "inactive", label: "Inactive" },
+        ],
+        [
+            { key: "low_stock", label: "Low Stock" },
+            { key: "out_of_stock", label: "Out of Stock" },
+        ],
+        [
+            { key: "recently_added", label: "Recently Added" },
+            { key: "added_long_ago", label: "Added Long Ago" },
+        ],
+        [
+            { key: "high_price", label: "High Price" },
+            { key: "low_price", label: "Low Price" },
+        ],
+        [
+            { key: "top_selling_day", label: "Top Selling (Day)" },
+            { key: "top_selling_week", label: "Top Selling (Week)" },
+            { key: "top_selling_month", label: "Top Selling (Month)" },
+            { key: "top_selling_year", label: "Top Selling (Year)" },
+            { key: "least_selling_day", label: "Least Selling (Day)" },
+            { key: "least_selling_week", label: "Least Selling (Week)" },
+            { key: "least_selling_month", label: "Least Selling (Month)" },
+            { key: "least_selling_year", label: "Least Selling (Year)" },
+        ],
+    ];
+
+    const INCOMPATIBLE_FILTERS = {
+        active: ["inactive"],
+        inactive: ["active"],
+
+        high_price: ["low_price"],
+        low_price: ["high_price"],
+
+        recently_added: ["added_long_ago"],
+        added_long_ago: ["recently_added"],
+
+        top_selling_day: ["least_selling_day"],
+        least_selling_day: ["top_selling_day"],
+
+        top_selling_week: ["least_selling_week"],
+        least_selling_week: ["top_selling_week"],
+
+        top_selling_month: ["least_selling_month"],
+        least_selling_month: ["top_selling_month"],
+
+        top_selling_year: ["least_selling_year"],
+        least_selling_year: ["top_selling_year"],
+
+        all: QUICK_FILTER_ROWS.flat().map(f => f.key).filter(k => k !== "all"),
+    };
 
     // Extract unique collections
     const uniqueCollections = Array.from(
@@ -87,10 +165,60 @@ const Products = () => {
     }
   };
 
+    const applyQuickFilters = (inputProducts, filters) => {
+        if (filters.includes("all")) return inputProducts;
+
+        let result = [...inputProducts];
+
+        if (filters.includes("active")) {
+            result = result.filter(p => p.isActive);
+        }
+        if (filters.includes("inactive")) {
+            result = result.filter(p => !p.isActive);
+        }
+        if (filters.includes("low_stock")) {
+            result = result.filter(p => p.stock > 0 && p.stock <= 5);
+        }
+        if (filters.includes("out_of_stock")) {
+            result = result.filter(p => p.stock === 0);
+        }
+        if (filters.includes("recently_added")) {
+            result = result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        }
+        if (filters.includes("high_price")) {
+            result = result.sort((a, b) => b.price - a.price);
+        }
+        if (filters.includes("low_price")) {
+            result = result.sort((a, b) => a.price - b.price);
+        }
+
+// For each time range
+        const timeRanges = ["day", "week", "month", "year"];
+        for (const range of timeRanges) {
+            if (filters.includes(`top_selling_${range}`)) {
+                result = result
+                    .filter(p => p.salesStats && p.salesStats[range])
+                    .sort((a, b) => b.salesStats[range].revenue - a.salesStats[range].revenue)
+                    .slice(0, 10);
+            }
+            if (filters.includes(`least_selling_${range}`)) {
+                result = result
+                    .filter(p => p.salesStats && p.salesStats[range])
+                    .sort((a, b) => a.salesStats[range].revenue - b.salesStats[range].revenue)
+                    .slice(0, 10);
+            }
+        }
+
+        return result;
+    };
+
   const filteredProducts = useMemo(() => {
     if (isLoading || isError) return [];
 
     let result = [...products];
+    console.log('result[0]', result[0]);
+    //Apply Quick Filter
+   result = applyQuickFilters(result, selectedQuickFilters);
 
     // Search filtering
     if (searchQuery.trim()) {
@@ -158,6 +286,7 @@ const Products = () => {
     return result;
   }, [
     products,
+      selectedQuickFilters,
     searchQuery,
     priceRange,
     stockRange,
@@ -178,35 +307,57 @@ const Products = () => {
   );
 
     const TopSection = () => (
-        <>
-            <View style={{ marginVertical: 10 }}>
-                <Text variant={"bodyLarge"} style={{ marginLeft: 10 }}>
-                    {nActive.toString() + " Active Product" + (nActive > 1 ? "s" : "")}
-                </Text>
-                <Text variant={"bodyLarge"} style={{ marginLeft: 10 }}>
-                    {nInactive.toString() +
-                        " Inactive Product" +
-                        (nInactive > 1 ? "s" : "")}
-                </Text>
-            </View>
+        <View>
+            <Card style={{ backgroundColor: theme.colors.surface, borderRadius: 0, paddingTop: 16 }} mode={'elevated'}>
 
-            <View style={{ marginBottom: 10, backgroundColor: theme.colors.surface }}>
-                <TextInput
-                    label="Search Products"
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    style={styles.searchBar}
-                    mode="outlined"
-                />
-                <View
-                    style={{
-                        backgroundColor: theme.colors.surface,
-                        overflow: "hidden",
-                        borderRadius: 8,
-                    }}
-                >
-                    <List.Accordion
-                        title="Sort & Filter"
+                <View style={{ paddingHorizontal: 16 }}>
+                    <Text style={{ marginLeft: 10, fontWeight: "bold", fontSize: 16, marginBottom: 10}}>
+                        Quick Filters
+                    </Text>
+                    {QUICK_FILTER_ROWS.map((row, rowIndex) => (
+                        <View key={rowIndex} style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 8 }}>
+                            {row.map(({ key, label }) => (
+                                <Chip
+                                    key={key}
+                                    selected={selectedQuickFilters.includes(key)}
+                                    onPress={() => {
+                                        const isSelected = selectedQuickFilters.includes(key);
+                                        let updated = [];
+
+                                        if (isSelected) {
+                                            updated = selectedQuickFilters.filter(f => f !== key);
+                                        } else {
+                                            const incompatible = INCOMPATIBLE_FILTERS[key] || [];
+                                            updated = selectedQuickFilters
+                                                .filter(f => !incompatible.includes(f) && f !== "all")
+                                                .concat(key);
+                                        }
+
+                                        if (updated.length === 0) updated = ["all"];
+                                        setSelectedQuickFilters(updated);
+                                    }}
+                                    style={{
+                                        margin: 2,
+                                        backgroundColor: theme.colors.softPrimary,
+                                        borderColor: "black",
+                                    }}
+                                    textStyle={{
+                                        color:
+                                            selectedQuickFilters.includes(key)
+                                                ? "black"
+                                                : theme.colors.primary,
+                                    }}
+                                    selectedColor={theme.colors.black}
+                                    disabled={selectedQuickFilters.length > 1 && key === "all"}
+                                >
+                                    {label}
+                                </Chip>
+                            ))}
+                        </View>
+                    ))}
+                </View>
+                <List.Accordion
+                        title="More Sort & Filter Options"
                         expanded={filterExpanded}
                         onPress={() => setFilterExpanded(!filterExpanded)}
                         style={styles.accordionBar}
@@ -216,11 +367,11 @@ const Products = () => {
                             <MaterialCommunityIcons
                                 name={filterExpanded ? "chevron-up" : "chevron-down"}
                                 size={24}
-                                color="white"
+                                color="black"
                             />
                         )}
                     >
-                        <Card style={styles.sortFilterContent}>
+                        <View style={styles.sortFilterContent}>
                             <View style={styles.section}>
                                 {/* Sort Options */}
                                 <Text style={styles.sectionTitle}>Sort By</Text>
@@ -375,16 +526,32 @@ const Products = () => {
                                     ))}
                                 </View>
                             </View>
-                        </Card>
+                        </View>
                     </List.Accordion>
-                </View>
+            </Card>
+            <TextInput
+                label="Search Products"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                style={styles.searchBar}
+                mode="outlined"
+            />
+            <Divider style={{ marginVertical: 10 }} />
+            <View style={{ marginVertical: 0 }}>
+                <Text variant={"bodyLarge"} style={{ marginLeft: 10 }}>
+                    {(nActive > 0 ? (nActive.toString() + " Active Product" + (nActive > 1 ? "s" : "")) : "") + (nActive >0 && nInactive > 0 ? " , " : "") + (nInactive > 0 ? (nInactive.toString() +
+                        " Inactive Product" +
+                        (nInactive > 1 ? "s" : "")) : "")}
+                </Text>
             </View>
             <Divider style={{ marginVertical: 10 }} />
-        </>
+        </View>
     );
 
-    let nActive = products.filter((c) => c.isActive).length;
-    let nInactive = products.filter((c) => !c.isActive).length;
+    let nActive = useMemo(() => filteredProducts.filter((c) => c.isActive).length, [filteredProducts]);
+    let nInactive = useMemo( () => filteredProducts.filter((c) => !c.isActive).length, [filteredProducts]);
+
+    console.log('AIA: ', nActive, nInactive);
 
     if (isLoading) {
     return (
@@ -414,7 +581,7 @@ const Products = () => {
   }
 
   return (
-      <Surface style={styles.surface}>
+      <View style={styles.surface}>
         <FlatList
             data={filteredProducts}
             keyExtractor={(item) => item.productId}
@@ -426,7 +593,7 @@ const Products = () => {
             )}
             contentContainerStyle={{ padding: 10 }}
         />
-      </Surface>
+      </View>
   );
 };
 
@@ -438,7 +605,7 @@ const makeStyles = ({ colors }) =>
       overflow: "visible",
       backgroundColor: colors.surface,
     },
-    searchBar: { marginVertical: 10, backgroundColor: colors.white },
+    searchBar: { marginTop: 10, backgroundColor: colors.white },
     section: { marginHorizontal: 10, marginVertical: 5 },
     sectionTitle: { fontSize: 16, fontWeight: "bold" },
     radioRow: { flexDirection: "row", justifyContent: "flex-start", margin: 0, padding: 0 },
@@ -455,27 +622,22 @@ const makeStyles = ({ colors }) =>
       marginVertical: 5,
     },
     accordionBar: {
-      backgroundColor: colors.primary,
+      backgroundColor: colors.softPrimary,
       height: 50,
       minHeight: 50,
       paddingVertical: 0,
       justifyContent: "center",
       alignItems: "center",
       verticalAlign: "center",
-      borderTopLeftRadius: 8,
-      borderTopRightRadius: 8,
-    },
-    accordionContent: { justifyContent: "center" },
-    accordionTitle: { color: "white", fontSize: 16 },
-    sortFilterContent: {
-      paddingBottom: 20,
       borderTopLeftRadius: 0,
       borderTopRightRadius: 0,
-      borderBottomLeftRadius: 8,
-      borderBottomRightRadius: 8,
+    },
+    accordionContent: { justifyContent: "center" },
+    accordionTitle: { color: "black", fontSize: 16, fontWeight: "bold" },
+    sortFilterContent: {
+      // paddingBottom: 20,
+      borderRadius: 0,
       backgroundColor: colors.white,
-      borderWidth: 1,
-      borderColor: colors.grayBorder,
     },
     sortOrderChip: {
       margin: 0,

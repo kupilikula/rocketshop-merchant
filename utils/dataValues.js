@@ -1,8 +1,8 @@
 export const orderStatusList = [
   "Order Created", // Order has been placed by the customer
   "Payment Initiated", // Payment is not yet confirmed
-  "Payment Received", // Payment has been successfully processed
   "Payment Failed", // Payment has been successfully processed
+  "Payment Received", // Payment has been successfully processed
   "Processing", // Order is being prepared
   "Ready for Pickup", // For pickup orders, when ready at the store
   "Awaiting Shipment", // Order is packed but not shipped
