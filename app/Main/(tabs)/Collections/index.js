@@ -1,12 +1,12 @@
 import React, {useState} from "react";
-import { ListRenderItemInfo, Pressable, View, StyleSheet } from "react-native";
+import {ListRenderItemInfo, Pressable, View, StyleSheet} from "react-native";
 import ReorderableList, {
     ReorderableListItem,
     ReorderableListReorderEvent,
     reorderItems,
     useReorderableDrag,
 } from "react-native-reorderable-list";
-import {Text, Surface, useTheme, Button, Portal, Modal, Chip, Switch, RadioButton, Card} from "react-native-paper";
+import {Text, Surface, useTheme, Button, ActivityIndicator, Portal, Modal, Chip, Switch, RadioButton, Card} from "react-native-paper";
 import { useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useCollections } from "@/api/hooks/useCollections";
@@ -62,7 +62,7 @@ const CollectionsScreen = () => {
 
     if (isLoading) {
         return (
-            <Surface
+            <View
                 style={{
                     flex: 1,
                     justifyContent: "center",
@@ -70,14 +70,14 @@ const CollectionsScreen = () => {
                     backgroundColor: theme.colors.surface,
                 }}
             >
-                <Text>Loading collections...</Text>
-            </Surface>
+                <ActivityIndicator size={100} animating={true} color={theme.colors.primary} />
+            </View>
         );
     }
 
     if (isError) {
         return (
-            <Surface
+            <View
                 style={{
                     flex: 1,
                     justifyContent: "center",
@@ -85,14 +85,14 @@ const CollectionsScreen = () => {
                     backgroundColor: theme.colors.surface,
                 }}
             >
-                <Text>Error loading collections. Please try again.</Text>
-            </Surface>
+                <Text variant={"titleLarge"}>Error loading collections.</Text>
+            </View>
         );
     }
 
     return (
-        <Surface
-            style={{ paddingHorizontal: 10, backgroundColor: theme.colors.surface }}
+        <View
+            style={{ paddingHorizontal: 10, backgroundColor: theme.colors.surface, flex: 1 }}
         >
             <ReorderableList
                 style={{}}
@@ -125,7 +125,7 @@ const CollectionsScreen = () => {
                 }
             />
             <AddNewCollectionModal isVisible={showNewCollectionModal} onDismiss={() => setShowNewCollectionModal(false)}/>
-        </Surface>
+        </View>
     );
 };
 

@@ -1,10 +1,11 @@
 import React from "react";
 import { View, StyleSheet, Pressable, ScrollView } from "react-native";
-import { Text, Card, Button, Divider, Surface, useTheme, Chip } from "react-native-paper";
+import {Text, Card, Button, Divider, Surface, useTheme, Chip, ActivityIndicator} from "react-native-paper";
 import { useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useOffers } from "../../../../api/hooks/useOffers"; // Import custom hook
-import { useSelector } from "react-redux"; // Assuming storeId is in Redux store
+import { useSelector } from "react-redux";
+import ScrollableScreen from "../../../../components/ScrollableScreen"; // Assuming storeId is in Redux store
 
 const OffersScreen = () => {
     const theme = useTheme();
@@ -69,22 +70,30 @@ const OffersScreen = () => {
     );
 
     if (isLoading) {
-        return (
-            <Surface style={styles.container}>
-                <Text variant="titleLarge" style={{ textAlign: "center", marginTop: 20 }}>
-                    Loading offers...
-                </Text>
-            </Surface>
-        );
+        return <View
+            style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: theme.colors.surface,
+            }}
+        >
+            <ActivityIndicator size={100} animating={true} color={theme.colors.primary} />
+        </View>;
     }
 
     if (isError) {
         return (
-            <Surface style={styles.container}>
-                <Text variant="titleLarge" style={{ textAlign: "center", marginTop: 20, color: theme.colors.error }}>
-                    Failed to load offers. Please try again later.
-                </Text>
-            </Surface>
+            <View
+                style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    backgroundColor: theme.colors.surface,
+                }}
+            >
+                <Text variant={"titleLarge"}>Error Loading Offers.</Text>
+            </View>
         );
     }
 
@@ -92,8 +101,7 @@ const OffersScreen = () => {
     let nInactive = offers.filter((o) => !o.isActive).length;
 
     return (
-        <Surface style={styles.container}>
-            <ScrollView>
+        <ScrollableScreen innerStyle={styles.container} backgroundColor={theme.colors.surface}>
                 <View style={{ marginVertical: 10 }}>
                     <Text variant={"bodyLarge"} style={{ marginLeft: 10 }}>
                         {nActive.toString() + " Active Offer" + (nActive !== 1 ? "s" : "")}
@@ -138,8 +146,7 @@ const OffersScreen = () => {
                 >
                     {offers.map(renderOfferItem)}
                 </View>
-            </ScrollView>
-        </Surface>
+        </ScrollableScreen>
     );
 };
 

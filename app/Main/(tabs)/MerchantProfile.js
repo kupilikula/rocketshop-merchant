@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
-import { Text, TextInput, Button, Card, useTheme } from 'react-native-paper';
+import {Text, TextInput, Button, Card, useTheme, Divider} from 'react-native-paper';
 import {useDispatch, useSelector} from 'react-redux';
 import axiosClient from '../../../api/client';
 import OtpInput from '../../../components/OtpInput';
@@ -90,8 +90,12 @@ const MerchantProfileScreen = () => {
                 <Card.Content>
                     {mode === 'VIEW' && (
                         <View>
-                            <Text>Name: {currentFullName}</Text>
-                            <Text>Phone: {currentPhone}</Text>
+                            <Text variant={"titleMedium"}>Name:</Text>
+                            <Text variant={"titleLarge"}>{currentFullName}</Text>
+                            <Divider style={{marginVertical: 16}}/>
+                            <Text variant={'titleMedium'}>Phone:</Text>
+                            <Text variant={'titleLarge'}>{currentPhone}</Text>
+                            <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: 16}}>
                             <Button mode="contained" style={styles.button} onPress={() => {
                                 setPhone(currentPhone);
                                 setFullName(currentFullName);
@@ -99,6 +103,7 @@ const MerchantProfileScreen = () => {
                             }}>
                                 Edit Profile
                             </Button>
+                            </View>
                         </View>
                     )}
 
@@ -119,14 +124,25 @@ const MerchantProfileScreen = () => {
                                 style={styles.input}
                                 keyboardType="phone-pad"
                             />
+                            <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+                                <View style={{display: 'flex', flexDirection: 'row', alignSelf: 'center'}}>
+                                    <Button
+                                        mode="outlined"
+                                        style={{borderRadius: 8, borderColor: theme.colors.error}}
+                                        labelStyle={{color: theme.colors.error}}
+                                        onPress={() => {
+                                            setPhone(currentPhone);
+                                            setFullName(currentFullName);
+                                            setMode('VIEW')
+                                        }}>Cancel</Button>
+                                </View>
+
+                                <View style={{display: 'flex', flexDirection: 'row', alignSelf: 'center'}}>
                             <Button mode="contained" loading={loading} style={styles.button} onPress={handleSaveChanges}>
                                 Save Changes
                             </Button>
-                            <Button onPress={() => {
-                                setPhone(currentPhone);
-                                setFullName(currentFullName);
-                                setMode('VIEW')
-                            }}>Cancel</Button>
+                            </View>
+                            </View>
                         </View>
                     )}
 
@@ -135,7 +151,11 @@ const MerchantProfileScreen = () => {
                             <Text style={{ marginBottom: 8 }}>Enter OTP sent to {pendingPhone}</Text>
                             <OtpInput otpLength={6} onSubmit={handleVerifyOtp} />
                             {otpError && <Text style={{ color: theme.colors.error }}>{otpError}</Text>}
-                            <Button onPress={() => setMode('EDIT')}>Go Back</Button>
+                            <Button onPress={() => {
+                                setOtpError(null);
+                                setMode('EDIT')
+                            }
+                            }>Go Back</Button>
                         </View>
                     )}
                 </Card.Content>
@@ -156,11 +176,14 @@ const styles = StyleSheet.create({
     },
     card: {
         padding: 8,
+        backgroundColor: 'white',
     },
     input: {
         marginBottom: 12,
+        backgroundColor: 'white',
     },
     button: {
-        marginTop: 12,
+        // marginTop: 12,
+        borderRadius: 8,
     },
 });

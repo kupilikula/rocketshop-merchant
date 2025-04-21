@@ -21,6 +21,7 @@ import TagPickerModal from "./TagPickerModal";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import {useSelector} from "react-redux";
 import CrossPlatformDatePicker from "./CrossPlatformDatePicker";
+import ScrollableScreen from "./ScrollableScreen";
 
 const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardHandler, discardButtonLabel}) => {
     const theme = useTheme();
@@ -168,8 +169,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
     };
     console.log('offer:', offer);
 
-    return (<ScrollView>
-            <Surface style={styles.container}>
+    return (<ScrollableScreen innerStyle={styles.container} backgroundColor={theme.colors.surface}>
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Offer Description</Text>
                     {/* Offer Name */}
@@ -310,7 +310,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                             keyboardType="numeric"
                             mode="outlined"
                             style={styles.input}
-                            value={discountDetails.percentage.toString() + '%'}
+                            value={discountDetails.percentage ? discountDetails.percentage?.toString() + '%' : ''}
                             onChangeText={(value) =>
                                 setDiscountDetails({ percentage: parseFloat(value) })
                             }
@@ -560,8 +560,7 @@ const OfferDetailsScreen = ({offer, publishHandler, publishButtonLabel, discardH
                     </Button>
                 </View>
                 </View>
-            </Surface>
-        </ScrollView>
+        </ScrollableScreen>
         // </SafeAreaView>
     );
 };
@@ -570,7 +569,7 @@ const makeStyles = ({ colors }) =>
     StyleSheet.create({
         container: {
             flex: 1,
-            paddingHorizontal: 10,
+            paddingHorizontal: 20,
             width: "100%",
             paddingBottom: 100,
             backgroundColor: colors.surface

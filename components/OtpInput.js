@@ -11,6 +11,8 @@ const OtpInput = ({ otpLength = 6, onSubmit }) => {
     const [isFocused, setIsFocused] = useState(false);
     const hiddenInputRef = useRef(null);
     const fillTimeoutsRef = useRef([]);
+    const hasSubmittedRef = useRef(false);
+
     // --- Callbacks and Effects ---
     const clearFillTimeouts = useCallback(() => {
         fillTimeoutsRef.current.forEach(clearTimeout);
@@ -32,7 +34,10 @@ const OtpInput = ({ otpLength = 6, onSubmit }) => {
 
     // --- Effect for Submission ---
     useEffect(() => {
-        if (validOtpEntered) {
+        console.log('line 35 useEffect, validOtpEntered: ', validOtpEntered);
+        if (validOtpEntered && !hasSubmittedRef.current) {
+            hasSubmittedRef.current = true;
+            console.log('line 37 useEffect, validOtpEntered: ', validOtpEntered);
             setTimeout(() => {
                 Keyboard.dismiss();
                 onSubmit?.(otp.join(''));
@@ -86,6 +91,7 @@ const OtpInput = ({ otpLength = 6, onSubmit }) => {
                         }
                         return newOtp;
                     });
+                    hasSubmittedRef.current = false;
                 }, (index + 1) * 75); // Stagger delays (e.g., 75ms, 150ms...). Adjust 75ms speed as needed.
 
                 fillTimeoutsRef.current.push(timeoutId); // Store timeout ID for potential clearing
@@ -101,6 +107,7 @@ const OtpInput = ({ otpLength = 6, onSubmit }) => {
                 newOtp[i] = digit;
             });
             setOtp(newOtp); // Direct state update, no sequential delay
+            hasSubmittedRef.current = false;
         }
 
         // Ensure hidden input remains focused if the component wrapper has focus

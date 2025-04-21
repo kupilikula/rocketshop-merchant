@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+    ActivityIndicator,
     Card,
     Chip,
     Divider,
@@ -155,15 +156,33 @@ export default function CollectionPage() {
     );
 
     if (isLoading) {
-        return <Text>Loading...</Text>;
+        return <View
+            style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: theme.colors.surface,
+            }}
+        >
+            <ActivityIndicator size={100} animating={true} color={theme.colors.primary} />
+        </View>
     }
 
     if (isError) {
-        return <Text>Error loading collection.</Text>;
+        return <View
+            style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: theme.colors.surface,
+            }}
+        >
+            <Text variant={"titleLarge"}>Error loading collection.</Text>
+        </View>;
     }
 
     return (
-        <Surface style={styles.surface}>
+        <View style={styles.surface}>
             <ReorderableList
                 data={productsData}
                 onReorder={handleReorder}
@@ -183,7 +202,7 @@ export default function CollectionPage() {
                 }
                 keyExtractor={(item) => item.productId}
             />
-        </Surface>
+        </View>
     );
 }
 
@@ -212,6 +231,7 @@ const makeStyles = ({ colors }) =>
             padding: 15,
             backgroundColor: "white",
             marginBottom: 20,
+            borderRadius: 0,
         },
         radioButtonGroup: {
             display: "flex",

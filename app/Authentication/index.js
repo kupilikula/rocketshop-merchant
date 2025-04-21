@@ -81,6 +81,8 @@ const Authentication = () => {
                 // Too many failed attempts
                 setTooManyAttempts(true);
                 // Alert.alert('Error', 'Too many failed attempts. Please request a new OTP.');
+                setLocalPhone('');
+                setOtp('')
                 dispatch(clearStore());
                 dispatch(clearStoreSettings());
                 dispatch(clearAllStores());

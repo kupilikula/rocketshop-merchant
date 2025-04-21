@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import {Pressable, ScrollView, View, StyleSheet} from "react-native";
+import {Pressable, ScrollView, View, StyleSheet } from "react-native";
 import { Image } from "expo-image";
-import {Button, Card, Divider, Surface, Text, useTheme} from "react-native-paper";
+import {Button, Card, Divider, Surface, Text, useTheme, ActivityIndicator} from "react-native-paper";
 import { foregroundColor } from "../../../../utils/foregroundColor";
 import { useQueries } from "react-query";
 import { fetchStoreFrontData } from "../../../../api/hooks/useStoreFrontData"; // Extracted query function
@@ -59,43 +59,37 @@ export default function StoreFront(props) {
         }
     }, [storeFrontData, storeProductsData]);
 
-    const onFollowButtonPress = () => {
-        // Example follow button logic
-    };
-
     if (storeFrontQuery.isLoading || storeProductsQuery.isLoading) {
         return (
-            <Surface
-                mode={"flat"}
+            <View
                 style={{
-                    backgroundColor: "white",
-                    height: "100%",
+                    backgroundColor: theme.colors.surface,
+                    flex: 1,
                     display: "flex",
                     flexDirection: "column",
-                    alignItems: "center",
                     justifyContent: "center",
                 }}
             >
-                <Text>Loading...</Text>
-            </Surface>
+                <ActivityIndicator size={100} animating={true} color={theme.colors.primary}/>
+            </View>
         );
     }
 
     if (storeFrontQuery.isError || storeProductsQuery.isError) {
         return (
-            <Surface
+            <View
                 mode={"flat"}
                 style={{
-                    backgroundColor: "white",
-                    height: "100%",
+                    backgroundColor: theme.colors.surface,
+                    flex: 1,
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
                 }}
             >
-                <Text>Error loading store data.</Text>
-            </Surface>
+                <Text variant={"titleLarge"}>Error loading store data.</Text>
+            </View>
         );
     }
 
