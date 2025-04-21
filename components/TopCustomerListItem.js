@@ -4,7 +4,7 @@ import React from "react";
 import { useRouter } from "expo-router";
 import { StyleSheet } from "react-native";
 
-export const CustomerListItem = ({ customer }) => {
+export const TopCustomerListItem = ({ customer }) => {
   const router = useRouter();
 
   return (

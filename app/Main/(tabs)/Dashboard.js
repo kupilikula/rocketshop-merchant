@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {View, ScrollView, StyleSheet, Pressable} from "react-native";
+import {View, ScrollView, StyleSheet, Pressable, ActivityIndicator} from "react-native";
 import {
     Card,
     Text,
@@ -26,13 +26,19 @@ import { ProductDisplayCompactMerchant } from "../../../components/ProductDispla
 import { CustomerListItem } from "../../../components/CustomerListItem";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {useSelector} from "react-redux";
+import {useDashboard} from "../../../api/hooks/useDashboard";
+import {TopCustomerListItem} from "../../../components/TopCustomerListItem";
+import ScrollableScreen from "../../../components/ScrollableScreen";
+import {AutoSizeText, ResizeTextMode} from "react-native-auto-size-text";
 
 const Dashboard = () => {
   const router = useRouter();
   const theme = useTheme();
   const styles = makeStyles(theme);
   const store = useSelector((state) => state.store);
+  const {data: dashboardData = {}, isLoading, isError} = useDashboard(store.storeId);
 
+  console.log('dashboardData:', dashboardData);
   const routeToOpenOrders = () => {
     router.push({ pathname: "/Main/Orders", params: { filter: "open" } });
   };
@@ -41,30 +47,30 @@ const Dashboard = () => {
     router.push({ pathname: "/Main/Orders", params: { filter: "today" } });
   };
 
-  const data = {
-    orders: {
-      day: faker.number.int({ min: 5, max: 30 }),
-      week: faker.helpers.multiple(
-        () => faker.number.int({ min: 8, max: 25 }),
-        { count: 7 },
-      ),
-      month: faker.helpers.multiple(
-        () => faker.number.int({ min: 50, max: 200 }),
-        { count: 4 },
-      ),
-    },
-    sales: {
-      day: faker.number.int({ min: 1000, max: 20000 }),
-      week: faker.helpers.multiple(
-        () => faker.number.int({ min: 2000, max: 25000 }),
-        { count: 7 },
-      ),
-      month: faker.helpers.multiple(
-        () => faker.number.int({ min: 15000, max: 200000 }),
-        { count: 4 },
-      ),
-    },
-  };
+  // const data = {
+  //   orders: {
+  //     day: faker.number.int({ min: 5, max: 30 }),
+  //     week: faker.helpers.multiple(
+  //       () => faker.number.int({ min: 8, max: 25 }),
+  //       { count: 7 },
+  //     ),
+  //     month: faker.helpers.multiple(
+  //       () => faker.number.int({ min: 50, max: 200 }),
+  //       { count: 4 },
+  //     ),
+  //   },
+  //   sales: {
+  //     day: faker.number.int({ min: 1000, max: 20000 }),
+  //     week: faker.helpers.multiple(
+  //       () => faker.number.int({ min: 2000, max: 25000 }),
+  //       { count: 7 },
+  //     ),
+  //     month: faker.helpers.multiple(
+  //       () => faker.number.int({ min: 15000, max: 200000 }),
+  //       { count: 4 },
+  //     ),
+  //   },
+  // };
 
   const [chartTimeWindow, setChartTimeWindow] = useState("week");
   // const [salesChartTimeWindow, setSalesChartTimeWindow] = useState("week");
@@ -79,19 +85,69 @@ const Dashboard = () => {
     return result;
   }
 
+  if (isLoading) {
+      return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size={100} color={theme.colors.primary} />
+      </View>
+  }
+
   return (
-    <ScrollView contentContainerStyle={styles.scrollContent}>
-      <Surface style={styles.container}>
+        <ScrollableScreen backgroundColor={theme.colors.surface} innerStyle={styles.container}>
         {/* Useful Links */}
         {/* Summary of Open Orders */}
-          {!store.isActive && (
-              <Banner
-                  visible
-                  icon="alert-circle"
-                  style={{ backgroundColor: theme.colors.errorContainer, marginVertical: 20 }}
-              >
-                  This store is currently <Text style={{ fontWeight: 'bold' }}>Inactive</Text>. Customers cannot view this store. You can activate this store from the store settings.
-              </Banner>
+          {dashboardData && (
+              <>
+                  {/* Store Inactive */}
+                  {dashboardData.banners.isActive === false && (
+                      <Banner
+                          visible
+                          icon="alert-circle"
+                          style={{ backgroundColor: theme.colors.errorContainer, marginVertical: 10 }}
+                      >
+                          This store is currently <Text style={{ fontWeight: 'bold' }}>Inactive</Text>.
+                          Customers cannot browse or place orders. You can activate this store from
+                          <Text style={{ fontWeight: 'bold' }}> Store Settings</Text>.
+                      </Banner>
+                  )}
+
+                  {/* No Products and No Orders */}
+                  {dashboardData.banners.noProducts && dashboardData.banners.noOrders && (
+                      <Banner
+                          visible
+                          icon="store-off"
+                          style={{ backgroundColor: theme.colors.secondaryContainer, marginVertical: 10 }}
+                      >
+                          Your store doesn’t have any <Text style={{ fontWeight: 'bold' }}>products</Text> listed
+                          and hasn’t received any <Text style={{ fontWeight: 'bold' }}>orders</Text> yet.
+                          Start by adding products and sharing your store to attract customers.
+                      </Banner>
+                  )}
+
+                  {/* No Products but Orders Exist */}
+                  {dashboardData.banners.noProducts && !dashboardData.banners.noOrders && (
+                      <Banner
+                          visible
+                          icon="cube-outline"
+                          style={{ backgroundColor: theme.colors.secondaryContainer, marginVertical: 10 }}
+                      >
+                          This store has received <Text style={{ fontWeight: 'bold' }}>orders</Text> in the past,
+                          but currently has no <Text style={{ fontWeight: 'bold' }}>active products</Text>.
+                          Add new products to keep your store up to date.
+                      </Banner>
+                  )}
+
+                  {/* Products Exist but No Orders */}
+                  {!dashboardData.banners.noProducts && dashboardData.banners.noOrders && (
+                      <Banner
+                          visible
+                          icon="cart-outline"
+                          style={{ backgroundColor: theme.colors.tertiaryContainer, marginVertical: 10 }}
+                      >
+                          Your products are live, but the store hasn’t received any <Text style={{ fontWeight: 'bold' }}>orders</Text> yet.
+                          Share your store link or run promotions to reach more customers.
+                      </Banner>
+                  )}
+              </>
           )}
         <View style={{ margin: 4 }}>
           <View
@@ -116,74 +172,39 @@ const Dashboard = () => {
               Today
             </Text>
           </View>
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-                // backgroundColor: 'green'
-            }}
-          >
-            {/*<Card style={styles.card}>*/}
-              <Card style={styles.card}>
-                  <Text variant={"titleMedium"} style={{ alignSelf: "center" }}>
-                      Open Orders
-                  </Text>
-                  <Text
-                      variant="headlineLarge"
-                      style={{ alignSelf: "center", marginVertical: 8 }}
-                  >
-                      24
-                  </Text>
-                  <View
-                      style={{
-                          display: "flex",
-                          flexDirection: "row",
-                          alignSelf: "center",
-                          marginVertical: 8,
-                      }}/>
-              </Card>
-            {/*</Card>*/}
-
-
-              <Card style={styles.card}>
-                  <Text variant={"titleMedium"} style={{ alignSelf: "center" }}>
-                      New Orders
-                  </Text>
-                  <Text
-                      variant="headlineLarge"
-                      style={{ alignSelf: "center", marginVertical: 8 }}
-                  >
-                      17
-                  </Text>
-                  <View
-                      style={{
-                          display: "flex",
-                          flexDirection: "row",
-                          alignSelf: "center",
-                          marginVertical: 8,
-                      }}/>
-              </Card>
-
-            <Card style={styles.card}>
-              <Text variant={"titleMedium"} style={{ alignSelf: "center" }}>
-                Sales
-              </Text>
-              <Text
-                variant="headlineLarge"
-                style={{ alignSelf: "center", marginVertical: 8 }}
-              >
-                ₹7854
-              </Text>
-              <View
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  alignSelf: "center",
-                  marginVertical: 8,
-                }}/>
-            </Card>
-          </View>
+            <View style={styles.statsRow}>
+                {[
+                    {
+                        label: "Open Orders",
+                        value: dashboardData.quickStats.openOrders.toString(),
+                    },
+                    {
+                        label: "New Orders",
+                        value: dashboardData.quickStats.newOrdersToday.toString(),
+                    },
+                    {
+                        label: "Sales",
+                        value: "₹" + dashboardData.quickStats.salesToday.toString(),
+                    },
+                ].map((stat, index) => (
+                    <Card key={index} style={styles.statsCard} mode="elevated">
+                        {/*<Text variant="titleSmall" style={styles.statLabel}>*/}
+                        {/*    {stat.label}*/}
+                        {/*</Text>*/}
+                        <Card.Title title={stat.label} titleStyle={{fontSize: 13, alignSelf: 'center'}}/>
+                        <Card.Content style={styles.cardContent}>
+                            <AutoSizeText
+                                fontSize={32}
+                                numberOfLines={1}
+                                mode={ResizeTextMode.max_lines}
+                                style={{ justifyContent: 'center', textAlign: 'center' }}
+                            >
+                                {stat.value}
+                            </AutoSizeText>
+                        </Card.Content>
+                    </Card>
+                ))}
+            </View>
         </View>
         <Divider style={{ marginVertical: 10 }} />
 
@@ -368,7 +389,7 @@ const Dashboard = () => {
               />
               {chartTimeWindow === "week" && salesOrOrders === "Sales" && (
                 <VictoryBar
-                  data={data.sales.week.map((v, i) => {
+                  data={dashboardData.chartData.sales.week.map(d => d.total).map((v, i) => {
                     let past7days = lastNDays(7);
                     return { x: past7days[i], y: v, label: "₹" + v };
                   })}
@@ -379,15 +400,15 @@ const Dashboard = () => {
                   data={["Week 1", "Week 2", "Week 3", "Week 4"].map(
                     (w, i) => ({
                       x: w,
-                      y: data.sales.month[i],
-                      label: "₹" + data.sales.month[i],
+                      y: dashboardData.chartData.sales.month.map(d => d.total)[i],
+                      label: "₹" + dashboardData.chartData.sales.month.map(d => d.total)[i],
                     }),
                   )}
                 />
               )}
               {chartTimeWindow === "week" && salesOrOrders === "Orders" && (
                 <VictoryBar
-                  data={data.orders.week.map((v, i) => {
+                  data={dashboardData.chartData.orders.week.map(d => d.count).map((v, i) => {
                     let past7days = lastNDays(7);
                     return { x: past7days[i], y: v, label: v };
                   })}
@@ -398,8 +419,8 @@ const Dashboard = () => {
                   data={["Week 1", "Week 2", "Week 3", "Week 4"].map(
                     (w, i) => ({
                       x: w,
-                      y: data.orders.month[i],
-                      label: data.orders.month[i].toString(),
+                      y: dashboardData.chartData.orders.month.map(d => d.count)[i],
+                      label: dashboardData.chartData.orders.month.map(d => d.count)[i].toString(),
                     }),
                   )}
                 />
@@ -433,7 +454,7 @@ const Dashboard = () => {
           </Text>
         </View>
         {/*<Card style={styles.card}>*/}
-        {faker.helpers.multiple(getProductForStore, { count: 3 }).map((p) => (
+        {dashboardData.topProducts.map((p) => (
           <View key={p.productId}>
               <Pressable onPress={() => router.push('/Main/(tabs)/Products/Product/' + p.productId)}>
             <ProductDisplayCompactMerchant product={p} key={p.productId} />
@@ -468,27 +489,61 @@ const Dashboard = () => {
             Top Customers
           </Text>
         </View>
-        {faker.helpers.multiple(getCustomer, { count: 3 }).map((c) => (
+        {dashboardData.topCustomers.map((c) => (
           <View key={c.customerId} style={{ padding: 2 }}>
-            <CustomerListItem customer={c} key={c.customerId} />
+            <TopCustomerListItem customer={c} key={c.customerId} />
             <Divider style={{ marginVertical: 8 }} />
           </View>
         ))}
-      </Surface>
-    </ScrollView>
+        </ScrollableScreen>
   );
 };
 
 const makeStyles = (theme) =>
   StyleSheet.create({
     container: {
-      flex: 1,
+      // flex: 1,
       padding: 10,
       backgroundColor: theme.colors.surface,
     },
     scrollContent: {
       // paddingBottom: 20,
     },
+      statsRow: {
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          gap: 8, // if you're on RN 0.71+; else use marginRight on all but last card
+          marginVertical: 8,
+      },
+
+      statsCard: {
+          flex: 1,
+          aspectRatio: 1, // Ensures square layout
+          padding: 0,
+          borderRadius: 12,
+          maxWidth: 120,
+          maxHeight: 120,
+          backgroundColor: 'white',
+      },
+
+      cardContent: {
+          // flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          // backgroundColor: 'red'
+      },
+
+      statLabel: {
+          color: 'black',
+          backgroundColor: 'green',
+          width: '100%',
+          // marginBottom: 6,
+      },
+
+      statValue: {
+        color: 'black',
+          fontWeight: 'bold',
+      },
     card: {
       // marginBottom: 10,
       padding: 10,

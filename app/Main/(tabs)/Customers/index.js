@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { FlatList, View, StyleSheet } from "react-native";
+import {FlatList, View, StyleSheet } from "react-native";
 import {
     TextInput,
     Text,
@@ -9,21 +9,22 @@ import {
     Surface,
     Divider,
     useTheme,
+    ActivityIndicator, Card
 } from "react-native-paper";
 import Fuse from "fuse.js";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { CustomerListItem } from "../../../../components/CustomerListItem";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useCustomers } from "../../../../api/hooks/useCustomers";
-import {useSelector} from "react-redux"; // Custom hook for fetching customers
+import {useSelector} from "react-redux";
+import KeyboardAwareView from "../../../../components/KeyboardAwareView"; // Custom hook for fetching customers
 
 const Customers = () => {
     const {storeId} = useSelector((state) => state.store);
     const { data: customers = [], isLoading, isError } = useCustomers(storeId); // Use the custom hook
     const [searchQuery, setSearchQuery] = useState("");
-    const [sortField, setSortField] = useState("numberOfOrders"); // Default sorting by number of orders
-    const [sortOrder, setSortOrder] = useState("ascending"); // Default sorting order
     const [filterExpanded, setFilterExpanded] = useState(false);
+    const [selectedQuickFilters, setSelectedQuickFilters] = useState(["most_recent"]);
 
     const theme = useTheme();
     const styles = makeStyles(theme);
@@ -38,8 +39,28 @@ const Customers = () => {
         });
     }, [customers]);
 
-    const toggleSortOrder = () => {
-        setSortOrder((prev) => (prev === "ascending" ? "descending" : "ascending"));
+    const QUICK_FILTER_ROWS = [
+        [
+            { key: "most_spent", label: "Most Spent" },
+            { key: "least_spent", label: "Least Spent" },
+        ],
+        [
+            { key: "highest_order_count", label: "Highest Order Count" },
+            { key: "lowest_order_count", label: "Lowest Order Count" },
+        ],
+        [
+            { key: "most_recent", label: "Most Recently Ordered" },
+            { key: "ordered_long_ago", label: "Ordered Long Ago" },
+        ],
+    ];
+
+    const INCOMPATIBLE_FILTERS = {
+        most_spent: ["least_spent", "highest_order_count", "lowest_order_count", "most_recent", "ordered_long_ago"],
+        least_spent: ["most_spent", "highest_order_count", "lowest_order_count", "most_recent", "ordered_long_ago"],
+        highest_order_count: ["most_spent", "least_spent", "lowest_order_count", "most_recent", "ordered_long_ago"],
+        lowest_order_count: ["most_spent", "least_spent", "highest_order_count", "most_recent", "ordered_long_ago"],
+        most_recent: ["most_spent", "least_spent", "highest_order_count", "lowest_order_count", "ordered_long_ago"],
+        ordered_long_ago: ["most_spent", "least_spent", "highest_order_count", "lowest_order_count", "most_recent"],
     };
 
     const filteredCustomers = useMemo(() => {
@@ -55,45 +76,97 @@ const Customers = () => {
 
         // Sorting
         result = [...result].sort((a, b) => {
-            const isAscending = sortOrder === "ascending";
-            if (sortField === "numberOfOrders") {
-                return isAscending
-                    ? a.orders.length - b.orders.length
-                    : b.orders.length - a.orders.length;
-            } else if (sortField === "totalSpent") {
-                const totalSpentA = a.orders.reduce(
-                    (sum, order) => sum + order.orderTotal,
-                    0
-                );
-                const totalSpentB = b.orders.reduce(
-                    (sum, order) => sum + order.orderTotal,
-                    0
-                );
-                return isAscending
-                    ? totalSpentA - totalSpentB
-                    : totalSpentB - totalSpentA;
-            }
+            const key = selectedQuickFilters[0];
+
+            if (key === "most_spent") return b.totalSpent - a.totalSpent;
+            if (key === "least_spent") return a.totalSpent - b.totalSpent;
+            if (key === "highest_order_count") return b.orderCount - a.orderCount;
+            if (key === "lowest_order_count") return a.orderCount - b.orderCount;
+            if (key === "most_recent") return new Date(b.mostRecentOrderDate) - new Date(a.mostRecentOrderDate);
+            if (key === "ordered_long_ago") return new Date(a.mostRecentOrderDate) - new Date(b.mostRecentOrderDate);
+
             return 0;
         });
 
         return result;
-    }, [customers, searchQuery, sortField, sortOrder, fuse, isLoading, isError]);
+    }, [customers, selectedQuickFilters, fuse, isLoading, isError]);
 
     const renderCustomerItem = ({ item }) => {
         return <CustomerListItem customer={item} />;
     };
 
-    const searchFilterAndSortComponent = () => (
-        <>
-            <View style={{ marginVertical: 10 }}>
-                <Text variant={"bodyLarge"} style={{ marginLeft: 10 }}>
-                    {customers.length.toString() +
-                        " Customer" +
-                        (customers.length !== 1 ? "s" : "")}
-                </Text>
-            </View>
+    console.log('custs:', filteredCustomers.map((c) => c.totalSpent));
 
-            <View style={{ marginBottom: 10 }}>
+    const searchFilterAndSortComponent = () => (
+        <View style={{ marginTop: 20, marginBottom: 10}}>
+            <Card style={{backgroundColor: theme.colors.surface, borderRadius: 0}} mode={'elevated'}>
+                <List.Accordion
+                    title={"Sort"}
+                    expanded={filterExpanded}
+                    onPress={() => setFilterExpanded(!filterExpanded)}
+                    style={styles.accordionBar}
+                    titleStyle={styles.accordionTitle}
+                    contentStyle={styles.accordionContent}
+                    right={() => (
+                        <View style={{
+                            height: 50,                  // Match the accordion height
+                            justifyContent: "center",    // Center vertically
+                            alignItems: "center"         // Center horizontally
+                        }}>
+                        <MaterialIcons
+                        name={filterExpanded ? "expand-more" : "expand-less"}
+                        size={28}
+                        color={"black"}
+                    />
+                        </View>
+                            )}
+                >
+                    <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
+                        {QUICK_FILTER_ROWS.map((row, rowIndex) => (
+                            <View
+                                key={rowIndex}
+                                style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 8 }}
+                            >
+                                {row.map(({ key, label }) => (
+                                    <Chip
+                                        key={key}
+                                        selected={selectedQuickFilters.includes(key)}
+                                        onPress={() => {
+                                            let updated = [];
+
+                                            const isSelected = selectedQuickFilters.includes(key);
+                                            if (isSelected) {
+                                                updated = selectedQuickFilters.filter((f) => f !== key);
+                                            } else {
+                                                const incompatible = INCOMPATIBLE_FILTERS[key] || [];
+                                                updated = selectedQuickFilters
+                                                    .filter((f) => !incompatible.includes(f))
+                                                    .concat(key);
+                                            }
+
+                                            if (updated.length === 0) updated = ["most_spent"];
+                                            setSelectedQuickFilters(updated);
+                                        }}
+                                        style={{
+                                            margin: 2,
+                                            backgroundColor: theme.colors.softPrimary,
+                                            borderColor: "black",
+                                        }}
+                                        textStyle={{
+                                            color: selectedQuickFilters.includes(key)
+                                                ? "black"
+                                                : theme.colors.primary,
+                                        }}
+                                        selectedColor={theme.colors.black}
+                                    >
+                                        {label}
+                                    </Chip>
+                                ))}
+                            </View>
+                        ))}
+                    </View>
+                </List.Accordion>
+            </Card>
                 <TextInput
                     label="Search Customers"
                     value={searchQuery}
@@ -101,102 +174,36 @@ const Customers = () => {
                     style={styles.searchBar}
                     mode="outlined"
                 />
-
-                <View
-                    style={{
-                        backgroundColor: theme.colors.surface,
-                        overflow: "hidden",
-                        borderRadius: 8,
-                    }}
-                >
-                    <List.Accordion
-                        title="Sort & Filter"
-                        expanded={filterExpanded}
-                        onPress={() => setFilterExpanded(!filterExpanded)}
-                        style={styles.accordionBar}
-                        titleStyle={styles.accordionTitle}
-                        contentStyle={styles.accordionContent}
-                        right={() => (
-                            <MaterialCommunityIcons
-                                name={filterExpanded ? "chevron-up" : "chevron-down"}
-                                size={24}
-                                color="white"
-                            />
-                        )}
-                    >
-                        <View style={styles.sortFilterContent}>
-                            <Text style={styles.sectionTitle}>Sort By</Text>
-                            <View style={styles.row}>
-                                <RadioButton.Group
-                                    onValueChange={setSortField}
-                                    value={sortField}
-                                >
-                                    <View style={styles.radioRow}>
-                                        <RadioButton.Item
-                                            label="Orders"
-                                            value="numberOfOrders"
-                                            mode="android"
-                                            position="leading"
-                                            color={theme.colors.primary}
-                                            style={styles.radioItem}
-                                            labelStyle={{ fontSize: 16 }}
-                                        />
-                                        <RadioButton.Item
-                                            label="Total"
-                                            value="totalSpent"
-                                            mode="android"
-                                            position="leading"
-                                            color={theme.colors.primary}
-                                            style={styles.radioItem}
-                                            labelStyle={{ fontSize: 16 }}
-                                        />
-                                    </View>
-                                </RadioButton.Group>
-                                <Chip
-                                    mode="outlined"
-                                    style={styles.chip}
-                                    icon={() => (
-                                        <MaterialCommunityIcons
-                                            name={
-                                                sortOrder === "ascending"
-                                                    ? "arrow-up-bold"
-                                                    : "arrow-down-bold"
-                                            }
-                                            size={20}
-                                            color={theme.colors.primary}
-                                        />
-                                    )}
-                                    onPress={toggleSortOrder}
-                                >
-                                    {sortOrder === "ascending" ? "Ascending" : "Descending"}
-                                </Chip>
-                            </View>
-                        </View>
-                    </List.Accordion>
-                </View>
+            <Divider style={{ marginVertical: 2 }} />
+            <View style={{marginVertical: 10}}>
+                <Text variant={"bodyLarge"} style={{ marginLeft: 10 }}>
+                    {filteredCustomers.length.toString() +
+                        " Customer" +
+                        (filteredCustomers.length !== 1 ? "s" : "")}
+                </Text>
             </View>
-            <Divider style={{ marginVertical: 10 }} />
-        </>
+            <Divider style={{ marginVertical: 2 }} />
+        </View>
     );
 
     if (isLoading) {
         return (
-            <Surface style={styles.container}>
-                <Text>Loading...</Text>
-            </Surface>
+            <View style={{flex: 1, justifyContent: "center", alignItems: "center", padding: 20, backgroundColor: theme.colors.surface}}>
+                <ActivityIndicator size={100} animating={true} color={theme.colors.primary} />
+            </View>
         );
     }
 
     if (isError) {
         return (
-            <Surface style={styles.container}>
-                <Text>Error loading customers</Text>
-            </Surface>
+            <View style={{flex: 1, justifyContent: "center", alignItems: "center", padding: 20, backgroundColor: theme.colors.surface}}>
+                <Text>Error Loading Customers</Text>
+            </View>
         );
     }
 
     return (
-        <Surface style={styles.container}>
+        <KeyboardAwareView backgroundColor={theme.colors.surface} containerStyle={styles.container}>
             <FlatList
                 data={filteredCustomers}
                 keyExtractor={(item) => item.customerId}
@@ -208,7 +215,7 @@ const Customers = () => {
                 contentContainerStyle={{ overflow: "visible", padding: 2 }}
                 ListEmptyComponent={<Text>No Customers Found</Text>}
             />
-        </Surface>
+        </KeyboardAwareView>
     );
 };
 
@@ -221,24 +228,20 @@ const makeStyles = ({ colors }) =>
         },
         searchBar: { marginVertical: 10, backgroundColor: "white" },
         accordionBar: {
-            backgroundColor: colors.primary,
+            backgroundColor: colors.softPrimary,
             height: 50,
             minHeight: 50,
             justifyContent: "center",
             alignItems: "center",
-            borderTopLeftRadius: 8,
-            borderTopRightRadius: 8,
+            verticalAlign: "center",
+            borderRadius: 0,
         },
         accordionContent: { justifyContent: "center" },
-        accordionTitle: { color: "white", fontSize: 16 },
+        accordionTitle: { color: "black", fontSize: 16, fontWeight: "bold" },
         sortFilterContent: {
             paddingBottom: 20,
-            borderTopLeftRadius: 0,
-            borderTopRightRadius: 0,
-            borderBottomLeftRadius: 8,
-            borderBottomRightRadius: 8,
+            borderRadius: 0,
             backgroundColor: colors.white,
-            borderWidth: 1,
             borderColor: colors.grayBorder,
         },
         sectionTitle: {

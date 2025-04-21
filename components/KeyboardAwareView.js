@@ -13,7 +13,7 @@ const KeyboardAwareView = ({
                                keyboardVerticalOffset = 0,
                                backgroundColor = 'white',
                                containerStyle = {},
-                               innerViewStyle = {},
+                               innerStyle = {},
                            }) => {
     return (
         <KeyboardAvoidingView
@@ -22,7 +22,7 @@ const KeyboardAwareView = ({
             keyboardVerticalOffset={Platform.OS ==='ios' ? keyboardVerticalOffset : 0}
         >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-                <View style={[{ flex: 1 }, innerViewStyle]}>
+                <View style={[{ flex: 1 }, innerStyle]}>
                     {children}
                 </View>
             </TouchableWithoutFeedback>
