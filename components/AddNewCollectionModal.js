@@ -3,6 +3,9 @@ import {Pressable, StyleSheet, View} from "react-native";
 import React, {useState} from "react";
 import {useAddNewCollection} from "@/api/hooks/useAddNewCollection";
 import {useSelector} from "react-redux";
+import KeyboardAwareView from "./KeyboardAwareView";
+import KeyboardAwareScrollableScreen from "./KeyboardAwareScrollableScreen";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 
 export const AddNewCollectionModal = (props) => {
@@ -13,8 +16,9 @@ export const AddNewCollectionModal = (props) => {
     const [isActive, setIsActive] = useState(false);
     const [storeFrontDisplay, setStoreFrontDisplay] = useState(false);
     const [storeFrontDisplayNumberOfItems, setStoreFrontDisplayNumberOfItems] = useState(4);
-    const [collectionName, setCollectionName] = useState('Collection Name');
+    const [collectionName, setCollectionName] = useState('');
     const { mutate: addNewCollection, isLoading, error } = useAddNewCollection(storeId);
+    const insets = useSafeAreaInsets();
 
     const submitNewCollection = () => {
         if (!collectionName.trim()) return;
@@ -37,13 +41,20 @@ export const AddNewCollectionModal = (props) => {
             onDismiss={props.onDismiss}
             contentContainerStyle={styles.modalContainer}
         >
+            <KeyboardAwareScrollableScreen backgroundColor={'white'}
+                                           keyboardVerticalOffset={60 + insets.top}
+                                           style={{}}
+                // contentContainerStyle={styles.container}
+                                           innerStyle={{paddingBottom: 100}}
+            >
             <Text variant={'titleLarge'}>New Collection Details</Text>
             <TextInput
                 label="New Collection Name"
                 mode="outlined"
-                value={collectionName}
+                // value={collectionName}
+                placeholder="Enter Collection Name"
                 onChangeText={(t) => setCollectionName(t)}
-                style={{marginTop: 10}}
+                style={{marginTop: 10, backgroundColor: 'white'}}
                 multiline
                 error={!collectionName.trim()}
             />
@@ -126,6 +137,7 @@ export const AddNewCollectionModal = (props) => {
                     Create New Collection
                 </Button>
             </View>
+            </KeyboardAwareScrollableScreen>
         </Modal>
     </Portal>
 }
