@@ -89,7 +89,6 @@ const ProductInfoScreen = (props) => {
             productTags: [],
             rating: null,
             numberOfRatings: 0,
-            enableStockTracking: true,
             isActive: true,
         }, shouldUnregister: false, resolver: yupResolver(schema),
     });
@@ -491,26 +490,6 @@ const ProductInfoScreen = (props) => {
                             />
                             <Text variant={"bodyLarge"}>Active</Text>
                         </View>
-                        <View
-                            style={{
-                                display: "flex",
-                                flexDirection: "row",
-                                alignItems: "center",
-                                marginVertical: 8,
-                                marginHorizontal: 10,
-                            }}
-                        >
-                            <Controller
-                                name="enableStockTracking"
-                                control={control}
-                                render={({field: {onChange, onBlur, value}}) => (<Switch
-                                    value={value}
-                                    onValueChange={onChange}
-                                    style={{marginRight: 16}}
-                                />)}
-                            />
-                            <Text variant={"bodyLarge"}>Enable Stock Tracking</Text>
-                        </View>
                         <Controller
                             name="gstInclusive"
                             control={control}
@@ -661,6 +640,7 @@ const makeStyles = ({colors}) => StyleSheet.create({
     // },
     textInput: {
         marginBottom: 8,
+        backgroundColor: 'white'
     }, textArea: {
         minHeight: 80,
     }, gstInputContainer: {
@@ -687,8 +667,8 @@ const makeStyles = ({colors}) => StyleSheet.create({
         justifyContent: "center", alignItems: "flex-start",
     }, optionColumn: {
         flexDirection: "row",
-        alignItems: "flex-start",
-        justifyContent: "flex-start",
+        alignItems: "center",
+        justifyContent: "space-between",
         flexWrap: "wrap",
         marginVertical: 10, // marginBottom: 10,
         // backgroundColor: 'white',
@@ -722,6 +702,7 @@ const makeStyles = ({colors}) => StyleSheet.create({
     }, row: {
         flexDirection: "row", marginBottom: 16,
     }, halfWidthInput: {
+        backgroundColor: 'white',
         flex: 1,
     }, subHeader: {
         fontSize: 16, fontWeight: "bold", marginTop: 16,
@@ -748,6 +729,7 @@ const makeStyles = ({colors}) => StyleSheet.create({
         position: "relative", marginBottom: 8,
     }, tagInput: {
         flex: 1,
+        backgroundColor: "white",
     }, errorText: {
         color: "red", fontSize: 12, marginBottom: 8,
     },

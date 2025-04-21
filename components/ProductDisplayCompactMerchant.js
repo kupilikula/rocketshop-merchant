@@ -1,10 +1,10 @@
 import { View } from "react-native";
 import { Image } from "expo-image";
-import { Card, Text } from "react-native-paper";
+import {Card, Chip, Text, useTheme} from "react-native-paper";
 
 export const ProductDisplayCompactMerchant = (props) => {
   // const router = useRouter();
-
+    const theme = useTheme();
   const nAttributes = props.product.attributes.length;
   let nAttrOdd = nAttributes % 2 === 1;
   let nAttrRows = nAttrOdd ? (nAttributes + 1) / 2 : nAttributes / 2;
@@ -86,6 +86,22 @@ export const ProductDisplayCompactMerchant = (props) => {
           </View>
         </View>
       </View>
+        <Chip
+            mode="flat"
+            style={{
+                position: 'absolute',
+                bottom: 10,
+                right: 10,
+                backgroundColor: props.product.isActive ? theme.colors.softSuccess : theme.colors.inactive,
+            }}
+            textStyle={{
+                color: 'black',
+                fontSize: 12
+            }}
+        >
+            {props.product.isActive ? 'Active' : 'Inactive'}
+        </Chip>
+
     </Card>
   );
 };

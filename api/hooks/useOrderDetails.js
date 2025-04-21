@@ -7,7 +7,7 @@ import axiosClient from "../client";
  */
 export const useOrderDetails = (storeId, orderId) => {
     return useQuery(
-        ["orderDetails", orderId],
+        ["order", orderId],
         async () => {
             const response = await axiosClient.get(`/stores/${storeId}/orders/${orderId}`);
             return response.data;

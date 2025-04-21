@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, ActivityIndicator } from "react-native";
-import { Text, Chip, Checkbox, Button } from "react-native-paper";
+import {Text, Chip, Checkbox, Button, useTheme} from "react-native-paper";
 import { useInfiniteProductReviews } from "../api/hooks/useInfiniteProductReviews";
 import {useSelector} from "react-redux";
 
@@ -9,6 +9,7 @@ export function ProductReviewsList({ productId }) {
     const [ratingFilter, setRatingFilter] = useState(undefined);
     const [hasTextOnly, setHasTextOnly] = useState(false);
     const {storeId} = useSelector((state) => state.store);
+    const theme = useTheme();
 
     const {
         data,
@@ -43,7 +44,14 @@ export function ProductReviewsList({ productId }) {
                 {sortOptions.map((option) => (
                     <Chip
                         key={option}
-                        style={{ marginRight: 4, marginBottom: 4 }}
+                        style={{
+                            margin: 2, backgroundColor: theme.colors.softPrimary, borderColor: "black",
+                        }}
+                        textStyle={{
+                            color: sort===option ? "black" : theme.colors.primary,
+                        }}
+                        selectedColor={theme.colors.black}
+
                         selected={sort === option}
                         onPress={() => setSort(option)}
                     >
@@ -59,7 +67,14 @@ export function ProductReviewsList({ productId }) {
                         key={r}
                         selected={ratingFilter === r}
                         onPress={() => setRatingFilter(ratingFilter === r ? undefined : r)}
-                        style={{ marginRight: 8, marginBottom: 8 }}
+                        style={{
+                            margin: 2, backgroundColor: theme.colors.softPrimary, borderColor: "black",
+                        }}
+                        textStyle={{
+                            color: ratingFilter===r ? "black" : theme.colors.primary,
+                        }}
+                        selectedColor={theme.colors.black}
+
                     >
                         {r}★
                     </Chip>

@@ -12,7 +12,6 @@ const initialState = {
   productTags: [],
   rating: null,
   numberOfRatings: 0,
-  enableStockTracking: true,
   gstInclusive: true,
   isActive: true,
 };

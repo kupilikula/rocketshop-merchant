@@ -4,6 +4,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Text, useTheme} from "react-native-paper";
 import {useRouter} from "expo-router";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
+import {CustomBackButton} from "@/components/CustomBackButton";
 
 const GenericHeader = ({title, titleSize = 'titleLarge', showBackButton = true, left = null, right = null}) => {
 
@@ -28,19 +29,20 @@ const GenericHeader = ({title, titleSize = 'titleLarge', showBackButton = true, 
             ]}
         >
             {showBackButton && !left &&
-                <Pressable
-                    onPressIn={() => {
-                        router.back();
-                    }}
-                    style={{width: 90}}
-                >
-                    <MaterialIcons
-                        name={"arrow-back"}
-                        size={36}
-                        style={{ color: "black" }}
-                    />
-                </Pressable>
-            }
+                <CustomBackButton/>}
+                {/*// <Pressable*/}
+                {/*//     onPressIn={() => {*/}
+                {/*//         router.back();*/}
+                {/*//     }}*/}
+                {/*//     style={{width: 90}}*/}
+                {/*// >*/}
+                {/*//     <MaterialIcons*/}
+                {/*//         name={"arrow-back"}*/}
+                {/*//         size={36}*/}
+                {/*//         style={{ color: "black" }}*/}
+                {/*//     />*/}
+                {/*// </Pressable>*/}
+
             {left}
             {!showBackButton && !left && <View style={{width: 90}}/>}
             <Text variant={titleSize} style={{ color: "black" }}>

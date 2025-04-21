@@ -1,11 +1,15 @@
 import { Card, Text } from "react-native-paper";
-import { View } from "react-native";
+import {Pressable, View} from "react-native";
 import StoreFrontProductCard from "./StoreFrontProductCard";
-import { Link } from "expo-router";
+import {Link, usePathname, useRouter} from "expo-router";
 
 export default function StoreFrontCollectionCard(props) {
     // console.log('c:',props.collection);
-  return (
+    const router = useRouter();
+    const currentPath = usePathname();
+
+
+    return (
     <Card
       style={{
         width: "100%",
@@ -34,14 +38,17 @@ export default function StoreFrontCollectionCard(props) {
           </Text>
         </View>
         <View>
-          <Link
-            href={
-              "/Main/(tabs)/Collections/Collection/" +
-              props.collection.collectionId
-            }
-          >
+<Pressable onPress={() => {
+    router.replace({
+        pathname: `/Main/(tabs)/Collections/Collection/${props.collection.collectionId}`,
+        params: {
+            backHref: currentPath, // Pass the path of the current screen (StoreFront)
+            // Add any other params needed by the destination screen
+        }
+    });
+}}>
             <Text variant={"bodyLarge"}>See All</Text>
-          </Link>
+</Pressable>
         </View>
       </View>
       <View

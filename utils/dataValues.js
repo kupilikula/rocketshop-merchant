@@ -4,7 +4,7 @@ const orderStatusList = [
   "Payment Failed",
   "Payment Received",
   "Processing",
-  "Ready for Pickup",
+  "Store Pickup Ready",
   "Awaiting Shipment",
   "Shipped",
   "Out for Delivery",
@@ -27,7 +27,7 @@ const PENDING_STATUSES = [
 const IN_PROGRESS_STATUSES = [
   "Payment Received",
   "Processing",
-  "Ready for Pickup",
+  "Store Pickup Ready",
   "Awaiting Shipment",
 ];
 
@@ -86,7 +86,7 @@ const orderStatusColors = {
   "Payment Received": "#DFF3E2", // Soft Success Green
   "Payment Failed": "#D72638", // Soft Success Green
   Processing: "#FFF9C4", // Light Yellow (neutral)
-  "Ready for Pickup": "#FFD180", // Soft Orange (pickup indicator)
+  "Store Pickup Ready": "#FFD180", // Soft Orange (pickup indicator)
   "Awaiting Shipment": "#FFE0B2", // Pale Orange
   Shipped: "#C5E1A5", // Light Cyan
   "Out for Delivery": "#85C185", // Muted Green (progress indicator)
@@ -104,10 +104,31 @@ const ActiveStatusColors = {
   Inactive: "#D0D0D0",
 };
 
+const allowedOrderStatusTransitions = {
+  "Order Created": ["Payment Initiated", "Canceled"],
+  "Payment Initiated": ["Payment Received", "Payment Failed", "Canceled"],
+  "Payment Failed": ["Payment Initiated", "Canceled"],
+  "Payment Received": ["Processing", "On Hold", "Canceled"],
+  "Processing": ["Store Pickup Ready", "Awaiting Shipment", "On Hold", "Canceled"],
+  "Store Pickup Ready": ["Delivered", "On Hold", "Canceled"],
+  "Awaiting Shipment": ["Shipped", "On Hold", "Canceled"],
+  "Shipped": ["Out for Delivery", "On Hold"],
+  "Out for Delivery": ["Delivered", "On Hold"],
+  "Delivered": ["Returned", "Refund Requested"],
+
+  "On Hold": ["Processing", "Store Pickup Ready", "Awaiting Shipment", "Canceled"],
+  "Refund Requested": ["Refund Processed"],
+  "Refund Processed": [],
+  "Returned": [],
+  "Canceled": [],
+  "Failed": [],
+};
+
 module.exports = {
   orderStatusList,
   orderStatusColors,
   ActiveStatusColors,
+  allowedOrderStatusTransitions,
   getPendingOrderStatuses,
   getInProgressOrderStatuses,
   getFulfilledOrderStatuses,

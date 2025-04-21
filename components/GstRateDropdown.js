@@ -24,7 +24,7 @@ export default function GstRateDropdown({ value, onChange, label = "GST (%)" , s
                 mode="outlined"
                 value={value.toString() + "%"}
                 editable={false}
-                style={{ flex: 1 }}
+                style={{ flex: 1, backgroundColor: 'white' }}
                 right={<TextInput.Icon icon="chevron-down" onPress={openMenu} />}
             />
             <Menu

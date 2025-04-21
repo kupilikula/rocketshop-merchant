@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import {FlatList, View, StyleSheet, Pressable, ActivityIndicator} from "react-native";
+import {FlatList, View, StyleSheet, Pressable} from "react-native";
 import {
   Text,
   TextInput,
@@ -11,6 +11,7 @@ import {
   useTheme,
   Divider,
   Card,
+    ActivityIndicator
 } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { useSelector } from "react-redux";
@@ -18,6 +19,8 @@ import { useStoreProducts } from "../../../../api/hooks/useStoreProducts";
 import { ProductDisplayCompactMerchant } from "../../../../components/ProductDisplayCompactMerchant";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
+import KeyboardAwareView from "../../../../components/KeyboardAwareView";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 const Products = () => {
   const {storeId} = useSelector((state) => state.store);
@@ -30,10 +33,12 @@ const Products = () => {
   const [sortField, setSortField] = useState("price");
   const [sortOrder, setSortOrder] = useState("ascending");
   const [filterExpanded, setFilterExpanded] = useState(false);
+    const [quickFilterExpanded, setQuickFilterExpanded] = useState(false);
   const [selectedCollectionIds, setSelectedCollectionIds] = useState(["All"]);
   const [selectedTags, setSelectedTags] = useState(["All"]);
     const [selectedQuickFilters, setSelectedQuickFilters] = useState(["all"]);
 
+    const insets = useSafeAreaInsets();
   const styles = makeStyles(theme);
 
     // const QUICK_FILTERS = [
@@ -185,6 +190,9 @@ const Products = () => {
         if (filters.includes("recently_added")) {
             result = result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
         }
+        if (filters.includes("added_long_ago")) {
+            result = result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        }
         if (filters.includes("high_price")) {
             result = result.sort((a, b) => b.price - a.price);
         }
@@ -307,13 +315,25 @@ const Products = () => {
   );
 
     const TopSection = () => (
-        <View>
-            <Card style={{ backgroundColor: theme.colors.surface, borderRadius: 0, paddingTop: 16 }} mode={'elevated'}>
+        <View style={{marginTop: 20, marginBottom: 10}}>
+            <Card style={{ backgroundColor: theme.colors.surface, borderRadius: 0}} mode={'elevated'}>
 
-                <View style={{ paddingHorizontal: 16 }}>
-                    <Text style={{ marginLeft: 10, fontWeight: "bold", fontSize: 16, marginBottom: 10}}>
-                        Quick Filters
-                    </Text>
+                <List.Accordion
+                    title="Quick Filter & Sort"
+                    expanded={quickFilterExpanded}
+                    onPress={() => setQuickFilterExpanded(!quickFilterExpanded)}
+                    style={styles.accordionBar}
+                    titleStyle={styles.accordionTitle}
+                    contentStyle={styles.accordionContent}
+                    right={() => (
+                        <MaterialCommunityIcons
+                            name={quickFilterExpanded ? "chevron-up" : "chevron-down"}
+                            size={24}
+                            color="black"
+                        />
+                    )}
+                >
+                <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
                     {QUICK_FILTER_ROWS.map((row, rowIndex) => (
                         <View key={rowIndex} style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 8 }}>
                             {row.map(({ key, label }) => (
@@ -366,6 +386,7 @@ const Products = () => {
                         </View>
                     ))}
                 </View>
+                </List.Accordion>
                 <List.Accordion
                         title="More Sort & Filter Options"
                         expanded={filterExpanded}
@@ -549,9 +570,7 @@ const Products = () => {
             <Divider style={{ marginVertical: 10 }} />
             <View style={{ marginVertical: 0 }}>
                 <Text variant={"bodyLarge"} style={{ marginLeft: 10 }}>
-                    {(nActive > 0 ? (nActive.toString() + " Active Product" + (nActive > 1 ? "s" : "")) : "") + (nActive >0 && nInactive > 0 ? " , " : "") + (nInactive > 0 ? (nInactive.toString() +
-                        " Inactive Product" +
-                        (nInactive > 1 ? "s" : "")) : "")}
+                    {filteredProducts?.length.toString() + (filteredProducts.length===1 ? " Filtered Product" : " Filtered Products")}
                 </Text>
             </View>
             <Divider style={{ marginVertical: 10 }} />
@@ -565,33 +584,26 @@ const Products = () => {
 
     if (isLoading) {
     return (
-        <Surface style={styles.surface}>
-            <View style={{height: '100%', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.surface}}>
             <ActivityIndicator size={100} animating={true} color={theme.colors.primary}/>
             </View>
-          {/*<Text style={{ textAlign: "center", marginTop: 20 }}>Loading...</Text>*/}
-        </Surface>
     );
   }
 
   if (isError) {
     return (
-        <Surface style={styles.surface}>
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.surface}}>
           <Text
-              style={{
-                textAlign: "center",
-                marginTop: 20,
-                color: theme.colors.error,
-              }}
+              variant={"bodyLarge"}
           >
             Failed to load products. Please try again.
           </Text>
-        </Surface>
+        </View>
     );
   }
 
   return (
-      <View style={styles.surface}>
+      <KeyboardAwareView backgroundColor={theme.colors.surface} containerStyle={styles.surface} keyboardVerticalOffset={0}>
         <FlatList
             data={filteredProducts}
             keyExtractor={(item) => item.productId}
@@ -601,16 +613,15 @@ const Products = () => {
             ItemSeparatorComponent={() => (
                 <Divider style={{ marginVertical: 10 }} />
             )}
-            contentContainerStyle={{ padding: 10 }}
+            contentContainerStyle={{ paddingHorizontal: 2 }}
         />
-      </View>
+      </KeyboardAwareView>
   );
 };
 
 const makeStyles = ({ colors }) =>
   StyleSheet.create({
     surface: {
-      flex: 1,
       paddingHorizontal: 10,
       overflow: "visible",
       backgroundColor: colors.surface,
@@ -639,8 +650,7 @@ const makeStyles = ({ colors }) =>
       justifyContent: "center",
       alignItems: "center",
       verticalAlign: "center",
-      borderTopLeftRadius: 0,
-      borderTopRightRadius: 0,
+      borderRadius: 0,
     },
     accordionContent: { justifyContent: "center" },
     accordionTitle: { color: "black", fontSize: 16, fontWeight: "bold" },

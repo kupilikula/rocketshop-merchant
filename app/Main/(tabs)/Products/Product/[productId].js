@@ -1,12 +1,13 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import {Text, ActivityIndicator} from 'react-native-paper';
+import {Text, ActivityIndicator, useTheme} from 'react-native-paper';
 import {useLocalSearchParams} from "expo-router";
 import { useSelector } from "react-redux"; // To get storeId from Redux
 import { useStoreProduct } from "../../../../../api/hooks/useStoreProduct";
 import ProductScreenMerchant from "../../../../../components/ProductScreenMerchant";
 
 const ProductPage = () => {
+  const theme = useTheme();
   const { productId } = useLocalSearchParams(); // Get productId from route params
   const {storeId} = useSelector((state) => state.store); // Get storeId from Redux
 
@@ -15,7 +16,7 @@ const ProductPage = () => {
   if (isLoading) {
     return (
         <View style={styles.container}>
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size={100} color={theme.colors.primary} />
         </View>
     );
   }
@@ -23,7 +24,7 @@ const ProductPage = () => {
   if (isError) {
     return (
         <View style={styles.container}>
-          <Text style={styles.errorText}>
+          <Text variant={"bodyLarge"}>
             Failed to load product details. Please try again.
           </Text>
         </View>

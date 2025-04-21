@@ -125,8 +125,8 @@ export default function Layout() {
           console.log("pathName:", pathName);
           return pathName.startsWith("/Main/AddNewProduct") ||
           pathName.startsWith("/Main/EditProduct") ||
-            pathName.startsWith("/Main/Products/Product") ||
-            pathName.startsWith("/Main/Orders/Order") ||
+            pathName.startsWith("/Main/Products") ||
+            pathName.startsWith("/Main/Orders") ||
             pathName.startsWith("/Main/Collections/Collection") ||
             pathName.startsWith("/Main/Customers/Customer") ||
             pathName.startsWith("/Main/Messaging") ||

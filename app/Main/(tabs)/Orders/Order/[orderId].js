@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useMemo, useState} from "react";
 import { View, StyleSheet, Image, ScrollView, Pressable } from "react-native";
 import {
     Card,
@@ -7,51 +7,61 @@ import {
     Chip,
     Avatar,
     Surface,
-    useTheme,
+    useTheme, ActivityIndicator, Button,
 } from "react-native-paper";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useOrderDetails } from "../../../../../api/hooks/useOrderDetails";
 import {useSelector} from "react-redux";
+import {formatDateTime} from "../../../../../utils/date";
+import {allowedOrderStatusTransitions, orderStatusColors} from "../../../../../utils/dataValues";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import ScrollableScreen from "../../../../../components/ScrollableScreen";
+import {useUpdateOrderStatus} from "../../../../../api/hooks/useUpdateOrderStatus";
 
 const OrderDetails = () => {
     const {storeId} = useSelector((state) => state.store);
     const { orderId } = useLocalSearchParams(); // Fetch orderId from params
     const router = useRouter();
     const theme = useTheme();
+    const updateOrderStatusMutation = useUpdateOrderStatus(storeId, orderId);
     const styles = makeStyles(theme);
+    const [selectedUpdateStatus, setSelectedUpdateStatus] = useState(null);
 
     // React Query: Fetch order details
     const { data: order, isLoading, isError } = useOrderDetails(storeId, orderId);
 
-    if (isLoading) {
-        return (
-            <Surface style={styles.container}>
-                <Text>Loading order details...</Text>
-            </Surface>
-        );
-    }
+    const availableNextStatuses = useMemo(() => {
+        if (!order?.orderStatus) return [];
+        return allowedOrderStatusTransitions[order.orderStatus] || [];
+    }, [order?.orderStatus]);
 
-    if (isError) {
-        return (
-            <Surface style={styles.container}>
-                <Text>Error fetching order details. Please try again.</Text>
-            </Surface>
-        );
-    }
-
-    // Status color mapping
-    const statusColors = {
-        Submitted: "#f5a623",
-        "Payment Received": "#3f51b5",
-        Shipped: "#4caf50",
-        Delivered: "#009688",
-    };
+    const renderStatusHistory = (statusHistory) => (
+        statusHistory.length > 0 ?
+    <Card style={styles.timelineContainer}>
+        <Card.Title title={'Status Timeline'}></Card.Title>
+        {statusHistory.map((status, index) => (
+            <View key={status.orderStatusId} style={styles.timelineItem}>
+                <View style={styles.timelineIcon}>
+                    <MaterialIcons
+                        name="circle"
+                        size={12}
+                        color={orderStatusColors[status.orderStatus]}
+                    />
+                </View>
+                <View style={styles.timelineDetails}>
+                    <Text variant="bodyLarge">{status.orderStatus}</Text>
+                    <Text variant="bodySmall">
+                        {new Date(status.created_at).toLocaleString()}
+                    </Text>
+                </View>
+            </View>
+        ))}
+    </Card> : null);
 
     // Render individual order item
     const renderOrderItem = ({ item }) => (
-        <>
+        <View key={item.product.productId}>
             <Pressable
-                key={item.product.productId}
                 onPress={() =>
                     router.push("/Main/(tabs)/Products/Product/" + item.product.productId)
                 }
@@ -76,13 +86,18 @@ const OrderDetails = () => {
                 </View>
             </Pressable>
             <Divider style={{ marginVertical: 8 }} />
-        </>
+        </View>
     );
+    console.log('order:', order);
+
+    if (isLoading) {
+        return (<View style={styles.container}>
+            <ActivityIndicator size={100} animating={true} color={theme.colors.primary}/>
+        </View>);
+    }
 
     return (
-        <Surface style={{ flex: 1, backgroundColor: theme.colors.surface }}>
-            <ScrollView>
-                <View style={styles.container}>
+        <ScrollableScreen backgroundColor={theme.colors.surface} innerStyle={styles.container}>
                     {/* Order Summary */}
                     <Card style={styles.card}>
                         <Card.Title
@@ -90,9 +105,9 @@ const OrderDetails = () => {
                             left={(props) => <Avatar.Icon {...props} icon="clipboard-list" />}
                         />
                         <Card.Content>
-                            <Text variant={"bodyLarge"}>Order ID: {order.orderId}</Text>
+                            <Text variant={"bodyLarge"}>Order ID: #{order.orderId.slice(0,8).toUpperCase()}</Text>
                             <Text variant={"bodyLarge"}>
-                                Order Date: {new Date(order.orderDate).toLocaleDateString()}
+                                Order Date: {formatDateTime(new Date(order.orderDate))}
                             </Text>
                             <Text variant={"bodyLarge"}>
                                 Number of Items:{" "}
@@ -103,8 +118,8 @@ const OrderDetails = () => {
                             </Text>
                             <View style={styles.statusRow}>
                                 <Chip
-                                    style={{ backgroundColor: statusColors[order.orderStatus] }}
-                                    textStyle={{ color: "#fff" }}
+                                    style={{ backgroundColor: orderStatusColors[order.orderStatus] }}
+                                    textStyle={{ color: 'black' }}
                                 >
                                     {order.orderStatus}
                                 </Chip>
@@ -114,6 +129,56 @@ const OrderDetails = () => {
 
                     <Divider style={styles.divider} />
 
+            <Card style={styles.card}>
+                <Card.Title title="Update Order Status" />
+                <Card.Content>
+                    {availableNextStatuses.length === 0 ? (
+                        <Text>This order is in a final state and cannot be updated.</Text>
+                    ) : (
+                        <View style={{ flexWrap: 'wrap', flexDirection: 'row' }}>
+                            {availableNextStatuses.map((status) => (
+                                <Chip
+                                    key={status}
+                                    style={{
+                                        margin: 4,
+                                        backgroundColor:
+                                            selectedUpdateStatus === status
+                                                ? theme.colors.primary
+                                                : theme.colors.softPrimary,
+                                    }}
+                                    textStyle={{
+                                        color: selectedUpdateStatus === status ? "white" : "black",
+                                    }}
+                                    onPress={() => setSelectedUpdateStatus(status)}
+                                    selected={selectedUpdateStatus === status}
+                                >
+                                    {status}
+                                </Chip>
+                            ))}
+                        </View>
+                    )}
+                    {selectedUpdateStatus && availableNextStatuses.length > 0 && (
+                        <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                        <Button
+                            mode="contained"
+                            onPress={() => {
+                                // Call mutation here
+                                updateOrderStatusMutation.mutate(selectedUpdateStatus);
+                                console.log("Update order to:", selectedUpdateStatus);
+                            }}
+                            style={{ marginTop: 10, backgroundColor: theme.colors.secondary }}
+                            loading={updateOrderStatusMutation.isLoading}
+                        >
+                            Update Status
+                        </Button>
+                        </View>
+                    )}
+                </Card.Content>
+            </Card>
+            <Divider style={styles.divider} />
+
+                    {renderStatusHistory(order.orderStatusHistory)}
+                    <Divider style={styles.divider} />
                     {/* Customer Information */}
                     <Card
                         style={styles.card}
@@ -157,9 +222,8 @@ const OrderDetails = () => {
                             );
                         })}
                     </Card>
-                </View>
-            </ScrollView>
-        </Surface>
+
+        </ScrollableScreen>
     );
 };
 
@@ -168,6 +232,7 @@ const makeStyles = (theme) =>
         container: {
             flex: 1,
             padding: 10,
+            justifyContent: "center",
         },
         card: {
             borderRadius: 8,
@@ -204,6 +269,26 @@ const makeStyles = (theme) =>
             justifyContent: "space-between",
             alignItems: "center",
         },
+        timelineContainer: {
+            padding: 16,
+            backgroundColor: theme.colors.white
+        },
+        timelineHeader: {
+            marginBottom: 10,
+        },
+        timelineItem: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 15,
+        },
+        timelineIcon: {
+            width: 20,
+            alignItems: 'center',
+        },
+        timelineDetails: {
+            flex: 1,
+        },
+
     });
 
 export default OrderDetails;

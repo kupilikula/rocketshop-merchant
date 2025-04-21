@@ -21,6 +21,7 @@ import {updateField} from "../store/newProductSlice";
 import MarkAsVariantModal from "./MarkAsVariantModal";
 import CloneProductModal from "./CloneProductModal";
 import {ProductReviewsList} from "./ProductReviews";
+import ScrollableScreen from "./ScrollableScreen";
 
 export default function ProductScreenMerchant(props) {
   // const router = useRouter();
@@ -166,13 +167,8 @@ export default function ProductScreenMerchant(props) {
   console.log("props.product:", props.product);
   // console.log('size:', size);
   return (
-          <View style={styles.container}>
-              <ScrollView contentContainerStyle={{flexGrow: 1,
-                  width: "100%",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  padding: 0,
-                  backgroundColor: "white",}}>
+          <>
+    <ScrollableScreen innerStyle={styles.container}>
         <Card mode={"contained"} style={styles.card}>
           <FlatListSlider
             data={props.product.mediaItems}
@@ -398,7 +394,7 @@ export default function ProductScreenMerchant(props) {
               <ProductReviewsList productId={props.product.productId} />
           </Card.Content>
         </Card>
-    </ScrollView>
+    </ScrollableScreen>
               <View style={styles.fabContainer}>
                   <Menu
                       visible={fabOpen}
@@ -445,8 +441,7 @@ export default function ProductScreenMerchant(props) {
                   onClose={() => setIsCloneModalVisible(false)}
                   onConfirm={submitCloneProduct}
               />
-          </View>
-
+        </>
   );
 }
 
@@ -457,7 +452,7 @@ const makeStyles = (theme) =>
       width: "100%",
       borderRadius: 0,
       backgroundColor: "white",
-      marginVertical: 15,
+      // marginVertical: 15,
       overflow: "hidden",
     },
     titleTextStyle: {
@@ -537,6 +532,7 @@ const makeStyles = (theme) =>
       container: {
           flex: 1,
           position: "relative",
+          backgroundColor: theme.colors.surface,
       },
       scrollView: {
           flex: 1,
