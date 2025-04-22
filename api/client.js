@@ -94,7 +94,7 @@ const axiosClientGetter = () => {
                     console.log("Guest user triggered 401. Skipping refresh. Redirecting to Auth.");
                     const safelySerializableRequest = getSerializableRequestConfig(originalRequest);
                     dispatch(setPendingRequest(safelySerializableRequest));
-                    dispatch(setRedirectAfterAuth({redirectTo: router.pathname}))
+                    dispatch(setRedirectAfterAuth(router.pathname))
                     router.push('/Authentication')
                     return Promise.reject(error);
                 }

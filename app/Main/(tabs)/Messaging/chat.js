@@ -16,6 +16,7 @@ import {format, isToday, isYesterday, formatDistanceToNow} from 'date-fns';
 import {v4 as uuidv4} from 'uuid';
 import {removeUnreadMessages} from "../../../../store/badgesSlice";
 import {copyContent} from "../../../../utils/copyToClipboard";
+import {useChatMessages} from "../../../../api/hooks/useChatMessages";
 
 const fetchChatMessages = async (chatId) => {
     const response = await axiosClient.get(`/chats/${chatId}/messages`);
@@ -39,7 +40,7 @@ const ChatScreen = () => {
     const [otherUserIsTyping, setOtherUserIsTyping] = useState(false); // Tracks if the other user is typing
     const typingDebounceRef = useRef(null); // Debounce timer for `typing` event
     const stopTypingTimeoutRef = useRef(null); // Timeout for `stopTyping` event
-    const {data: messages, isLoading} = useQuery(['messages', chatId], () => fetchChatMessages(chatId));
+    const { data: messages, isLoading } = useChatMessages(chatId);
 
     const [message, setMessage] = useState('');
     const [isSnackbarVisible, setSnackbarVisible] = useState(false);
@@ -163,7 +164,18 @@ const ChatScreen = () => {
             // Handle incoming messages
             const handleReceiveMessage = (newMessage) => {
                 console.log("New message received in merchant app from customer app:", newMessage);
-                queryClient.setQueryData(["messages", chatId], (oldMessages) => [...(oldMessages || []), newMessage,]);
+                queryClient.setQueryData(["messages", chatId], (oldMessages) => {
+                    const existing = oldMessages?.find((m) => m.messageId === newMessage.messageId);
+
+                    if (existing) {
+                        // Merge any new fields (e.g. updated read_at from the backend)
+                        return oldMessages.map((m) =>
+                            m.messageId === newMessage.messageId ? { ...m, ...newMessage } : m
+                        );
+                    }
+
+                    return [...(oldMessages || []), newMessage];
+                });
             };
             socketInstance.on("receiveMessage", handleReceiveMessage);
 
@@ -174,13 +186,13 @@ const ChatScreen = () => {
 
                 // Update the messages in the local cache to set `read_at` for the specified `messageIds`
                 queryClient.setQueryData(["messages", chatId], (oldMessages) => {
-                    if (!oldMessages) return oldMessages; // If no messages exist, return as is
+                    if (!oldMessages) return oldMessages;
 
                     return oldMessages.map((message) =>
-                        messageIds.includes(message.messageId)
+                        messageIds.includes(message.messageId) && !message.read_at
                             ? {
                                 ...message,
-                                read_at: new Date(), // Set the read_at timestamp
+                                read_at: new Date().toISOString(),
                             }
                             : message
                     );
@@ -298,7 +310,7 @@ const ChatScreen = () => {
             // Optimistically update the local cache
             queryClient.setQueryData(["messages", chatId], (oldMessages) =>
                 oldMessages.map((message) =>
-                    newReadMessageIds.includes(message.messageId)
+                    newReadMessageIds.includes(message.messageId) && !message.read_at
                         ? { ...message, read_at: new Date().toISOString() }
                         : message
                 )
@@ -452,11 +464,12 @@ const makeStyles = (theme) => StyleSheet.create({
 
     }, messageText: {
         fontSize: 16,
-        maxWidth: "70%",
+        maxWidth: "100%",
         color: 'white',
         marginTop: 8,
         marginHorizontal: 16,
         marginBottom: 24, // backgroundColor: 'blue'
+        flexWrap: 'wrap',
     }, timeAndReadContainer: {
         position: 'absolute', bottom: 4, right: 4, // paddingBottom: 2,
         // paddingHorizontal: 8,

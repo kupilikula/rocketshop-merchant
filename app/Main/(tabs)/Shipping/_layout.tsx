@@ -12,7 +12,7 @@ export default function ShippingLayout() {
             name="index"
             options={{
               title: 'Shipping Rules',
-                header: () => <GenericHeader title={'Shipping Rules'} right={null}/>
+                header: () =>null
             }}
         />
         <Stack.Screen

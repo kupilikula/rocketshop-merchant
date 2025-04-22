@@ -11,6 +11,7 @@ import { useGetShippingRules } from '../../../../api/hooks/useGetShippingRules';
 import { useReorderShippingRules } from '../../../../api/hooks/useReorderShippingRules';
 
 import {useSelector} from "react-redux";
+import GenericHeader from "../../../../components/GenericHeader";
 
 const RuleElement = React.memo(({ rule }) => {
     const drag = useReorderableDrag();
@@ -56,11 +57,19 @@ const RuleElement = React.memo(({ rule }) => {
     );
 });
 
+const helpText = `Configure shipping rules for your store. 
+1. Rules are evaluated in ascending order of priority value. 
+2. The first rule applicable to a cart item (or group of cart items) that can compute a valid shipping cost will be applied for the item(s). 
+3. Drag & Drop the rules to reorder them.`;
+
+
+
 export default function ShippingScreen() {
     const theme = useTheme();
     const router = useRouter();
     const styles = makeStyles(theme);
     const {storeId} = useSelector((state) => state.store);
+    const [helpVisible, setHelpVisible] = useState(true);
     const {
         data: rules = [],
         isLoading,
@@ -102,14 +111,40 @@ export default function ShippingScreen() {
         }
     };
 
+    const HelpButton = () =>
+    <View style={{width: 30, height: 30, justifyContent: 'center', alignItems: 'center'}}>
+        <IconButton icon={'help-circle'} onPressIn={() =>{
+        console.log('helpVisible:', helpVisible);
+        setHelpVisible(!helpVisible);
+    }} color={theme.colors.primary} size={24} style={{alignSelf: 'center'}}/>
+    </View>;
+
 
     const renderItem = ({ item }) => <RuleElement rule={item} />;
 
     return (
+        <>
+        <GenericHeader title={'Shipping Rules'} right={<HelpButton/>}/>
+
         <View style={styles.container}>
-            <Text style={styles.description}>
-                Configure shipping rules for your store. Rules are evaluated in ascending order of priority. The first rule applicable to a cart item (or group of cart items) that can compute a valid shipping cost will be applied for the item(s). Drag & Drop the rules to reorder them.
+            {helpVisible &&
+                <Card mode={'elevated'} style={{backgroundColor: 'white', borderRadius: 0}}>
+                    <Card.Content>
+                <Text variant={'titleMedium'} style={{marginVertical: 10}}>
+                    Configure shipping rules for your store.
             </Text>
+                        <Text variant={'bodyLarge'} style={{}}>
+                            1. Rules are evaluated in ascending order of priority value.
+                        </Text>
+                        <Text variant={'bodyLarge'} style={{}}>
+                            2. The first rule applicable to a cart item (or group of cart items) that can compute a valid shipping cost will be applied for the item(s).
+                        </Text>
+                        <Text variant={'bodyLarge'} style={{}}>
+                            3. Drag & Drop the rules to reorder them.
+                        </Text>
+                    </Card.Content>
+                </Card>
+            }
 
             <ReorderableList
                 data={rules}
@@ -118,14 +153,19 @@ export default function ShippingScreen() {
                 keyExtractor={(item) => item.ruleId}
             />
 
+            <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center'}}>
             <Button
-                mode="contained"
+                icon="plus"
+                mode="outlined"
                 onPress={handleAddRule}
                 style={styles.addButton}
+                labelStyle={{color: theme.colors.success}}
             >
                 Add Shipping Rule
             </Button>
+            </View>
         </View>
+        </>
     );
 }
 
@@ -148,6 +188,7 @@ const makeStyles =  (theme) => StyleSheet.create({
     addButton: {
         marginTop: 16,
         marginBottom: 24,
+        borderColor: theme.colors.success,
     },
     statusChip: {
         // height: 24,

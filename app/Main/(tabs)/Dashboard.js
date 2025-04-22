@@ -98,7 +98,7 @@ const Dashboard = () => {
           {dashboardData && (
               <>
                   {/* Store Inactive */}
-                  {dashboardData.banners.isActive === false && (
+                  {dashboardData?.banners?.isActive === false && (
                       <Banner
                           visible
                           icon="alert-circle"
@@ -111,7 +111,7 @@ const Dashboard = () => {
                   )}
 
                   {/* No Products and No Orders */}
-                  {dashboardData.banners.noProducts && dashboardData.banners.noOrders && (
+                  {dashboardData?.banners?.noProducts && dashboardData.banners.noOrders && (
                       <Banner
                           visible
                           icon="store-off"
@@ -124,7 +124,7 @@ const Dashboard = () => {
                   )}
 
                   {/* No Products but Orders Exist */}
-                  {dashboardData.banners.noProducts && !dashboardData.banners.noOrders && (
+                  {dashboardData?.banners?.noProducts && !dashboardData.banners.noOrders && (
                       <Banner
                           visible
                           icon="cube-outline"
@@ -137,7 +137,7 @@ const Dashboard = () => {
                   )}
 
                   {/* Products Exist but No Orders */}
-                  {!dashboardData.banners.noProducts && dashboardData.banners.noOrders && (
+                  {!dashboardData?.banners?.noProducts && dashboardData.banners.noOrders && (
                       <Banner
                           visible
                           icon="cart-outline"

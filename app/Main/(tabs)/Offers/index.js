@@ -55,9 +55,9 @@ const OffersScreen = () => {
                             </Text>
                         </View>
                         <Chip
-                            textStyle={{ color: "white" }}
+                            textStyle={{ color: "black" }}
                             style={{
-                                backgroundColor: item.isActive ? theme.colors.success : "#aaa",
+                                backgroundColor: item.isActive ? theme.colors.softSuccess : theme.colors.inactive,
                             }}
                         >
                             {item.isActive ? "Active" : "Inactive"}
@@ -103,14 +103,6 @@ const OffersScreen = () => {
     return (
         <ScrollableScreen innerStyle={styles.container} backgroundColor={theme.colors.surface}>
                 <View style={{ marginVertical: 10 }}>
-                    <Text variant={"bodyLarge"} style={{ marginLeft: 10 }}>
-                        {nActive.toString() + " Active Offer" + (nActive !== 1 ? "s" : "")}
-                    </Text>
-                    <Text variant={"bodyLarge"} style={{ marginLeft: 10 }}>
-                        {nInactive.toString() +
-                            " Inactive Offer" +
-                            (nInactive !== 1 ? "s" : "")}
-                    </Text>
                     <View
                         style={{
                             display: "flex",
@@ -134,8 +126,17 @@ const OffersScreen = () => {
                         </Button>
                     </View>
                 </View>
-
-                <View
+            <View style={{ marginBottom: 10 }}>
+            <Text variant={"bodyLarge"} style={{ marginLeft: 10 }}>
+                {nActive.toString() + " Active Offer" + (nActive !== 1 ? "s" : "")}
+            </Text>
+            <Text variant={"bodyLarge"} style={{ marginLeft: 10 }}>
+                {nInactive.toString() +
+                    " Inactive Offer" +
+                    (nInactive !== 1 ? "s" : "")}
+            </Text>
+            </View>
+            <View
                     style={{
                         display: "flex",
                         flexDirection: "column",
@@ -158,7 +159,7 @@ const makeStyles = (theme) =>
             paddingHorizontal: 10,
         },
         offerCard: {
-            borderRadius: 8,
+            borderRadius: 0,
             elevation: 2,
             width: "100%",
             backgroundColor: "white",

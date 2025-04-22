@@ -695,8 +695,6 @@ const makeStyles = ({colors}) => StyleSheet.create({
         marginLeft: 0,
     }, addButton: {
         marginVertical: 0, backgroundColor: colors.secondary,
-    }, saveButton: {
-        backgroundColor: "white", borderRadius: 0, borderWidth: 2,
     }, publishButton: {
         backgroundColor: colors.success, borderRadius: 0,
     }, row: {

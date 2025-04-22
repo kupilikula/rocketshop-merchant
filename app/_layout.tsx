@@ -1,7 +1,7 @@
 import {Stack, useRouter} from "expo-router";
 import { PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Platform } from "react-native";
+import {AppState, Platform} from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -9,7 +9,7 @@ import { DefaultTheme } from "react-native-paper";
 import {Provider} from "react-redux";
 import { store } from "@/store/store";
 import * as NavigationBar from "expo-navigation-bar";
-import {QueryClient, QueryClientProvider} from "react-query";
+import {focusManager, QueryClient, QueryClientProvider} from "react-query";
 import 'react-native-get-random-values';
 // import TokenMonitor from '../components/TokenMonitor';
 import {setAxiosDependencies} from "@/api/client";
@@ -57,6 +57,9 @@ export default function RootLayout() {
     dark: false, // Set to true if creating a dark theme
   };
 
+  AppState.addEventListener('change', (status) => {
+    focusManager.setFocused(status === 'active');
+  });
 
   useEffect(() => {
     const configureNavigationBar = async () => {

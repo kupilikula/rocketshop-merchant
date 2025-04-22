@@ -134,7 +134,7 @@ export default function StoreSummary() {
                             width: 80,
                             borderRadius: 40,
                             borderStyle: "solid",
-                            borderWidth: 2,
+                            borderWidth: 1,
                             borderColor: 'black',
                             margin: 0,
                             padding: 0,

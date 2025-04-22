@@ -1,22 +1,19 @@
 // ChatListScreen.js
 import React, {useEffect} from 'react';
-import { FlatList } from 'react-native';
+import {FlatList, View} from 'react-native';
 import {List, ActivityIndicator, Text, Surface, useTheme, Divider, Badge} from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import {useQuery, useQueryClient} from 'react-query';
 import axiosClient from "../../../../api/client";
 import {useSelector} from "react-redux";
+import {useChats} from "../../../../api/hooks/useChats";
 
-const fetchChats = async (storeId) => {
-    const response = await axiosClient.get('/chats', {params: {storeId: storeId}}); // Replace with your API endpoint
-    return response.data;
-};
 
 const ChatListScreen = () => {
-    const { data: chats, isLoading, isError } = useQuery('chats', () => fetchChats(storeId));
+    const {storeId} = useSelector( (state) => state.store);
+    const { data: chats, isLoading, isError } = useChats(storeId);
     const router = useRouter();
     const theme = useTheme();
-    const {storeId} = useSelector( (state) => state.store);
     const {unreadMessages} = useSelector((state)=> state.badges);
 
     const handleChatPress = (chatId, customerId, customerName, customerPhone) => {
@@ -24,15 +21,25 @@ const ChatListScreen = () => {
     };
 
     if (isLoading) {
-        return <ActivityIndicator animating={true} size="large" style={{ flex: 1 }} />;
+        return <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.surface}}>
+            <ActivityIndicator animating={true} size={100} style={{  justifyContent: 'center', alignItems: 'center' }} />
+        </View>;
     }
 
     if (isError) {
-        return <Text>Error loading chats. Please try again later.</Text>;
+        return <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.surface}}>
+            <Text variant={"titleLarge"}>Error Loading Chats</Text>
+        </View>
+        ;
     }
     console.log('chats:', chats);
     return (
-        <Surface style={{backgroundColor: theme.colors.surface, flex: 1, padding: 8}}>
+        chats?.length===0 ?
+            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.surface}}>
+                <Text variant={"titleLarge"}>You Don't Have Any Messages</Text>
+            </View> :
+
+        <View style={{backgroundColor: theme.colors.surface, flex: 1, padding: 8}}>
         <FlatList
             data={chats}
             keyExtractor={(item) => item.chatId}
@@ -49,7 +56,7 @@ const ChatListScreen = () => {
             ItemSeparatorComponent={() => <Divider style={{marginVertical: 1}}/>}
             contentContainerStyle={{marginVertical: 16, minHeight: '100%'}}
         />
-        </Surface>
+        </View>
     );
 };
 

@@ -25,6 +25,7 @@ const GenericHeader = ({title, titleSize = 'titleLarge', showBackButton = true, 
                     alignItems: "center",
                     justifyContent: "space-between",
                     backgroundColor: "white",
+                    zIndex: 10000
                 },
             ]}
         >
@@ -45,10 +46,10 @@ const GenericHeader = ({title, titleSize = 'titleLarge', showBackButton = true, 
 
             {left}
             {!showBackButton && !left && <View style={{width: 90}}/>}
-            <Text variant={titleSize} style={{ color: "black" }}>
+            <Text variant={titleSize} style={{ color: "black"}}>
                 {title}
             </Text>
-            {!right && <View style={{width: 90}}/>}
+            {!right && <View style={{width: 10,height: 10}}/>}
             {right}
         </View>
     );

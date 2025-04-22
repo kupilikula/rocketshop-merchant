@@ -252,8 +252,8 @@ const AddEditShippingRule = () => {
                 value={condition.operator}
                 onValueChange={(value) => updateCondition(index, { operator: value })}
                 buttons={[
-                    { value: OPERATORS.GREATER_THAN, label: '>' },
-                    { value: OPERATORS.LESS_THAN, label: '<' },
+                    { value: OPERATORS.GREATER_THAN_EQUALS, label: '>=' },
+                    { value: OPERATORS.LESS_THAN_EQUALS, label: '<=' },
                     { value: OPERATORS.IN_RANGE, label: 'Range' },
                 ]}
             />
@@ -295,8 +295,8 @@ const AddEditShippingRule = () => {
                 value={condition.operator}
                 onValueChange={(value) => updateCondition(index, { operator: value })}
                 buttons={[
-                    { value: OPERATORS.GREATER_THAN, label: '>' },
-                    { value: OPERATORS.LESS_THAN, label: '<' },
+                    { value: OPERATORS.GREATER_THAN_EQUALS, label: '>=' },
+                    { value: OPERATORS.LESS_THAN_EQUALS, label: '<=' },
                     { value: OPERATORS.EQUALS, label: '=' },
                 ]}
             />

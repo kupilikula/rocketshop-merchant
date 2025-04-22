@@ -8,7 +8,7 @@ import { fetchStoreFrontData } from "../../../../api/hooks/useStoreFrontData"; /
 import { fetchStoreProducts } from "../../../../api/hooks/useStoreProducts"; // Extracted query function
 import ProductSearch from "../../../../components/ProductSearch";
 import StoreFrontCollectionCard from "../../../../components/StoreFrontCollectionCard";
-import {useLocalSearchParams, useRouter} from "expo-router";
+import {useLocalSearchParams, usePathname, useRouter} from "expo-router";
 import {useSelector} from "react-redux";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {Rating} from "@kolking/react-native-rating";
@@ -50,6 +50,7 @@ export default function StoreFront(props) {
     const storeProductsData = storeProductsQuery.data;
 
     const [uniqueProducts, setUniqueProducts] = useState([]);
+    const currentPath = usePathname();
 
     // Extract unique products and set text color when data is fetched
     useEffect(() => {
@@ -154,7 +155,7 @@ export default function StoreFront(props) {
                                             width: 80,
                                             borderRadius: 40,
                                             borderStyle: "solid",
-                                            borderWidth: 2,
+                                            borderWidth: 1,
                                             borderColor: 'black',
                                             margin: 0,
                                             padding: 0,
@@ -211,6 +212,7 @@ export default function StoreFront(props) {
                                         {storeFrontData.storeDescription}
                                     </Text>
                                 </View>
+                                {store.merchantRole==='Admin' &&
                                 <View style={{ marginTop: 10, alignSelf: 'center'}}>
                                     <Button
                                         mode={"elevated"}
@@ -219,11 +221,19 @@ export default function StoreFront(props) {
                                         textColor={"white"}
                                         style={{borderRadius: 8}}
                                         icon={({size, color}) => <MaterialIcons name={'settings'} size={size} color={'white'}/>}
-                                        onPress={() => {}}
+                                        onPress={() => {
+                                            router.replace({
+                                                pathname: `/Main/(tabs)/StoreSettings`,
+                                                params: {
+                                                    backHref: currentPath, // Pass the path of the current screen (StoreFront)
+                                                    // Add any other params needed by the destination screen
+                                                }
+                                            })}}
                                     >
                                         Settings
                                     </Button>
                                 </View>
+                                }
                             </View>
                         </Card>
                         <Divider style={{marginVertical: 2}}/>

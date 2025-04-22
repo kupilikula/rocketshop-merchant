@@ -27,14 +27,9 @@ export function CustomBackButton({ style }) {
         } else {
             // Optional: Fallback if no backHref and cannot go back (e.g., navigate home)
             console.log('CustomBackButton: Cannot go back and no backHref provided.');
-            // router.replace('/'); // Example: Navigate to home
+            router.replace('/Main/(tabs)/Dashboard'); // Example: Navigate to home
         }
     };
-
-    // Only render the button if there's somewhere to go back to (either default or specific)
-    if (!canGoBack && !backHref) {
-        return null; // Or return a placeholder/disabled button if preferred
-    }
 
     // Apply default styles and merge incoming style prop
     const defaultStyle = styles.button;

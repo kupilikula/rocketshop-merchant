@@ -16,7 +16,7 @@ export const StoreLogo = (props) => (
 const styles = StyleSheet.create({
   logo: {
     borderStyle: "solid",
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: "black",
     margin: 0,
     padding: 0,
