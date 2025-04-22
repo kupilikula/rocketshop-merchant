@@ -4,6 +4,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {Platform, TouchableOpacity} from "react-native";
 import { useTheme } from "react-native-paper";
 import {useSelector} from "react-redux";
+import AppHeader from "../../../components/AppHeader";
 
 export default function TabsComponent() {
   const theme = useTheme();
@@ -40,7 +41,7 @@ export default function TabsComponent() {
           tabBarIcon: ({ color }) => (
             <MaterialIcons name={"dashboard"} size={30} color={color} />
           ),
-          headerShown: true,
+          header: () => <AppHeader/>,
         }}
       />
       <Tabs.Screen
@@ -77,6 +78,7 @@ export default function TabsComponent() {
           tabBarIcon: ({ color }) => (
             <MaterialIcons name={"store"} size={30} color={color} />
           ),
+            header: () => <AppHeader/>,
         }}
       />
       <Tabs.Screen

@@ -1,5 +1,10 @@
 import { Stack } from "expo-router";
+import GenericHeader from "@/components/GenericHeader";
 
 export default function Layout() {
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return <Stack screenOptions={{ }} >
+    <Stack.Screen name='index' options={{header: () => <GenericHeader title={'Collections'}/> }}/>
+    <Stack.Screen name='Collection' options={{header: () => null }}/>
+  </Stack>
+    ;
 }

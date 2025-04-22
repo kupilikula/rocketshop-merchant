@@ -55,17 +55,17 @@ const ChatScreen = () => {
 
 
 
-
-    useEffect(() => {
-        navigation.setOptions({
-            header: () => <GenericHeader title={customerName} right={<Pressable
-                style={{width: 60, display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}
-                onPress={() => router.push(`/Main/(tabs)/Customers/Customer/${customerId}`)}
-            >
-                <MaterialIcons name={'person'} size={36}/>
-            </Pressable>}/>,
-        });
-    }, [customerName]);
+    //
+    // useEffect(() => {
+    //     navigation.setOptions({
+    //         header: () => <GenericHeader title={customerName} right={<Pressable
+    //             style={{width: 60, display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}
+    //             onPress={() => router.push(`/Main/(tabs)/Customers/Customer/${customerId}`)}
+    //         >
+    //             <MaterialIcons name={'person'} size={36}/>
+    //         </Pressable>}/>,
+    //     });
+    // }, [customerName]);
 
     const scrollToLatest = (animated = false, useDelay = true) => {
         console.log('line 102, animated:', animated, ', useDelay:', useDelay);
@@ -327,7 +327,15 @@ const ChatScreen = () => {
         return <ActivityIndicator animating={true} size="large" style={{flex: 1}}/>;
     }
 
-    return (<View style={{...styles.container, backgroundColor: isExpired ? 'white' : 'white'}}>
+    return (<>
+        <GenericHeader title={customerName} right={<Pressable
+            style={{width: 60, display: 'flex', flexDirection: 'row', justifyContent: 'flex-end'}}
+            onPress={() => router.push(`/Main/(tabs)/Customers/Customer/${customerId}`)}
+        >
+            <MaterialIcons name={'person'} size={36}/>
+        </Pressable>}/>
+
+        <View style={{...styles.container, backgroundColor: isExpired ? 'white' : 'white'}}>
             {/*<TokenMonitor/>*/}
             <FlatList
                 ref={flatListRef}
@@ -417,7 +425,9 @@ const ChatScreen = () => {
             >
                 Message copied!
             </Snackbar>
-        </View>);
+        </View>
+        </>
+        );
 };
 
 export default ChatScreen;

@@ -121,23 +121,24 @@ export default function Layout() {
           borderTopRightRadius: 0,
           borderBottomRightRadius: 0,
         },
-        header: () => {
-          console.log("pathName:", pathName);
-          return pathName.startsWith("/Main/AddNewProduct") ||
-          pathName.startsWith("/Main/EditProduct") ||
-            pathName.startsWith("/Main/Products") ||
-            pathName.startsWith("/Main/Orders") ||
-            pathName.startsWith("/Main/Collections/Collection") ||
-            pathName.startsWith("/Main/Customers/Customer") ||
-            pathName.startsWith("/Main/Messaging") ||
-          pathName.startsWith("/Main/Shipping") ||
-          pathName.startsWith("/Main/Offers") ||
-          pathName.startsWith("/Main/StoreSettings") ||
-            pathName.startsWith("/CreateStore")
-              ? null : (
-            <AppHeader />
-          );
-        },
+        // header: () => {
+        //   console.log("pathName:", pathName);
+        //   return pathName.startsWith("/Main/AddNewProduct") ||
+        //   pathName.startsWith("/Main/EditProduct") ||
+        //     pathName.startsWith("/Main/Products") ||
+        //     pathName.startsWith("/Main/Orders") ||
+        //     pathName.startsWith("/Main/Collections") ||
+        //     pathName.startsWith("/Main/Customers") ||
+        //     pathName.startsWith("/Main/Messaging") ||
+        //   pathName.startsWith("/Main/Shipping") ||
+        //   pathName.startsWith("/Main/Offers") ||
+        //   pathName.startsWith("/Main/StoreSettings") ||
+        //     pathName.startsWith("/CreateStore")
+        //       ? null : (
+        //     <AppHeader />
+        //   );
+        // },
+          header: () => null,
       })}
       drawerContent={(props) => <DrawerMenu {...props} />}
     ></Drawer>
