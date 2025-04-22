@@ -16,10 +16,11 @@ export default function AppHeader(props) {
   const insets = useSafeAreaInsets();
   const {canReceiveMessages} = useSelector(state => state.store);
 
-    const unreadCount = useSelector(
-        (state) =>
-            Object.values(state.badges.unreadMessages || {}).flat().length // Total unread messages
-    );
+    const unreadCount = useSelector((state) => {
+        const unread = state.badges.unreadMessages;
+        if (!unread) return 0;
+        return Object.values(unread).reduce((total, messages) => total + messages.length, 0);
+    });
 
   return (
     <View

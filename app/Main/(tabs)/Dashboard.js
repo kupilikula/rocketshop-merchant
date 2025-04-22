@@ -124,7 +124,7 @@ const Dashboard = () => {
                   )}
 
                   {/* No Products but Orders Exist */}
-                  {dashboardData?.banners?.noProducts && !dashboardData.banners.noOrders && (
+                  {dashboardData?.banners?.noProducts && !dashboardData?.banners?.noOrders && (
                       <Banner
                           visible
                           icon="cube-outline"
@@ -137,7 +137,7 @@ const Dashboard = () => {
                   )}
 
                   {/* Products Exist but No Orders */}
-                  {!dashboardData?.banners?.noProducts && dashboardData.banners.noOrders && (
+                  {!dashboardData?.banners?.noProducts && dashboardData?.banners?.noOrders && (
                       <Banner
                           visible
                           icon="cart-outline"

@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    unreadMessages: {},
+    unreadMessages: {}, // chatId => [messages]
 };
 
 const badgesSlice = createSlice({
@@ -9,21 +9,56 @@ const badgesSlice = createSlice({
     initialState,
     reducers: {
         addUnreadMessage: (state, action) => {
-            state.unreadMessages[action.payload.chatId] = [...(state.unreadMessages[action.payload.chatId] ?? []), action.payload];
+            const { chatId, message } = action.payload;
+            if (!chatId || !message?.messageId) return;
+
+            if (!state.unreadMessages[chatId]) {
+                state.unreadMessages[chatId] = [];
+            }
+
+            const alreadyExists = state.unreadMessages[chatId].some(m => m.messageId === message.messageId);
+            if (!alreadyExists) {
+                state.unreadMessages[chatId].push(message);
+            }
+        },
+        setUnreadMessages: (state, action) => {
+            const unreadMessages = action.payload?.unreadMessages ?? {};
+            console.log('✅ setting unreadMessages in state:', unreadMessages);
+            state.unreadMessages = unreadMessages;
         },
         removeUnreadMessage: (state, action) => {
-            const {chatId, messageId} = action.payload;
-            state.unreadMessages[chatId] = [...(state.unreadMessages[chatId] ?? []).filter((m) => m.messageId!==messageId)];
+            console.log('removing unread message', action.payload);
+            const { chatId, messageId } = action.payload;
+            if (!chatId || !messageId || !state.unreadMessages[chatId]) return;
+
+            state.unreadMessages[chatId] = state.unreadMessages[chatId].filter(msg => msg.messageId !== messageId);
         },
+
         removeUnreadMessages: (state, action) => {
-            const {chatId, messageIds} = action.payload;
-            state.unreadMessages[chatId] = [...(state.unreadMessages[chatId] ?? []).filter((m) => !messageIds.includes(m.messageId))];
+            console.log('removing unread messages', action.payload);
+            const { chatId, messageIds } = action.payload;
+            if (!chatId || !Array.isArray(messageIds) || !state.unreadMessages[chatId]) return;
+
+            state.unreadMessages[chatId] = state.unreadMessages[chatId].filter(
+                msg => !messageIds.includes(msg.messageId)
+            );
         },
+
         clearUnreadMessages: (state, action) => {
             const { chatId } = action.payload;
-            state.unreadMessages[chatId] = [];
-        }
-    }});
+            if (!chatId) return;
 
-export const { addUnreadMessage, removeUnreadMessage, removeUnreadMessages, clearUnreadMessages } = badgesSlice.actions;
+            state.unreadMessages[chatId] = [];
+        },
+    },
+});
+
+export const {
+    addUnreadMessage,
+    setUnreadMessages,
+    removeUnreadMessage,
+    removeUnreadMessages,
+    clearUnreadMessages,
+} = badgesSlice.actions;
+
 export default badgesSlice.reducer;

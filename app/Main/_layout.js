@@ -8,6 +8,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {addUnreadMessage} from "../../store/badgesSlice";
 import {useQueryClient} from "react-query";
 import {useTheme} from "react-native-paper";
+import {useAppStateSyncUnreadMessages} from "../../api/hooks/useAppStateSyncUnreadMessages";
 
 export default function Layout() {
   const pathName = usePathname();
@@ -23,6 +24,8 @@ export default function Layout() {
           console.log('Unmounting Main');
       }
   },[])
+
+    useAppStateSyncUnreadMessages(storeId);
 
     useEffect(() => {
         const socketType = "global"; // Define the socket type
@@ -52,7 +55,7 @@ export default function Layout() {
                 console.log("newMessage socket.id:", socket.id);
 
                 // Update Redux store
-                dispatch(addUnreadMessage(message));
+                dispatch(addUnreadMessage({chatId: message.chatId, message}));
 
                 // Invalidate 'chats' query
                 queryClient.invalidateQueries(["chats"]);

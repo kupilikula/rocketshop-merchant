@@ -39,21 +39,23 @@ const ChatListScreen = () => {
                 <Text variant={"titleLarge"}>You Don't Have Any Messages</Text>
             </View> :
 
-        <View style={{backgroundColor: theme.colors.surface, flex: 1, padding: 8}}>
+        <View style={{backgroundColor: theme.colors.surface, flex: 1, padding: 0}}>
         <FlatList
             data={chats}
             keyExtractor={(item) => item.chatId}
             renderItem={({ item }) => (
+                <>
                 <List.Item
                     title={item.customerName+ ' (' + item.customerPhone +')'}
                     titleStyle={{ fontWeight: 'bold'}}
-                    style={{padding: 16, backgroundColor: 'white', height: 80, alignContent: 'center', justifyContent: 'center'}}
+                    style={{padding: 0, backgroundColor: 'white', height: 80, alignContent: 'center', justifyContent: 'center'}}
                     description={item.lastMessage}
                     right={() => unreadMessages[item.chatId]?.length > 0 ? <Badge>{unreadMessages[item.chatId]?.length}</Badge> : null}
                     onPress={() => handleChatPress(item.chatId, item.customerId, item.customerName, item.customerPhone)}
                 />
+                    <Divider style={{marginVertical: 1}}/>
+                </>
             )}
-            ItemSeparatorComponent={() => <Divider style={{marginVertical: 1}}/>}
             contentContainerStyle={{marginVertical: 16, minHeight: '100%'}}
         />
         </View>

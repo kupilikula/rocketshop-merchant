@@ -17,10 +17,11 @@ export default function DrawerMenu(props) {
   const styles = makeStyles(theme);
   const {storeLogoImage, canReceiveMessages, merchantRole} = useSelector(state => state.store);
   const stores = useSelector(state => state.allStores.stores);
-  const unreadCount = useSelector(
-      (state) =>
-          Object.values(state.badges.unreadMessages || {}).flat().length // Total unread messages
-  );
+  const unreadCount = useSelector((state) => {
+    const unread = state.badges.unreadMessages;
+    if (!unread) return 0;
+    return Object.values(unread).reduce((total, messages) => total + messages.length, 0);
+  });
   // console.log('props:', JSON.stringify(props));
   return (
     <DrawerContentScrollView
