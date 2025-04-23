@@ -57,11 +57,6 @@ const RuleElement = React.memo(({ rule }) => {
     );
 });
 
-const helpText = `Configure shipping rules for your store. 
-1. Rules are evaluated in ascending order of priority value. 
-2. The first rule applicable to a cart item (or group of cart items) that can compute a valid shipping cost will be applied for the item(s). 
-3. Drag & Drop the rules to reorder them.`;
-
 
 
 export default function ShippingScreen() {
@@ -127,12 +122,18 @@ export default function ShippingScreen() {
         <GenericHeader title={'Shipping Rules'} right={<HelpButton/>}/>
 
         <View style={styles.container}>
-            {helpVisible &&
+            <ReorderableList
+                data={rules}
+                onReorder={handleReorder}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.ruleId}
+                contentContainerStyle={{paddingHorizontal: 10}}
+                ListHeaderComponent={() => {return helpVisible ?
                 <Card mode={'elevated'} style={{backgroundColor: 'white', borderRadius: 0}}>
                     <Card.Content>
-                <Text variant={'titleMedium'} style={{marginVertical: 10}}>
-                    Configure shipping rules for your store.
-            </Text>
+                        <Text variant={'titleMedium'} style={{marginVertical: 10}}>
+                            Configure shipping rules for your store.
+                        </Text>
                         <Text variant={'bodyLarge'} style={{}}>
                             1. Rules are evaluated in ascending order of priority value.
                         </Text>
@@ -140,30 +141,25 @@ export default function ShippingScreen() {
                             2. The first rule applicable to a cart item (or group of cart items) that can compute a valid shipping cost will be applied for the item(s).
                         </Text>
                         <Text variant={'bodyLarge'} style={{}}>
-                            3. Drag & Drop the rules to reorder them.
+                            3. Drag & Drop the rules to reorder the priority values.
                         </Text>
                     </Card.Content>
-                </Card>
-            }
-
-            <ReorderableList
-                data={rules}
-                onReorder={handleReorder}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.ruleId}
+                </Card> : null
+            }}
+                ListFooterComponent={() =>  <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center'}}>
+                    <Button
+                        icon="plus"
+                        mode="outlined"
+                        onPress={handleAddRule}
+                        style={styles.addButton}
+                        labelStyle={{color: theme.colors.success}}
+                    >
+                        Add Shipping Rule
+                    </Button>
+                </View>}
             />
 
-            <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center'}}>
-            <Button
-                icon="plus"
-                mode="outlined"
-                onPress={handleAddRule}
-                style={styles.addButton}
-                labelStyle={{color: theme.colors.success}}
-            >
-                Add Shipping Rule
-            </Button>
-            </View>
+
         </View>
         </>
     );
@@ -172,7 +168,7 @@ export default function ShippingScreen() {
 const makeStyles =  (theme) => StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
+        // paddingHorizontal: 16,
         backgroundColor: theme.colors.surface,
     },
     description: {
@@ -183,7 +179,9 @@ const makeStyles =  (theme) => StyleSheet.create({
         marginVertical: 10,
         position: 'relative',
         padding: 16,
-        backgroundColor: 'white'
+        backgroundColor: 'white',
+        borderRadius: 0
+
     },
     addButton: {
         marginTop: 16,
