@@ -1,11 +1,9 @@
 // RequireAuth.js
 
-import { useRouter, useSegments, usePathname, useLocalSearchParams } from "expo-router";
+import { useRouter, useSegments, usePathname, useLocalSearchParams, useFocusEffect } from "expo-router";
 import { useSelector, useDispatch } from "react-redux";
-import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import { setRedirectAfterAuth } from "../store/authSlice";
-import { AnimatedUnauthenticatedState } from "./AnimatedUnauthenticatedState";
 import {ActivityIndicator, useTheme} from "react-native-paper";
 
 export const RequireAuth = ({ children }) => {
