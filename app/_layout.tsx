@@ -7,15 +7,14 @@ import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { DefaultTheme } from "react-native-paper";
 import {Provider} from "react-redux";
-import { store } from "@/store/store";
+import {persistor, store} from "@/store/store";
 import * as NavigationBar from "expo-navigation-bar";
 import {focusManager, QueryClient, QueryClientProvider} from "react-query";
 import 'react-native-get-random-values';
-// import TokenMonitor from '../components/TokenMonitor';
 import {setAxiosDependencies} from "@/api/client";
 import AppShell from "@/components/AppShell";
 import * as Linking from 'expo-linking';
-// import {PersistGate} from "redux-persist/integration/react";
+import {PersistGate} from "redux-persist/integration/react";
 
 const queryClient = new QueryClient();
 // const isLoggedIn = true;
@@ -91,12 +90,12 @@ export default function RootLayout() {
           <SafeAreaProvider>
           <GestureHandlerRootView style={{ flex: 1 }}>
             <Provider store={store}>
-              {/*<PersistGate loading={null} persistor={persistor}>*/}
+              <PersistGate loading={null} persistor={persistor}>
               <PaperProvider theme={customTheme}>
                 <StatusBar style="dark" />
                 <AppShell/>
               </PaperProvider>
-              {/*</PersistGate>*/}
+              </PersistGate>
             </Provider>
           </GestureHandlerRootView>
         </SafeAreaProvider>

@@ -5,6 +5,7 @@ import {Platform, TouchableOpacity} from "react-native";
 import { useTheme } from "react-native-paper";
 import {useSelector} from "react-redux";
 import AppHeader from "../../../components/AppHeader";
+import GenericHeader from "../../../components/GenericHeader";
 
 export default function TabsComponent() {
   const theme = useTheme();
@@ -128,6 +129,7 @@ export default function TabsComponent() {
             options={{
                 href: null,
                 // tabBarButton: () => null, // Hides the tab bar button
+                header: () => <GenericHeader title={'Merchant Profile'} right={null}/>
             }}
         />
         <Tabs.Screen

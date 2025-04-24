@@ -9,6 +9,8 @@ import badgesReducer from './badgesSlice';
 import authReducer from './authSlice';
 import newStoreReducer from './newStoreSlice';
 import storeSettingsReducer from './storeSettingsSlice';
+import { persistReducer } from 'redux-persist';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const rootReducer = combineReducers({
     merchant: merchantReducer,
@@ -22,5 +24,13 @@ const rootReducer = combineReducers({
     auth: authReducer,
 });
 
+const persistConfig = {
+    key: 'root',
+    storage: AsyncStorage,
+};
 
-export default rootReducer;
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+
+
+export default persistedReducer;
