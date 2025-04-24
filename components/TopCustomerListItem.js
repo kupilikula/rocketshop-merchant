@@ -10,7 +10,7 @@ export const TopCustomerListItem = ({ customer }) => {
   return (
     <Pressable
       onPress={() =>
-        router.push("/Main/(tabs)/Customers/Customer/" + customer.customerId)
+        router.push("/Main/(tabs)/Customers/" + customer.customerId)
       }
     >
       <Card style={styles.card}>

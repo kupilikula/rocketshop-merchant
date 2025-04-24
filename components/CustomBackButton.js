@@ -19,7 +19,7 @@ export function CustomBackButton({ style }) {
 
     const goBack = () => {
 
-        router.back();
+        // router.back();
         // console.log('NAVIGATION STACK BEFORE GOING BACK', JSON.stringify(navRef.getRootState(), null, 4));
         // if (backHref && typeof backHref === 'string') {
         //     console.log(`CustomBackButton: Navigating back to specific href: ${backHref}`);

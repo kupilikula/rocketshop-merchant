@@ -39,8 +39,8 @@ export default function StoreFrontCollectionCard(props) {
         </View>
         <View>
 <Pressable onPress={() => {
-    router.replace({
-        pathname: `/Main/(tabs)/Collections/Collection/${props.collection.collectionId}`,
+    router.push({
+        pathname: `/Main/(tabs)/Collections/${props.collection.collectionId}`,
         params: {
             backHref: currentPath, // Pass the path of the current screen (StoreFront)
             // Add any other params needed by the destination screen

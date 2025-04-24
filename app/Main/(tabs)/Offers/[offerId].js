@@ -2,13 +2,13 @@ import React, {useState} from "react";
 import {
     StyleSheet, Text, View,
 } from "react-native";
-import { useOffer } from "../../../../../api/hooks/useOffer";
+import { useOffer } from "../../../../api/hooks/useOffer";
 import {useLocalSearchParams, useRouter} from "expo-router";
 import {useSelector} from "react-redux";
-import {useUpdateOffer} from "../../../../../api/hooks/useUpdateOffer";
-import OfferDetailsScreen from "../../../../../components/OfferDetails";
+import {useUpdateOffer} from "../../../../api/hooks/useUpdateOffer";
+import OfferDetailsScreen from "../../../../components/OfferDetails";
 import {Button, Dialog, Portal, Snackbar, useTheme} from "react-native-paper";
-import {useDeleteOffer} from "../../../../../api/hooks/useDeleteOffer";
+import {useDeleteOffer} from "../../../../api/hooks/useDeleteOffer";
 
 const EditOfferScreen = () => {
     const {storeId} = useSelector((state) => state.store);

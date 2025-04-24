@@ -25,7 +25,7 @@ const ListElement = React.memo((collection) => {
                 onLongPress={drag}
                 onPress={() => {
                     router.push(
-                        "/Main/(tabs)/Collections/Collection/" + collection.collectionId
+                        "/Main/(tabs)/Collections/" + collection.collectionId
                     );
                 }}
             >

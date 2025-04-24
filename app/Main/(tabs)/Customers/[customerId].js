@@ -2,11 +2,11 @@ import React, { useMemo } from "react";
 import { ScrollView, View, StyleSheet } from "react-native";
 import { Text, Divider, useTheme, Card } from "react-native-paper";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useCustomerDetails } from "../../../../../api/hooks/useCustomerDetails";
+import { useCustomerDetails } from "../../../../api/hooks/useCustomerDetails";
 import {useSelector} from "react-redux";
 import {formatDate} from "date-fns";
-import {formatDateTime} from "../../../../../utils/date";
-import {CustomerOrders} from "../../../../../components/CustomerOrders"; // Custom hook
+import {formatDateTime} from "../../../../utils/date";
+import {CustomerOrders} from "../../../../components/CustomerOrders"; // Custom hook
 
 const CustomerDetails = () => {
     const theme = useTheme();

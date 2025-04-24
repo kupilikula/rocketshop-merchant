@@ -18,7 +18,7 @@ const OffersScreen = () => {
     const renderOfferItem = (item) => (
         <View key={item.offerId} style={{ width: "100%" }}>
             <Pressable
-                onPress={() => router.push(`/Main/(tabs)/Offers/Offer/${item.offerId}`)}
+                onPress={() => router.push(`/Main/(tabs)/Offers/${item.offerId}`)}
             >
                 <Card style={styles.offerCard}>
                     <View style={styles.cardContent}>
@@ -113,7 +113,7 @@ const OffersScreen = () => {
                     >
                         <Button
                             onPress={() =>
-                                router.push("/Main/(tabs)/Offers/Offer/NewOffer")
+                                router.push("/Main/(tabs)/Offers/NewOffer")
                             }
                             mode={"contained"}
                             icon={"plus"}

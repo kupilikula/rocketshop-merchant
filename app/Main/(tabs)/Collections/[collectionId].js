@@ -17,12 +17,12 @@ import ReorderableList, {
     reorderItems,
     useReorderableDrag,
 } from "react-native-reorderable-list";
-import { ProductDisplayCompactMerchant } from "../../../../../components/ProductDisplayCompactMerchant";
-import {useCollection} from "../../../../../api/hooks/useCollection";
-import {useUpdateCollectionSettings} from "../../../../../api/hooks/useUpdateCollectionSettings";
-import {useReorderCollectionProducts} from "../../../../../api/hooks/useReorderCollectionProducts";
+import { ProductDisplayCompactMerchant } from "../../../../components/ProductDisplayCompactMerchant";
+import {useCollection} from "../../../../api/hooks/useCollection";
+import {useUpdateCollectionSettings} from "../../../../api/hooks/useUpdateCollectionSettings";
+import {useReorderCollectionProducts} from "../../../../api/hooks/useReorderCollectionProducts";
 import {useSelector} from "react-redux";
-import {usePushWithBackHref} from "../../../../../utils/usePushWithBackHref";
+import {usePushWithBackHref} from "../../../../utils/usePushWithBackHref";
 
 
 const ListElement = React.memo((product) => {

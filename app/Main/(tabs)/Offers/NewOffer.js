@@ -4,9 +4,9 @@ import {
 } from "react-native";
 import {useLocalSearchParams, useRouter} from "expo-router";
 import {useSelector} from "react-redux";
-import OfferDetailsScreen from "../../../../../components/OfferDetails";
+import OfferDetailsScreen from "../../../../components/OfferDetails";
 import {Snackbar, useTheme} from "react-native-paper";
-import {usePublishOffer} from "../../../../../api/hooks/usePublishOffer";
+import {usePublishOffer} from "../../../../api/hooks/usePublishOffer";
 
 const NewOfferScreen = () => {
     const {storeId} = useSelector((state) => state.store);

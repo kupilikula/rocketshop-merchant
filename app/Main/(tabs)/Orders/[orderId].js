@@ -186,7 +186,7 @@ const OrderDetails = () => {
                         style={styles.card}
                         onPress={() =>
                             router.push(
-                                "/Main/(tabs)/Customers/Customer/" + order.customer.customerId
+                                "/Main/(tabs)/Customers/" + order.customer.customerId
                             )
                         }
                     >

@@ -7,7 +7,8 @@ export default function Layout() {
       initialRouteName={"index"}
     >
      <Stack.Screen name='index' options={{header: ()=> <GenericHeader title={'Offers'}/>}}/>
-      <Stack.Screen name='Offer' options={{header: ()=> null}}/>
+      <Stack.Screen name='[offerId]' options={{header: ()=> <GenericHeader title={"Offer Details"} />}}/>
+        <Stack.Screen name='NewOffer' options={{header: ()=> <GenericHeader title={"New Offer Details"} />}}/>
     </Stack>
   );
 }

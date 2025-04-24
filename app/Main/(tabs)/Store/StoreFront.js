@@ -224,7 +224,7 @@ export default function StoreFront(props) {
                                         style={{borderRadius: 8}}
                                         icon={({size, color}) => <MaterialIcons name={'settings'} size={size} color={'white'}/>}
                                         onPress={() => {
-                                            router.replace({
+                                            router.push({
                                                 pathname: `/Main/(tabs)/StoreSettings`,
                                                 params: {
                                                     backHref: currentPath, // Pass the path of the current screen (StoreFront)
