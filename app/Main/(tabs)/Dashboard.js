@@ -1,6 +1,6 @@
 // Refactored Dashboard Screen using `situations` instead of `banners` with chart window constraints
 
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {
     View,
     ScrollView,
@@ -27,7 +27,7 @@ import { ProductDisplayCompactMerchant } from "../../../components/ProductDispla
 import { TopCustomerListItem } from "../../../components/TopCustomerListItem";
 import ScrollableScreen from "../../../components/ScrollableScreen";
 import { AutoSizeText, ResizeTextMode } from "react-native-auto-size-text";
-import {useReplaceWithBackHref} from "../../../utils/useReplaceWithBackHref";
+import {usePushWithBackHref} from "../../../utils/usePushWithBackHref";
 
 export default function Dashboard ()  {
     const router = useRouter();
@@ -38,8 +38,7 @@ export default function Dashboard ()  {
 
     const [chartTimeWindow, setChartTimeWindow] = useState("week");
     const [salesOrOrders, setSalesOrOrders] = useState("Sales");
-    const [banners, setBanners] = useState();
-    const replaceWithBackHref = useReplaceWithBackHref();
+    const pushWithBackHref = usePushWithBackHref();
 
 
     function lastNDays(n) {
@@ -52,12 +51,12 @@ export default function Dashboard ()  {
         return result;
     }
 
-    const situations = dashboardData.situations || {};
-    const storeAge = situations.storeAgeInDays || 0;
-    const shouldShowCharts = storeAge >= 7 && situations.totalOrders > 0 && situations.hasProducts;
-    const canShowMonthChart = storeAge >= 28;
-    const showTopProducts = dashboardData.topProducts && dashboardData.topProducts.length > 0;
-    const showTopCustomers = dashboardData.topCustomers && dashboardData.topCustomers.length > 0;
+    const situations = useMemo(() => dashboardData.situations || {}, [dashboardData]);
+    const storeAge = useMemo(() => situations.storeAgeInDays || 0, [situations]);
+    const shouldShowCharts = useMemo(() => storeAge >= 7 && situations.totalOrders > 0 && situations.hasProducts,[storeAge, situations]);
+    const canShowMonthChart = useMemo(() => storeAge >= 28, [storeAge]);
+    const showTopProducts = useMemo(() => dashboardData.topProducts && dashboardData.topProducts.length > 0, [dashboardData]);
+    const showTopCustomers = useMemo(() => dashboardData.topCustomers && dashboardData.topCustomers.length > 0, [dashboardData]);
     // Auto-select time window based on age
     const effectiveChartTimeWindow = canShowMonthChart ? chartTimeWindow : "week";
 
@@ -94,112 +93,113 @@ export default function Dashboard ()  {
         },
     ];
 
+    const banners = useMemo(() => {
+        if (!situations) return [];
 
-    useEffect(() => {
-        let newBanners = [];
-    if (!situations.storeIsActive) {
-        newBanners.push({
-            icon: "alert-circle",
-            color: theme.colors.errorContainer,
-            message: (
-                <>This store is currently <Text style={{ fontWeight: "bold" }}>Inactive</Text>. Customers cannot browse or place orders. You can activate this store from <Text style={{ fontWeight: "bold" }}>Store Settings</Text>.</>
-            )
-        });
-    }
+        const newBanners = [];
 
-    if (situations.totalProducts === 0 && situations.totalOrders === 0) {
-        newBanners.push({
-            icon: "store-off",
-            color: theme.colors.secondaryContainer,
-            message: (
-                <>Your store doesn’t have any <Text style={{ fontWeight: "bold" }}>products</Text> listed and hasn’t received any <Text style={{ fontWeight: "bold" }}>orders</Text> yet. Start by adding products and sharing your store to attract customers.</>
-            )
-        });
-    }
+        if (!situations.storeIsActive) {
+            newBanners.push({
+                icon: "alert-circle",
+                color: theme.colors.errorContainer,
+                message: (
+                    <>This store is currently <Text style={{ fontWeight: "bold" }}>Inactive</Text>. Customers cannot browse or place orders. You can activate this store from <Text style={{ fontWeight: "bold" }}>Store Settings</Text>.</>
+                )
+            });
+        }
 
-    if (situations.totalProducts === 0 && situations.totalOrders > 0) {
-        newBanners.push({
-            icon: "cube-outline",
-            color: theme.colors.secondaryContainer,
-            message: (
-                <>This store has received <Text style={{ fontWeight: "bold" }}>orders</Text> in the past, but currently has no <Text style={{ fontWeight: "bold" }}>products</Text>. Add new products to keep your store up to date.</>
-            )
-        });
-    }
+        if (situations.totalProducts === 0 && situations.totalOrders === 0) {
+            newBanners.push({
+                icon: "store-off",
+                color: theme.colors.secondaryContainer,
+                message: (
+                    <>Your store doesn’t have any <Text style={{ fontWeight: "bold" }}>products</Text> listed and hasn’t received any <Text style={{ fontWeight: "bold" }}>orders</Text> yet. Start by adding products and sharing your store to attract customers.</>
+                )
+            });
+        }
 
-    if(situations.totalProducts > 0 && situations.totalOrders === 0) {
-        newBanners.push({
-            icon: "cart-outline",
-            color: theme.colors.tertiaryContainer,
-            message: (
-                <>Your products are live, but the store hasn’t received any <Text style={{ fontWeight: "bold" }}>orders</Text> yet. Share your store link or run promotions to reach more customers.</>
-            )
-        });
-    }
+        if (situations.totalProducts === 0 && situations.totalOrders > 0) {
+            newBanners.push({
+                icon: "cube-outline",
+                color: theme.colors.secondaryContainer,
+                message: (
+                    <>This store has received <Text style={{ fontWeight: "bold" }}>orders</Text> in the past, but currently has no <Text style={{ fontWeight: "bold" }}>products</Text>. Add new products to keep your store up to date.</>
+                )
+            });
+        }
 
-    if (situations.firstActiveProduct) {
-        newBanners.push({
-            icon: "star-outline",
-            color: theme.colors.secondaryContainer,
-            message: (
-                <>🎉 You’ve listed your <Text style={{ fontWeight: "bold" }}>first active product</Text>! Add more to grow your catalog and attract more customers.</>
-            )
-        });
-    }
+        if (situations.totalProducts > 0 && situations.totalOrders === 0) {
+            newBanners.push({
+                icon: "cart-outline",
+                color: theme.colors.tertiaryContainer,
+                message: (
+                    <>Your products are live, but the store hasn’t received any <Text style={{ fontWeight: "bold" }}>orders</Text> yet. Share your store link or run promotions to reach more customers.</>
+                )
+            });
+        }
 
-    if (situations.firstFewActiveProducts) {
-        newBanners.push({
-            icon: "layers-outline",
-            color: theme.colors.secondaryContainer,
-            message: (
-                <>You’re off to a good start with a few active products. Keep going — customers love variety!</>
-            )
-        });
-    }
+        if (situations.firstActiveProduct) {
+            newBanners.push({
+                icon: "star-outline",
+                color: theme.colors.secondaryContainer,
+                message: (
+                    <>🎉 You’ve listed your <Text style={{ fontWeight: "bold" }}>first active product</Text>! Add more to grow your catalog and attract more customers.</>
+                )
+            });
+        }
 
-    if (situations.firstCompletedOrder || true) {
-        console.log('line 159', situations);
-        newBanners.push({
-            icon: "check-circle-outline",
-            color: theme.colors.tertiaryContainer,
-            message: (
-                <>✅ Congratulations on your <Text style={{ fontWeight: "bold" }}>first completed order</Text>! Keep the momentum going by sharing your store link.</>
-            )
-        });
-    }
+        if (situations.firstFewActiveProducts) {
+            newBanners.push({
+                icon: "layers-outline",
+                color: theme.colors.secondaryContainer,
+                message: (
+                    <>You’re off to a good start with a few active products. Keep going — customers love variety!</>
+                )
+            });
+        }
 
-    if (situations.firstInProgressOrder) {
-        newBanners.push({
-            icon: "truck-delivery-outline",
-            color: theme.colors.tertiaryContainer,
-            message: (
-                <>🚚 You’ve got your <Text style={{ fontWeight: "bold" }}>first in-progress order</Text>. Prepare for shipping and update its status once fulfilled.</>
-            )
-        });
-    }
+        if (situations.firstCompletedOrder) {
+            newBanners.push({
+                icon: "check-circle-outline",
+                color: theme.colors.tertiaryContainer,
+                message: (
+                    <>✅ Congratulations on your <Text style={{ fontWeight: "bold" }}>first completed order</Text>! Keep the momentum going by sharing your store link.</>
+                )
+            });
+        }
 
-    if (situations.firstFewOrders) {
-        newBanners.push({
-            icon: "cart-arrow-down",
-            color: theme.colors.tertiaryContainer,
-            message: (
-                <>📦 Great! Your store has started receiving orders. Continue delighting customers with on-time delivery and support.</>
-            )
-        });
-    }
+        if (situations.firstInProgressOrder) {
+            newBanners.push({
+                icon: "truck-delivery-outline",
+                color: theme.colors.tertiaryContainer,
+                message: (
+                    <>🚚 You’ve got your <Text style={{ fontWeight: "bold" }}>first in-progress order</Text>. Prepare for shipping and update its status once fulfilled.</>
+                )
+            });
+        }
 
-    if (situations.refundedOrReturnedOrders > 0) {
-        newBanners.push({
-            icon: "history",
-            color: theme.colors.errorContainer,
-            message: (
-                <>You’ve had some refunds or returns. Review your product quality and customer communication to improve future experiences.</>
-            )
-        });
-    }
-    setBanners(newBanners);
-        },
-        [situations]);
+        if (situations.firstFewOrders) {
+            newBanners.push({
+                icon: "cart-arrow-down",
+                color: theme.colors.tertiaryContainer,
+                message: (
+                    <>📦 Great! Your store has started receiving orders. Continue delighting customers with on-time delivery and support.</>
+                )
+            });
+        }
+
+        if (situations.refundedOrReturnedOrders > 0) {
+            newBanners.push({
+                icon: "history",
+                color: theme.colors.errorContainer,
+                message: (
+                    <>You’ve had some refunds or returns. Review your product quality and customer communication to improve future experiences.</>
+                )
+            });
+        }
+
+        return newBanners;
+    }, [situations, theme.colors]);
 
 
 
@@ -346,7 +346,7 @@ export default function Dashboard ()  {
                     </View>
                     {dashboardData.topProducts.map((p) => (
                         <View key={p.productId}>
-                            <Pressable onPress={() => replaceWithBackHref('/Main/(tabs)/Products/' + p.productId)}>
+                            <Pressable onPress={() => pushWithBackHref('/Main/(tabs)/Products/' + p.productId)}>
                                 <ProductDisplayCompactMerchant product={p} />
                             </Pressable>
                             <Divider style={{ marginVertical: 8 }} />

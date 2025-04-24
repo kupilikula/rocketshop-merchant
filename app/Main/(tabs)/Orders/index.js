@@ -23,6 +23,7 @@ import CrossPlatformDatePicker from "../../../../components/CrossPlatformDatePic
 import KeyboardAwareView from "../../../../components/KeyboardAwareView";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {formatDateTime, isToday, isThisWeek, isThisYear, isThisMonth, getStartOfWeek, normalizeDateRange} from "../../../../utils/date";
+import {usePushWithBackHref} from "../../../../utils/usePushWithBackHref";
 
 
 const statusGroupMap = {
@@ -59,6 +60,7 @@ const Orders = () => {
     const [filterExpanded, setFilterExpanded] = useState(false);
     const [selectedQuickFilters, setSelectedQuickFilters] = useState(["all"]);
     const {filter} = useLocalSearchParams();
+    const pushWithBackHref = usePushWithBackHref();
     console.log("params:", filter);
 
     const QUICK_FILTER_ROWS = [[{key: "all", label: "All Orders"}, {key: "pending", label: "Pending"},            // Order Created, Payment Initiated
@@ -257,7 +259,10 @@ const Orders = () => {
 
     const renderOrderItem = ({item}) => (<Card
             style={styles.orderCard}
-            onPress={() => router.push("/Main/(tabs)/Orders/Order/" + item.orderId)}
+            onPress={() =>
+                // pushWithBackHref("/Main/(tabs)/Orders/" + item.orderId)
+                router.push("/Main/(tabs)/Orders/" + item.orderId)
+    }
         >
             <View
                 style={{

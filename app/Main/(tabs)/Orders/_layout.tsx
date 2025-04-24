@@ -8,6 +8,6 @@ export default function Layout() {
 
   return <Stack screenOptions={{ headerShown: true, contentStyle: {backgroundColor: theme.colors.surface} }}>
     <Stack.Screen name='index' options={{header: ()=> <GenericHeader title={'Orders'}/>}}/>
-    <Stack.Screen name='Order' options={{header: () => null}}/>
+    <Stack.Screen name='[orderId]' options={{header: () => <GenericHeader title={"Order Details"}/>}}/>
   </Stack>;
 }

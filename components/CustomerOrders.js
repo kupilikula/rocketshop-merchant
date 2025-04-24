@@ -5,13 +5,14 @@ import { useSelector } from "react-redux";
 import { Button, Card, Divider, Text, useTheme } from "react-native-paper";
 import { formatDateTime } from "../utils/date";
 import { useRouter } from "expo-router";
+import {usePushWithBackHref} from "../utils/usePushWithBackHref";
 
 export const CustomerOrders = ({ customerId }) => {
     const router = useRouter();
     const theme = useTheme();
     const styles = makeStyles(theme);
     const { storeId } = useSelector((state) => state.store);
-
+    const pushWithBackHref = usePushWithBackHref();
     // const [page, setPage] = useState(1);
     // const limit = 2;
 
@@ -36,7 +37,7 @@ export const CustomerOrders = ({ customerId }) => {
             <Card
                 style={styles.orderCard}
                 onPress={() =>
-                    router.push("/Main/(tabs)/Orders/Order/" + order.orderId)
+                    pushWithBackHref("/Main/(tabs)/Orders/" + order.orderId)
                 }
             >
                 <Text style={styles.orderId}>

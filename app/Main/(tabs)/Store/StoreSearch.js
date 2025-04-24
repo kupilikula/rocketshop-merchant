@@ -4,14 +4,14 @@ import ProductSearch from "../../../../components/ProductSearch";
 import { useStoreProducts } from "../../../../api/hooks/useStoreProducts";
 import {useSelector} from "react-redux";
 import KeyboardAwareView from "../../../../components/KeyboardAwareView";
-import {useReplaceWithBackHref} from "../../../../utils/useReplaceWithBackHref";
+import {usePushWithBackHref} from "../../../../utils/usePushWithBackHref";
 
 export default function StoreSearch(props) {
     const { initialSearchQuery } = useLocalSearchParams();
     const {storeId} = useSelector((state) => state.store);
     const router = useRouter();
     const theme = useTheme();
-    const replaceWithBackHref = useReplaceWithBackHref();
+    const pushWithBackHref = usePushWithBackHref();
     // Fetch store products using the custom hook
     const { data: storeProducts, isLoading, isError } = useStoreProducts(storeId);
 
@@ -76,7 +76,7 @@ export default function StoreSearch(props) {
                     limitedResults={false}
                     initialSearchQuery={initialSearchQuery}
                     onSearchResultPressHandler={(p) =>
-                        replaceWithBackHref(`/Main/(tabs)/Products/${p.productId}`)}
+                        pushWithBackHref(`/Main/(tabs)/Products/${p.productId}`)}
                 />
             </KeyboardAwareView>
         )

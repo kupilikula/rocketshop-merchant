@@ -10,14 +10,14 @@ import {
     useTheme, ActivityIndicator, Button,
 } from "react-native-paper";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useOrderDetails } from "../../../../../api/hooks/useOrderDetails";
+import { useOrderDetails } from "../../../../api/hooks/useOrderDetails";
 import {useSelector} from "react-redux";
-import {formatDateTime} from "../../../../../utils/date";
-import {allowedOrderStatusTransitions, orderStatusColors} from "../../../../../utils/dataValues";
+import {formatDateTime} from "../../../../utils/date";
+import {allowedOrderStatusTransitions, orderStatusColors} from "../../../../utils/dataValues";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import ScrollableScreen from "../../../../../components/ScrollableScreen";
-import {useUpdateOrderStatus} from "../../../../../api/hooks/useUpdateOrderStatus";
-import {useReplaceWithBackHref} from "../../../../../utils/useReplaceWithBackHref";
+import ScrollableScreen from "../../../../components/ScrollableScreen";
+import {useUpdateOrderStatus} from "../../../../api/hooks/useUpdateOrderStatus";
+import {usePushWithBackHref} from "../../../../utils/usePushWithBackHref";
 
 const OrderDetails = () => {
     const {storeId} = useSelector((state) => state.store);
@@ -27,7 +27,7 @@ const OrderDetails = () => {
     const updateOrderStatusMutation = useUpdateOrderStatus(storeId, orderId);
     const styles = makeStyles(theme);
     const [selectedUpdateStatus, setSelectedUpdateStatus] = useState(null);
-    const replaceWithBackHref = useReplaceWithBackHref();
+    const pushWithBackHref = usePushWithBackHref();
 
     // React Query: Fetch order details
     const { data: order, isLoading, isError } = useOrderDetails(storeId, orderId);
@@ -65,7 +65,7 @@ const OrderDetails = () => {
         <View key={item.product.productId}>
             <Pressable
                 onPress={() =>
-                    replaceWithBackHref("/Main/(tabs)/Products/" + item.product.productId)
+                    pushWithBackHref("/Main/(tabs)/Products/" + item.product.productId)
                 }
             >
                 <View style={styles.productContainer}>

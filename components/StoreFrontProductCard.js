@@ -3,15 +3,15 @@ import { Card, Text } from "react-native-paper";
 import { Rating } from "@kolking/react-native-rating";
 import { Pressable, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import {useReplaceWithBackHref} from "../utils/useReplaceWithBackHref";
+import {usePushWithBackHref} from "../utils/usePushWithBackHref";
 
 export default function StoreFrontProductCard(props) {
-  const replaceWithBackHref = useReplaceWithBackHref();
+  const pushWithBackHref = usePushWithBackHref();
 
   return (
     <Pressable
       onPress={() =>
-        replaceWithBackHref(`/Main/(tabs)/Products/${props.product.productId}`)
+        pushWithBackHref(`/Main/(tabs)/Products/${props.product.productId}`)
       }
     >
       <Card

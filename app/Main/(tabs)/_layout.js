@@ -1,4 +1,4 @@
-import { Tabs } from "expo-router";
+import {Tabs, useRouter} from "expo-router";
 import React from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {Platform, TouchableOpacity} from "react-native";
@@ -9,6 +9,7 @@ import GenericHeader from "../../../components/GenericHeader";
 
 export default function TabsComponent() {
   const theme = useTheme();
+    const router = useRouter();
 
   return (
     <Tabs
@@ -53,6 +54,15 @@ export default function TabsComponent() {
             <MaterialIcons name={"shopping-bag"} size={30} color={color} />
           ),
         }}
+        listeners={({ navigation, route }) => ({
+            tabPress: (e) => {
+                const isFocused = navigation.isFocused();
+                if (isFocused) {
+                    e.preventDefault();
+                    router.replace(`/Main/(tabs)/${route.name}`);
+                }
+            },
+        })}
       />
       <Tabs.Screen
         name="AddNewProduct"
@@ -71,6 +81,16 @@ export default function TabsComponent() {
             <MaterialIcons name={"receipt-long"} size={30} color={color} />
           ),
         }}
+        listeners={({ navigation, route }) => ({
+            tabPress: (e) => {
+                const isFocused = navigation.isFocused();
+                if (isFocused) {
+                    e.preventDefault();
+                    router.replace(`/Main/(tabs)/${route.name}`);
+                }
+            },
+        })}
+
       />
       <Tabs.Screen
         name="Store"
@@ -81,6 +101,16 @@ export default function TabsComponent() {
           ),
             header: () => <AppHeader/>,
         }}
+        listeners={({ navigation, route }) => ({
+            tabPress: (e) => {
+                const isFocused = navigation.isFocused();
+                if (isFocused) {
+                    e.preventDefault();
+                    router.replace(`/Main/(tabs)/${route.name}`);
+                }
+            },
+        })}
+
       />
       <Tabs.Screen
         name="Collections"
@@ -88,6 +118,16 @@ export default function TabsComponent() {
           href: null,
           // tabBarButton: () => null, // Hides the tab bar button
         }}
+        listeners={({ navigation, route }) => ({
+            tabPress: (e) => {
+                const isFocused = navigation.isFocused();
+                if (isFocused) {
+                    e.preventDefault();
+                    router.replace(`/Main/(tabs)/${route.name}`);
+                }
+            },
+        })}
+
       />
       <Tabs.Screen
         name="Customers"
@@ -95,6 +135,16 @@ export default function TabsComponent() {
           href: null,
           // tabBarButton: () => null, // Hides the tab bar button
         }}
+        listeners={({ navigation, route }) => ({
+            tabPress: (e) => {
+                const isFocused = navigation.isFocused();
+                if (isFocused) {
+                    e.preventDefault();
+                    router.replace(`/Main/(tabs)/${route.name}`);
+                }
+            },
+        })}
+
       />
       <Tabs.Screen
         name="Offers"
@@ -102,6 +152,16 @@ export default function TabsComponent() {
           href: null,
           // tabBarButton: () => null, // Hides the tab bar button
         }}
+        listeners={({ navigation, route }) => ({
+            tabPress: (e) => {
+                const isFocused = navigation.isFocused();
+                if (isFocused) {
+                    e.preventDefault();
+                    router.replace(`/Main/(tabs)/${route.name}`);
+                }
+            },
+        })}
+
       />
         <Tabs.Screen
             name="Shipping"
@@ -109,6 +169,16 @@ export default function TabsComponent() {
                 href: null,
                 // tabBarButton: () => null, // Hides the tab bar button
             }}
+            listeners={({ navigation, route }) => ({
+                tabPress: (e) => {
+                    const isFocused = navigation.isFocused();
+                    if (isFocused) {
+                        e.preventDefault();
+                        router.replace(`/Main/(tabs)/${route.name}`);
+                    }
+                },
+            })}
+
         />
         <Tabs.Screen
             name="Messaging"
@@ -116,6 +186,16 @@ export default function TabsComponent() {
                 href: null,
                 // tabBarButton: () => null, // Hides the tab bar button
             }}
+            listeners={({ navigation, route }) => ({
+                tabPress: (e) => {
+                    const isFocused = navigation.isFocused();
+                    if (isFocused) {
+                        e.preventDefault();
+                        router.replace(`/Main/(tabs)/${route.name}`);
+                    }
+                },
+            })}
+
         />
         <Tabs.Screen
             name="StoreSettings"
@@ -123,6 +203,16 @@ export default function TabsComponent() {
                 href: null,
                 // tabBarButton: () => null, // Hides the tab bar button
             }}
+            listeners={({ navigation, route }) => ({
+                tabPress: (e) => {
+                    const isFocused = navigation.isFocused();
+                    if (isFocused) {
+                        e.preventDefault();
+                        router.replace(`/Main/(tabs)/${route.name}`);
+                    }
+                },
+            })}
+
         />
         <Tabs.Screen
             name="MerchantProfile"

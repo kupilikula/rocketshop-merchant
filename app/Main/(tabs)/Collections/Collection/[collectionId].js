@@ -22,19 +22,19 @@ import {useCollection} from "../../../../../api/hooks/useCollection";
 import {useUpdateCollectionSettings} from "../../../../../api/hooks/useUpdateCollectionSettings";
 import {useReorderCollectionProducts} from "../../../../../api/hooks/useReorderCollectionProducts";
 import {useSelector} from "react-redux";
-import {useReplaceWithBackHref} from "../../../../../utils/useReplaceWithBackHref";
+import {usePushWithBackHref} from "../../../../../utils/usePushWithBackHref";
 
 
 const ListElement = React.memo((product) => {
     const drag = useReorderableDrag();
-    const replaceWithBackHref = useReplaceWithBackHref();
+    const pushWithBackHref = usePushWithBackHref();
 
     return (
         <ReorderableListItem>
             <Pressable
                 onLongPress={drag}
                 onPress={() =>
-                    replaceWithBackHref("/Main/(tabs)/Products/" + product.productId)
+                    pushWithBackHref("/Main/(tabs)/Products/" + product.productId)
                 }
                 style={{ marginVertical: 5 }}
             >
