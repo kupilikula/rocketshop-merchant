@@ -14,6 +14,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {Rating} from "@kolking/react-native-rating";
 import KeyboardAwareScrollableScreen from "../../../../components/KeyboardAwareScrollableScreen";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
+import {useReplaceWithBackHref} from "../../../../utils/useReplaceWithBackHref";
 
 const getUniqueProducts = (products) => {
     return [...new Set(products)];
@@ -27,6 +28,7 @@ export default function StoreFront(props) {
     const merchant = useSelector((state) => state.merchant);
     const store = useSelector((state) => state.store);
     const insets = useSafeAreaInsets();
+    const replaceWithBackHref = useReplaceWithBackHref();
     console.log('store:', store);
     console.log('merchant:', merchant);
 
@@ -239,9 +241,8 @@ export default function StoreFront(props) {
                         <Divider style={{marginVertical: 2}}/>
                         <ProductSearch
                             uniqueProducts={uniqueProducts}
-                            onSearchResultPressHandler={(product) => router.push(
-                                `/Main/(tabs)/Products/Product/${product.productId}`,
-                            )}
+                            onSearchResultPressHandler={(product) =>
+                                replaceWithBackHref(`/Main/(tabs)/Products/${product.productId}`)}
                             limitedResults={true}
                             resultsLimit={5}
                             initialSearchQuery={""}

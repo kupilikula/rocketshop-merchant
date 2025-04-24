@@ -59,7 +59,7 @@ export default function EditPreview(props) {
                 setTimeout(async () => {
                     await queryClient.invalidateQueries(["merchantProduct", storeId, editProduct.productId]);
                     await queryClient.invalidateQueries("storeProducts");
-                    router.replace('/Main/(tabs)/Products/Product/' + editProduct.productId);
+                    router.replace('/Main/(tabs)/Products/' + editProduct.productId);
                     resetWorkflow()
                 }, 2000);
             }
@@ -96,10 +96,8 @@ export default function EditPreview(props) {
                     </View>
                     <Button onPress={async () => {
                         navigation.popToTop();
-                        // setMediaGalleryKey(mediaGalleryKey+1);
-                        // resetNavigationStack('/Main/(tabs)/Products/Product/' + editProduct.productId);
                         await queryClient.invalidateQueries(["merchantProduct", storeId, editProduct.productId])
-                        router.replace('/Main/(tabs)/Products/Product/' + editProduct.productId);
+                        router.replace('/Main/(tabs)/Products/' + editProduct.productId);
                         setTimeout(() => {
                             dispatch(resetEditProduct());
                             resetWorkflow();

@@ -15,7 +15,7 @@ export default function ProductDisplayCardMerchantListing(props) {
       style={styles.card}
       onPress={() => {
         console.log("pushing");
-        router.push(`/Main/(tabs)/Products/Product/${props.product.productId}`);
+        router.push(`/Main/(tabs)/Products/${props.product.productId}`);
       }}
     >
       <FlatListSlider

@@ -152,7 +152,7 @@ export default function Preview(props) {
                 setTimeout(async () => {
                     await queryClient.invalidateQueries(["merchantProduct", storeId, newProduct.productId]);
                     await queryClient.invalidateQueries("storeProducts");
-                    router.replace('/Main/(tabs)/Products/Product/' + newProduct.productId);
+                    router.replace('/Main/(tabs)/Products/' + newProduct.productId);
                     resetWorkflow()
                 }, 2000);
 
@@ -198,7 +198,7 @@ export default function Preview(props) {
                     <Button onPress={() => {
                         navigation.popToTop();
                         setMediaGalleryKey(mediaGalleryKey+1);
-                        router.replace('/Main/(tabs)/Products/Product/' + newProduct.productId);
+                        router.replace('/Main/(tabs)/Products/' + newProduct.productId);
                         setTimeout(() => {
                             dispatch(resetNewProduct());
                             resetWorkflow();

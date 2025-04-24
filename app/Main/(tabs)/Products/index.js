@@ -21,6 +21,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
 import KeyboardAwareView from "../../../../components/KeyboardAwareView";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
+import {useReplaceWithBackHref} from "../../../../utils/useReplaceWithBackHref";
 
 const Products = () => {
   const {storeId} = useSelector((state) => state.store);
@@ -38,6 +39,7 @@ const Products = () => {
   const [selectedTags, setSelectedTags] = useState(["All"]);
     const [selectedQuickFilters, setSelectedQuickFilters] = useState(["all"]);
 
+    const replaceWithBackHref = useReplaceWithBackHref();
     const insets = useSafeAreaInsets();
   const styles = makeStyles(theme);
 
@@ -306,9 +308,7 @@ const Products = () => {
 
   const renderProductItem = ({ item }) => (
       <Pressable
-          onPress={() =>
-              router.push(`/Main/(tabs)/Products/Product/${item.productId}`)
-          }
+          onPress={() => replaceWithBackHref(`/Main/(tabs)/Products/${item.productId}`)}
       >
         <ProductDisplayCompactMerchant product={item} />
       </Pressable>

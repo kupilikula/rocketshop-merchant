@@ -27,6 +27,7 @@ import { ProductDisplayCompactMerchant } from "../../../components/ProductDispla
 import { TopCustomerListItem } from "../../../components/TopCustomerListItem";
 import ScrollableScreen from "../../../components/ScrollableScreen";
 import { AutoSizeText, ResizeTextMode } from "react-native-auto-size-text";
+import {useReplaceWithBackHref} from "../../../utils/useReplaceWithBackHref";
 
 export default function Dashboard ()  {
     const router = useRouter();
@@ -38,6 +39,7 @@ export default function Dashboard ()  {
     const [chartTimeWindow, setChartTimeWindow] = useState("week");
     const [salesOrOrders, setSalesOrOrders] = useState("Sales");
     const [banners, setBanners] = useState();
+    const replaceWithBackHref = useReplaceWithBackHref();
 
 
     function lastNDays(n) {
@@ -213,7 +215,7 @@ export default function Dashboard ()  {
     return (
         <ScrollableScreen backgroundColor={theme.colors.surface} innerStyle={styles.container}>
             {/* Situational Banners */}
-            {banners.map((b, i) => (
+            {banners?.map((b, i) => (
                 <Banner
                     key={i}
                     visible
@@ -344,7 +346,7 @@ export default function Dashboard ()  {
                     </View>
                     {dashboardData.topProducts.map((p) => (
                         <View key={p.productId}>
-                            <Pressable onPress={() => router.push('/Main/(tabs)/Products/Product/' + p.productId)}>
+                            <Pressable onPress={() => replaceWithBackHref('/Main/(tabs)/Products/' + p.productId)}>
                                 <ProductDisplayCompactMerchant product={p} />
                             </Pressable>
                             <Divider style={{ marginVertical: 8 }} />

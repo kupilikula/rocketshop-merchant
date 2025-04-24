@@ -17,6 +17,7 @@ import {allowedOrderStatusTransitions, orderStatusColors} from "../../../../../u
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import ScrollableScreen from "../../../../../components/ScrollableScreen";
 import {useUpdateOrderStatus} from "../../../../../api/hooks/useUpdateOrderStatus";
+import {useReplaceWithBackHref} from "../../../../../utils/useReplaceWithBackHref";
 
 const OrderDetails = () => {
     const {storeId} = useSelector((state) => state.store);
@@ -26,6 +27,7 @@ const OrderDetails = () => {
     const updateOrderStatusMutation = useUpdateOrderStatus(storeId, orderId);
     const styles = makeStyles(theme);
     const [selectedUpdateStatus, setSelectedUpdateStatus] = useState(null);
+    const replaceWithBackHref = useReplaceWithBackHref();
 
     // React Query: Fetch order details
     const { data: order, isLoading, isError } = useOrderDetails(storeId, orderId);
@@ -63,7 +65,7 @@ const OrderDetails = () => {
         <View key={item.product.productId}>
             <Pressable
                 onPress={() =>
-                    router.push("/Main/(tabs)/Products/Product/" + item.product.productId)
+                    replaceWithBackHref("/Main/(tabs)/Products/" + item.product.productId)
                 }
             >
                 <View style={styles.productContainer}>

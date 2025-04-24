@@ -317,7 +317,7 @@ export default function ProductScreenMerchant(props) {
                                           marginVertical: 4
                                       }}
                                       onPress={() =>
-                                          router.replace("/Main/(tabs)/Products/Product/" + v.productId)
+                                          router.replace("/Main/(tabs)/Products/" + v.productId)
                                       }
                                   >
                                       <View

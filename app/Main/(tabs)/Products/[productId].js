@@ -3,8 +3,8 @@ import { View, StyleSheet } from "react-native";
 import {Text, ActivityIndicator, useTheme} from 'react-native-paper';
 import {useLocalSearchParams} from "expo-router";
 import { useSelector } from "react-redux"; // To get storeId from Redux
-import { useStoreProduct } from "../../../../../api/hooks/useStoreProduct";
-import ProductScreenMerchant from "../../../../../components/ProductScreenMerchant";
+import { useStoreProduct } from "../../../../api/hooks/useStoreProduct";
+import ProductScreenMerchant from "../../../../components/ProductScreenMerchant";
 
 const ProductPage = () => {
   const theme = useTheme();
