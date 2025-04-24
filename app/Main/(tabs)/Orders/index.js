@@ -34,7 +34,6 @@ const statusGroupMap = {
     refunded_returned: getRefundedOrReturnedOrderStatuses(),
 };
 
-
 const Orders = () => {
     const router = useRouter();
     const theme = useTheme();
@@ -49,8 +48,6 @@ const Orders = () => {
     // Local State
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState([]);
-    const [statusQuickFilter, setStatusQuickFilter] = useState("All");
-    const [dateQuickFilter, setDateQuickFilter] = useState("This Month");
     const [minTotal, setMinTotal] = useState("");
     const [maxTotal, setMaxTotal] = useState("");
     const [filterDates, setFilterDates] = useState({
@@ -60,11 +57,8 @@ const Orders = () => {
     const [sortOrder, setSortOrder] = useState("descending");
     const [quickFilterExpanded, setQuickFilterExpanded] = useState(false);
     const [filterExpanded, setFilterExpanded] = useState(false);
-    const [showStartPicker, setShowStartPicker] = useState(false);
-    const [showEndPicker, setShowEndPicker] = useState(false);
     const [selectedQuickFilters, setSelectedQuickFilters] = useState(["all"]);
     const {filter} = useLocalSearchParams();
-    const insets = useSafeAreaInsets();
     console.log("params:", filter);
 
     const QUICK_FILTER_ROWS = [[{key: "all", label: "All Orders"}, {key: "pending", label: "Pending"},            // Order Created, Payment Initiated
@@ -100,21 +94,6 @@ const Orders = () => {
         lowest_order_total: ["highest_order_total", "all"],
         most_recent: ["oldest", "all"],
         oldest: ["most_recent", "all"],
-    };
-
-
-    // useEffect(() => {
-    //   console.log("line50:, params:", filter);
-    //   if (filter === "open") {
-    //     setStatusFilter(orderStatusList.slice(0, 6));
-    //   } else if (filter === "today") {
-    //     setFilterDates({ startDate: new Date(), endDate: new Date() });
-    //     setStatusQuickFilter("All");
-    //   }
-    // }, [filter]);
-
-    const toggleSortOrder = () => {
-        setSortOrder((prev) => (prev === "ascending" ? "descending" : "ascending"));
     };
 
     const fuse = useMemo(() => {

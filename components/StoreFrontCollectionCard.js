@@ -58,7 +58,7 @@ export default function StoreFrontCollectionCard(props) {
           flexWrap: "wrap",
           display: "flex",
           width: "100%",
-          justifyContent: "center",
+          justifyContent: "space-around",
         }}
       >
         {props.collection.displayProducts
