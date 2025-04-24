@@ -68,9 +68,9 @@ const ProductInfoScreen = (props) => {
             .min(0, "Stock cannot be negative.")
             .required("Stock is required."),
         description: yup.string().required("Description is required."),
-        collections: yup
-            .array()
-            .min(1, "At least one collection must be selected."),
+        // collections: yup
+        //     .array()
+        //     .min(1, "At least one collection must be selected."),
     });
 
     // react-hook-form setup

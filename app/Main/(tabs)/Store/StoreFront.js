@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {Pressable, ScrollView, View, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import {Button, Card, Divider, Surface, Text, useTheme, ActivityIndicator} from "react-native-paper";
@@ -15,6 +15,8 @@ import {Rating} from "@kolking/react-native-rating";
 import KeyboardAwareScrollableScreen from "../../../../components/KeyboardAwareScrollableScreen";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {usePushWithBackHref} from "../../../../utils/usePushWithBackHref";
+import {useApplicableOffers} from "../../../../api/hooks/useApplicableOffers";
+import OfferBar from "../../../../components/OfferBar";
 
 const getUniqueProducts = (products) => {
     return [...new Set(products)];
@@ -47,20 +49,18 @@ export default function StoreFront(props) {
             staleTime: 5 * 60 * 1000,
         },
     ]);
+    const { data: offersData, } = useApplicableOffers({storeId: storeId, storeWide: true});
 
     const storeFrontData = storeFrontQuery.data;
     const storeProductsData = storeProductsQuery.data;
 
-    const [uniqueProducts, setUniqueProducts] = useState([]);
     const currentPath = usePathname();
 
     // Extract unique products and set text color when data is fetched
-    useEffect(() => {
-        if (storeProductsData) {
-            const uniqueProducts = getUniqueProducts(storeProductsData);
-            setUniqueProducts(uniqueProducts);
-        }
-    }, [storeFrontData, storeProductsData]);
+
+    const uniqueProducts = useMemo(() => getUniqueProducts(storeProductsData || []), [storeProductsData]);
+
+    const notInAnyActiveCollectionProducts = useMemo(() => storeProductsData?.filter(p => p.collections.filter(c => c.isActive).length===0), [storeProductsData]);
 
     if (storeFrontQuery.isLoading || storeProductsQuery.isLoading) {
         return (
@@ -238,6 +238,12 @@ export default function StoreFront(props) {
                                 }
                             </View>
                         </Card>
+                        {offersData?.offers.length > 0 &&
+                            <Card style={{padding: 16, backgroundColor: 'white', marginVertical: 10, borderRadius: 0}} mode={'contained'}>
+                                <Text variant={'titleMedium'}>Store Wide Offers</Text>
+                                {offersData.offers.map( (o) => !o.requireCode ? <OfferBar key = {o.offerId} offer={o} showCheckmark={false} fullWidth={true}/> : null)}
+                            </Card>
+                        }
                         <Divider style={{marginVertical: 2}}/>
                         <ProductSearch
                             uniqueProducts={uniqueProducts}
@@ -249,6 +255,7 @@ export default function StoreFront(props) {
                             style={{ paddingHorizontal: 10, marginVertical: 10, alignSelf: 'stretch'}}
                         />
                         <Divider style={{marginVertical: 2}}/>
+                        {storeFrontData?.displayCollections.length > 0 &&
                         <View
                             style={{
                                 display: "flex",
@@ -264,6 +271,10 @@ export default function StoreFront(props) {
                                 </View>
                             ))}
                         </View>
+                        }
+                        {notInAnyActiveCollectionProducts.length > 0 &&
+                            <StoreFrontCollectionCard storeId={storeId} fallback={true} products={notInAnyActiveCollectionProducts} collection={undefined}/>
+                        }
                     </View>
             </KeyboardAwareScrollableScreen>
         )
