@@ -30,8 +30,6 @@ export default function OtherProductsPage() {
         isError: isErrorCollections,
     } = useCollections(storeId);
 
-    const {data: store} = useStoreDetails(storeId);
-
     const otherProducts = useMemo(() => products?.filter(p=> !p.collections?.some(c=>c.isActive) && p.isActive), [products]);
     const noActiveCollections = useMemo(() => collections?.filter(c => c.isActive).length === 0, [collections]);
     console.log('otherProducts:', otherProducts);
