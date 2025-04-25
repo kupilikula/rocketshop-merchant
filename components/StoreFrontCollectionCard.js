@@ -49,6 +49,17 @@ export default function StoreFrontCollectionCard(props) {
                 </View>
             </View>
         }
+        {props.fallback &&
+            <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%'}}>
+                <View>
+                    {props.showFallbackName && <Text variant={'titleLarge'}>Other</Text>}
+                    <Text variant={'bodyLarge'}>{props.products?.length.toString() + ' Products'}</Text>
+                </View>
+                <View>
+                    <Link href={`/Main/(tabs)/Collections/Other`}><Text variant={'bodyLarge'}>See All</Text></Link>
+                </View>
+            </View>
+        }
         {!props.fallback && offersData?.offers.length > 0 &&
             offersData.offers.map( (o) => !o.applicableTo.storeWide && !o.requireCode ? <OfferBar key = {o.offerId} offer={o} showCheckmark={false} fullWidth={false}/> : null)
         }

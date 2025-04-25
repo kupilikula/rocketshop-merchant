@@ -202,6 +202,7 @@ export default function CollectionPage() {
                     </>
                 }
                 keyExtractor={(item) => item.productId}
+                contentContainerStyle={{ paddingHorizontal: 10 }}
             />
         </View>
     );
@@ -211,7 +212,7 @@ const makeStyles = ({ colors }) =>
     StyleSheet.create({
         surface: {
             flex: 1,
-            paddingHorizontal: 10,
+            // paddingHorizontal: 10,
             backgroundColor: colors.surface,
         },
         header: {

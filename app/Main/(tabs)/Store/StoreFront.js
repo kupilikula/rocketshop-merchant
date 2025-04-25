@@ -239,7 +239,7 @@ export default function StoreFront(props) {
                             </View>
                         </Card>
                         {offersData?.offers.length > 0 &&
-                            <Card style={{padding: 16, backgroundColor: 'white', marginVertical: 10, borderRadius: 0}} mode={'contained'}>
+                            <Card style={{padding: 8, backgroundColor: 'white', marginVertical: 0, borderRadius: 0}} mode={'contained'}>
                                 <Text variant={'titleMedium'}>Store Wide Offers</Text>
                                 {offersData.offers.map( (o) => !o.requireCode ? <OfferBar key = {o.offerId} offer={o} showCheckmark={false} fullWidth={true}/> : null)}
                             </Card>
@@ -273,7 +273,7 @@ export default function StoreFront(props) {
                         </View>
                         }
                         {notInAnyActiveCollectionProducts.length > 0 &&
-                            <StoreFrontCollectionCard storeId={storeId} fallback={true} products={notInAnyActiveCollectionProducts} collection={undefined}/>
+                            <StoreFrontCollectionCard storeId={storeId} fallback={true} products={notInAnyActiveCollectionProducts} showFallbackName={storeFrontData?.displayCollections?.length>0} collection={undefined}/>
                         }
                     </View>
             </KeyboardAwareScrollableScreen>
