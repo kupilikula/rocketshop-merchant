@@ -2,7 +2,6 @@ import { useQuery } from "react-query";
 import axiosClient from "../client";
 
 export const useApplicableOffers = ({storeId, productId, collectionId, storeWide}) => {
-
     let enabled = true;
     let params;
     let queryKey;
@@ -19,8 +18,12 @@ export const useApplicableOffers = ({storeId, productId, collectionId, storeWide
         enabled = false;
     }
 
-    return useQuery(queryKey, async () => {
-        const { data } = await axiosClient.get(`/stores/${storeId}/offers/getApplicableOffers`, {params: params});
-        return data;
-    }, {enabled: !!storeId && enabled});
+    return useQuery({
+        queryKey,
+        queryFn: async () => {
+            const { data } = await axiosClient.get('/getApplicableOffers', {params: params});
+            return data;
+        },
+        enabled: !!storeId && enabled
+    });
 };
