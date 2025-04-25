@@ -3,10 +3,10 @@ import { PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import {AppState, Platform} from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import {useEffect, useRef} from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { DefaultTheme } from "react-native-paper";
-import {Provider} from "react-redux";
+import {Provider, useDispatch, useSelector} from "react-redux";
 import {persistor, store} from "@/store/store";
 import * as NavigationBar from "expo-navigation-bar";
 import {focusManager, QueryClient, QueryClientProvider} from "react-query";
@@ -83,6 +83,8 @@ export default function RootLayout() {
       console.log('🔗 Received initial URL:', url);
     });
   }, []);
+
+
 
 
   return (

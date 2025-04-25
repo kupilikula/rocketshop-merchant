@@ -13,8 +13,13 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.rocketshop.merchant",
       "icon": "./assets/images/RocketShopIconOrangeIOS1024.png",
-      "associatedDomains": ["applinks:merchant.rocketshop.in"]
-
+      "associatedDomains": [
+        "applinks:merchant.rocketshop.in",
+        "applinks:merchant.rocketshop.in"
+      ],
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -31,9 +36,13 @@
             "host": "rocketshop.in",
             "pathPrefix": "/"
           },
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
+      "googleServicesFile": "./google-services.json",
       "permissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
@@ -96,6 +105,9 @@
             "composeCompilerVersion": "1.5.15"
           }
         }
+      ],
+      [
+        "expo-notifications"
       ]
     ],
     "experiments": {

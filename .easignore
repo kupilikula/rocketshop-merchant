@@ -40,12 +40,10 @@ yarn-error.*
 
 #build
 *.apk
-ios
 android
+ios
 build-*
 
-#firebase
-google-services.json
 
 app-example
 

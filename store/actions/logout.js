@@ -14,7 +14,9 @@ export const logout = async (dispatch, router) => {
 
                 // Make logout API call
                 await axios.post(`${BASE_URL}/auth/logout`,
-                    {},
+                    {
+                            expoPushToken: 'placeholder',
+                    },
                     { withCredentials: true });
 
                 console.log('Logout API call succeeded.');

@@ -89,7 +89,9 @@
     "uuid": "11.1.0",
     "victory-native": "37.3.6",
     "yup": "1.6.1",
-    "expo-linear-gradient": "~14.0.2"
+    "expo-linear-gradient": "~14.0.2",
+    "expo-notifications": "~0.29.14",
+    "expo-device": "~7.0.3"
   },
   "devDependencies": {
     "@babel/core": "7.26.10",

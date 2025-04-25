@@ -5,7 +5,7 @@ export default function Index() {
 
   const isAuthenticated = useSelector((state) => state.auth.authenticationStatus==='AUTHENTICATED');
 
-  if (isAuthenticated) {
+  if (false) {
     return <Redirect href={"/Main"} />;
   } else {
     return <Redirect href={"/Authentication"} />;

@@ -60,6 +60,7 @@ export default function Dashboard ()  {
     // Auto-select time window based on age
     const effectiveChartTimeWindow = canShowMonthChart ? chartTimeWindow : "week";
 
+    console.log("Dashboard Data", dashboardData);
     const quickLinks = [
         {
             label: "Open Orders",
@@ -237,8 +238,8 @@ export default function Dashboard ()  {
                         const label = key === "openOrders" ? "Open Orders" : key === "newOrdersToday" ? "New Orders" : "Sales";
                         const value =
                             key === "salesToday"
-                                ? `₹${dashboardData.quickStats[key]}`
-                                : dashboardData.quickStats[key].toString();
+                                ? `₹${dashboardData?.quickStats[key]}`
+                                : dashboardData?.quickStats[key]?.toString();
                         return (
                             <Card key={index} style={styles.statsCard} mode="elevated">
                                 <Card.Title title={label} titleStyle={{ fontSize: 13, alignSelf: "center" }} />
