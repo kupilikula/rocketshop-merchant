@@ -15,6 +15,7 @@ import {setAxiosDependencies} from "@/api/client";
 import AppShell from "@/components/AppShell";
 import * as Linking from 'expo-linking';
 import {PersistGate} from "redux-persist/integration/react";
+import {initializeNotificationChannels, initializeNotificationHandler} from "../utils/initializeNotificationHandler";
 
 const queryClient = new QueryClient();
 // const isLoggedIn = true;
@@ -84,7 +85,10 @@ export default function RootLayout() {
     });
   }, []);
 
-
+  useEffect(() => {
+    initializeNotificationHandler();
+    initializeNotificationChannels();
+  }, []);
 
 
   return (

@@ -46,6 +46,7 @@ build-*
 
 #firebase
 google-services.json
+*firebase*.json
 
 app-example
 
