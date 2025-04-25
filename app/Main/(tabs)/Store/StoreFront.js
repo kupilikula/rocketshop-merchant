@@ -17,6 +17,8 @@ import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {usePushWithBackHref} from "../../../../utils/usePushWithBackHref";
 import {useApplicableOffers} from "../../../../api/hooks/useApplicableOffers";
 import OfferBar from "../../../../components/OfferBar";
+import MaterialCommunityIcon from "react-native-paper/src/components/MaterialCommunityIcon";
+import {MaterialCommunityIcons} from "@expo/vector-icons";
 
 const getUniqueProducts = (products) => {
     return [...new Set(products)];
@@ -214,6 +216,7 @@ export default function StoreFront(props) {
                                         {storeFrontData.storeDescription}
                                     </Text>
                                 </View>
+                                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginTop: 10, alignSelf: 'center'}}>
                                 {store.merchantRole==='Admin' &&
                                 <View style={{ marginTop: 10, alignSelf: 'center'}}>
                                     <Button
@@ -236,6 +239,27 @@ export default function StoreFront(props) {
                                     </Button>
                                 </View>
                                 }
+                                <View style={{ marginTop: 10, alignSelf: 'center'}}>
+                                    <Button
+                                        mode={"elevated"}
+                                        elevation={5}
+                                        buttonColor={theme.colors.primary}
+                                        textColor={"white"}
+                                        style={{borderRadius: 8}}
+                                        icon={({size, color}) => <MaterialCommunityIcons name={'account-check'} size={size} color={'white'}/>}
+                                        onPress={() => {
+                                            router.push({
+                                                pathname: `/Main/(tabs)/Store/FollowersList`,
+                                                params: {
+                                                    backHref: currentPath, // Pass the path of the current screen (StoreFront)
+                                                    // Add any other params needed by the destination screen
+                                                }
+                                            })}}
+                                    >
+                                        Followers
+                                    </Button>
+                                </View>
+                                </View>
                             </View>
                         </Card>
                         {offersData?.offers.length > 0 &&

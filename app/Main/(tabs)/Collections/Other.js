@@ -53,7 +53,7 @@ export default function OtherProductsPage() {
 
     return (
         <>
-            <GenericHeader title={noActiveCollections ? 'All Products' : 'Other Products'}/>
+            <GenericHeader title={'Other Products'}/>
             {
                 isLoading &&  <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
                     <ActivityIndicator size={100} animating={true} color={theme.colors.primary}/>
@@ -66,7 +66,7 @@ export default function OtherProductsPage() {
                 </View>
             }
             { !isLoading && !isError && otherProducts?.length > 0  &&
-                <View  style={{backgroundColor: theme.colors.surface, height: '100%'}}>
+                <View  style={{flex: 1, backgroundColor: theme.colors.surface,}}>
 
                     <FlatList
                         data={otherProducts}

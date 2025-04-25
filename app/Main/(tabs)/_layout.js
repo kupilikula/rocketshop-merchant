@@ -104,7 +104,7 @@ export default function TabsComponent() {
           tabBarIcon: ({ color }) => (
             <MaterialIcons name={"store"} size={30} color={color} />
           ),
-            header: () => <AppHeader/>,
+            header: () => null,
         }}
         listeners={({ navigation, route }) => ({
             tabPress: (e) => {

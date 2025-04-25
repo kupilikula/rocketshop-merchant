@@ -16,7 +16,7 @@ export const SearchResultProduct = (props) => {
           height: 60,
           borderStyle: "solid",
             borderWidth: 1,
-            borderRadius: 8,
+            borderRadius: 0,
             borderColor: theme.colors.grayBorder,
             backgroundColor: theme.colors.white,
           // borderBottomWidth: 1,

@@ -6,7 +6,7 @@ import {useSelector} from "react-redux";
 import KeyboardAwareView from "../../../../components/KeyboardAwareView";
 import {usePushWithBackHref} from "../../../../utils/usePushWithBackHref";
 
-export default function StoreSearch(props) {
+export default function StoreProductsSearch(props) {
     const { initialSearchQuery } = useLocalSearchParams();
     const {storeId} = useSelector((state) => state.store);
     const router = useRouter();

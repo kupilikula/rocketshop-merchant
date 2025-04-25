@@ -106,7 +106,7 @@ export default function ProductSearch(props) {
               textColor={"white"}
               onPress={() =>
                 router.push({
-                  pathname: "/Main/(tabs)/Store/StoreSearch",
+                  pathname: "/Main/(tabs)/Store/StoreProductsSearch",
                   params: { initialSearchQuery: searchQuery },
                 })
               }
