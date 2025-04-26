@@ -34,7 +34,7 @@ const newProductSlice = createSlice({
       state[field] = value;
     },
     resetNewProduct: () => {
-      console.log("resetting: ", { ...initialState });
+      console.log("resetting new product: ", { ...initialState });
       return { ...initialState };
     },
     addAttribute: (state) => {

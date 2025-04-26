@@ -19,6 +19,7 @@ export const ProductWorkflowProvider = ({ children }) => {
 
     const resetWorkflow = () =>
     {
+        console.log("resetting workflow");
         setIsNewProduct(true);
         setIsNewVariant(false);
         setIsClone(false);

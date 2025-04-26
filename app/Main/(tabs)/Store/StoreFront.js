@@ -110,7 +110,7 @@ export default function StoreFront(props) {
                     flexDirection: "column",
                     width: '100%'
                 }}
-                contentContainerStyle={{ width: '100%', padding: 0, alignSelf: 'stretch'}}
+                contentContainerStyle={{ width: '100%', padding: 0, alignSelf: 'stretch', paddingBottom: 100}}
                 keyboardVerticalOffset={insets.top + 60}
             >
                     <View

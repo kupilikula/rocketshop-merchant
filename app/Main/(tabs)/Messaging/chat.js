@@ -76,22 +76,68 @@ const ChatScreen = () => {
     };
 
     const handleSendMessage = () => {
-
         console.log('handleSendMessage, socket:', socket);
+
         if (!message.trim() || !socket) return;
 
         const newMessage = {
-            chatId, senderId: merchantId, senderType: 'Merchant', message, messageId: uuidv4(), created_at: new Date(),
+            chatId,
+            senderId: merchantId,
+            senderType: 'Merchant',
+            message,
+            messageId: uuidv4(),
+            created_at: new Date(),
         };
-        try {
-            socket.emit('stopTyping', {chatId, senderId: merchantId}); // Stop typing when a message is sent
-            socket.emit('sendMessage', newMessage);
-        } catch (err) {
-            console.log('merchant hsm err', err);
-        }
-        queryClient.setQueryData(['messages', chatId], (oldMessages) => [...(oldMessages || []), newMessage,]);
 
-        setMessage('');
+        let ackReceived = false;
+
+        try {
+            socket.emit('stopTyping', { chatId, senderId: merchantId });
+
+            // 1. Emit with ack handler
+            socket.timeout(3000).emit('sendMessage', newMessage, (err, ackResponse) => {
+                if (err) {
+                    console.log('Socket ack timeout or error (Merchant):', err);
+                    return;
+                }
+
+                if (ackResponse?.status === 'ok') {
+                    console.log('Socket ack received successfully (Merchant):', ackResponse);
+                    ackReceived = true;
+                    // Optional: Update message status to "confirmed" in UI
+                } else {
+                    console.log('Socket ack error or unexpected response (Merchant):', ackResponse);
+                }
+            });
+
+            // 2. Optimistically update UI
+            queryClient.setQueryData(['messages', chatId], (oldMessages) => [
+                ...(oldMessages || []),
+                newMessage,
+            ]);
+
+            setMessage('');
+
+            // 3. Timeout fallback to API
+            setTimeout(() => {
+                if (!ackReceived) {
+                    console.log('No ack received (Merchant), sending via API fallback...');
+                    sendMessageViaApi(newMessage);
+                }
+            }, 4000);
+
+        } catch (err) {
+            console.log('Merchant handleSendMessage error:', err);
+        }
+    };
+
+    const sendMessageViaApi = async (message) => {
+        try {
+            await axiosClient.post(`/chats/${chatId}/newMessage`, message);
+            console.log('Successfully sent via API fallback.');
+        } catch (err) {
+            console.error('API fallback failed:', err);
+        }
     };
 
 

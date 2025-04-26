@@ -34,14 +34,21 @@ export default function Preview(props) {
     const theme = useTheme();
     const newProduct = useSelector((state) => state.newProduct);
     const storeId = useSelector((state) => state.store.storeId); // Access the storeId from Redux
-    const {isNewVariant, variantInfo, isClone, useSameMediaForClone, resetWorkflow, productPreviewPublishRef, isPublishing, setIsPublishing, published, setPublished, publishFailure, setPublishFailure, setShouldResetStack, mediaGalleryKey, setMediaGalleryKey} = useContext(ProductWorkflowContext);
+    const {isNewVariant, variantInfo, isClone, useSameMediaForClone, resetWorkflow, isPublishing, setIsPublishing, published, setPublished, publishFailure, setPublishFailure, mediaGalleryKey, setMediaGalleryKey} = useContext(ProductWorkflowContext);
     const navigation = useNavigation();
     const queryClient = useQueryClient();
-    const resetNavigationStack = (route) => {
-        // Reset the navigation stack to the Dashboard tab
-        navigation.dispatch(CommonActions.reset({
-            index: 0, routes: [{name: route}], // Replace with your Dashboard screen name
-        }),);
+    const resetNavigationStack = (route, params) => {
+        navigation.dispatch(
+            CommonActions.reset({
+                index: 0,
+                routes: [
+                    {
+                        name: route,
+                        params: params || {},
+                    }
+                ],
+            })
+        );
     };
 
     async function publishProduct() {
@@ -66,7 +73,7 @@ export default function Preview(props) {
                 updatedMediaItems = _.cloneDeep(newProduct.mediaItems);
                 // Upload each mediaItem to Spaces
                 console.log('uploading media');
-                await Promise.all(newProduct.mediaItems.map(async (item, index) => {
+                const P = await Promise.all(newProduct.mediaItems.map(async (item, index) => {
                     const presignedUrl = presignedUrls[index].presignedUrl;
                     console.log('pre:', presignedUrl);
 
@@ -84,7 +91,7 @@ export default function Preview(props) {
                     if (convertedItemUri) {
                         console.log('computing blob of converted item');
                         let res = await fetch(convertedItemUri);
-                        blob = res.blob();
+                        blob = await res.blob();
                         console.log('line 87, blob:', blob);
                     } else {
                         let assetInfo = await MediaLibrary.getAssetInfoAsync(item);
@@ -105,14 +112,21 @@ export default function Preview(props) {
                             }, body: blob,
                         });
                         console.log('r:', r);
+                        if (!r.ok) {
+                            console.error('Failed to upload to Spaces:', r.statusText);
+                            return { success: false, reason: `uploadError (${r.status})` };
+                        }
                         // Update the mediaItem with its uploaded URI
                         updatedMediaItems[index].uri = presignedUrls[index].fileUri;
+                        return { success: true };
+
                     } catch (err) {
                         console.log('err:', err);
-                        return false;
+                        return { success: false, reason: 'fetchPutError' };
                     }
 
                 }));
+                console.log('P:', JSON.stringify(P, null, 2));
                 console.log('updatedMediaItems:', updatedMediaItems);
             } else {
                 updatedMediaItems = newProduct.mediaItems;
@@ -152,8 +166,18 @@ export default function Preview(props) {
                 setTimeout(async () => {
                     await queryClient.invalidateQueries(["merchantProduct", storeId, newProduct.productId]);
                     await queryClient.invalidateQueries("storeProducts");
-                    router.replace('/Main/(tabs)/Products/' + newProduct.productId);
+
+                    console.log('resetting workflow');
                     resetWorkflow()
+                    console.log("resetting new product slice's redux state");
+                    dispatch(resetNewProduct());
+                    console.log('resetting navigation stack');
+                    await router.replace('/Main/(tabs)/AddNewProduct');
+                    // Wait one animation frame
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    await router.replace(`/Main/(tabs)/Products/${newProduct.productId}`);
+                    console.log('done resetting');
+
                 }, 2000);
 
             }
