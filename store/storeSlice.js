@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import {RESET_ALL} from "./actions/resetAll";
 
 const initialState = {
   storeId: null,
@@ -22,7 +23,10 @@ const storeSlice = createSlice({
       clearStore: (state, action) => {
           return {...initialState};
       },
-  }
+  },
+    extraReducers: (builder) => {
+        builder.addCase(RESET_ALL, () => initialState);
+    },
 });
 
 export const {

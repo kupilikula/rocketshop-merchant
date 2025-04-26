@@ -1,7 +1,7 @@
 // components/AppShell.js
 import React, {useEffect, useRef} from 'react';
 import {Platform, View} from 'react-native';
-import { Stack } from 'expo-router';
+import {Stack, useRouter} from 'expo-router';
 import StoreSelectorHeader from "@/components/StoreSelectorHeader";
 import {useTheme} from "react-native-paper";
 import {useSelector} from "react-redux";
@@ -9,9 +9,12 @@ import {registerForPushNotificationsAsync} from "../utils/registerForPushNotific
 import axiosClient from "../api/client";
 import * as Device from "expo-device";
 import {setPushToken} from "../store/pushTokenSlice";
+import * as Notifications from "expo-notifications";
+import {handleNotificationNavigation} from "../utils/handleNotificationNavigation";
 
 export default function AppShell() {
 
+    const router = useRouter();
     const theme = useTheme();
     const isAuthenticated = useSelector((state) => state.auth.authenticationStatus==='AUTHENTICATED');
     const {merchantId} = useSelector((state) => state.merchant);
@@ -56,6 +59,38 @@ export default function AppShell() {
 
         sendPushTokenIfNeeded();
     }, [isAuthenticated, merchantId]);
+
+    useEffect(() => {
+        const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+            const content = response.notification.request.content;
+            console.log('Notification tapped with content:', content);
+            const { data } = response.notification.request.content;
+
+            console.log('Notification tapped with data:', data);
+
+            if (data?.type) {
+                handleNotificationNavigation(data, router);
+            }
+        });
+
+        return () => subscription.remove();
+    }, [router]);
+
+    useEffect(() => {
+        const checkInitialNotification = async () => {
+            const initialNotification = await Notifications.getLastNotificationResponseAsync();
+            if (initialNotification?.notification?.request?.content?.data) {
+                const data = initialNotification.notification.request.content.data;
+                console.log('Initial notification tapped:', data);
+
+                if (data?.type) {
+                    handleNotificationNavigation(data, router);
+                }
+            }
+        };
+
+        checkInitialNotification();
+    }, [router]);
 
     return (
         <View style={{ flex: 1, backgroundColor: theme.colors.surface }}>

@@ -17,6 +17,7 @@ import {v4 as uuidv4} from 'uuid';
 import {removeUnreadMessages} from "../../../../store/badgesSlice";
 import {copyContent} from "../../../../utils/copyToClipboard";
 import {useChatMessages} from "../../../../api/hooks/useChatMessages";
+import {useGetCustomerDetailsFromChatId} from "../../../../api/hooks/useGetCustomerDetailsFromChatId";
 
 const fetchChatMessages = async (chatId) => {
     const response = await axiosClient.get(`/chats/${chatId}/messages`);
@@ -24,7 +25,9 @@ const fetchChatMessages = async (chatId) => {
 };
 
 const ChatScreen = () => {
-    const {chatId, customerId, customerName} = useLocalSearchParams();
+    const {chatId} = useLocalSearchParams();
+    const {data: customer} = useGetCustomerDetailsFromChatId(chatId);
+    const {customerId, fullName: customerName} = customer || {};
     console.log('customerName:', customerName, ' , customerId:', customerId);
     const {merchantId} = useSelector((state) => state.merchant);
     const { storeId } = useSelector((state) => state.store);

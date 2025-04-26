@@ -1,4 +1,5 @@
 import {createSlice} from "@reduxjs/toolkit";
+import {RESET_ALL} from "./actions/resetAll";
 
 const initialState = {
     expoPushToken: null,
@@ -14,6 +15,9 @@ const pushTokenSlice = createSlice({
         clearPushToken: (state) => {
             state.expoPushToken = null;
         },
+    },
+    extraReducers: (builder) => {
+        builder.addCase(RESET_ALL, () => initialState);
     },
 });
 

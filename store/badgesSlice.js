@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import {RESET_ALL} from "./actions/resetAll";
 
 const initialState = {
     unreadMessages: {}, // chatId => [messages]
@@ -50,6 +51,9 @@ const badgesSlice = createSlice({
 
             state.unreadMessages[chatId] = [];
         },
+    },
+    extraReducers: (builder) => {
+        builder.addCase(RESET_ALL, () => initialState);
     },
 });
 

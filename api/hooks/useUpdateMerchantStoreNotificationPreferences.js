@@ -7,17 +7,14 @@ export function useUpdateMerchantStoreNotificationPreferences(storeId, merchantI
     const queryClient = useQueryClient();
 
     return useMutation(
-        async ({ preferences }) => {
-            const response = await axiosClient.patch(`/stores/${storeId}/updateNotificationPreferences`, {
-                storeId,
-                ...preferences
-            });
+        async (preferences) => {
+            const response = await axiosClient.patch(`/stores/${storeId}/updateNotificationPreferences`, preferences);
             return response.data;
         },
         {
             onSuccess: (_data, variables) => {
                 // Optional: invalidate query for this specific storeId
-                queryClient.invalidateQueries(['merchantNotificationPreferences', storeId, merchantId]);
+                queryClient.invalidateQueries(['merchantStoreNotificationPreferences', storeId, merchantId]);
             },
             onError: (error) => {
                 console.error('Failed to update merchant notification preferences:', error);

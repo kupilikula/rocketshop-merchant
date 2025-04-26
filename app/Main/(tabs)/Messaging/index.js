@@ -16,8 +16,8 @@ const ChatListScreen = () => {
     const theme = useTheme();
     const {unreadMessages} = useSelector((state)=> state.badges);
 
-    const handleChatPress = (chatId, customerId, customerName, customerPhone) => {
-        router.push({ pathname: '/Main/(tabs)/Messaging/chat', params: { chatId, customerId, customerName, customerPhone } });
+    const handleChatPress = (chatId) => {
+        router.push({ pathname: '/Main/(tabs)/Messaging/chat', params: { chatId} });
     };
 
     if (isLoading) {

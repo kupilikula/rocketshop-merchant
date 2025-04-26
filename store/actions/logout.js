@@ -7,6 +7,8 @@ import {BASE_URL} from '@/config/config';
 import {clearAllStores} from "@/store/allStoresSlice";
 import {setAuthenticationStatus} from "@/store/authSlice";
 import {clearStoreSettings} from "@/store/storeSettingsSlice";
+import {persistor} from "../store";
+import {RESET_ALL} from "./resetAll";
 
 export const logout =  (router) => async (dispatch, getState) => {
         try {
@@ -30,14 +32,14 @@ export const logout =  (router) => async (dispatch, getState) => {
                 // Disconnect all active sockets
                 disconnectAllSockets();
 
-
-                // Clear Redux state
-                dispatch(setAuthenticationStatus('UNAUTHENTICATED'));
+                dispatch({ type: RESET_ALL });
                 router.replace('/Authentication');
-                dispatch(clearMerchant());
-                dispatch(clearStore());
-                dispatch(clearAllStores());
-                dispatch(clearStoreSettings());
+
+
+                // ✅ Purge persisted Redux storage
+                await persistor.purge();
+
+
 
                 console.log('Logged out locally.');
 

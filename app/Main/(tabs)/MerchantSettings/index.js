@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import {Text, TextInput, Button, Card, useTheme, Divider} from 'react-native-paper';
 import {useDispatch, useSelector} from 'react-redux';
-import axiosClient from '../../../api/client';
-import OtpInput from '../../../components/OtpInput';
-import {setMerchant} from "../../../store/merchantSlice";
+import axiosClient from '../../../../api/client';
+import OtpInput from '../../../../components/OtpInput';
+import {setMerchant} from "../../../../store/merchantSlice";
+import MerchantNotificationPreferences from "../../../../components/MerchantNotificationPreferences";
+import ScrollableScreen from "../../../../components/ScrollableScreen";
 
 const MerchantProfileScreen = () => {
 
@@ -84,17 +86,17 @@ const MerchantProfileScreen = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <ScrollableScreen innerStyle={styles.container}>
             <Card style={styles.card}>
                 <Card.Title title="Merchant Profile" />
                 <Card.Content>
                     {mode === 'VIEW' && (
                         <View>
                             <Text variant={"titleMedium"}>Name:</Text>
-                            <Text variant={"titleLarge"}>{currentFullName}</Text>
-                            <Divider style={{marginVertical: 16}}/>
+                            <Text variant={"bodyLarge"}>{currentFullName}</Text>
+                            <Divider style={{marginVertical: 4}}/>
                             <Text variant={'titleMedium'}>Phone:</Text>
-                            <Text variant={'titleLarge'}>{currentPhone}</Text>
+                            <Text variant={'bodyLarge'}>{currentPhone}</Text>
                             <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', marginTop: 16}}>
                             <Button mode="contained" style={styles.button} onPress={() => {
                                 setPhone(currentPhone);
@@ -162,7 +164,8 @@ const MerchantProfileScreen = () => {
             </Card>
 
             {/* Future: Store Preferences Section */}
-        </View>
+            <MerchantNotificationPreferences/>
+        </ScrollableScreen>
     );
 };
 
@@ -177,6 +180,8 @@ const styles = StyleSheet.create({
     card: {
         padding: 8,
         backgroundColor: 'white',
+        marginVertical: 16,
+        borderRadius: 0,
     },
     input: {
         marginBottom: 12,

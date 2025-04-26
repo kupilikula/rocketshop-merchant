@@ -1,5 +1,6 @@
 // store/authSlice.js
 import { createSlice } from '@reduxjs/toolkit';
+import {RESET_ALL} from "./actions/resetAll";
 
 const initialState = {
     authenticationStatus: 'UNAUTHENTICATED', // 'UNAUTHENTICATED' | 'CHECKING_REGISTRATION' | 'OTP_SENT' | 'LOGGING_IN' | 'REGISTERING' | 'AUTHENTICATED'
@@ -42,6 +43,9 @@ const authSlice = createSlice({
         clearRedirectAfterAuth: (state) => {
             state.redirectAfterAuth = null;
         },
+    },
+    extraReducers: (builder) => {
+        builder.addCase(RESET_ALL, () => initialState);
     },
 });
 

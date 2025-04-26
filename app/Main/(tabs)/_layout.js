@@ -165,11 +165,11 @@ export default function TabsComponent() {
             }}
         />
         <Tabs.Screen
-            name="MerchantProfile"
+            name="MerchantSettings"
             options={{
                 href: null,
                 // tabBarButton: () => null, // Hides the tab bar button
-                header: () => <GenericHeader title={'Merchant Profile'} right={null}/>
+                header: () => null
             }}
         />
         <Tabs.Screen
