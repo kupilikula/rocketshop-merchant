@@ -33,31 +33,30 @@ export async function initializeNotificationChannels() {
         lightColor: '#FF6F59', // match your theme color
     });
 
-    await Notifications.setNotificationChannelAsync('chat', {
-        name: 'Messages',
+    await Notifications.setNotificationChannelAsync('chatMessages', {
+        name: 'Chat Messages',
         importance: Notifications.AndroidImportance.DEFAULT,
         sound: 'default',
         vibrationPattern: [0, 150, 100, 150],
         lightColor: '#3A86FF',
     });
 
-    await Notifications.setNotificationChannelAsync('promotions', {
-        name: 'Promotions & Campaigns',
+    await Notifications.setNotificationChannelAsync('miscellaneous', {
+        name: 'Miscellaneous',
         importance: Notifications.AndroidImportance.LOW,
         sound: null,
         enableVibrate: false,
         lightColor: '#FFBE0B',
     });
 
-    await Notifications.setNotificationChannelAsync('platform', {
-        name: 'Platform Messages',
-        importance: Notifications.AndroidImportance.DEFAULT,
-        sound: 'default',
-        lightColor: '#00C4CC',
-    });
-
     await Notifications.setNotificationChannelAsync('ratings', {
         name: 'Ratings & Reviews',
+        importance: Notifications.AndroidImportance.DEFAULT,
+        sound: null,
+        lightColor: '#8E44AD',
+    });
+    await Notifications.setNotificationChannelAsync('follows', {
+        name: 'Follows',
         importance: Notifications.AndroidImportance.DEFAULT,
         sound: null,
         lightColor: '#8E44AD',

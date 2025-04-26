@@ -127,7 +127,7 @@ const axiosClientGetter = () => {
                         logoutInProgress = true; // Prevent multiple logout calls
                         console.log("Initiating logout due to failed token refresh...");
                         try {
-                            await logout(dispatch, router); // Pass `dispatch` and `router` to logout
+                            await dispatch(logout(router)); // Pass `dispatch` and `router` to logout
                         } finally {
                             logoutInProgress = false; // Reset the flag
                         }

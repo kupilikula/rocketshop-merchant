@@ -133,7 +133,7 @@ export default function DrawerMenu(props) {
                    style={{padding: 0, borderRadius: 5, marginLeft: 0}}
                    onPress={ async () => {
                      try {
-                       await logout(dispatch, router); // Pass `dispatch` and `router` to logout
+                       await dispatch(logout(router)); // Pass `dispatch` and `router` to logout
                      } catch (err) {
                        console.log('error during logout:', err);
                      }

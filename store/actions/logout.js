@@ -8,14 +8,15 @@ import {clearAllStores} from "@/store/allStoresSlice";
 import {setAuthenticationStatus} from "@/store/authSlice";
 import {clearStoreSettings} from "@/store/storeSettingsSlice";
 
-export const logout = async (dispatch, router) => {
+export const logout =  (router) => async (dispatch, getState) => {
         try {
                 console.log('logging out. Calling /auth/logout');
 
                 // Make logout API call
                 await axios.post(`${BASE_URL}/auth/logout`,
                     {
-                            expoPushToken: 'placeholder',
+                            merchantId: getState().merchant.merchantId,
+                            expoPushToken: getState().pushToken.expoPushToken,
                     },
                     { withCredentials: true });
 

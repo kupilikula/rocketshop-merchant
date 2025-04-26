@@ -19,6 +19,12 @@ export default function AppShell() {
     console.log('AppShell', isAuthenticated, merchantId, pushTokenSent.current);
 
     useEffect(() => {
+        if (!isAuthenticated) {
+            pushTokenSent.current = false;
+        }
+    }, [isAuthenticated]);
+
+    useEffect(() => {
         async function sendPushTokenIfNeeded() {
             if (
                 isAuthenticated &&
