@@ -137,8 +137,8 @@ const ProductInfoScreen = (props) => {
     const saveStateToReduxAndResetFormData = useCallback(() => {
         const resetFormData = () => {
             console.log("resetting form data");
-            reset();
             replaceFormAttributes([]);
+            reset();
             console.log("form state after reset:", getValues());
         };
 
@@ -323,7 +323,8 @@ const ProductInfoScreen = (props) => {
     const onSubmit = (data) => {
         if (isNewProduct) {
             dispatch(updateNewProductField({field: "all", value: data}));
-            router.push("./Preview");
+            router.push('./Shipping')
+            // router.push("./Preview");
         } else {
             dispatch(updateEditProductField({field: "all", value: data}));
             router.push("./EditPreview");

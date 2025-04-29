@@ -12,6 +12,7 @@ import storeSettingsReducer from './storeSettingsSlice';
 import { persistReducer } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import pushTokenReducer from "./pushTokenSlice";
+import shippingRuleReducer from "./shippingRuleSlice";
 
 const rootReducer = combineReducers({
     merchant: merchantReducer,
@@ -24,6 +25,7 @@ const rootReducer = combineReducers({
     badges: badgesReducer,
     auth: authReducer,
     pushToken: pushTokenReducer,
+    shippingRule: shippingRuleReducer,
 });
 
 const persistConfig = {

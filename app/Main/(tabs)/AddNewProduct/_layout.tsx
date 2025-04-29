@@ -26,6 +26,14 @@ export default function AddNewProductStack() {
         }}
       />
         <Stack.Screen
+            name={"Shipping"}
+            options={{
+                title: "Shipping",
+                header: () => null,
+                // header: () => <ShippingHeader/>
+            }}
+        />
+        <Stack.Screen
             name={"Preview"}
             options={{
                 title: "Preview",

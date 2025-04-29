@@ -22,6 +22,8 @@ import MarkAsVariantModal from "./MarkAsVariantModal";
 import CloneProductModal from "./CloneProductModal";
 import {ProductReviewsList} from "./ProductReviews";
 import ScrollableScreen from "./ScrollableScreen";
+import GenericHeader from "./GenericHeader";
+import ConfirmDeleteProductModal from "./ConfirmDeleteProductModal";
 
 export default function ProductScreenMerchant(props) {
   // const router = useRouter();
@@ -35,6 +37,7 @@ export default function ProductScreenMerchant(props) {
     const [markAsVariantModalVisible, setMarkAsVariantModalVisible] = useState(false);
     const [isCloneModalVisible, setIsCloneModalVisible] = useState(false);
     const [fabOpen, setFabOpen] = useState(false);
+    const [deleteProductModal, setDeleteProductModal] = useState(false);
 
     const handleFabToggle = () => setFabOpen(!fabOpen);
   const [isActive, setIsActive] = useState(props.product.isActive);
@@ -160,14 +163,21 @@ export default function ProductScreenMerchant(props) {
         });
         setGenerateVariantModalVisible(false);
     }
-    // const handleArchive = () => {
-  //   console.log(`Product ${props.product.productId} archived`);
-  // };
+
 
   console.log("props.product:", props.product);
   // console.log('size:', size);
   return (
           <>
+              <GenericHeader title={'Product Details'} right={<IconButton
+                  icon="pencil"
+                  size={28}
+                  onPress={() => {
+                      router.push({pathname: '/Main/(tabs)/EditProduct', params: { productId: props.product.productId, backHref: `/Main/(tabs)/Products/${props.product.productId}`} } )
+                  }}
+                  style={styles.actionButton}
+                  iconColor={theme.colors.black}
+              />}/>
     <ScrollableScreen innerStyle={styles.container}>
         <Card mode={"contained"} style={styles.card}>
           <FlatListSlider
@@ -199,14 +209,16 @@ export default function ProductScreenMerchant(props) {
             </Text>
             <View style={styles.cardContentView}>
               <View style={styles.actionContainer}>
-                <View style={styles.actions}>
-                  <IconButton
-                    icon="pencil"
-                    size={28}
-                    onPress={() => { router.push({pathname: '/Main/(tabs)/EditProduct', params: { productId: props.product.productId} } )}}
-                    style={styles.actionButton}
-                    iconColor={theme.colors.primary}
-                  />
+                <View style={{display: "flex", flexDirection: "row", justifyContent: "flex-end", alignItems: "center"}}>
+                    <IconButton
+                        icon="delete"
+                        size={28}
+                        onPress={() => {
+                            setDeleteProductModal(true);
+                        }}
+                        style={styles.actionButton}
+                        iconColor={theme.colors.error}
+                    />
                 </View>
                 <View style={styles.statusContainer}>
                   <Switch
@@ -394,6 +406,11 @@ export default function ProductScreenMerchant(props) {
               <ProductReviewsList productId={props.product.productId} />
           </Card.Content>
         </Card>
+        <ConfirmDeleteProductModal
+            visible={deleteProductModal}
+            onDismiss={() => setDeleteProductModal(false)}
+            productId={props.product.productId}
+        />
     </ScrollableScreen>
               <View style={styles.fabContainer}>
                   <Menu

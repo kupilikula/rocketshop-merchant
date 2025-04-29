@@ -16,6 +16,7 @@ export const ProductWorkflowProvider = ({ children }) => {
     const [isCameraOpen, setIsCameraOpen] = useState(false);
     const [isMediaSelected, setIsMediaSelected] = useState(false);
     const [mediaGalleryKey, setMediaGalleryKey] = useState(0);
+    // const [shippingRuleChoice, setShippingRuleChoice] = useState(null);
 
     const resetWorkflow = () =>
     {
@@ -31,6 +32,7 @@ export const ProductWorkflowProvider = ({ children }) => {
         setIsCameraOpen(false);
         setIsMediaSelected(false);
         setMediaGalleryKey(0);
+        // setShippingRuleChoice(null);
     }
 
     return (
@@ -60,6 +62,8 @@ export const ProductWorkflowProvider = ({ children }) => {
                 productPreviewPublishRef,
                 mediaGalleryKey,
                 setMediaGalleryKey,
+                // shippingRuleChoice,
+                // setShippingRuleChoice,
                 resetWorkflow
             }}
         >
