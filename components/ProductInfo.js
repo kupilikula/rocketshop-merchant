@@ -327,7 +327,8 @@ const ProductInfoScreen = (props) => {
             // router.push("./Preview");
         } else {
             dispatch(updateEditProductField({field: "all", value: data}));
-            router.push("./EditPreview");
+            router.push("./EditShipping");
+            // router.push("./EditPreview");
         }
 
 

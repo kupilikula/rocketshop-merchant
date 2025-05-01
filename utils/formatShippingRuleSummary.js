@@ -3,7 +3,10 @@ export const formatShippingRuleSummary = (rule) => {
     console.log('rule.ruleName:', rule.ruleName);
     const lines = [];
     // 0. Number of products info
-    lines.push(`${rule.products.length} products`);
+    if (rule.products?.length > 0) {
+        lines.push(`${rule.products.length} products`);
+    }
+
 
     // 1. Handle default (no condition)
     const defaultCondition = rule.conditions.find(c => c.when.length === 0);

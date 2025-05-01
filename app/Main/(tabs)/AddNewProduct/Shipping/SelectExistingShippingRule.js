@@ -7,7 +7,7 @@ import { ProductWorkflowContext } from '../../../../../components/ProductWorkflo
 import Fuse from 'fuse.js';
 import {router, useRouter} from 'expo-router';
 import {computeProductSimilarityScore} from "../../../../../utils/computeProductSimilarityScore";
-import {setSelectedExistingShippingRuleId} from "../../../../../store/shippingRuleSlice";
+import {setNewShippingRule, setSelectedExistingShippingRuleId} from "../../../../../store/shippingRuleSlice";
 import {formatShippingRuleSummary} from "../../../../../utils/formatShippingRuleSummary";
 
 export default function SelectExistingShippingRule() {
@@ -44,6 +44,7 @@ export default function SelectExistingShippingRule() {
     const handleConfirm = () => {
         if (!localSelectedRuleId) return;
         dispatch(setSelectedExistingShippingRuleId(localSelectedRuleId));
+        dispatch(setNewShippingRule(shippingRules.find((r) => r.shippingRuleId===localSelectedRuleId)))
         router.push('/Main/(tabs)/AddNewProduct/Preview');
     };
 

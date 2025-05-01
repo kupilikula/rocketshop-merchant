@@ -24,6 +24,9 @@ import {ProductReviewsList} from "./ProductReviews";
 import ScrollableScreen from "./ScrollableScreen";
 import GenericHeader from "./GenericHeader";
 import ConfirmDeleteProductModal from "./ConfirmDeleteProductModal";
+// import {useGetShippingRule} from "../api/hooks/useGetShippingRule";
+import {useGetShippingRuleForProduct} from "../api/hooks/useGetShippingRuleForProduct";
+import {ShippingRuleSummary} from "./ShippingRuleSummary";
 
 export default function ProductScreenMerchant(props) {
   // const router = useRouter();
@@ -38,10 +41,11 @@ export default function ProductScreenMerchant(props) {
     const [isCloneModalVisible, setIsCloneModalVisible] = useState(false);
     const [fabOpen, setFabOpen] = useState(false);
     const [deleteProductModal, setDeleteProductModal] = useState(false);
-
+    const {data: shippingRule} = useGetShippingRuleForProduct(props.product.productId, storeId);
     const handleFabToggle = () => setFabOpen(!fabOpen);
   const [isActive, setIsActive] = useState(props.product.isActive);
 
+  console.log('shippingRule:', shippingRule);
   const handleStatusChange = async (status) => {
       console.log("status:", status);
       setIsActive(status);
@@ -404,8 +408,17 @@ export default function ProductScreenMerchant(props) {
               ))}
             </View>
               <ProductReviewsList productId={props.product.productId} />
+              {shippingRule &&
+                  <View style={{}}>
+                      <Text variant={"titleMedium"} style={{ marginTop: 10 }}>Shipping Cost Rule</Text>
+                      <ShippingRuleSummary shippingRule={shippingRule}/>
+                  </View>
+              }
+
           </Card.Content>
         </Card>
+
+
         <ConfirmDeleteProductModal
             visible={deleteProductModal}
             onDismiss={() => setDeleteProductModal(false)}

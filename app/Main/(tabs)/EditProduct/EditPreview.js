@@ -2,7 +2,7 @@ import {ActivityIndicator, ScrollView, View} from "react-native";
 import {Button, useTheme, Text} from "react-native-paper";
 import ProductDisplayCardCustomerStore from "../../../../components/ProductDisplayCardCustomerStore";
 import {useDispatch, useSelector} from "react-redux";
-import { useContext, useEffect} from "react";
+import React, { useContext, useEffect} from "react";
 import {resetEditProduct} from "../../../../store/editProductSlice";
 import {useNavigation, useRouter} from "expo-router";
 import {CommonActions} from "@react-navigation/native";
@@ -14,6 +14,8 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import _ from "lodash";
 import {ProductWorkflowContext} from "../../../../components/ProductWorkflowContext";
 import {useQueryClient} from "react-query";
+import {ShippingRuleSummary} from "../../../../components/ShippingRuleSummary";
+import {useGetShippingRuleForProduct} from "../../../../api/hooks/useGetShippingRuleForProduct";
 
 export default function EditPreview(props) {
     const {resetWorkflow, isNewProduct, productPreviewPublishRef, isPublishing, setIsPublishing, published, setPublished, publishFailure, setPublishFailure, setShouldResetStack, mediaGalleryKey, setMediaGalleryKey} = useContext(ProductWorkflowContext);
@@ -22,8 +24,12 @@ export default function EditPreview(props) {
     const theme = useTheme();
     const editProduct = useSelector((state) => state.editProduct);
     const storeId = useSelector((state) => state.store.storeId); // Access the storeId from Redux
+    const {
+        data: shippingRule,
+    } = useGetShippingRuleForProduct(editProduct.productId, storeId);
     const queryClient = useQueryClient();
     const navigation = useNavigation();
+    const {shippingChanged} = useContext(ProductWorkflowContext);
 
     const resetNavigationStack = (route) => {
         // Reset the navigation stack to the Dashboard tab
@@ -148,6 +154,12 @@ export default function EditPreview(props) {
                     showProductDescription={true}
                     showRating={true}
                 />
+                <View style={{alignSelf: 'stretch', marginTop: 16}}>
+                <Text variant={'titleMedium'}>Shipping Rule</Text>
+                {shippingChanged ? <ShippingRuleSummary shippingRule={editProduct.shippingRuleDraft} />:
+                    <ShippingRuleSummary shippingRule={shippingRule} />
+                }
+                </View>
             </>
         </View>
 

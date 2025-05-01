@@ -1,8 +1,7 @@
-import {Button, Card, SegmentedButtons, TextInput, useTheme} from "react-native-paper";
-import React, {useState} from "react";
-import {StyleSheet, View} from "react-native";
+import {Button, Card, Divider, SegmentedButtons, TextInput, useTheme} from "react-native-paper";
+import React, { useState } from "react";
+import { StyleSheet, View } from "react-native";
 import ShippingCostParameters from "./ShippingCostParameters";
-
 
 const LocationConditionEditor = ({ condition, onSave, onCancel }) => {
     const theme = useTheme();
@@ -25,34 +24,38 @@ const LocationConditionEditor = ({ condition, onSave, onCancel }) => {
         capAmount: '',
     });
 
-    // Since only one location condition now
     const [locationCondition, setLocationCondition] = useState(
-        condition.when?.[0] || {
+        condition?.when?.[0] || {
             type: 'location',
-            operator: 'inside',
+            operator: 'inside', // fixed to 'inside'
             locationType: LOCATION_TYPES.CITY,
             city: '',
             state: '',
             country: '',
         }
     );
-    const [baseCost, setBaseCost] = useState(condition.baseCost !== undefined ? String(condition.baseCost) : '');
-    const [costModifiers, setCostModifiers] = useState(condition.costModifiers || initialCostModifiers());
+
+    const [baseCost, setBaseCost] = useState(
+        condition?.baseCost !== undefined ? String(condition?.baseCost) : ''
+    );
+
+    const [costModifiers, setCostModifiers] = useState(
+        condition?.costModifiers || initialCostModifiers()
+    );
 
     const handleLocationRuleSave = () => {
-        console.log('inside location editor baseCost:', baseCost);
         if (!baseCost || isNaN(Number(baseCost))) {
             alert('Please enter a valid Base Shipping Cost.');
             return;
         }
 
-        if (locationCondition.locationType === LOCATION_TYPES.CITY && !locationCondition.city) {
-            alert('Please enter a valid City name.');
+        if (locationCondition.locationType === LOCATION_TYPES.CITY && (!locationCondition.city || !locationCondition.state || !locationCondition.country)) {
+            alert('Please enter a valid City, State and Country.');
             return;
         }
 
-        if (locationCondition.locationType === LOCATION_TYPES.STATE && !locationCondition.state) {
-            alert('Please enter a valid State name.');
+        if (locationCondition.locationType === LOCATION_TYPES.STATE && (!locationCondition.state || !locationCondition.country)) {
+            alert('Please enter a valid State and Country name.');
             return;
         }
 
@@ -64,7 +67,7 @@ const LocationConditionEditor = ({ condition, onSave, onCancel }) => {
         if (onSave) {
             onSave({
                 id: condition.id,
-                when: [locationCondition],
+                when: [{ ...locationCondition, operator: 'inside' }], // always 'inside'
                 baseCost: Number(baseCost),
                 costModifiers,
             });
@@ -73,30 +76,25 @@ const LocationConditionEditor = ({ condition, onSave, onCancel }) => {
 
     return (
         <Card style={styles.editorContainer}>
-            <Card.Title title="Delivery Location Rule" />
+            <Card.Title title="Delivery Location" />
             <Card.Content>
 
-                {/* Location Type */}
+                {/* Location Type Selector */}
                 <SegmentedButtons
                     value={locationCondition.locationType}
-                    onValueChange={(value) => setLocationCondition(prev => ({ ...prev, locationType: value }))}
+                    onValueChange={(value) =>
+                        setLocationCondition(prev => ({
+                            ...prev,
+                            locationType: value,
+                            operator: 'inside' // enforce
+                        }))
+                    }
                     buttons={[
-                        { value: LOCATION_TYPES.CITY, label: 'City' },
-                        { value: LOCATION_TYPES.STATE, label: 'State' },
-                        { value: LOCATION_TYPES.COUNTRY, label: 'Country' },
+                        { value: LOCATION_TYPES.CITY, label: 'City', style: { borderRadius: 8} },
+                        { value: LOCATION_TYPES.STATE, label: 'State', style: { borderRadius: 0}  },
+                        { value: LOCATION_TYPES.COUNTRY, label: 'Country', style: { borderRadius: 8}  },
                     ]}
-                    style={{ marginVertical: 8 }}
-                />
-
-                {/* Inside / Outside Selector */}
-                <SegmentedButtons
-                    value={locationCondition.operator}
-                    onValueChange={(value) => setLocationCondition(prev => ({ ...prev, operator: value }))}
-                    buttons={[
-                        { value: 'inside', label: 'Inside' },
-                        { value: 'outside', label: 'Outside' },
-                    ]}
-                    style={{ marginBottom: 8 }}
+                    style={{ marginVertical: 8 , borderRadius: 8}}
                 />
 
                 {/* Location Input Fields */}
@@ -105,14 +103,27 @@ const LocationConditionEditor = ({ condition, onSave, onCancel }) => {
                         <TextInput
                             label="City"
                             value={locationCondition.city}
-                            onChangeText={(text) => setLocationCondition(prev => ({ ...prev, city: text }))}
+                            onChangeText={(text) =>
+                                setLocationCondition(prev => ({ ...prev, city: text }))
+                            }
                             mode="outlined"
                             style={styles.input}
                         />
                         <TextInput
                             label="State"
                             value={locationCondition.state}
-                            onChangeText={(text) => setLocationCondition(prev => ({ ...prev, state: text }))}
+                            onChangeText={(text) =>
+                                setLocationCondition(prev => ({ ...prev, state: text }))
+                            }
+                            mode="outlined"
+                            style={styles.input}
+                        />
+                        <TextInput
+                            label="Country"
+                            value={locationCondition.country}
+                            onChangeText={(text) =>
+                                setLocationCondition(prev => ({ ...prev, country: text }))
+                            }
                             mode="outlined"
                             style={styles.input}
                         />
@@ -120,27 +131,42 @@ const LocationConditionEditor = ({ condition, onSave, onCancel }) => {
                 )}
 
                 {locationCondition.locationType === LOCATION_TYPES.STATE && (
+                    <>
                     <TextInput
                         label="State"
                         value={locationCondition.state}
-                        onChangeText={(text) => setLocationCondition(prev => ({ ...prev, state: text }))}
+                        onChangeText={(text) =>
+                            setLocationCondition(prev => ({ ...prev, state: text }))
+                        }
                         mode="outlined"
                         style={styles.input}
                     />
+                        <TextInput
+                            label="Country"
+                            value={locationCondition.country}
+                            onChangeText={(text) =>
+                                setLocationCondition(prev => ({ ...prev, country: text }))
+                            }
+                            mode="outlined"
+                            style={styles.input}
+                        />
+                    </>
+
                 )}
 
                 {locationCondition.locationType === LOCATION_TYPES.COUNTRY && (
                     <TextInput
                         label="Country"
                         value={locationCondition.country}
-                        onChangeText={(text) => setLocationCondition(prev => ({ ...prev, country: text }))}
+                        onChangeText={(text) =>
+                            setLocationCondition(prev => ({ ...prev, country: text }))
+                        }
                         mode="outlined"
                         style={styles.input}
                     />
                 )}
 
-
-                {/* Shipping Cost Modifiers */}
+                <Divider style={{ marginVertical: 8 }}/>
                 <ShippingCostParameters
                     title="Shipping Cost Parameters for this Location"
                     baseCost={baseCost}
@@ -149,7 +175,6 @@ const LocationConditionEditor = ({ condition, onSave, onCancel }) => {
                     onCostModifiersChange={setCostModifiers}
                 />
 
-                {/* Save / Cancel Buttons */}
                 <View style={styles.buttonRow}>
                     <Button mode="outlined" onPress={onCancel}>
                         Cancel
@@ -158,47 +183,27 @@ const LocationConditionEditor = ({ condition, onSave, onCancel }) => {
                         Save Location Rule
                     </Button>
                 </View>
-
             </Card.Content>
         </Card>
     );
 };
 
-const makeStyles = () => StyleSheet.create({
-    editorContainer: {
-        marginVertical: 16,
-        backgroundColor: 'white',
-    },
-    conditionBlock: {
-        marginVertical: 12,
-        padding: 8,
-        backgroundColor: '#f8f8f8',
-        borderRadius: 8,
-    },
-    conditionHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    input: {
-        marginVertical: 8,
-        backgroundColor: 'white',
-    },
-    addConditionButtons: {
-        marginVertical: 16,
-    },
-    buttonRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        marginVertical: 24,
-    },
-    container: { flex: 1 },
-    header: { marginBottom: 8 },
-    sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 0, marginBottom: 8 },
-    checkboxRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
-    conditionCard: { marginBottom: 12, backgroundColor: 'white' },
-    nestedInputs: { marginLeft: 32 },
-    switchRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 8 },
-});
+const makeStyles = (theme) =>
+    StyleSheet.create({
+        editorContainer: {
+            marginVertical: 16,
+            backgroundColor: 'white',
+            borderRadius: 0,
+        },
+        input: {
+            marginVertical: 8,
+            backgroundColor: 'white',
+        },
+        buttonRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            marginVertical: 24,
+        },
+    });
 
 export default LocationConditionEditor;

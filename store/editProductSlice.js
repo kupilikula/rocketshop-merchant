@@ -15,6 +15,8 @@ const initialState = {
   numberOfRatings: 0,
   gstInclusive: true,
   isActive: true,
+  shippingRuleChoice: null,
+  shippingRuleDraft: {}
 };
 
 const editProductSlice = createSlice({

@@ -1,5 +1,5 @@
 import {StyleSheet, View} from "react-native";
-import {Checkbox, Text, TextInput, useTheme} from "react-native-paper";
+import {Card, Checkbox, Text, TextInput, useTheme} from "react-native-paper";
 import React from "react";
 
 
@@ -8,7 +8,7 @@ const ShippingCostParameters = ({ title, baseCost, onBaseCostChange, costModifie
     const styles = makeStyles(theme);
 
     return (
-        <View style={{ marginVertical: 24 }}>
+        <Card style={{ marginVertical: 24, padding: 16, borderRadius: 0, backgroundColor: 'white' }} mode="elevated">
             <Text variant="titleMedium">
                 {title}
             </Text>
@@ -27,7 +27,7 @@ const ShippingCostParameters = ({ title, baseCost, onBaseCostChange, costModifie
                     status={costModifiers.extraPerItemEnabled ? 'checked' : 'unchecked'}
                     onPress={() => onCostModifiersChange({ ...costModifiers, extraPerItemEnabled: !costModifiers.extraPerItemEnabled })}
                 />
-                <Text>Additional ₹ per item after N items</Text>
+                <Text variant={'bodyLarge'} numberOfLines={2}>Additional ₹ per item after N items</Text>
             </View>
             {costModifiers.extraPerItemEnabled && (
                 <View style={styles.nestedInputs}>
@@ -56,7 +56,7 @@ const ShippingCostParameters = ({ title, baseCost, onBaseCostChange, costModifie
                     status={costModifiers.discountEnabled ? 'checked' : 'unchecked'}
                     onPress={() => onCostModifiersChange({ ...costModifiers, discountEnabled: !costModifiers.discountEnabled })}
                 />
-                <Text>Reduce Shipping Cost if Order Total exceeds ₹</Text>
+                <Text numberOfLines={2} variant={'bodyLarge'}>Reduce Shipping Cost if Order Total exceeds ₹</Text>
             </View>
             {costModifiers.discountEnabled && (
                 <View style={styles.nestedInputs}>
@@ -85,7 +85,7 @@ const ShippingCostParameters = ({ title, baseCost, onBaseCostChange, costModifie
                     status={costModifiers.capEnabled ? 'checked' : 'unchecked'}
                     onPress={() => onCostModifiersChange({ ...costModifiers, capEnabled: !costModifiers.capEnabled })}
                 />
-                <Text>Cap Maximum Shipping Charge</Text>
+                <Text variant={'bodyLarge'} numberOfLines={2}>Cap Maximum Shipping Charge</Text>
             </View>
             {costModifiers.capEnabled && (
                 <View style={styles.nestedInputs}>
@@ -99,7 +99,7 @@ const ShippingCostParameters = ({ title, baseCost, onBaseCostChange, costModifie
                     />
                 </View>
             )}
-        </View>
+        </Card>
     );
 };
 

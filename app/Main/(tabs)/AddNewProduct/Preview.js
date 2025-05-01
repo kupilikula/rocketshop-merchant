@@ -1,8 +1,8 @@
 import {ActivityIndicator, ScrollView, View} from "react-native";
-import {Button, useTheme, Text} from "react-native-paper";
+import {Button, useTheme, Text, Card, Badge, RadioButton} from "react-native-paper";
 import ProductDisplayCardCustomerStore from "../../../../components/ProductDisplayCardCustomerStore";
 import {useDispatch, useSelector} from "react-redux";
-import { useContext, useEffect} from "react";
+import React, { useContext, useEffect} from "react";
 import {resetNewProduct} from "../../../../store/newProductSlice";
 import {useNavigation, useRouter} from "expo-router";
 import {CommonActions} from "@react-navigation/native";
@@ -14,6 +14,10 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import _ from "lodash";
 import {ProductWorkflowContext} from "../../../../components/ProductWorkflowContext";
 import {useQueryClient} from "react-query";
+import {formatShippingRuleSummary} from "../../../../utils/formatShippingRuleSummary";
+import {ShippingRuleSummary} from "../../../../components/ShippingRuleSummary";
+import {useAddShippingRule} from "../../../../api/hooks/useAddShippingRule";
+import {useAssignShippingRule} from "../../../../api/hooks/useAssignShippingRule";
 
 const convertHeicToJpg = async (uri) => {
     try {
@@ -33,10 +37,13 @@ export default function Preview(props) {
     const router = useRouter();
     const theme = useTheme();
     const newProduct = useSelector((state) => state.newProduct);
+    const shippingRule = useSelector((state) => state.shippingRule);
     const storeId = useSelector((state) => state.store.storeId); // Access the storeId from Redux
     const {isNewVariant, variantInfo, isClone, useSameMediaForClone, resetWorkflow, isPublishing, setIsPublishing, published, setPublished, publishFailure, setPublishFailure, mediaGalleryKey, setMediaGalleryKey} = useContext(ProductWorkflowContext);
     const navigation = useNavigation();
     const queryClient = useQueryClient();
+    const {mutateAsync: addShippingRule} = useAddShippingRule(storeId);
+    const {mutateAsync: associateRuleWithProduct} = useAssignShippingRule(storeId);
     const resetNavigationStack = (route, params) => {
         navigation.dispatch(
             CommonActions.reset({
@@ -55,7 +62,7 @@ export default function Preview(props) {
         try {
 
             let updatedMediaItems;
-            if ((!isNewVariant || (isNewVariant && !variantInfo.useSameMedia) ) && (!isClone || (isClone && !useSameMediaForClone) )){
+            if ((!isNewVariant || (isNewVariant && !variantInfo.useSameMedia)) && (!isClone || (isClone && !useSameMediaForClone))) {
                 // Generate fileKeys for each mediaItem
                 const fileKeysWithContentTypes = newProduct.mediaItems.map((item) => ({
                     fileKey: `stores/${storeId}/products/${newProduct.productId}/${item.mediaId}`,
@@ -114,15 +121,15 @@ export default function Preview(props) {
                         console.log('r:', r);
                         if (!r.ok) {
                             console.error('Failed to upload to Spaces:', r.statusText);
-                            return { success: false, reason: `uploadError (${r.status})` };
+                            return {success: false, reason: `uploadError (${r.status})`};
                         }
                         // Update the mediaItem with its uploaded URI
                         updatedMediaItems[index].uri = presignedUrls[index].fileUri;
-                        return { success: true };
+                        return {success: true};
 
                     } catch (err) {
                         console.log('err:', err);
-                        return { success: false, reason: 'fetchPutError' };
+                        return {success: false, reason: 'fetchPutError'};
                     }
 
                 }));
@@ -136,6 +143,14 @@ export default function Preview(props) {
             if (isNewVariant) {
                 data.variantInfo = variantInfo;
             }
+
+            // Add shipping info to data
+            data.shipping = {
+                shippingRuleChoice: shippingRule.shippingRuleChoice,
+                newShippingRule: shippingRule.newShippingRule,
+                selectedExistingShippingRuleId: shippingRule.selectedExistingShippingRuleId
+            };
+
 
             // Send the updated product data to the backend
             console.log('inserting data into db');
@@ -273,6 +288,14 @@ export default function Preview(props) {
                     showProductDescription={true}
                     showRating={true}
                 />
+                <Text variant={'titleMedium'} style={{marginTop: 16, marginBottom: 8}}>Shipping Rule For This Product</Text>
+                {shippingRule.shippingRuleChoice === 'noShipping' ?
+                    <Card style={{alignSelf: 'stretch', borderRadius: 0, backgroundColor: theme.colors.surface, padding: 16, marginVertical: 8}}>
+                        <Text variant={'titleMedium'} style={{marginTop: 16, marginBottom: 8}}>No Shipping Required</Text>
+                    </Card>
+                    :
+                <ShippingRuleSummary shippingRule={shippingRule.newShippingRule} />}
+
             </>
         </View>
 

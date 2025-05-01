@@ -2,12 +2,12 @@
 import { useMutation, useQueryClient } from 'react-query';
 import axiosClient from '../client';
 
-export const useAddShippingRule = () => {
+export const useAddShippingRule = (storeId) => {
     const queryClient = useQueryClient();
 
     return useMutation(
-        async ({ storeId, data }) => {
-            const response = await axiosClient.post(`/stores/${storeId}/shipping/addRule`, data);
+        async (data) => {
+            const response = await axiosClient.post(`/stores/${storeId}/shipping/addNewRule`, data);
             return response.data;
         },
         {

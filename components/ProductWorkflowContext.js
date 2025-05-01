@@ -16,6 +16,7 @@ export const ProductWorkflowProvider = ({ children }) => {
     const [isCameraOpen, setIsCameraOpen] = useState(false);
     const [isMediaSelected, setIsMediaSelected] = useState(false);
     const [mediaGalleryKey, setMediaGalleryKey] = useState(0);
+    const [shippingChanged, setShippingChanged] = useState(false);
     // const [shippingRuleChoice, setShippingRuleChoice] = useState(null);
 
     const resetWorkflow = () =>
@@ -32,6 +33,7 @@ export const ProductWorkflowProvider = ({ children }) => {
         setIsCameraOpen(false);
         setIsMediaSelected(false);
         setMediaGalleryKey(0);
+        setShippingChanged(false);
         // setShippingRuleChoice(null);
     }
 
@@ -48,6 +50,8 @@ export const ProductWorkflowProvider = ({ children }) => {
                 setUseSameMediaForClone,
                 variantInfo,
                 setVariantInfo,
+                shippingChanged,
+                setShippingChanged,
                 isCameraOpen,
                 setIsCameraOpen,
                 isMediaSelected,

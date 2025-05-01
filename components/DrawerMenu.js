@@ -89,14 +89,6 @@ export default function DrawerMenu(props) {
           <MaterialIcons name={"discount"} size={size} />
         )}
       />
-      <Drawer.Item
-          label={<Text variant={"titleLarge"}>Shipping</Text>}
-          style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}
-          onPress={() => router.push("/Main/(tabs)/Shipping")}
-          icon={({ size, color }) => (
-              <MaterialIcons name={"local-shipping"} size={size} />
-          )}
-      />
       {canReceiveMessages &&
       <Drawer.Item label={<Text variant={'titleLarge'}>Messages</Text>}
                    style={{padding: 0, borderRadius: 5, marginLeft: 0}}

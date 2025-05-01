@@ -144,13 +144,6 @@ export default function TabsComponent() {
         }}
       />
         <Tabs.Screen
-            name="Shipping"
-            options={{
-                href: null,
-                // tabBarButton: () => null, // Hides the tab bar button
-            }}
-        />
-        <Tabs.Screen
             name="Messaging"
             options={{
                 href: null,
