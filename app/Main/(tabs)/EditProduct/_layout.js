@@ -27,13 +27,15 @@ export default function EditProductStack() {
             name={"EditShipping"}
             options={{
                 title: "Edit Shipping",
-                header: () => <GenericHeader title={'Edit Shipping'} right={<Pressable onPressIn={()=> router.push('/Main/(tabs)/EditProduct/EditPreview')}>
-                    <MaterialIcons
-                        name={"arrow-forward"}
-                        size={36}
-                        style={{ color: "black" }}
-                    />
-                </Pressable>}/>
+                header: () => <GenericHeader title={'Edit Shipping'} right={null}/>
+
+            }}
+        />
+        <Stack.Screen
+            name={"SelectExistingShippingRule"}
+            options={{
+                title: "Preview",
+                header: () => <GenericHeader title={'Select Shipping Rule'} right={null}/>
             }}
         />
         <Stack.Screen

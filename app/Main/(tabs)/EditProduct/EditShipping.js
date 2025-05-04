@@ -11,6 +11,7 @@ import ShippingRuleEditor from '../../../../components/ShippingRuleEditor';
 import {updateField as updateEditProductField} from '../../../../store/editProductSlice';
 import _ from "lodash";
 import {ProductWorkflowContext} from "../../../../components/ProductWorkflowContext";
+import {ShippingRuleSummary} from "../../../../components/ShippingRuleSummary";
 
 export default function EditShippingRuleScreen() {
     const {productId} = useSelector((state) => state.editProduct);
@@ -28,9 +29,6 @@ export default function EditShippingRuleScreen() {
         isError,
     } = useGetShippingRuleForProduct(productId, storeId);
 
-    const createShippingRule = useCreateShippingRule(storeId);
-    const updateShippingRule = useUpdateShippingRule(storeId);
-    const associateRule = useAssignShippingRule(storeId);
     const {setShippingChanged} = useContext(ProductWorkflowContext);
 
     console.log('shippingRule:', shippingRule);
@@ -78,17 +76,8 @@ export default function EditShippingRuleScreen() {
 
     if (isLoading || mode === 'loading') {
         return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 16 }}>
-                <ActivityIndicator animating />
-                <Text>Loading shipping rule…</Text>
-            </View>
-        );
-    }
-
-    if (isError || !shippingRule) {
-        return (
-            <View style={{ padding: 16 }}>
-                <Text>Error loading shipping rule. Please try again later.</Text>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 16, backgroundColor: theme.colors.surface }}>
+                <ActivityIndicator animating={true} size={100} color={theme.colors.primary} />
             </View>
         );
     }
@@ -96,6 +85,14 @@ export default function EditShippingRuleScreen() {
     if (mode === 'choice') {
         return (
             <ScrollView style={{ flex: 1, padding: 16, backgroundColor: theme.colors.surface }}>
+
+                {shippingRule &&
+                <View style={{marginVertical: 16}}>
+                <Text variant={'titleMedium'} style={{marginBottom: 16}}>Current Shipping Rule Summary</Text>
+                    <ShippingRuleSummary shippingRule={shippingRule} />
+                </View>
+                }
+
                 <Card
                     mode="elevated"
                     style={{
@@ -151,13 +148,79 @@ export default function EditShippingRuleScreen() {
                     />
                 </Card>
 
+                <Card
+                    mode="elevated"
+                    style={{
+                        marginBottom: 16,
+                        borderWidth: 1,
+                        borderColor: editChoice === 'assignExisting' ? theme.colors.primary : 'white',
+                        backgroundColor: theme.colors.surface,
+                        padding: 8,
+                        borderRadius: 0
+                    }}
+                    onPress={() => setEditChoice('assignExisting')}
+                >
+                    <Card.Title
+                        title="Assign Different Existing Shipping Rule"
+                        titleNumberOfLines={5}
+                        subtitle="Choose from already created rules and assign it to this product."
+                        subtitleNumberOfLines={5}
+                        right={(props) => (
+                            <RadioButton.Android
+                                {...props}
+                                value="assignExisting"
+                                status={editChoice === 'assignExisting' ? 'checked' : 'unchecked'}
+                            />
+                        )}
+                    />
+                </Card>
+                <Card
+                    mode="elevated"
+                    style={{
+                        marginBottom: 16,
+                        borderWidth: 1,
+                        borderColor: editChoice === 'editNone' ? theme.colors.primary : 'white',
+                        backgroundColor: theme.colors.surface,
+                        padding: 8,
+                        borderRadius: 0
+
+                    }}
+                    onPress={() => setEditChoice('editNone')}
+                >
+                    <Card.Title
+                        title="Skip Editing Shipping"
+                        titleNumberOfLines={5}
+                        subtitle={`No changes to Shipping Cost`}
+                        subtitleNumberOfLines={5}
+                        right={(props) => (
+                            <RadioButton.Android
+                                {...props}
+                                value="editNone"
+                                status={editChoice === 'editNone' ? 'checked' : 'unchecked'}
+                            />
+                        )}
+                    />
+                </Card>
+
+                <View style={{alignSelf: 'center'}}>
                 <Button
                     mode="contained"
                     disabled={!editChoice}
-                    onPress={() => setMode('edit')}
+                    onPress={() => {
+                        if (editChoice === 'editNone') {
+                            setShippingChanged(false);
+                            router.push('/Main/(tabs)/EditProduct/EditPreview');
+                        } else if (editChoice === 'assignExisting') {
+                            router.push('/Main/(tabs)/EditProduct/SelectExistingShippingRule');
+                        } else {
+                            setMode('edit');
+                        }
+                    }}
+                    style={{  borderRadius: 8 }}
                 >
                     Continue
                 </Button>
+                </View>
             </ScrollView>
         );
     }
@@ -169,6 +232,7 @@ export default function EditShippingRuleScreen() {
             mode={editChoice === 'editAll' ? 'edit' : 'clone'}
             onCancel={() => router.back()}
             onSave={handleEditorSubmit}
+            saveButtonLabel={'Continue'}
         />
     );
 }

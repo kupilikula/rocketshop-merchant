@@ -155,7 +155,7 @@ export default function EditPreview(props) {
                     showRating={true}
                 />
                 <View style={{alignSelf: 'stretch', marginTop: 16}}>
-                <Text variant={'titleMedium'}>Shipping Rule</Text>
+                <Text variant={'titleMedium'} style={{marginBottom: 16}}>Shipping Rule</Text>
                 {shippingChanged ? <ShippingRuleSummary shippingRule={editProduct.shippingRuleDraft} />:
                     <ShippingRuleSummary shippingRule={shippingRule} />
                 }

@@ -18,6 +18,7 @@ import {formatShippingRuleSummary} from "../../../../utils/formatShippingRuleSum
 import {ShippingRuleSummary} from "../../../../components/ShippingRuleSummary";
 import {useAddShippingRule} from "../../../../api/hooks/useAddShippingRule";
 import {useAssignShippingRule} from "../../../../api/hooks/useAssignShippingRule";
+import {resetShipping} from "../../../../store/shippingRuleSlice";
 
 const convertHeicToJpg = async (uri) => {
     try {
@@ -42,8 +43,6 @@ export default function Preview(props) {
     const {isNewVariant, variantInfo, isClone, useSameMediaForClone, resetWorkflow, isPublishing, setIsPublishing, published, setPublished, publishFailure, setPublishFailure, mediaGalleryKey, setMediaGalleryKey} = useContext(ProductWorkflowContext);
     const navigation = useNavigation();
     const queryClient = useQueryClient();
-    const {mutateAsync: addShippingRule} = useAddShippingRule(storeId);
-    const {mutateAsync: associateRuleWithProduct} = useAssignShippingRule(storeId);
     const resetNavigationStack = (route, params) => {
         navigation.dispatch(
             CommonActions.reset({
@@ -155,7 +154,7 @@ export default function Preview(props) {
             // Send the updated product data to the backend
             console.log('inserting data into db');
             await axiosClient.post(`/stores/${storeId}/products/addNewProduct`, data);
-
+            queryClient.invalidateQueries(["groupingShippingRules", storeId]);
             console.log('Product published successfully!');
             return true;
             // resetNewProduct()
@@ -186,6 +185,7 @@ export default function Preview(props) {
                     resetWorkflow()
                     console.log("resetting new product slice's redux state");
                     dispatch(resetNewProduct());
+                    dispatch(resetShipping());
                     console.log('resetting navigation stack');
                     await router.replace('/Main/(tabs)/AddNewProduct');
                     // Wait one animation frame
@@ -211,6 +211,7 @@ export default function Preview(props) {
         // reset redux new product to empty
         console.log("DISCARDING: redux product before reset:", newProduct);
         dispatch(resetNewProduct());
+        dispatch(resetShipping());
         console.log("AFTER DISCARDING: redux product before reset:", newProduct);
         resetWorkflow();
         resetNavigationStack("Dashboard");
@@ -240,6 +241,7 @@ export default function Preview(props) {
                         router.replace('/Main/(tabs)/Products/' + newProduct.productId);
                         setTimeout(() => {
                             dispatch(resetNewProduct());
+                            dispatch(resetShipping());
                             resetWorkflow();
                         }, 500);
                         }

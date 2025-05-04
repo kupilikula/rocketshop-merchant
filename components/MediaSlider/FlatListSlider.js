@@ -94,7 +94,7 @@ const FlatListSlider = forwardRef((props, ref) => {
   // }, [props.data]);
 
   return (
-    props.data.length > 0 && (
+    props.data?.length > 0 && (
       <View
         onLayout={onLayout}
         style={[{ position: "relative" }, props.flatListWrapperStyle || {}]}

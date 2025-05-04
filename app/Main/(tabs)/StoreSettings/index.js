@@ -31,7 +31,7 @@ export default function StoreSettingsScreen() {
                 <List.Item
                     title="Payment Settings"
                     titleStyle={{fontSize: 20}}
-                    onPress={() => router.push('/StoreSettings/Razorpay')}
+                    onPress={() => router.push('/Main/(tabs)/StoreSettings/PaymentSettings')}
                     style={styles.listItem}
                 />
                 <Divider />

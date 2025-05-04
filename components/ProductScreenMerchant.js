@@ -410,7 +410,7 @@ export default function ProductScreenMerchant(props) {
               <ProductReviewsList productId={props.product.productId} />
               {shippingRule &&
                   <View style={{}}>
-                      <Text variant={"titleMedium"} style={{ marginTop: 10 }}>Shipping Cost Rule</Text>
+                      <Text variant={"titleMedium"} style={{ marginVertical: 10 }}>Shipping Cost Rule</Text>
                       <ShippingRuleSummary shippingRule={shippingRule}/>
                   </View>
               }

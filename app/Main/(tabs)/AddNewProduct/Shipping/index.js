@@ -3,7 +3,6 @@ import {ScrollView, View} from "react-native";
 import {Button, Card, IconButton, RadioButton, Text, useTheme} from "react-native-paper";
 import {useState} from "react";
 import {router, useRouter} from "expo-router";
-import {ProductWorkflowContext} from "../../../../../components/ProductWorkflowContext";
 import {useDispatch, useSelector} from "react-redux";
 import {setShippingRuleChoice} from "../../../../../store/shippingRuleSlice";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";

@@ -51,7 +51,8 @@ const formatCostParametersSummary = (baseCost, modifiers) => {
     return parts.join('');
 };
 
-const ShippingRuleEditor = ({ initialData, onSave, onCancel }) => {
+const ShippingRuleEditor = ({ initialData, onSave, onCancel, saveButtonLabel }) => {
+    console.log('saveButtonLabel:', saveButtonLabel);
     const theme = useTheme();
     const styles = makeStyles(theme);
 
@@ -204,7 +205,7 @@ const ShippingRuleEditor = ({ initialData, onSave, onCancel }) => {
 
             <View style={styles.buttonRow}>
                 <Button mode="outlined" onPress={onCancel}>Cancel</Button>
-                <Button mode="contained" onPress={handleSubmit}>Save Rule</Button>
+                <Button mode="contained" onPress={handleSubmit}>{saveButtonLabel || 'Save Rule'}</Button>
             </View>
         </KeyboardAwareScrollableScreen>
     );
