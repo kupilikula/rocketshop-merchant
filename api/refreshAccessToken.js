@@ -1,12 +1,14 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {BASE_URL} from '@/config/config';
+import Constants from 'expo-constants';
+
+const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl;
 
 export const refreshAccessToken = async () => {
     try {
         console.log("Attempting to refresh access token...");
         const response = await axios.post(
-            `${BASE_URL}/auth/refreshToken`,
+            `${API_BASE_URL}/auth/refreshToken`,
             {},
             { withCredentials: true }
         );

@@ -1,7 +1,9 @@
 import { io } from "socket.io-client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { refreshAccessToken } from "@/api/refreshAccessToken";
-import { BASE_URL } from "@/config/config";
+import Constants from 'expo-constants';
+
+const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl;
 
 let socketRegistry = []; // Array to track all active sockets
 let connectionInProgress = false;
@@ -125,7 +127,7 @@ export const connectSocket = async (type, context = null, storeId = null) => {
                 throw new Error("No valid token found. Socket connection aborted.");
             }
 
-            const newSocket = io(BASE_URL, {
+            const newSocket = io(API_BASE_URL, {
                 transports: ["websocket"],
                 autoConnect: false,
                 auth: {

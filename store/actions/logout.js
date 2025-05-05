@@ -1,21 +1,18 @@
-import { clearStore } from "../storeSlice";
-import { clearMerchant } from "../merchantSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {disconnectAllSockets} from "@/api/websocket";
 import axios from "axios";
-import {BASE_URL} from '@/config/config';
-import {clearAllStores} from "@/store/allStoresSlice";
-import {setAuthenticationStatus} from "@/store/authSlice";
-import {clearStoreSettings} from "@/store/storeSettingsSlice";
 import {persistor} from "../store";
 import {RESET_ALL} from "./resetAll";
+import Constants from 'expo-constants';
+
+const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl;
 
 export const logout =  (router) => async (dispatch, getState) => {
         try {
                 console.log('logging out. Calling /auth/logout');
 
                 // Make logout API call
-                await axios.post(`${BASE_URL}/auth/logout`,
+                await axios.post(`${API_BASE_URL}/auth/logout`,
                     {
                             merchantId: getState().merchant.merchantId,
                             expoPushToken: getState().pushToken.expoPushToken,

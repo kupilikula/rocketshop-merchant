@@ -1,13 +1,13 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { reconnectAllSockets, disconnectAllSockets } from "@/api/websocket";
+import { reconnectAllSockets } from "@/api/websocket";
 import { refreshAccessToken } from "@/api/refreshAccessToken";
 import { logout } from "@/store/actions/logout";
 
-// Base URL for the Merchant App Backend
-import {BASE_URL} from '@/config/config';
 import {setPendingRequest, setRedirectAfterAuth} from "@/store/authSlice";
+import Constants from 'expo-constants';
 
+const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl;
 let isRefreshing = false; // Track if a refresh attempt is already in progress
 let logoutInProgress = false; // Track if logout is in progress
 let failedQueue = []; // Queue to store requests while the refresh token is being processed
@@ -28,7 +28,7 @@ const processQueue = (error, token = null) => {
 // Create an Axios instance with the baseURL
 const axiosClientGetter = () => {
     let instance = axios.create({
-        baseURL: BASE_URL,
+        baseURL: API_BASE_URL,
         headers: {
             "Content-Type": "application/json", // Default content type
         },
