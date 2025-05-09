@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import {View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView} from 'react-native';
-import { Text, TextInput, Button, useTheme } from 'react-native-paper';
+import {Text, TextInput, Button, useTheme, Checkbox} from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
-import { setNewStoreName } from '../../store/newStoreSlice';
+import { setNewStoreName, setIsPlatformOwned as setNewStoreIsPlatformOwned } from '../../store/newStoreSlice';
 import { useRouter } from 'expo-router';
 import LogoIconWithName from "../../components/LogoIconWithName";
 
@@ -13,6 +13,8 @@ export default function StoreNameScreen() {
 
     const storeName = useSelector((state) => state.newStore.storeName);
     const [localStoreName, setLocalStoreName] = useState(storeName);
+    const [isPlatformOwned, setIsPlatformOwned] = useState(false);
+    const {isPlatformMerchant} = useSelector((state) => state.merchant);
     // const [error, setError] = useState('');
 
     const handleNext = () => {
@@ -21,6 +23,7 @@ export default function StoreNameScreen() {
             return;
         }
         dispatch(setNewStoreName(localStoreName.trim()));
+        dispatch(setNewStoreIsPlatformOwned(isPlatformOwned));
         router.push('/CreateStore/StoreHandle'); // Move to next step
     };
 
@@ -46,7 +49,19 @@ export default function StoreNameScreen() {
                     style={styles.input}
                     // error={!!error}
                 />
-                {/*{error ? (*/}
+                    {isPlatformMerchant &&
+                    <View style={styles.checkboxContainer}>
+                        <Checkbox.Android
+                            status={isPlatformOwned ? 'checked' : 'unchecked'}
+                            onPress={() => setIsPlatformOwned(!isPlatformOwned)}
+
+                        />
+                        <Text style={styles.checkboxLabel}>
+                            Is this a RocketShop Platform Owned Store?
+                        </Text>
+                    </View>}
+
+                    {/*{error ? (*/}
                 {/*    <Text style={{ color: theme.colors.error, marginBottom: 8 }}>*/}
                 {/*        {error}*/}
                 {/*    </Text>*/}
@@ -76,4 +91,12 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         backgroundColor: 'white',
     },
+    checkboxContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    checkboxLabel: {
+    },
+
 });

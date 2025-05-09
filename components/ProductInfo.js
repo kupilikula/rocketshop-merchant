@@ -425,7 +425,8 @@ const ProductInfoScreen = (props) => {
                                     onBlur={onBlur}
                                     onChangeText={onChange}
                                     style={[styles.halfWidthInput, {marginRight: 8}]}
-                                    inputMode={'numeric'}
+                                    // inputMode={'numeric'}
+                                    keyboardType={'decimal-pad'}
                                     error={!!errors.price}
                                 />)}
                         />

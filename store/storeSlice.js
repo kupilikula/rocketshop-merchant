@@ -11,6 +11,7 @@ const initialState = {
     merchantRole: null,
     canReceiveMessages: null,
     isActive: null,
+    isPlatformOwned: null,
 };
 
 const storeSlice = createSlice({

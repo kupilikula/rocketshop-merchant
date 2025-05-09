@@ -16,7 +16,8 @@ const ShippingCostParameters = ({ title, baseCost, onBaseCostChange, costModifie
                 label="Base Shipping Cost (₹)"
                 value={baseCost}
                 onChangeText={onBaseCostChange}
-                inputMode="numeric"
+                // inputMode="numeric"
+                keyboardType="decimal-pad"
                 mode="outlined"
                 left={<TextInput.Affix text="₹" />}
                 style={styles.input}
@@ -35,7 +36,8 @@ const ShippingCostParameters = ({ title, baseCost, onBaseCostChange, costModifie
                         label="₹ per extra item"
                         value={costModifiers.extraPerItemCost}
                         onChangeText={(text) => onCostModifiersChange({ ...costModifiers, extraPerItemCost: text })}
-                        inputMode="numeric"
+                        // inputMode="numeric"
+                        keyboardType="decimal-pad"
                         mode="outlined"
                         style={styles.input}
                     />
@@ -64,7 +66,8 @@ const ShippingCostParameters = ({ title, baseCost, onBaseCostChange, costModifie
                         label="Reduce Shipping by (%)"
                         value={costModifiers.discountPercentage}
                         onChangeText={(text) => onCostModifiersChange({ ...costModifiers, discountPercentage: text })}
-                        inputMode="numeric"
+                        keyboardType="decimal-pad"
+                        // inputMode="numeric"
                         mode="outlined"
                         style={styles.input}
                     />
@@ -72,7 +75,8 @@ const ShippingCostParameters = ({ title, baseCost, onBaseCostChange, costModifie
                         label="Order Total Threshold (₹)"
                         value={costModifiers.discountThreshold}
                         onChangeText={(text) => onCostModifiersChange({ ...costModifiers, discountThreshold: text })}
-                        inputMode="numeric"
+                        keyboardType={'decimal-pad'}
+                        // inputMode="numeric"
                         mode="outlined"
                         style={styles.input}
                     />

@@ -11,7 +11,8 @@ const initialState = {
     storeSettings: {
         defaultGstRate: null,
         defaultGstInclusive: null,
-    }
+    },
+    isPlatformOwned: false,
 };
 
 const newStoreSlice = createSlice({
@@ -20,6 +21,9 @@ const newStoreSlice = createSlice({
     reducers: {
         setNewStoreName: (state, action) => {
             state.storeName = action.payload;
+        },
+        setIsPlatformOwned: (state, action) => {
+            state.isPlatformOwned = action.payload;
         },
         setNewStoreHandle: (state, action) => {
             state.storeHandle = action.payload;
@@ -54,6 +58,7 @@ const newStoreSlice = createSlice({
 
 export const {
     setNewStoreName,
+    setIsPlatformOwned,
     setNewStoreHandle,
     setNewStoreDescription,
     setNewStoreLogoImage,

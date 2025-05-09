@@ -26,6 +26,7 @@ export default function StoreSummary() {
         storeTags,
         firstCollectionName,
         storeSettings,
+        isPlatformOwned,
     } = useSelector((state) => state.newStore);
 
     const { merchantId } = useSelector((state) => state.merchant);
@@ -46,6 +47,7 @@ export default function StoreSummary() {
                 storeDescription,
                 storeTags,
                 storeSettings,
+                isPlatformOwned
             });
             console.log('Store created:', res);
 
@@ -155,11 +157,9 @@ export default function StoreSummary() {
                         >
                             {storeName}
                         </Text>
-                        <View>
-                        </View>
                     </View>
-
                 </View>
+                {isPlatformOwned && <Text variant={"titleMedium"} style={{color: 'black'}}>RocketShop Platform Store</Text>}
                 <View style={{ width:'100%', marginTop: 10}}>
                     <Text variant={"bodyLarge"} style={{color: 'black'}}>
                         {storeDescription}

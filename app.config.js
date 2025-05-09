@@ -5,6 +5,7 @@ import 'dotenv/config'; // Optional: for local development .env loading
 // Values taken from your original app.json that DON'T change per environment
 const baseConfig = {
     slug: "merchant",
+    owner: 'anandmurugan',
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/RocketShopIconOrange1024.png", // Merchant App Icon
@@ -137,7 +138,7 @@ export default ({config}) => { // Receives Expo defaults/CLI flags, but we prima
         currentEnvConfig = envConfig['development'];
     }
     console.log(`[App Config] Using environment: ${environment}`);
-    console.log(`[App Config] Merchant API URL: ${currentEnvConfig.API_MERCHANT_URL}`);
+    console.log(`[App Config] Merchant API URL: ${currentEnvConfig.API_BASE_URL}`);
 
 // --- Return the final merged config object ---
     return {

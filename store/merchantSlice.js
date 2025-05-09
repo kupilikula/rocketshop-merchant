@@ -5,6 +5,7 @@ const initialState = {
   merchantId: null,
   fullName: null,
   phone: null,
+  isPlatformMerchant: null,
 };
 
 const merchantSlice = createSlice({

@@ -28,6 +28,8 @@ export default function StoreSettingsScreen() {
                     style={styles.listItem}
                 />
                 <Divider />
+            {!store.isPlatformOwned &&
+                <>
                 <List.Item
                     title="Payment Settings"
                     titleStyle={{fontSize: 20}}
@@ -35,6 +37,8 @@ export default function StoreSettingsScreen() {
                     style={styles.listItem}
                 />
                 <Divider />
+                </>
+            }
                 <List.Item
                     title="Manage Merchants"
                     titleStyle={{fontSize: 20}}
