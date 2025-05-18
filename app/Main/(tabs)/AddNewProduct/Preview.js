@@ -30,6 +30,10 @@ const convertHeicToJpg = async (uri) => {
         return result.uri;
     } catch (error) {
         console.error('Image conversion error:', error);
+        // It's good practice to throw the error or return a specific failure indicator
+        // if the calling code needs to handle this failure.
+        // For now, just logging and letting it return undefined implicitly.
+        return undefined; // Explicitly return undefined on error
     }
 };
 
@@ -60,7 +64,8 @@ export default function Preview(props) {
     async function publishProduct() {
         try {
 
-            let updatedMediaItems;
+            let updatedMediaItems = _.cloneDeep(newProduct.mediaItems); // Initialize with a clone
+
             if ((!isNewVariant || (isNewVariant && !variantInfo.useSameMedia)) && (!isClone || (isClone && !useSameMediaForClone))) {
                 // Generate fileKeys for each mediaItem
                 const fileKeysWithContentTypes = newProduct.mediaItems.map((item) => ({
@@ -79,7 +84,7 @@ export default function Preview(props) {
                 updatedMediaItems = _.cloneDeep(newProduct.mediaItems);
                 // Upload each mediaItem to Spaces
                 console.log('uploading media');
-                const P = await Promise.all(newProduct.mediaItems.map(async (item, index) => {
+                const uploadResults = await Promise.all(newProduct.mediaItems.map(async (item, index) => {
                     const presignedUrl = presignedUrls[index].presignedUrl;
                     console.log('pre:', presignedUrl);
 
@@ -94,17 +99,22 @@ export default function Preview(props) {
                     }
 
                     let blob;
-                    if (convertedItemUri) {
-                        console.log('computing blob of converted item');
-                        let res = await fetch(convertedItemUri);
-                        blob = await res.blob();
-                        console.log('line 87, blob:', blob);
-                    } else {
-                        let assetInfo = await MediaLibrary.getAssetInfoAsync(item);
-                        console.log('assetInfo:', assetInfo);
-                        let res = await fetch(assetInfo.localUri || assetInfo.uri);
-                        blob = await res.blob();
-                        console.log('line 94, blob:', blob);
+                    try {
+                        if (convertedItemUri) {
+                            console.log('computing blob of converted item');
+                            let res = await fetch(convertedItemUri);
+                            blob = await res.blob();
+                            console.log('line 87, blob:', blob);
+                        } else {
+                            let assetInfo = await MediaLibrary.getAssetInfoAsync(item); // Assuming item has an id for getAssetInfoAsync if it's a MediaLibrary asset
+                            console.log('assetInfo:', assetInfo);
+                            let res = await fetch(assetInfo.localUri || assetInfo.uri);
+                            blob = await res.blob();
+                            console.log('line 94, blob:', blob);
+                        }
+                    } catch (fetchError) {
+                        console.error('Error fetching blob for media item:', fetchError);
+                        return {success: false, reason: `blobFetchError: ${fetchError.message}`};
                     }
 
 
@@ -132,10 +142,21 @@ export default function Preview(props) {
                     }
 
                 }));
-                console.log('P:', JSON.stringify(P, null, 2));
+                console.log('uploadResults:', JSON.stringify(uploadResults, null, 2));
+
+                // Check if all uploads were successful
+                const allUploadsSuccessful = uploadResults.every(result => result.success);
+                if (!allUploadsSuccessful) {
+                    console.error('One or more media uploads failed. Product will not be created.');
+                    // Optionally, find out which ones failed
+                    uploadResults.forEach((r, i) => {
+                        if (!r.success) console.error(`Upload failed for item ${i}: ${r.reason}`);
+                    });
+                    return false; // Signal failure to prevent DB insertion
+                }
                 console.log('updatedMediaItems:', updatedMediaItems);
             } else {
-                updatedMediaItems = newProduct.mediaItems;
+                console.log('Skipping media upload, using existing media references.');
             }
 
             let data = {...newProduct, mediaItems: updatedMediaItems}
@@ -229,7 +250,7 @@ export default function Preview(props) {
                     <Text variant={'titleMedium'} style={{marginLeft: 10, color: 'white'}}>Publishing product</Text>
                 </View>
                 }
-            {published &&
+            {published && !publishFailure &&
                 <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginVertical: 16, width: '100%', padding: 8, borderRadius: 8, justifyContent: 'space-between', backgroundColor: theme.colors.softSuccess}}>
                     <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start'}}>
                     <MaterialIcons name={'check'} size={28} color={theme.colors.black}/>
@@ -257,7 +278,7 @@ export default function Preview(props) {
             </View>}
             <>
 
-                {((!published && !isPublishing) || (publishFailure)) &&
+                {((!published && !isPublishing) || (publishFailure && !isPublishing)) &&
                 <View
                     style={{
                         display: "flex",

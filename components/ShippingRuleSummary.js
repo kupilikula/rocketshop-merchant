@@ -9,7 +9,7 @@ export const ShippingRuleSummary = ({shippingRule, style}) => {
     const theme = useTheme();
     return <Card
         mode={'elevated'}
-        style={{alignSelf: 'stretch', marginBottom: 16, padding: 0, borderRadius: 0, backgroundColor: theme.colors.softPrimary, ...style}}
+        style={{alignSelf: 'stretch', marginBottom: 16, padding: 0, borderRadius: 0, backgroundColor: 'white', ...style}}
     >
         <Card.Content>
         <Text variant={'titleMedium'}>{shippingRule.ruleName}</Text>
