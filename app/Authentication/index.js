@@ -1,302 +1,116 @@
 // app/Authentication/index.js
-
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { Text, TextInput as PaperTextInput, Button, useTheme, ActivityIndicator } from 'react-native-paper';
+import React from 'react';
+import { View, StyleSheet, Platform, ScrollView, KeyboardAvoidingView } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { setPhone, setAuthenticationStatus, clearPendingRequest, clearRedirectAfterAuth } from '../../store/authSlice';
-import axiosClient from '../../api/client';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { setMerchant } from '../../store/merchantSlice';
 import { useRouter } from 'expo-router';
-import OtpInput from '../../components/OtpInput';
-import LogoIconWithName from "../../components/LogoIconWithName";
-import {useSafeAreaInsets} from "react-native-safe-area-context";
-import PhoneInput from "../../components/PhoneInput";
-import {clearAllStores, setAllStores} from "../../store/allStoresSlice";
-import {clearStore} from "../../store/storeSlice";
-import {clearStoreSettings} from "../../store/storeSettingsSlice";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import AuthFormMerchant from '../../components/AuthForm'; // Import the new component
+
+import axiosClient from '../../api/client'; // For retrying pending requests
+import {
+    clearPendingRequest,
+    clearRedirectAfterAuth,
+    // Removed setAuthenticationStatus and setPhone as AuthFormMerchant handles its UI steps
+    // and sets the final 'AUTHENTICATED' status.
+} from '../../store/authSlice';
+// Removed store-specific clear actions as AuthFormMerchant/parent can handle if needed
+// upon explicit logout trigger rather than during auth flow cancellation within the form.
 
 const Authentication = () => {
     const dispatch = useDispatch();
     const router = useRouter();
-    const theme = useTheme();
+    const insets = useSafeAreaInsets();
+    const styles = useStyles(insets); // Use a makeStyles function for styles
 
-    const phone = useSelector((state) => state.auth.phone);
-    const authenticationStatus = useSelector((state) => state.auth.authenticationStatus);
+    // Selectors for post-authentication logic
     const pendingRequest = useSelector((state) => state.auth.pendingRequestConfig);
     const redirectAfterAuth = useSelector((state) => state.auth.redirectAfterAuth);
-    const selectedStoreId = useSelector((state) => state.store.storeId);
-    const insets = useSafeAreaInsets();
-    const [localPhone, setLocalPhone] = useState(phone);
-    const [otp, setOtp] = useState('');
-    const [otpError, setOtpError] = useState(false);
-    const [name, setName] = useState('');
-    const [isRegistered, setIsRegistered] = useState(false);
-    const [tooManyAttempts, setTooManyAttempts] = useState(false);
-    const [merchantName, setMerchantName] = useState(null);
+    const initialIdentifier = useSelector((state) => state.auth.phone); // Last used identifier (phone/email)
+    const selectedStoreId = useSelector((state) => state.store.storeId); // Current selected store from Redux
 
-    const sendOtp = async () => {
-        if (localPhone) {
+    const handleAuthSuccess = async ({ merchant, stores /*, accessToken */ }) => {
+        // This logic was previously in the useEffect reacting to 'AUTHENTICATED' status
+        console.log('Merchant Authentication Successful from Authentication/index.js. Welcome,', merchant.fullName);
+
+        if (pendingRequest) {
+            console.log('Retrying pending request for merchant:');
             try {
-                dispatch(setAuthenticationStatus('LOADING'));
-                setOtpError(false);
-                const res = await axiosClient.post('/sendOtp', {phone: localPhone, context: 'AUTH_LOGIN'});
-                setIsRegistered(res.data.isRegistered);
-                setTooManyAttempts(false);
-                dispatch(setPhone(localPhone));
-                dispatch(setAuthenticationStatus('OTP_SENT'));
+                // const client = getAxiosClient();
+                await axiosClient(pendingRequest); // Assuming pendingRequest is a full Axios request config
             } catch (err) {
-                console.error('Failed to send OTP:', err);
-                dispatch(clearStore());
-                dispatch(clearStoreSettings());
-                dispatch(clearAllStores());
-                dispatch(setAuthenticationStatus('UNAUTHENTICATED'));
+                console.error('Merchant Auth: Retried request failed:', err.response ? err.response.data : err.message);
+            } finally {
+                dispatch(clearPendingRequest());
             }
         }
-    };
 
-    const validateOtp = async (otp) => {
-        try {
-            setOtp(otp);
-            dispatch(setAuthenticationStatus('LOADING'));
-            await axiosClient.post('/verifyOtp', { phone: localPhone, otp, context: 'AUTH_LOGIN' });
-
-            if (isRegistered) {
-                const res = await axiosClient.post('/auth/merchantLogin', { phone: localPhone, otp});
-                const { accessToken, merchant, stores } = res.data;
-                await AsyncStorage.setItem('accessToken', accessToken);
-                setMerchantName(merchant.fullName);
-                dispatch(setMerchant(merchant));
-                dispatch(setAllStores( {stores}))
-                dispatch(setAuthenticationStatus('AUTHENTICATED'));
+        // The SUCCESS_MESSAGE step in AuthFormMerchant shows "Welcome... Redirecting..."
+        // Add a slight delay for that message to be visible before redirecting.
+        setTimeout(() => {
+            if (redirectAfterAuth) {
+                console.log('Merchant Auth: Redirecting to designated route:', redirectAfterAuth);
+                router.replace(redirectAfterAuth);
+                dispatch(clearRedirectAfterAuth());
             } else {
-                dispatch(setAuthenticationStatus('COLLECT_NAME'));
+                router.replace('/StoreSelector?exitToLogout=true'); // exitToLogout might prompt relogin if they exit selector
             }
-
-            return true;
-        } catch (err) {
-            console.error('Invalid OTP', err);
-            if (err.response?.status === 429) {
-                // Too many failed attempts
-                setTooManyAttempts(true);
-                // Alert.alert('Error', 'Too many failed attempts. Please request a new OTP.');
-                setLocalPhone('');
-                setOtp('')
-                dispatch(clearStore());
-                dispatch(clearStoreSettings());
-                dispatch(clearAllStores());
-                dispatch(setAuthenticationStatus('UNAUTHENTICATED'));
-                dispatch(setAuthenticationStatus('UNAUTHENTICATED'));
-            } else {
-                setOtpError(true);
-                setOtp('');
-                dispatch(setAuthenticationStatus('OTP_SENT'));
-            }
-            return false;
-        }
+        }, 1500); // Adjust delay as needed for the success message visibility in AuthFormMerchant
     };
 
-    const cancelRegistration = () => {
-        dispatch(setPhone(''));
-        dispatch(clearStore());
-        dispatch(clearStoreSettings());
-        dispatch(clearAllStores());
-        dispatch(setAuthenticationStatus('UNAUTHENTICATED'));
-    }
-
-    const registerUser = async () => {
-        try {
-            dispatch(setAuthenticationStatus('LOADING'));
-            const res = await axiosClient.post('/auth/register', {
-                phone: localPhone,
-                otp: otp,
-                fullName: name,
-                app: 'merchant'
-            });
-            const { accessToken, merchant, stores } = res.data;
-            await AsyncStorage.setItem('accessToken', accessToken);
-            setMerchantName(merchant.fullName);
-            dispatch(setMerchant(merchant));
-            dispatch(setAllStores( {stores}));
-            dispatch(setAuthenticationStatus('AUTHENTICATED'));
-            setOtp('');
-        } catch (err) {
-            console.error('Failed to register user:', err);
-        }
+    const handleCancelAuthFlowInPage = () => {
+        // This is called if AuthFormMerchant's onCancelFlow prop is triggered.
+        // For a full-page auth screen, this might mean navigating back or to a home/login prompt.
+        // If AuthFormMerchant just resets itself, this parent page might not need to do much
+        // unless it was presented modally or needs to clear other app-wide states.
+        console.log("Authentication flow cancelled, handled by Authentication/index.js.");
+        // Example: if there's a route they should go to on explicit cancel from deep in the flow:
+        // router.replace('/'); // Or a specific public landing page
     };
 
-    useEffect(() => {
-        console.log('useEffect authenticationStatus:', authenticationStatus);
-        if (authenticationStatus === 'AUTHENTICATED') {
-            const completeAuthFlow = async () => {
-                console.log('completeAuthFlow');
-                console.log('pendingRequest:', pendingRequest);
-                if (pendingRequest) {
-                    console.log('retrying pending request:')
-                    try {
-                        await axiosClient(pendingRequest);
-                    } catch (err) {
-                        console.error('Retried request failed:', err);
-                    } finally {
-                        dispatch(clearPendingRequest());
-                    }
-                }
-                console.log('redirectAfterAuth:', redirectAfterAuth);
-                if (redirectAfterAuth) {
-                    console.log('redirecting to:', redirectAfterAuth);
-                    setTimeout(()=> {
-                        router.replace(redirectAfterAuth);
-                        dispatch(clearRedirectAfterAuth());
-                    }, 2000)
-
-                } else if (selectedStoreId) {
-                    router.replace('/Main/(tabs)/Dashboard');
-                } else {
-                    router.replace('/StoreSelector?exitToLogout=true');
-                }
-            };
-
-            completeAuthFlow();
-        }
-    }, [authenticationStatus]);
+    // This component now focuses on layout and passing callbacks to AuthFormMerchant.
+    // No web-specific layout here as per the request to focus on mobile changes.
+    // AuthFormMerchant itself has IS_WEB checks for its internal styling.
 
     return (
         <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            style={{ flex: 1, backgroundColor: 'white' }}
-            contentContainerStyle={{ backgroundColor: 'white'}}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.keyboardAvoidingView}
         >
             <ScrollView
-                contentContainerStyle={[styles.container, { paddingTop: 0, paddingBottom: insets.bottom + 40 }]}
+                contentContainerStyle={styles.scrollContainer}
                 keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
             >
-                <View style={styles.inner}>
-                    <LogoIconWithName style={{ marginBottom: 20 }} />
-
-                    {authenticationStatus === 'UNAUTHENTICATED' && (
-                        <View style={styles.section}>
-                            <Text variant="titleMedium" style={styles.heading}>
-                                Enter Phone Number
-                            </Text>
-                            <View style={styles.row}>
-                                <PhoneInput
-                                    setPhone={setLocalPhone}
-                                    style={{flex: 1, marginRight: 10}}
-                                />
-                                <Button
-                                    mode="contained"
-                                    onPress={sendOtp}
-                                    style={styles.button}
-                                >
-                                    {tooManyAttempts ? 'Resend OTP' : 'Verify'}
-                                </Button>
-                            </View>
-                            {tooManyAttempts && <Text style={{ color: theme.colors.error }}>Too many failed attempts. Please request a new OTP.</Text>}
-                        </View>
-                    )}
-
-                    {authenticationStatus === 'OTP_SENT' && (
-                        <View style={styles.section}>
-                            <Text variant="titleMedium" style={styles.heading}>
-                                Enter OTP
-                            </Text>
-                            <OtpInput otpLength={6} onSubmit={validateOtp} />
-                            {otpError && (
-                                <Text style={{ color: theme.colors.error }}>
-                                    Invalid OTP. Please try again.
-                                </Text>
-                            )}
-                        </View>
-                    )}
-
-
-                    {authenticationStatus === 'COLLECT_NAME' && (
-                        <View style={styles.section}>
-                            <Text variant="titleMedium" style={styles.heading}>
-                                Enter Your Name
-                            </Text>
-                            <PaperTextInput
-                                label="Full Name"
-                                mode="outlined"
-                                onChangeText={setName}
-                                style={[{ marginBottom: 16 }, styles.input]}
-                            />
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between'}}>
-                            <View style={{ flexDirection: 'row', justifyContent: 'center'}}>
-                                <Button
-                                    mode="contained"
-                                    onPress={() => cancelRegistration()}
-                                    style={{ backgroundColor: theme.colors.error, borderRadius: 8 }}
-                                >
-                                    Cancel
-                                </Button>
-                            </View>
-                            <View style={{ flexDirection: 'row', justifyContent: 'center'}}>
-                            <Button
-                                mode="contained"
-                                onPress={() => registerUser()}
-                                style={{ backgroundColor: theme.colors.primary, borderRadius: 8 }}
-                            >
-                                Register
-                            </Button>
-                            </View>
-                            </View>
-                        </View>
-                    )}
-
-                    {merchantName && <Text variant={"titleLarge"}>{'Welcome, ' + merchantName + '!'}</Text>}
-
-                    {authenticationStatus === 'LOADING' && (
-                        <ActivityIndicator
-                            animating={true}
-                            size="large"
-                            color={theme.colors.primary}
-                        />
-                    )}
+                <View style={styles.mobileInnerContainer}>
+                    <AuthFormMerchant
+                        onAuthSuccess={handleAuthSuccess}
+                        onCancelFlow={handleCancelAuthFlowInPage} // Pass a handler for cancellation
+                        initialIdentifierFromState={initialIdentifier}
+                    />
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flexGrow: 1,
-        minHeight: '100%',     // <--- Fix vertical centering
-        paddingHorizontal: 20,
-        justifyContent: 'center',
-        backgroundColor: 'white',
+// Styles for the Authentication page itself
+const useStyles = (insets) => StyleSheet.create({
+    keyboardAvoidingView: {
+        flex: 1,
+        backgroundColor: 'white', // Match AuthForm background or use a distinct page background
     },
-    inner: {
-        alignItems: 'center', // Center logo & sections horizontally
+    scrollContainer: {
+        flexGrow: 1, // Important for ScrollView to allow centering content if it's short
+        justifyContent: 'center', // Vertically center AuthFormMerchant if content is shorter than screen
+        paddingHorizontal: 0, // AuthFormMerchant has its own padding
+        paddingTop: Platform.OS === 'android' ? insets.top + 10 : insets.top + 20, // Adjust top padding for status bar
+        paddingBottom: insets.bottom + 20, // Padding for home indicator/navigation bar
+    },
+    mobileInnerContainer: {
+        alignItems: 'center', // Center AuthFormMerchant horizontally
         width: '100%',
-        backgroundColor: 'white',
     },
-    section: {
-        alignSelf: 'stretch',
-        marginBottom: 24,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-
-    },
-    row: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 16,
-        justifyContent: "space-between",
-    },
-    button: {
-        borderRadius: 8,
-        marginTop: 4
-    },
-    heading: {
-        marginBottom: 4,
-    },
-    input: {
-        backgroundColor: 'white',
-    }
 });
 
 export default Authentication;

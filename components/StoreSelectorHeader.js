@@ -7,7 +7,7 @@ import {Button, IconButton, useTheme} from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { generateBoxShadowStyle } from "@/styles/generateShadow";
 import {useDispatch, useSelector} from "react-redux";
-import {logout} from "@/store/actions/logout";
+import {logout} from "../store/actions/logout";
 
 export default function StoreSelectorHeader({exitToLogout}) {
 
@@ -34,7 +34,7 @@ export default function StoreSelectorHeader({exitToLogout}) {
     >
 
       <LogoIconWithName />
-        {exitToLogout ? <IconButton icon="logout" size={32} iconColor={theme.colors.secondary} onPress={() => logout(dispatch, router)}/>
+        {exitToLogout ? <IconButton icon="logout" size={32} iconColor={theme.colors.secondary} onPress={() => dispatch(logout(router))}/>
             : <Button mode={'contained'} style={{backgroundColor: theme.colors.error, borderRadius: 8, marginHorizontal: 10}}  onPress={() => router.back()}>Cancel</Button>
         }
     </View>);
