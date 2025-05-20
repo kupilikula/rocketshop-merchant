@@ -8,7 +8,7 @@ import {useNavigation, useRouter} from "expo-router";
 import {CommonActions} from "@react-navigation/native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
-import axiosClient from "../../../../api/client";
+import { getAxiosClient } from "../../../../api/client";
 import * as MediaLibrary from "expo-media-library";
 import * as ImageManipulator from 'expo-image-manipulator';
 import _ from "lodash";
@@ -20,6 +20,7 @@ import {useGetShippingRuleForProduct} from "../../../../api/hooks/useGetShipping
 export default function EditPreview(props) {
     const {resetWorkflow, isNewProduct, productPreviewPublishRef, isPublishing, setIsPublishing, published, setPublished, publishFailure, setPublishFailure, setShouldResetStack, mediaGalleryKey, setMediaGalleryKey} = useContext(ProductWorkflowContext);
     const dispatch = useDispatch();
+    const axiosClient = getAxiosClient();
     const router = useRouter();
     const theme = useTheme();
     const editProduct = useSelector((state) => state.editProduct);

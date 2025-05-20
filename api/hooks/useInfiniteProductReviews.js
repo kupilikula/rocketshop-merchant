@@ -1,6 +1,6 @@
 // hooks/useInfiniteProductReviews.ts
 import { useInfiniteQuery } from "react-query";
-import axiosClient from "../client";
+import { getAxiosClient } from "../client";
 
 export function useInfiniteProductReviews(
     storeId,
@@ -14,6 +14,7 @@ export function useInfiniteProductReviews(
         limit = 10,
     } = options;
 
+    const axiosClient = getAxiosClient();
     return useInfiniteQuery({
         queryKey: ["product_reviews", storeId, productId, sort, rating, hasTextOnly],
         queryFn: async ({ pageParam = 0 }) => {

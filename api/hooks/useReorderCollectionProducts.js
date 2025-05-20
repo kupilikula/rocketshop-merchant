@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from "react-query";
-import axiosClient from "../client";
+import { getAxiosClient } from "../client";
 
 export const useReorderCollectionProducts = (storeId, collectionId) => {
     const queryClient = useQueryClient();
-
+    const axiosClient = getAxiosClient();
     return useMutation(
         async (products) => {
             const productOrders = products.map((product, index) => ({

@@ -1,8 +1,9 @@
 // hooks/useChatsQuery.js
 import { useQuery } from 'react-query';
-import axiosClient from '../client';
+import { getAxiosClient } from '../client';
 
 const fetchChats = async (storeId) => {
+    const axiosClient = getAxiosClient();
     const response = await axiosClient.get('/chats', {params: {storeId: storeId}}); // Replace with your API endpoint
     return response.data;
 };

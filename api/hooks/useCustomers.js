@@ -1,7 +1,9 @@
 import { useQuery } from "react-query";
-import axiosClient from "../client";
+import { getAxiosClient } from "../client";
 
 export const useCustomers = (storeId) => {
+    const axiosClient = getAxiosClient();
+
     return useQuery(
         "customers",
         async () => {

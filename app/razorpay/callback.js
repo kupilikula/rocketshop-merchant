@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, Alert, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSelector, useDispatch } from 'react-redux'; // Added useDispatch
-import axiosClient from '../../api/client'; // Adjust path as needed
+import { getAxiosClient } from '../../api/client'; // Adjust path as needed
 import * as WebBrowser from 'expo-web-browser'; // Needed for dismissBrowser
 import { setOAuthState } from '../../store/razorpaySlice';
 import {useQueryClient} from "react-query"; // Import action to store/clear state (ADJUST PATH)

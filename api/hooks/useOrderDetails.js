@@ -1,11 +1,12 @@
 import { useQuery } from "react-query";
-import axiosClient from "../client";
+import { getAxiosClient } from "../client";
 /**
  * Fetch details of a specific order.
  * @param storeId
  * @param {string} orderId - The ID of the order.
  */
 export const useOrderDetails = (storeId, orderId) => {
+    const axiosClient = getAxiosClient();
     return useQuery(
         ["order", orderId],
         async () => {

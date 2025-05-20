@@ -1,13 +1,14 @@
 // hooks/useMerchantNotificationPreferences.js
 
 import { useQuery } from 'react-query';
-import axiosClient from '../client';
+import { getAxiosClient } from '../client';
 
 /**
  * Fetch merchant's notification preferences for a given store.
  * @param {string} storeId - The store ID for which to fetch preferences
  */
 export const useMerchantStoreNotificationPreferences = (storeId, merchantId) => {
+    const axiosClient = getAxiosClient();
     return useQuery(
         ['merchantStoreNotificationPreferences', storeId, merchantId],
         async () => {

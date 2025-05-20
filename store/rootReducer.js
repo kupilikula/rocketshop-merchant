@@ -14,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import pushTokenReducer from "./pushTokenSlice";
 import shippingRuleReducer from "./shippingRuleSlice";
 import razorpayReducer from "./razorpaySlice";
+import storage from "./storage";
 
 const rootReducer = combineReducers({
     merchant: merchantReducer,
@@ -32,7 +33,7 @@ const rootReducer = combineReducers({
 
 const persistConfig = {
     key: 'root',
-    storage: AsyncStorage,
+    storage: storage,
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

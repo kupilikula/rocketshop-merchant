@@ -12,7 +12,7 @@ import MediaItem from "./MediaSlider/MediaItem";
 import { Rating } from "@kolking/react-native-rating";
 import React, { useState } from "react";
 import {useRouter} from "expo-router";
-import axiosClient from "../api/client";
+import { getAxiosClient } from "../api/client";
 import {useDispatch, useSelector} from "react-redux";
 import {useQueryClient} from "react-query";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";

@@ -1,10 +1,11 @@
 import { useQuery } from "react-query";
-import axiosClient from "../client";
+import { getAxiosClient } from "../client";
 
 /**
  * Fetch the list of collections for the store.
  */
 export const useProductTags = (storeId) => {
+    const axiosClient = getAxiosClient();
     return useQuery(
         "productTags",
         async () => {

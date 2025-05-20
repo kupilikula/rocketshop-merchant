@@ -4,14 +4,14 @@ import { Text, TextInput, Button, useTheme } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import { setNewStoreHandle } from '../../store/newStoreSlice';
 import { useRouter } from 'expo-router';
-import axiosClient from '../../api/client';
+import { getAxiosClient } from '../../api/client';
 import LogoIconWithName from "../../components/LogoIconWithName";
 
 export default function StoreHandleScreen() {
     const theme = useTheme();
     const dispatch = useDispatch();
     const router = useRouter();
-
+    const axiosClient = getAxiosClient();
     const storeName = useSelector((state) => state.newStore.storeName);
     const existingHandle = useSelector((state) => state.newStore.storeHandle);
 

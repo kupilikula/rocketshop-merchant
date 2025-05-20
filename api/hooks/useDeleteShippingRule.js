@@ -1,9 +1,10 @@
 // api/hooks/useDeleteShippingRule.js
 import { useMutation, useQueryClient } from 'react-query';
-import axiosClient from '../client';
+import { getAxiosClient } from '../client';
 
 export const useDeleteShippingRule = () => {
     const queryClient = useQueryClient();
+    const axiosClient = getAxiosClient();
 
     return useMutation(
         async ({ storeId, ruleId }) => {

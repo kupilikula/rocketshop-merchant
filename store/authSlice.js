@@ -8,6 +8,7 @@ const initialState = {
     isRegistered: null,
     pendingRequestConfig: null,
     redirectAfterAuth: null,
+    isAuthModalVisible: false,
 };
 
 const authSlice = createSlice({
@@ -43,6 +44,13 @@ const authSlice = createSlice({
         clearRedirectAfterAuth: (state) => {
             state.redirectAfterAuth = null;
         },
+        // --- New reducers for the authentication modal ---
+        openAuthModal: (state, action) => {
+            state.isAuthModalVisible = true;
+        },
+        closeAuthModal: (state) => {
+            state.isAuthModalVisible = false;
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(RESET_ALL, () => initialState);
@@ -58,6 +66,8 @@ export const {
     clearPendingRequest,
     setRedirectAfterAuth,
     clearRedirectAfterAuth,
+    openAuthModal,
+    closeAuthModal,
 } = authSlice.actions;
 
 export default authSlice.reducer;

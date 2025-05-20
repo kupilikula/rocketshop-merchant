@@ -1,11 +1,11 @@
 // hooks/useUpdateMerchantNotificationPreferences.js
 
 import { useMutation, useQueryClient } from 'react-query';
-import axiosClient from '../client';
+import { getAxiosClient } from '../client';
 
 export function useUpdateMerchantStoreNotificationPreferences(storeId, merchantId) {
     const queryClient = useQueryClient();
-
+    const axiosClient = getAxiosClient();
     return useMutation(
         async (preferences) => {
             const response = await axiosClient.patch(`/stores/${storeId}/updateNotificationPreferences`, preferences);

@@ -1,9 +1,10 @@
 import { useMutation, useQueryClient } from "react-query";
-import axiosClient from "../client";
+import { getAxiosClient } from "../client";
 /**
  * Update the order of collections in the backend.
  */
 export const useUpdateCollectionOrder = (storeId) => {
+    const axiosClient = getAxiosClient();
     const queryClient = useQueryClient();
 
     return useMutation(

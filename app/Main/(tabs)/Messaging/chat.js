@@ -7,7 +7,7 @@ import {useQuery, useQueryClient} from 'react-query';
 import {useLocalSearchParams, useNavigation, useRouter, useFocusEffect} from 'expo-router';
 import {useDispatch, useSelector} from 'react-redux';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import axiosClient from "../../../../api/client";
+import { getAxiosClient } from "../../../../api/client";
 import {connectSocket, disconnectSocket, getSocket, logActiveSockets} from "../../../../api/websocket";
 import KeyboardSpacer from "../../../../components/KeyboardSpacer";
 import GenericHeader from "../../../../components/GenericHeader";
@@ -32,6 +32,7 @@ const ChatScreen = () => {
     const {merchantId} = useSelector((state) => state.merchant);
     const { storeId } = useSelector((state) => state.store);
     const queryClient = useQueryClient();
+    const axiosClient = getAxiosClient();
     const router = useRouter();
     const [socket, setSocket] = useState(null);
     const dispatch = useDispatch();

@@ -8,7 +8,7 @@ import {useNavigation, useRouter} from "expo-router";
 import {CommonActions} from "@react-navigation/native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
-import axiosClient from "../../../../api/client";
+import { getAxiosClient } from "../../../../api/client";
 import * as MediaLibrary from "expo-media-library";
 import * as ImageManipulator from 'expo-image-manipulator';
 import _ from "lodash";
@@ -40,6 +40,7 @@ const convertHeicToJpg = async (uri) => {
 export default function Preview(props) {
     const dispatch = useDispatch();
     const router = useRouter();
+    const axiosClient = getAxiosClient();
     const theme = useTheme();
     const newProduct = useSelector((state) => state.newProduct);
     const shippingRule = useSelector((state) => state.shippingRule);

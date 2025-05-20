@@ -63,9 +63,14 @@ export default function RootLayout() {
 
   useEffect(() => {
     const configureNavigationBar = async () => {
-      await NavigationBar.setVisibilityAsync('hidden'); // Hide initially
-      await NavigationBar.setBehaviorAsync('overlay-swipe'); // Allow swipe-up to reveal
-      await NavigationBar.setBackgroundColorAsync('#00000000'); // Transparent background
+      if (Platform.OS === 'android') { // <--- Add this check
+        try {
+          await NavigationBar.setVisibilityAsync('hidden'); // Hide initially
+          await NavigationBar.setBehaviorAsync('overlay-swipe'); // Allow swipe-up to reveal
+          await NavigationBar.setBackgroundColorAsync('#00000000'); // Transparent background
+        } catch (e) {
+          console.log( 'Failed to configure Navigation Bar:', e);
+        }}
     };
 
     if (Platform.OS==='android') {
@@ -80,14 +85,18 @@ export default function RootLayout() {
 
 
   useEffect(() => {
-    Linking.getInitialURL().then((url) => {
-      console.log('🔗 Received initial URL:', url);
-    });
+    if (Platform.OS === 'ios' || Platform.OS === 'android') { // <--- Consider this check
+      Linking.getInitialURL().then((url) => {
+        console.log('🔗 Received initial URL:', url);
+      });
+    }
   }, []);
 
   useEffect(() => {
-    initializeNotificationHandler();
-    initializeNotificationChannels();
+    if (Platform.OS === 'ios' || Platform.OS === 'android') { // <--- Consider this check
+      initializeNotificationHandler();
+      initializeNotificationChannels();
+    }
   }, []);
 
 

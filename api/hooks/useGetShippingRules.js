@@ -1,9 +1,9 @@
 // api/hooks/useGetShippingRules.js
 import { useQuery } from 'react-query';
-import axiosClient from '../client';
+import { getAxiosClient } from '../client';
 
 export const useGetShippingRules = (storeId) => {
-
+    const axiosClient = getAxiosClient();
     return useQuery(
         ['shippingRules', storeId],
         async () => {

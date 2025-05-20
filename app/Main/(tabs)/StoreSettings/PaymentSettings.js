@@ -8,11 +8,12 @@ import { useRouter } from "expo-router";
 import * as WebBrowser from 'expo-web-browser';
 import { useQueryClient } from 'react-query'; // Import RQ hooks
 
-import axiosClient from "../../../../api/client"; // <<< ADJUST PATH
+import { getAxiosClient } from "../../../../api/client"; // <<< ADJUST PATH
 import { setOAuthState } from "../../../../store/razorpaySlice"; // <<< ADJUST PATH
 import { useGetRazorpayStatus } from "../../../../api/hooks/useGetRazorpayStatus"; // <<< ADJUST PATH & Ensure this hook file exists
 
 export default function PaymentSettingsScreen() {
+    const axiosClient = getAxiosClient();
     const dispatch = useDispatch();
     const theme = useTheme();
     const router = useRouter();

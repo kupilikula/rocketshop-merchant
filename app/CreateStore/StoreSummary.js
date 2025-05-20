@@ -3,7 +3,7 @@ import { View, ScrollView, StyleSheet, Alert } from 'react-native';
 import { Text, Button, useTheme, ActivityIndicator, Card, Chip } from 'react-native-paper';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'expo-router';
-import axiosClient from '../../api/client';
+import { getAxiosClient } from '../../api/client';
 import {resetNewStore, setNewStoreLogoImage} from '../../store/newStoreSlice';
 import { v4 as uuidv4 } from 'uuid';
 import {useQueryClient} from "react-query";
@@ -17,6 +17,7 @@ export default function StoreSummary() {
     const dispatch = useDispatch();
     const router = useRouter();
     const queryClient = useQueryClient();
+    const axiosClient = getAxiosClient();
 
     const {
         storeName,

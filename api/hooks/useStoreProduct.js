@@ -1,11 +1,12 @@
 import { useQuery } from "react-query";
-import axiosClient from "../client";
+import { getAxiosClient } from "../client";
 /**
  * Fetch details of a specific product.
  * @param {string} storeId - The ID of the store.
  * @param {string} productId - The ID of the product.
  */
 export const useStoreProduct = (storeId, productId) => {
+    const axiosClient = getAxiosClient();
     return useQuery(
         ["merchantProduct", storeId, productId],
         async () => {

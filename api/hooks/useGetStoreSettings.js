@@ -1,9 +1,10 @@
 // src/api/hooks/useGetStoreSettings.js
 
 import { useQuery } from "react-query";
-import axiosClient from "../client";
+import { getAxiosClient } from "../client";
 
 export const useGetStoreSettings = (storeId) => {
+    const axiosClient = getAxiosClient();
     return useQuery({
         queryKey: ["storeSettings", storeId],
         queryFn: async () => {

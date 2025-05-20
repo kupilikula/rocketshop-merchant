@@ -1,7 +1,8 @@
 import { useQuery } from 'react-query';
-import axiosClient from '../client';
+import { getAxiosClient } from '../client';
 
 const fetchShippingRuleForProduct = async (productId, storeId) => {
+    const axiosClient = getAxiosClient();
     if (!productId) throw new Error('Missing productId');
 
     const response = await axiosClient.get(`/stores/${storeId}/shipping/getRuleForProduct?productId=${productId}`);

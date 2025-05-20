@@ -1,9 +1,9 @@
 import {useMutation, useQueryClient} from "react-query";
-import axiosClient from "../client";
+import { getAxiosClient } from "../client";
 
 export const usePublishOffer = (storeId) => {
     const queryClient = useQueryClient();
-
+    const axiosClient = getAxiosClient();
     return useMutation({
         mutationFn: async (newOffer) => {
             const { data } = await axiosClient.post(`/stores/${storeId}/offers/createNewOffer`, newOffer);

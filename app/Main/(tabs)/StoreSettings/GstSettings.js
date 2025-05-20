@@ -5,7 +5,7 @@ import { View, StyleSheet, Alert } from "react-native";
 import { Text, List, Button, useTheme, Checkbox } from "react-native-paper";
 import {useDispatch, useSelector} from "react-redux";
 import { useRouter } from "expo-router";
-import axiosClient from "../../../../api/client";
+import { getAxiosClient } from "../../../../api/client";
 import GstRateDropdown from "../../../../components/GstRateDropdown";
 import {setStoreSettings} from "../../../../store/storeSettingsSlice";
 import GstSettingsComponent from "../../../../components/GstSettingsComponent"; // Assuming this exists
@@ -13,6 +13,7 @@ import GstSettingsComponent from "../../../../components/GstSettingsComponent"; 
 export default function GstSettingsScreen() {
     const theme = useTheme();
     const dispatch = useDispatch();
+    const axiosClient = getAxiosClient();
     const router = useRouter();
     const { storeId } = useSelector((state) => state.store);
     const { defaultGstInclusive, defaultGstRate } = useSelector((state) => state.storeSettings);

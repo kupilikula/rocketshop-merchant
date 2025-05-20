@@ -1,7 +1,7 @@
 // src/hooks/queries/useGetRazorpayStatus.js
 
 import { useQuery } from 'react-query';
-import axiosClient from '../client'; // <<< ADJUST path to your configured axios instance
+import { getAxiosClient } from '../client'; // <<< ADJUST path to your configured axios instance
 
 /*
  * Fetches the Razorpay connection status and account ID for a given store.
@@ -9,6 +9,7 @@ import axiosClient from '../client'; // <<< ADJUST path to your configured axios
  * @returns {Promise<{isConnected: boolean, accountId: string | null}>}
  */
 const fetchRazorpayConnectionStatus = async (storeId) => {
+    const axiosClient = getAxiosClient();
     // If storeId is falsy (null, undefined, ''), don't attempt to fetch.
     // The `enabled` option in useQuery is the primary guard for this.
     if (!storeId) {

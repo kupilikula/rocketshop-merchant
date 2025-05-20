@@ -1,11 +1,12 @@
 // src/api/mutations/useSelectStore.js
 
 import { useMutation } from "react-query";
-import axiosClient from "../client";
+import { getAxiosClient } from "../client";
 import { setStore } from "../../store/storeSlice";
 import { setStoreSettings } from "../../store/storeSettingsSlice";
 
 export const useSelectStore = (dispatch, router) => {
+    const axiosClient = getAxiosClient();
     return useMutation({
         mutationFn: async (store) => {
             const res = await axiosClient.get(`/stores/${store.storeId}/getStoreSettings`);

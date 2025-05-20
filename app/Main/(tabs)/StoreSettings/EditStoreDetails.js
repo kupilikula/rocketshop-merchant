@@ -4,13 +4,14 @@ import {Text, TextInput, Button, IconButton, Chip, Avatar, useTheme, Divider} fr
 import { useDispatch, useSelector } from 'react-redux';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
-import axiosClient from '../../../../api/client';
+import { getAxiosClient } from '../../../../api/client';
 import { setStore } from '../../../../store/storeSlice';
 import {useRouter} from "expo-router";
 
 export default function EditStoreDetails() {
     const theme = useTheme();
     const dispatch = useDispatch();
+    const axiosClient = getAxiosClient();
     const router = useRouter();
     const store = useSelector((state) => state.store);
     const [editing, setEditing] = useState(false);

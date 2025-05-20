@@ -1,7 +1,8 @@
 import { useQuery } from "react-query";
-import axiosClient from "../client";
+import { getAxiosClient } from "../client";
 
 export const fetchStoreFrontData = async (storeId) => {
+    const axiosClient = getAxiosClient();
     const response = await axiosClient.get(`/stores/${storeId}/storeFront`);
     return response.data;
 };

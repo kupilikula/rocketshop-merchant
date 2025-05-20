@@ -1,8 +1,10 @@
 // src/api/hooks/useGetMerchantStores.js
 import { useQuery } from 'react-query';
-import axiosClient from '../../api/client';
+import { getAxiosClient } from '../../api/client';
 
 export const useGetMerchantStores = (merchantId) => {
+    const axiosClient = getAxiosClient();
+
     return useQuery({
         queryKey: ['merchantStores', merchantId],
         queryFn: async () => {

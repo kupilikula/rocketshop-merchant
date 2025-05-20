@@ -1,7 +1,10 @@
 import { useInfiniteQuery } from "react-query";
-import axiosClient from "../client";
+import { getAxiosClient } from "../client";
 
 export const useCustomerOrders = ({ storeId, customerId, limit = 10 }) => {
+
+    const axiosClient = getAxiosClient();
+
     return useInfiniteQuery({
         queryKey: ["customerOrders", storeId, customerId],
         queryFn: async ({ pageParam = 1 }) => {

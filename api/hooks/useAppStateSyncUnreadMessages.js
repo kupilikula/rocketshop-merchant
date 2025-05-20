@@ -2,11 +2,12 @@
 import { useEffect } from "react";
 import { AppState } from "react-native";
 import { useDispatch } from "react-redux";
-import axiosClient from "../client";
+import { getAxiosClient } from "../client";
 import { setUnreadMessages } from "../../store/badgesSlice"; // update action name if needed
 
 export const useAppStateSyncUnreadMessages = (storeId = null) => {
     const dispatch = useDispatch();
+    const axiosClient = getAxiosClient();
 
     useEffect(() => {
         const fetchUnread = async () => {
@@ -24,8 +25,11 @@ export const useAppStateSyncUnreadMessages = (storeId = null) => {
         const handleAppStateChange = (nextAppState) => {
             console.log("App state changed to", nextAppState);
             if (nextAppState === "active") {
-                console.log("Fetching unread messages...");
-                fetchUnread();
+                if (storeId) {
+                    console.log("Fetching unread messages...");
+                    fetchUnread();
+                }
+
             }
         };
 

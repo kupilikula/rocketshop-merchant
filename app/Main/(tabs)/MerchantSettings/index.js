@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import {Text, TextInput, Button, Card, useTheme, Divider} from 'react-native-paper';
 import {useDispatch, useSelector} from 'react-redux';
-import axiosClient from '../../../../api/client';
+import { getAxiosClient } from '../../../../api/client';
 import OtpInput from '../../../../components/OtpInput';
 import {setMerchant} from "../../../../store/merchantSlice";
 import MerchantNotificationPreferences from "../../../../components/MerchantNotificationPreferences";
@@ -11,6 +11,7 @@ import ScrollableScreen from "../../../../components/ScrollableScreen";
 const MerchantProfileScreen = () => {
 
     const dispatch = useDispatch();
+    const axiosClient = getAxiosClient();
     const { merchantId, fullName: currentFullName, phone: currentPhone } = useSelector((state) => state.merchant);
     const [mode, setMode] = useState('VIEW'); // 'VIEW' | 'EDIT' | 'VERIFY_OTP'
     const [fullName, setFullName] = useState(currentFullName);

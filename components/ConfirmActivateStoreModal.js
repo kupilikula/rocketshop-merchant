@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, StyleSheet, Alert, TextInput } from "react-native";
 import { Text, Button, Modal, Portal, useTheme } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
-import axiosClient from "../api/client";
+import { getAxiosClient } from "../api/client";
 import OtpInput from "../components/OtpInput";
 import { useQueryClient } from "react-query";
 import {setStore} from "../store/storeSlice";

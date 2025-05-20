@@ -1,10 +1,11 @@
 import { useQuery } from "react-query";
-import axiosClient from "../client";
+import { getAxiosClient } from "../client";
 
 /**
  * Fetch the list of collections for the store.
  */
 export const useCollections = (storeId) => {
+    const axiosClient = getAxiosClient();
     return useQuery(
         "collections",
         async () => {

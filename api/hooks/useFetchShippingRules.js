@@ -1,7 +1,8 @@
 import { useQuery } from 'react-query';
-import axiosClient from '../client';
+import { getAxiosClient } from '../client';
 
 export const useFetchShippingRules = (storeId, groupingEnabled) => {
+    const axiosClient = getAxiosClient();
     return useQuery(['groupingShippingRules', storeId], async () => {
         const response = await axiosClient.get(`stores/${storeId}/shipping/getRulesWithAssociatedProducts`, {
             params: {

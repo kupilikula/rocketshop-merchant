@@ -6,7 +6,7 @@ import {Text, Card, Button, IconButton, Menu, useTheme, Chip, TextInput, Portal,
 import { useSelector } from "react-redux";
 import { useRouter } from "expo-router";
 import { useQuery, useMutation, useQueryClient } from "react-query";
-import axiosClient from "../../../../api/client";
+import { getAxiosClient } from "../../../../api/client";
 import PhoneInput from "../../../../components/PhoneInput";
 import KeyboardAwareScrollableScreen from "../../../../components/KeyboardAwareScrollableScreen";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
@@ -14,6 +14,7 @@ import {useSafeAreaInsets} from "react-native-safe-area-context";
 export default function MerchantManagementScreen() {
     const theme = useTheme();
     const router = useRouter();
+    const axiosClient = getAxiosClient();
     const {storeId, merchantRole: currentMerchantRole} = useSelector((state) => state.store);
     const queryClient = useQueryClient();
     const {merchantId: currentMerchantId} = useSelector((state) => state.merchant);

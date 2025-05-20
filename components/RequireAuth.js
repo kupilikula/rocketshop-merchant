@@ -1,19 +1,17 @@
-// RequireAuth.js
-
-import { useRouter, useSegments, usePathname, useLocalSearchParams, useFocusEffect } from "expo-router";
+import {useRouter, useSegments, usePathname, useLocalSearchParams, useFocusEffect} from "expo-router";
 import { useSelector, useDispatch } from "react-redux";
-import { useCallback } from "react";
-import { setRedirectAfterAuth } from "../store/authSlice";
-import {ActivityIndicator, useTheme} from "react-native-paper";
+import {useCallback, useEffect} from "react";
+import {openAuthModal, setRedirectAfterAuth} from "../store/authSlice";
+import {Platform} from "react-native";
 
+const IS_WEB = Platform.OS === 'web';
 export const RequireAuth = ({ children }) => {
-    const isAuthenticated = useSelector((state) => state.auth.authenticationStatus==='AUTHENTICATED');
+    const isAuthenticated = useSelector((state) => state.auth.authenticationStatus === 'AUTHENTICATED');
     const dispatch = useDispatch();
     const pathname = usePathname();
     const params = useLocalSearchParams();
     const router = useRouter();
-    const theme = useTheme();
-    const segments = useSegments(); // <-- returns ['Main', '(tabs)', 'Orders']
+    const segments = useSegments();
 
     useFocusEffect(
         useCallback(() => {
@@ -24,15 +22,18 @@ export const RequireAuth = ({ children }) => {
                     : `/${segments.join('/')}`;
 
                 dispatch(setRedirectAfterAuth(fullPath));
+                if (IS_WEB) {
+                    dispatch(openAuthModal());
+                } else {
+                    console.log('RequireAuth Redirecting to auth screen...');
+                    router.push('/Authentication');
+                }
 
-                router.push('/Authentication');
             }
         }, [isAuthenticated, pathname, JSON.stringify(params)])
     );
 
-    if (!isAuthenticated) {
-        return <ActivityIndicator animating={true} size={"large"} color={theme.colors.primary}/>;
-    }
+    if (!isAuthenticated) return null;
 
     return children;
 };

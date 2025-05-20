@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import AuthFormMerchant from '../../components/AuthForm'; // Import the new component
 
-import axiosClient from '../../api/client'; // For retrying pending requests
+import { getAxiosClient } from '../../api/client'; // For retrying pending requests
 import {
     clearPendingRequest,
     clearRedirectAfterAuth,

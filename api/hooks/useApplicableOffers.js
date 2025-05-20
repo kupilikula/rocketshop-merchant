@@ -1,7 +1,8 @@
 import { useQuery } from "react-query";
-import axiosClient from "../client";
+import { getAxiosClient } from "../client";
 
 export const useApplicableOffers = ({storeId, productId, collectionId, storeWide}) => {
+
     let enabled = true;
     let params;
     let queryKey;
@@ -17,6 +18,7 @@ export const useApplicableOffers = ({storeId, productId, collectionId, storeWide
     } else {
         enabled = false;
     }
+    const axiosClient = getAxiosClient();
 
     return useQuery({
         queryKey,

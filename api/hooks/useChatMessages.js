@@ -1,8 +1,9 @@
 // hooks/useChatMessages.js
 import { useQuery, useQueryClient } from 'react-query';
-import axiosClient from '../client';
+import { getAxiosClient } from '../client';
 
 const fetchChatMessages = async (chatId) => {
+    const axiosClient = getAxiosClient();
     const response = await axiosClient.get(`/chats/${chatId}/messages`);
     return response.data; // Includes read_at from backend for the current customer
 };

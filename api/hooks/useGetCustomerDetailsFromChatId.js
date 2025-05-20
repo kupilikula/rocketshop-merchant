@@ -1,13 +1,14 @@
 // hooks/useStoreInfoFromChat.js
 
 import { useQuery } from 'react-query';
-import axiosClient from '../client';
+import { getAxiosClient } from '../client';
 
 /**
  * Fetch store info (storeId, storeName, storeLogoImage) from chatId
  * @param {string} chatId - The chatId to fetch store info for
  */
 export const useGetCustomerDetailsFromChatId = (chatId) => {
+    const axiosClient = getAxiosClient();
     return useQuery(
         ['customerDetailsFromChatId', chatId],
         async () => {

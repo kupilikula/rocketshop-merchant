@@ -1,10 +1,10 @@
 // api/hooks/useReorderShippingRules.js
 import { useMutation, useQueryClient } from 'react-query';
-import axiosClient from '../client';
+import { getAxiosClient } from '../client';
 
 export const useReorderShippingRules = () => {
     const queryClient = useQueryClient();
-
+    const axiosClient = getAxiosClient();
     return useMutation(
         async ({ storeId, data }) => {
             console.log('storeId:', storeId);

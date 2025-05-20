@@ -1,22 +1,15 @@
 import { Drawer } from "expo-router/drawer";
-import {usePathname, useRouter} from "expo-router";
 import DrawerMenu from "../../components/DrawerMenu";
-import AppHeader from "../../components/AppHeader";
 import {useEffect, useState} from "react";
-import {disconnectSocket, getSocket} from "../../api/websocket";
-import {useDispatch, useSelector} from "react-redux";
-import {addUnreadMessage} from "../../store/badgesSlice";
-import {useQueryClient} from "react-query";
 import {useTheme} from "react-native-paper";
-import {useAppStateSyncUnreadMessages} from "../../api/hooks/useAppStateSyncUnreadMessages";
+import {Platform, Text, View} from "react-native";
+import {Slot} from "expo-router";
+
+const IS_WEB = Platform.OS === "web";
 
 export default function Layout() {
-  const pathName = usePathname();
-  const dispatch = useDispatch();
+
   const theme = useTheme();
-  const queryClient = useQueryClient();
-  const {merchantId} = useSelector((state)=> state.merchant);
-  const { storeId } = useSelector((state) => state.store);
 
   useEffect(() => {
       console.log('Mounting MAIN');
@@ -25,78 +18,22 @@ export default function Layout() {
       }
   },[])
 
-    useAppStateSyncUnreadMessages(storeId);
-
-    useEffect(() => {
-        const socketType = "global"; // Define the socket type
-        console.log('global useEffect');
-        // Function to initialize and manage the global socket connection
-        const initializeSocket = async () => {
-            if (!merchantId || !storeId) {
-                console.error("Merchant ID or storeId not found. Cannot initialize global socket.");
-                return;
-            }
-            const socket = await getSocket(socketType, null, storeId); // Get or connect the global socket
-            if (!socket) {
-                console.error("Failed to initialize the global socket.");
-                return;
-            }
-
-            console.log(`Global socket initialized, ID: ${socket.id} , merchantId: ${merchantId}`);
-            console.log(`Existing "newMessage" listeners:`, socket.listeners("newMessage").length);
-
-            // Remove any existing listeners
-            socket.removeAllListeners("newMessage");
-
-            // Add the 'newMessage' listener
-            socket.on("newMessage", (message) => {
-                console.log("Received newMessage event:", message);
-                console.log(`Active "newMessage" listeners:`, socket.listeners("newMessage").length);
-                console.log("newMessage socket.id:", socket.id);
-
-                // Update Redux store
-                dispatch(addUnreadMessage({chatId: message.chatId, message}));
-
-                // Invalidate 'chats' query
-                queryClient.invalidateQueries(["chats"]);
-            });
-
-            console.log("Global socket listener for 'newMessage' added.");
-        };
-
-        const handleReconnect = async () => {
-            console.log("Socket reconnected. Reinitializing listeners...");
-            await initializeSocket(); // Reattach listeners after reconnection
-        };
-
-        const attachReconnectHandler = async () => {
-            const socket = await getSocket(socketType);
-            if (!socket) {
-                console.error("Failed to attach reconnect handler: Global socket not initialized.");
-                return;
-            }
-
-            // Ensure only one reconnect handler is active
-            socket.off("connect", handleReconnect);
-            socket.on("connect", handleReconnect);
-        };
-
-        const setupSocket = async () => {
-            if (merchantId && storeId) {
-                await initializeSocket();
-                await attachReconnectHandler();
-            }
-        };
-
-        setupSocket();
-
-        // Clean up on unmount
-        return () => {
-            disconnectSocket(socketType); // Disconnect the global socket
-        };
-    }, [merchantId, storeId]); // Re-run when merchantId changes
-
-
+    // --- Platform-Specific UI Rendering ---
+    if (Platform.OS === 'web') {
+        // This layout (app/Main/_layout.js) should ideally not be reached by web routes
+        // if web navigation is structured under (public_marketplace) and (authenticated_user).
+        // This is a fallback/defensive measure.
+        console.warn("Web platform accessed /Main/_layout.js. This is usually for mobile. Redirecting or showing error.");
+        // Option 1: Redirect to the web's main entry point
+        // return <Redirect href="/(public_marketplace)/" />; // Or simply "/"
+        // Option 2: Show a message or a basic slot if some content under /Main needs to be web-accessible without the drawer
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+                <Text style={{textAlign: 'center'}}>This content is typically viewed within the mobile app's main navigation. You might be seeing a simplified version.</Text>
+                <Slot />
+            </View>
+        );
+    }
 
   return (
     <Drawer

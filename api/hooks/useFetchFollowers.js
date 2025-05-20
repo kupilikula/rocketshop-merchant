@@ -1,7 +1,10 @@
 import { useQuery } from "react-query";
-import axiosClient from "../client";
+import { getAxiosClient } from "../client";
 
 export const useFetchFollowers = (storeId) => {
+
+    const axiosClient = getAxiosClient();
+
     return useQuery(
         ["storeFollowers", storeId],
         async () => {

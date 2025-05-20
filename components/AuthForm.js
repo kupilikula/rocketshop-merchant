@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux';
 import {
     setAuthenticationStatus as setGlobalAuthProcessStatus,
 } from '../store/authSlice';
-import axiosClient from '../api/client';
+import { getAxiosClient } from '../api/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setMerchant } from '../store/merchantSlice';
 import { setAllStores } from '../store/allStoresSlice';
@@ -39,7 +39,7 @@ const AuthFormMerchant = ({
                           }) => {
     const theme = useTheme();
     const dispatch = useDispatch();
-    // const axiosClient = getAxiosClient();
+    const axiosClient = getAxiosClient();
     const styles = useMemo(() => makeStyles(theme, IS_WEB), [theme, IS_WEB]);
 
     // ... (State variables remain the same) ...

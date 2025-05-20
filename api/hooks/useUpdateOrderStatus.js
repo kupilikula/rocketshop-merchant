@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from 'react-query';
-import axiosClient from '../client';
+import { getAxiosClient } from '../client';
 
 export const useUpdateOrderStatus = (storeId, orderId) => {
     const queryClient = useQueryClient();
-
+    const axiosClient = getAxiosClient();
     return useMutation({
         mutationFn: async (newStatus) => {
             const response = await axiosClient.patch(

@@ -1,6 +1,8 @@
 import { useQuery } from "react-query";
-import axiosClient from "../client";
+import { getAxiosClient } from "../client";
 export const useCustomerDetails = (storeId, customerId) => {
+    const axiosClient = getAxiosClient();
+
     return useQuery(
         ["customerDetails", customerId],
         async () => {

@@ -4,7 +4,7 @@ import {FlatList, View} from 'react-native';
 import {List, ActivityIndicator, Text, Surface, useTheme, Divider, Badge} from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import {useQuery, useQueryClient} from 'react-query';
-import axiosClient from "../../../../api/client";
+import { getAxiosClient } from "../../../../api/client";
 import {useSelector} from "react-redux";
 import {useChats} from "../../../../api/hooks/useChats";
 
