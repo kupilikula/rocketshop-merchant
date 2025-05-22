@@ -4,6 +4,7 @@ import {useEffect, useState} from "react";
 import {useTheme} from "react-native-paper";
 import {Platform, Text, View} from "react-native";
 import {Slot} from "expo-router";
+import {RequireAuth} from "../../components/RequireAuth";
 
 const IS_WEB = Platform.OS === "web";
 
@@ -35,7 +36,7 @@ export default function Layout() {
         );
     }
 
-  return (
+  return (<RequireAuth>
     <Drawer
       initialRouteName={"(tabs)"}
       backBehavior={"history"}
@@ -82,5 +83,6 @@ export default function Layout() {
       })}
       drawerContent={(props) => <DrawerMenu {...props} />}
     ></Drawer>
+      </RequireAuth>
   );
 }

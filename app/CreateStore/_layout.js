@@ -1,9 +1,11 @@
 import {Stack} from "expo-router";
 import GenericHeader from "../../components/GenericHeader";
+import {RequireAuth} from "../../components/RequireAuth";
 
 export default function StoreLayout () {
 
-    return <Stack screenOptions={{headerShown: true, header: () => <GenericHeader title={'Create New Store'}/>}} >
+    return <RequireAuth>
+    <Stack screenOptions={{headerShown: true, header: () => <GenericHeader title={'Create New Store'}/>}} >
         <Stack.Screen name={'StoreName'} />
         <Stack.Screen name={'StoreHandle'} />
         <Stack.Screen name={'StoreDescription'} />
@@ -12,6 +14,7 @@ export default function StoreLayout () {
         <Stack.Screen name={'CreateFirstCollection'} />
         <Stack.Screen name={'StoreSummary'} />
     </Stack>
+    </RequireAuth>
 }
 
 

@@ -4,7 +4,7 @@ import { Platform } from 'react-native'; // Import Platform
 import { refreshAccessToken } from "./refreshAccessToken";
 import Constants from 'expo-constants';
 
-const CHAT_API_BASE_URL = Constants.expoConfig?.extra?.chatApiBaseUrl;
+const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl;
 
 let socketRegistry = [];
 let connectionInProgress = false;
@@ -72,9 +72,11 @@ const createMockSocket = () => {
 };
 
 
-export const getSocket = async (type, context = null) => {
+export const getSocket = async (type, context = null, storeId = null) => {
+    console.log('getSocket called with type: ', type, ' and context: ', context, '')
     // If not on a client platform, return a mock or throw an error
     if (Platform.OS === 'web' && typeof window === 'undefined') {
+        console.warn(`[getSocket] Not a client environment. Returning mock socket for type: ${type}, context: ${context}`);
         return createMockSocket();
     }
 
@@ -88,10 +90,10 @@ export const getSocket = async (type, context = null) => {
     }
 
     console.log(`Socket for type: ${type}, context: ${context} not initialized or disconnected. Connecting...`);
-    return await connectSocket(type, context);
+    return await connectSocket(type, context, storeId);
 };
 
-export const connectSocket = async (type, context = null) => {
+export const connectSocket = async (type, context = null, storeId = null) => {
     // If not on a client platform, return a mock or throw an error
     if (Platform.OS === 'web' && typeof window === 'undefined') {
         console.warn(`[connectSocket] Not a client environment. Returning mock socket for type: ${type}, context: ${context}`);
@@ -101,8 +103,15 @@ export const connectSocket = async (type, context = null) => {
     console.log(`[${new Date().toISOString()}] Attempting to connect socket:`, {
         type,
         context,
+        storeId,
         existingConnections: socketRegistry.length,
         connectionInProgress,
+        existingSockets: socketRegistry.map(s => ({
+            type: s.type,
+            context: s.context,
+            id: s.socket.id,
+            connected: s.socket.connected
+        }))
     });
 
     const existingSocketEntry = socketRegistry.find(
@@ -160,11 +169,14 @@ export const connectSocket = async (type, context = null) => {
                 console.log("No valid token found. Socket connection aborted for non-authenticated features.");
                 throw new Error("No valid token found. Socket connection aborted.");
             }
-
-            const newSocket = io(CHAT_API_BASE_URL, {
+            console.log("Valid token found. Connecting socket... ", token);
+            const newSocket = io(API_BASE_URL, {
                 transports: ["websocket"],
                 autoConnect: false,
-                auth: { accessToken: token },
+                auth: {
+                        accessToken: token,
+                        storeId: storeId
+                },
             });
 
             registerSocket(newSocket, type, context); // Register immediately

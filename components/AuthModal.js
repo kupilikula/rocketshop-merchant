@@ -11,7 +11,7 @@ import {
 import AuthForm from './AuthForm'; // Adjust path
 import { getAxiosClient } from '../api/client'; // Adjust path
 import { useRouter } from 'expo-router';
-import {getHomePath} from "../utils/getPathUtils";
+// import {getHomePath} from "../utils/getPathUtils";
 
 const IS_WEB = Platform.OS === 'web';
 

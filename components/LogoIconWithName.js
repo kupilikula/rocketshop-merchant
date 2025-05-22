@@ -33,6 +33,7 @@ export default function LogoIconWithName({style}) {
           fontFamily: Platform.select({
             android: "Atma_600SemiBold",
             ios: "Atma-SemiBold",
+              web: "Atma_600SemiBold",
           }),
           color: theme.colors.primary,
           fontSize: 26,

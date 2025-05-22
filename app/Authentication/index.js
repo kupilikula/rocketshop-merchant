@@ -6,7 +6,6 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import AuthFormMerchant from '../../components/AuthForm'; // Import the new component
-
 import { getAxiosClient } from '../../api/client'; // For retrying pending requests
 import {
     clearPendingRequest,
@@ -20,6 +19,7 @@ import {
 const Authentication = () => {
     const dispatch = useDispatch();
     const router = useRouter();
+    const axiosClient = getAxiosClient();
     const insets = useSafeAreaInsets();
     const styles = useStyles(insets); // Use a makeStyles function for styles
 

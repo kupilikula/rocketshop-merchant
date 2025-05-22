@@ -1,7 +1,7 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { reconnectAllSockets } from "@/api/websocket";
-import { refreshAccessToken } from "@/api/refreshAccessToken";
+import { reconnectAllSockets } from "./websocket";
+import { refreshAccessToken } from "./refreshAccessToken";
 import { logout } from "../store/actions/logout";
 
 import {setPendingRequest, setRedirectAfterAuth} from "@/store/authSlice";
@@ -77,7 +77,10 @@ const createAxiosInstance = () => {
 
             // If the error is a 401 and not a retry of the refresh token itself
             if (error.response.status === 401 && !originalRequest._retry) {
-                console.log("401 detected - attempting refresh...");
+                console.log("401 detected - checking need for token refresh...");
+
+                // Check the backend's signal for refreshing the token
+                const canTryRefresh = error.response.data?.tryTokenRefresh === true;
 
                 if (logoutInProgress) {
                     console.warn("Logout is already in progress. Ignoring further 401 handling.");
@@ -107,7 +110,7 @@ const createAxiosInstance = () => {
                     }
                 }
 
-                if (!token) {
+                if (!token || !canTryRefresh) {
                     console.log("Guest user triggered 401 or no token. Skipping refresh.");
                     if (router && dispatch && router.pathname !== '/Authentication') { // Ensure router and dispatch are set
                         const safelySerializableRequest = getSerializableRequestConfig(originalRequest);
@@ -128,6 +131,8 @@ const createAxiosInstance = () => {
 
                 originalRequest._retry = true; // Mark this request as already retried
                 isRefreshing = true; // Set the refreshing flag
+
+
 
                 try {
                     console.log("Attempting to refresh token...");

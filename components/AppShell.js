@@ -14,7 +14,8 @@ import {useAppStateSyncUnreadMessages} from "../api/hooks/useAppStateSyncUnreadM
 import {disconnectSocket, getSocket} from "../api/websocket";
 import {addUnreadMessage} from "../store/badgesSlice";
 import {useQueryClient} from "react-query";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import AuthModal from './AuthModal';
 
 const IS_WEB = Platform.OS === 'web';
 
@@ -36,6 +37,10 @@ export default function AppShell() {
         console.log('global useEffect');
         // Function to initialize and manage the global socket connection
         const initializeSocket = async () => {
+
+            const accessToken = await AsyncStorage.getItem('accessToken');
+            console.log('accessToken', accessToken);
+
             if (!merchantId || !storeId) {
                 console.error("Merchant ID or storeId not found. Cannot initialize global socket.");
                 return;
@@ -193,6 +198,7 @@ export default function AppShell() {
                 <Stack.Screen name="StoreSelector"  options={{ headerShown: false }}/>
                 <Stack.Screen name="CreateStore"  options={{ headerShown: false }}/>
             </Stack>
+            {IS_WEB && <AuthModal/>}
         </View>
     );
 }
