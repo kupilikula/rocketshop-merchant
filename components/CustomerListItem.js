@@ -3,6 +3,7 @@ import { Pressable, View } from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
 import { StyleSheet } from "react-native";
+import {getCustomerPath} from "../utils/getPathUtils";
 
 export const CustomerListItem = ({ customer }) => {
   const router = useRouter();
@@ -10,7 +11,7 @@ export const CustomerListItem = ({ customer }) => {
   return (
     <Pressable
       onPress={() =>
-        router.push("/Main/(tabs)/Customers/" + customer.customerId)
+        router.push(getCustomerPath(customer.customerId))
       }
     >
       <Card style={styles.card}>

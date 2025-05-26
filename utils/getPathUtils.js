@@ -88,19 +88,53 @@ export const getOrdersPath = () => {
     }
 }
 
+export const getOrderPath = (orderId) => {
+    if (Platform.OS === 'web') {
+        return `/(web_merchant)/(protected)/orders/${orderId}`;
+    } else {
+        return `/Main/(tabs)/Orders/${orderId}`;
+    }
+}
+
 export const getCustomersPath = () => {
     if (Platform.OS === 'web') {
-        return '/(web_merchant)/customers';
+        return '/(web_merchant)/(protected)/customers';
     } else {
         return '/Main/(tabs)/Customers'
     }
 }
 
+export const getCustomerPath = (customerId) => {
+    if (Platform.OS === 'web') {
+        return `/(web_merchant)/(protected)/customers/${customerId}`;
+    } else {
+        return `/Main/(tabs)/Customers/${customerId}`;
+    }
+}
+
+
+
 export const getOffersPath = () => {
     if (Platform.OS === 'web') {
-        return '/(web_merchant)/offers';
+        return '/(web_merchant)/(protected)/offers';
     } else {
         return '/Main/(tabs)/Offers'
+    }
+}
+
+export const getOfferPath = (offerId) => {
+    if (Platform.OS === 'web') {
+        return `/(web_merchant)/(protected)/offers/${offerId}`;
+    } else {
+        return `/Main/(tabs)/Offers/${offerId}`;
+    }
+}
+
+export const getNewOfferPath = () => {
+    if (Platform.OS === 'web') {
+        return `/(web_merchant)/(protected)/offers/new_offer`;
+    } else {
+        return `/Main/(tabs)/Offers/NewOffer`;
     }
 }
 
