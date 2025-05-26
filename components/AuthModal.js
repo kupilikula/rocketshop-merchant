@@ -11,6 +11,7 @@ import {
 import AuthForm from './AuthForm'; // Adjust path
 import { getAxiosClient } from '../api/client'; // Adjust path
 import { useRouter } from 'expo-router';
+import {getStoreSelectorPath} from "../utils/getPathUtils";
 // import {getHomePath} from "../utils/getPathUtils";
 
 const IS_WEB = Platform.OS === 'web';
@@ -64,7 +65,14 @@ const AuthModal = () => {
                 dispatch(clearRedirectAfterAuth());
             }
 
-            setTimeout(() => {dispatch(closeAuthModal())}, 1500);
+            setTimeout(() => {
+                dispatch(closeAuthModal());
+                console.log('actionTaken', actionTaken);
+                if (!actionTaken) {
+                    router.replace(getStoreSelectorPath() + '?exitToLogout=true');
+                }
+
+            }, 1500);
     }, [dispatch, router, pendingRequest, redirectPathAfterAuth]); // authContinuation here ensures we use its value at the time of success
 
     if (!isVisible) {

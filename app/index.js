@@ -20,7 +20,7 @@ export default function IndexPage() {
     // Mobile specific logic
     if (authStatus === 'AUTHENTICATED') {
       console.log("IndexPage (Mobile): Authenticated, redirecting to Main feed.");
-      return <Redirect href="/Main/(tabs)/Feed" />;
+      return <Redirect href="/Main/(tabs)/Dashboard" />;
     } else {
       console.log("IndexPage (Mobile): Not authenticated, redirecting to Authentication screen.");
       return <Redirect href="/Authentication/" />;

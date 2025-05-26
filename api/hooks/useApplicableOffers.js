@@ -23,7 +23,7 @@ export const useApplicableOffers = ({storeId, productId, collectionId, storeWide
     return useQuery({
         queryKey,
         queryFn: async () => {
-            const { data } = await axiosClient.get('/getApplicableOffers', {params: params});
+            const { data } = await axiosClient.get(`/stores/${storeId}/offers/getApplicableOffers`, {params: params});
             return data;
         },
         enabled: !!storeId && enabled

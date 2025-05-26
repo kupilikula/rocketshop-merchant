@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Modal, Portal, Text, Button, Checkbox, useTheme } from "react-native-paper";
 
-export default function CloneProductModal({ visible, onClose, onConfirm }) {
+export default function CloneProductModal({ visible, onClose, onConfirm, contentContainerStyle }) {
     const theme = useTheme();
     const [useSameMedia, setUseSameMedia] = useState(true);
 
@@ -16,7 +16,7 @@ export default function CloneProductModal({ visible, onClose, onConfirm }) {
             <Modal
                 visible={visible}
                 onDismiss={onClose}
-                contentContainerStyle={styles.modalContainer}
+                contentContainerStyle={[styles.modalContainer, contentContainerStyle]}
             >
                 <Text style={styles.title}>Clone Product</Text>
                 <Text style={styles.description}>
@@ -54,6 +54,7 @@ const styles = StyleSheet.create({
         padding: 20,
         marginHorizontal: 20,
         borderRadius: 8,
+        alignSelf: "center",
     },
     title: {
         fontSize: 18,

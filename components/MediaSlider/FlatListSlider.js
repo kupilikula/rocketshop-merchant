@@ -4,207 +4,202 @@ import React, {
   useImperativeHandle,
   useRef,
   useState,
+  useCallback, // Imported
+  useMemo,     // Imported
 } from "react";
-import { View, StyleSheet, Platform, UIManager } from "react-native";
-import { FlatList } from "react-native-gesture-handler";
+import { View, StyleSheet, Platform, UIManager, Text } from "react-native"; // Added Text for potential debugging
+import { FlatList } from "react-native"; // Using standard react-native FlatList
 import Indicator from "./Indicator";
 import MediaItem from "./MediaItem";
 
 const FlatListSlider = forwardRef((props, ref) => {
-  const slider = useRef();
-  // const [isReady, setIsReady] = useState(false); // Track if the FlatList is ready
-  const [size, setSize] = useState({ width: 400, height: 300 });
+  const slider = useRef(null);
+  const [size, setSize] = useState({
+    width: typeof props.width === 'number' ? props.width : 400,
+    height: typeof props.height === 'number' ? props.height : 300
+  });
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const onLayout = (event) => {
+  // Destructure props for stable references in dependency arrays where appropriate
+  const {
+    data,
+    currentIndexCallback,
+    keyExtractor: propsKeyExtractor,
+    orientation,
+    local,
+    allowPanZoom,
+    onZoomAndPanEnd,
+    showScrollButtons,
+    simultaneousHandlers: propsSimultaneousHandlers,
+    indicator,
+    indicatorStyle,
+    indicatorContainerStyle: propsIndicatorContainerStyle,
+    indicatorActiveColor,
+    indicatorInActiveColor,
+    indicatorActiveWidth,
+    flatListWrapperStyle,
+  } = props;
+
+  const onLayout = useCallback((event) => {
     const { layout } = event.nativeEvent;
-
     if (layout.width > 0 && layout.height > 0) {
       if (layout.width !== size.width || layout.height !== size.height) {
         setSize({ width: layout.width, height: layout.height });
       }
     }
-  };
-
-  const [currentIndex, setCurrentIndex] = useState(0);
+  }, [size.width, size.height]);
 
   useEffect(() => {
     if (Platform.OS === "android") {
-      UIManager.setLayoutAnimationEnabledExperimental(true);
+      if (UIManager.setLayoutAnimationEnabledExperimental) {
+        UIManager.setLayoutAnimationEnabledExperimental(true);
+      }
     }
   }, []);
 
-  const scrollToIndex = (index) => {
-    console.log("line48, index:", index);
-    if (slider.current) {
-      slider?.current.scrollToIndex({ index: index, animated: true });
+  const scrollToIndex = useCallback((index, animated = true) => {
+    if (slider.current && data && data.length > 0 && index >= 0 && index < data.length) {
+      slider.current.scrollToIndex({ index, animated });
     }
-  };
+  }, [data]); // Depends on the stability of the `data` prop
 
-  useImperativeHandle(ref, () => {
-    return {
-      scrollToIndex,
-    };
-  });
+  useImperativeHandle(ref, () => ({
+    scrollToIndex,
+  }), [scrollToIndex]);
 
-  // useEffect(() => {
-  //         scrollToIndex(props.data.length-1);
-  //     }, [props.data])
-
-  // useEffect(() => {
-  //     // Use scrollToEnd to scroll to the last item
-  //     if (slider.current && props.data.length > 0) {
-  //         setTimeout(() => {slider.current.scrollToEnd({ animated: true })}, 100 );
-  //     }
-  // }, [props.data]);
-
-  // Use effect to listen to data changes and trigger scroll
-  // useEffect(() => {
-  //     if (isReady && props.data.length > 0) {
-  //         // After content size change, scroll to the last item
-  //         const lastIndex = props.data.length - 1;
-  //         console.log('lastIndex:', lastIndex);
-  //         scrollToIndex(lastIndex);
-  //     }
-  // }, [props.data, isReady]);
-
-  // Handle onLayout and content size changes
-  // const handleContentSizeChange = (_) => {
-  //     // setSize({ width: contentSize.width, height: contentSize.height });
-  //     setTimeout(() =>
-  //             slider?.current.scrollToEnd({animated: true})
-  //         , 100)
-  // };
-
-  const onViewableItemsChanged = ({ viewableItems, changed }) => {
+  const onViewableItemsChangedInternal = useCallback(({ viewableItems }) => {
     if (viewableItems.length > 0) {
-      let currentIndex = viewableItems[0].index;
-      setCurrentIndex(currentIndex);
-      if (props.currentIndexCallback) {
-        props.currentIndexCallback(currentIndex);
+      const newIndex = viewableItems[0].index;
+      if (newIndex !== null && newIndex !== undefined) {
+        setCurrentIndex(prevCurrentIndex => {
+          if (newIndex !== prevCurrentIndex) {
+            if (currentIndexCallback) {
+              currentIndexCallback(newIndex);
+            }
+            return newIndex;
+          }
+          return prevCurrentIndex;
+        });
       }
     }
-  };
+  }, [currentIndexCallback]); // Dependency is ONLY `currentIndexCallback`
 
-  const viewabilityConfig = {
+  const viewabilityConfig = useMemo(() => ({
     itemVisiblePercentThreshold: 50,
-  };
+    // waitForInteraction: true, // Experiment if needed
+  }), []);
 
-  // useEffect(() => {
-  //     console.log("props.data updated:", props.data);
-  // }, [props.data]);
+  const viewabilityConfigCallbackPairs = useRef([{ viewabilityConfig, onViewableItemsChangedInternal }])
+
+  const renderItemInternal = useCallback(({ item, index: i }) => (
+      <MediaItem
+          width={size.width}
+          height={size.height}
+          item={item}
+          orientation={orientation}
+          index={i}
+          numberOfItems={data.length}
+          scrollToIndex={scrollToIndex}
+          active={i === currentIndex}
+          local={local}
+          allowPanZoom={allowPanZoom}
+          onZoomAndPanEnd={onZoomAndPanEnd}
+          showScrollButtons={showScrollButtons}
+          simultaneousHandlers={
+            propsSimultaneousHandlers
+                ? [slider, ...propsSimultaneousHandlers]
+                : [slider]
+          }
+      />
+  ), [
+    size.width,
+    size.height,
+    orientation,
+    data?.length,
+    scrollToIndex,
+    currentIndex,
+    local,
+    allowPanZoom,
+    onZoomAndPanEnd,
+    showScrollButtons,
+    propsSimultaneousHandlers,
+  ]);
+
+  const ItemSeparatorComponentInternal = useCallback(() => <View />, []);
+
+  const getItemLayoutInternal = useCallback((itemData, index) => {
+    const { width } = size;
+    if (!width || width <= 0) {
+      return { length: 0, offset: 0, index };
+    }
+    return {
+      length: width,
+      offset: width * index,
+      index,
+    };
+  }, [size.width]);
+
+  if (!data || data.length === 0) {
+    return null; // Render nothing if no data
+  }
 
   return (
-    props.data?.length > 0 && (
       <View
-        onLayout={onLayout}
-        style={[{ position: "relative" }, props.flatListWrapperStyle || {}]}
+          onLayout={onLayout}
+          style={[{ position: "relative" }, flatListWrapperStyle || {}]}
       >
         <FlatList
-          ref={slider}
-          simultaneousHandlers={props.simultaneousHandlers || []}
-          horizontal={true}
-          pagingEnabled={true}
-          snapToAlignment={"center"}
-          decelerationRate={0.99}
-          bounces={false}
-          // contentContainerStyle={props.contentContainerStyle}
-          data={props.data}
-          extraData={props.data}
-          showsHorizontalScrollIndicator={false}
-          renderItem={({ item, index: i }) => {
-            // return <View>
-            //     <Text style={{color: 'white'}}>{item.id}</Text>
-            // </View>
-            return (
-              <MediaItem
-                width={size.width}
-                height={size.height}
-                item={item}
-                orientation={props.orientation}
-                // onPress: props.onPress,
-                index={i}
-                numberOfItems={props.data.length}
-                scrollToIndex={scrollToIndex}
-                active={i === currentIndex}
-                local={props.local}
-                allowPanZoom={props.allowPanZoom}
-                onZoomAndPanEnd={props.onZoomAndPanEnd} // Pass the callback
-                showScrollButtons={props.showScrollButtons}
-                simultaneousHandlers={
-                  props.simultaneousHandlers
-                    ? [slider, ...props.simultaneousHandlers]
-                    : [slider]
-                }
-              />
-            );
-          }}
-          ItemSeparatorComponent={() => <></>}
-          keyExtractor={props.keyExtractor}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
-          getItemLayout={(_, index) => {
-            const { width, height } = size;
-
-            // Handle initial state where size might be empty
-            if (!width || !height) {
-              return { length: 0, offset: 0, index };
-            }
-
-            return {
-              length: width,
-              offset: width * index,
-              index,
-            };
-          }}
-          initialNumToRender={3}
-          maxToRenderPerBatch={3}
-          windowSize={3}
-          removeClippedSubviews={true}
-          updateCellsBatchingPeriod={50}
-          onEndReachedThreshold={0.5} // Preload data before reaching the end
-          scrollEnabled={true}
-          // onContentSizeChange={handleContentSizeChange}
+            ref={slider}
+            horizontal={true}
+            pagingEnabled={true}
+            snapToAlignment={"center"}
+            decelerationRate={Platform.OS === 'ios' ? 0.99 : 'fast'}
+            bounces={false}
+            data={data}
+            showsHorizontalScrollIndicator={false}
+            renderItem={renderItemInternal}
+            ItemSeparatorComponent={ItemSeparatorComponentInternal}
+            keyExtractor={propsKeyExtractor} // This prop comes from the parent
+            // onViewableItemsChanged={onViewableItemsChangedInternal}
+            // viewabilityConfig={viewabilityConfig}
+            viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
+            getItemLayout={getItemLayoutInternal}
+            initialNumToRender={1}
+            maxToRenderPerBatch={1}
+            windowSize={3}
+            removeClippedSubviews={Platform.OS !== 'web'} // Important for web
+            updateCellsBatchingPeriod={50}
+            // extraData={currentIndex} // Consider adding if 'active' prop in MediaItem needs to force re-render
         />
-        {props.indicator && props.data.length > 1 && (
-          <Indicator
-            itemCount={props.data.length}
-            currentIndex={currentIndex % props.data.length}
-            indicatorStyle={props.indicatorStyle}
-            indicatorContainerStyle={[
-              styles.indicatorContainerStyle,
-              props.indicatorContainerStyle,
-            ]}
-            indicatorActiveColor={props.indicatorActiveColor}
-            indicatorInActiveColor={props.indicatorInActiveColor}
-            indicatorActiveWidth={props.indicatorActiveWidth}
-            style={{ ...styles.indicator, ...props.indicatorStyle }}
-          />
+        {indicator && data.length > 1 && (
+            <Indicator
+                itemCount={data.length}
+                currentIndex={currentIndex % data.length} // Ensure currentIndex is within bounds
+                indicatorStyle={indicatorStyle}
+                indicatorContainerStyle={[
+                  styles.indicatorContainerStyle, // Default styles
+                  propsIndicatorContainerStyle,    // Prop-provided styles
+                ]}
+                indicatorActiveColor={indicatorActiveColor}
+                indicatorInActiveColor={indicatorInActiveColor}
+                indicatorActiveWidth={indicatorActiveWidth}
+                style={{ ...styles.indicator, ...props.indicatorStyle }} // Merging styles
+            />
         )}
       </View>
-    )
   );
 });
 
 const styles = StyleSheet.create({
-  image: {
-    height: 230,
-  },
   indicatorContainerStyle: {
-    marginTop: 18,
+    position: 'absolute',
+    bottom: 10,
+    alignSelf: 'center',
   },
-  shadow: {
-    ...Platform.select({
-      ios: {
-        shadowColor: "black",
-        shadowOffset: { width: 3, height: 3 },
-        shadowOpacity: 0.4,
-        shadowRadius: 10,
-      },
-      android: {
-        elevation: 5,
-      },
-    }),
+  indicator: { // Style for the Indicator component itself if needed
+    // e.g. paddingVertical: 5,
   },
+  // Removed unused styles 'image' and 'shadow'
 });
 
 export default FlatListSlider;

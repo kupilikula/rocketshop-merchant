@@ -9,128 +9,15 @@ import {useDispatch, useSelector} from "react-redux";
 import {logout} from "../store/actions/logout";
 import MaterialCommunityIcon from "react-native-paper/src/components/MaterialCommunityIcon";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
+import DrawerItemsContent from "./DrawerItemsContent";
 
 export default function DrawerMenu(props) {
-  const router = useRouter();
-  const theme = useTheme();
-  const dispatch = useDispatch();
-  const styles = makeStyles(theme);
-  const {storeLogoImage, canReceiveMessages, merchantRole} = useSelector(state => state.store);
-  const stores = useSelector(state => state.allStores.stores);
-  const unreadCount = useSelector((state) => {
-    const unread = state.badges.unreadMessages;
-    if (!unread) return 0;
-    return Object.values(unread).reduce((total, messages) => total + messages.length, 0);
-  });
-  // console.log('props:', JSON.stringify(props));
   return (
     <DrawerContentScrollView
       {...props}
-      contentContainerStyle={{ flex: 1, height: "100%" }}
+      contentContainerStyle={{ flex: 1, height: "100%"}}
     >
-      <View
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          marginBottom: 15,
-        }}
-      >
-        <StoreLogo logoImage={storeLogoImage} size={40} />
-        <Text variant={"displaySmall"} style={{ marginLeft: 15 }}>
-          Store Name
-        </Text>
-      </View>
-      {/*<Drawer.Item*/}
-      {/*  label={<Text variant={"titleLarge"}>Store Front</Text>}*/}
-      {/*  style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}*/}
-      {/*  onPress={() => {*/}
-      {/*    router.push("/Main/(tabs)/Store/StoreFront");*/}
-      {/*  }}*/}
-      {/*  icon={({ size, color }) => <MaterialIcons name={"store"} size={size} />}*/}
-      {/*/>*/}
-      {/*<Drawer.Item*/}
-      {/*  label={<Text variant={"titleLarge"}>Products</Text>}*/}
-      {/*  style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}*/}
-      {/*  onPress={() => router.push("/Main/(tabs)/Products")}*/}
-      {/*  icon={({ size, color }) => (*/}
-      {/*    <MaterialIcons name={"shopping-bag"} size={size} />*/}
-      {/*  )}*/}
-      {/*/>*/}
-      <Drawer.Item
-        label={<Text variant={"titleLarge"}>Collections</Text>}
-        style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}
-        onPress={() => {
-          router.push("/Main/(tabs)/Collections");
-        }}
-        icon={({ size, color }) => (
-          <MaterialIcons name={"category"} size={size} />
-        )}
-      />
-      {/*<Drawer.Item*/}
-      {/*  label={<Text variant={"titleLarge"}>Orders</Text>}*/}
-      {/*  style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}*/}
-      {/*  onPress={() => router.push("/Main/(tabs)/Orders")}*/}
-      {/*  icon={({ size, color }) => (*/}
-      {/*    <MaterialIcons name={"receipt-long"} size={size} />*/}
-      {/*  )}*/}
-      {/*/>*/}
-      <Drawer.Item
-        label={<Text variant={"titleLarge"}>Customers</Text>}
-        style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}
-        onPress={() => router.push("/Main/(tabs)/Customers")}
-        icon={({ size, color }) => <MaterialIcons name={"hail"} size={size} />}
-      />
-      <Drawer.Item
-        label={<Text variant={"titleLarge"}>Offers</Text>}
-        style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}
-        onPress={() => router.push("/Main/(tabs)/Offers")}
-        icon={({ size, color }) => (
-          <MaterialIcons name={"discount"} size={size} />
-        )}
-      />
-      {canReceiveMessages &&
-      <Drawer.Item label={<Text variant={'titleLarge'}>Messages</Text>}
-                   style={{padding: 0, borderRadius: 5, marginLeft: 0}}
-                   onPress={() => {router.push('/Main/(tabs)/Messaging')}}
-                   icon={({ size, color }) => (
-                       <View style={styles.iconContainer}>
-                         <MaterialIcons name="chat" size={size} color={color} />
-                         {unreadCount > 0 && (
-                             <Badge style={styles.badge}>{unreadCount}</Badge>
-                         )}
-                       </View>
-                   )}
-      />}
-      {(merchantRole === 'Admin' || merchantRole === 'Manager') &&
-      <Drawer.Item
-        label={<Text variant={"titleLarge"}>Store Settings</Text>}
-        style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}
-        onPress={() => router.push("/Main/(tabs)/StoreSettings")}
-        icon={({ size, color }) => (
-          <MaterialCommunityIcons name={"store-cog"} size={size} />
-        )}
-      />
-      }
-      <Drawer.Item label={<Text variant={'titleLarge'}>Merchant Settings</Text>}
-                   style={{padding: 0, borderRadius: 5, marginLeft: 0}}
-                   onPress={  () => router.push("/Main/(tabs)/MerchantSettings")}
-                   icon={({size, color}) => <MaterialIcons name={'manage-accounts'} size={size}/>}/>
-
-      <Drawer.Item label={<Text variant={'titleLarge'}>Switch Store</Text>}
-                   style={{padding: 0, borderRadius: 5, marginLeft: 0}}
-                   onPress={  () => router.push("/StoreSelector")}
-                   icon={({size, color}) => <MaterialIcons name={'change-circle'} size={size}/>}/>
-      <Drawer.Item label={<Text variant={'titleLarge'}>Log out</Text>}
-                   style={{padding: 0, borderRadius: 5, marginLeft: 0}}
-                   onPress={ async () => {
-                     try {
-                       await dispatch(logout(router)); // Pass `dispatch` and `router` to logout
-                     } catch (err) {
-                       console.log('error during logout:', err);
-                     }
-                   }}
-                   icon={({size, color}) => <MaterialIcons name={'logout'} size={size}/>}/>
+      <DrawerItemsContent/>
     </DrawerContentScrollView>
   );
 }

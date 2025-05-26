@@ -4,6 +4,8 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Platform }
 import {useDispatch} from "react-redux";
 import {useRouter} from "expo-router";
 import {openAuthModal} from "../../../store/authSlice";
+import LogoIconWithName from "../../../components/LogoIconWithName";
+import {useTheme} from "react-native-paper";
 // For web, you might use specific components from 'react-native-web'
 // or ensure your universal components render well on web.
 const IS_WEB = Platform.OS === 'web';
@@ -17,16 +19,12 @@ const MerchantLandingPage = () => {
 
     const dispatch = useDispatch();
     const router = useRouter();
+    const theme = useTheme();
+    const styles = makeStyles(theme);
     // Dummy navigation function - replace with your actual navigation logic
     const navigateTo = (screen) => console.log(`Navigating to ${screen}`);
 
     const handleLoginPress = () => {
-        // For web, we'll use the new openAuthModal flow.
-        // For mobile, if /Authentication is a full screen, router.push is fine.
-        // To unify, we could always use openAuthModal if it's set up to work on both.
-        // For now, sticking to user's original for mobile, adapting for web via IS_WEB if needed,
-        // or just dispatching openAuthModal if WebHeader is the only consumer of this for web.
-        // Since this component is shared, let's assume openAuthModal is the preferred way.
         if (IS_WEB) {
             dispatch(openAuthModal({ reason: 'drawerLoginClick' }));
         } else {
@@ -36,65 +34,17 @@ const MerchantLandingPage = () => {
     };
 
     return (
-        <ScrollView style={styles.container}>
-            {/* 1. Navigation Bar */}
-            <View style={styles.navBar}>
-                <Image source={{ uri: '/path-to-your-logo.png' }} style={styles.logo} />
-                <TouchableOpacity onPress={() => handleLoginPress()} style={styles.loginButton}>
-                    <Text style={styles.loginButtonText}>Login</Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* 2. Hero Section */}
+        <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.heroSection}>
-                <Text style={styles.headline}>Grow Your Business with [Your Platform Name]</Text>
+                <Text style={styles.headline}>Set Up Your Shop in Minutes</Text>
                 <Text style={styles.subHeadline}>
-                    Join our vibrant marketplace and connect with thousands of eager buyers. Easy setup, powerful tools, and dedicated support.
+                    Sell your products on our marketplace. Easy setup and management with Mobile and Web interfaces.
                 </Text>
-                <TouchableOpacity onPress={() => navigateTo('CreateStore')} style={styles.primaryCtaButton}>
+                <TouchableOpacity onPress={() => handleLoginPress()} style={styles.primaryCtaButton}>
                     <Text style={styles.primaryCtaButtonText}>Become a Merchant</Text>
                 </TouchableOpacity>
-                {/* Optional: <Image source={{ uri: '/path-to-hero-image.jpg' }} style={styles.heroImage} /> */}
             </View>
 
-            {/* 3. Key Benefits Section */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Why Sell With Us?</Text>
-                <View style={styles.benefitsGrid}>
-                    <BenefitItem iconName="users" title="Wider Reach" description="Access a large and growing customer base." />
-                    <BenefitItem iconName="settings" title="Easy Management" description="Intuitive tools for products, orders, and payments." />
-                    <BenefitItem iconName="shield" title="Secure Payments" description="Reliable and secure transaction processing." />
-                </View>
-            </View>
-
-            {/* 4. How It Works Section */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Get Started in 3 Simple Steps</Text>
-                <View style={styles.stepsContainer}>
-                    <StepItem number="1" title="Sign Up" description="Create your merchant account in minutes." />
-                    <StepItem number="2" title="List Products" description="Easily add your products and set up your store." />
-                    <StepItem number="3" title="Start Selling" description="Begin receiving orders and grow your sales." />
-                </View>
-            </View>
-
-            {/* 5. Social Proof (Optional) */}
-            {/* <View style={styles.section}>
-        <Text style={styles.sectionTitle}>What Our Merchants Say</Text>
-        {/* ... Testimonial components ... * /
-      </View> */}
-
-            {/* 6. Footer */}
-            <View style={styles.footer}>
-                <TouchableOpacity onPress={() => navigateTo('CreateStore')} style={[styles.primaryCtaButton, styles.footerCta]}>
-                    <Text style={styles.primaryCtaButtonText}>Ready to Start? Sign Up Now!</Text>
-                </TouchableOpacity>
-                <View style={styles.footerLinks}>
-                    <TouchableOpacity onPress={() => navigateTo('AboutUs')}><Text style={styles.footerLinkText}>About Us</Text></TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigateTo('Terms')}><Text style={styles.footerLinkText}>Terms of Service</Text></TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigateTo('Privacy')}><Text style={styles.footerLinkText}>Privacy Policy</Text></TouchableOpacity>
-                </View>
-                <Text style={styles.copyright}>© {new Date().getFullYear()} [Your Platform Name]. All rights reserved.</Text>
-            </View>
         </ScrollView>
     );
 };
@@ -117,9 +67,10 @@ const StepItem = ({ number, title, description }) => (
 );
 
 // Basic Styles - you'll need to expand and refine these significantly for web
-const styles = StyleSheet.create({
+const makeStyles = (theme) => StyleSheet.create({
     container: {
         flex: 1,
+        justifyContent: 'space-between',
         backgroundColor: '#fff', // Or your brand's background color
     },
     navBar: {
@@ -140,7 +91,7 @@ const styles = StyleSheet.create({
     loginButton: {
         paddingVertical: 8,
         paddingHorizontal: 20,
-        backgroundColor: '#007AFF', // Example primary color
+        backgroundColor: theme.colors.primary, // Example primary color
         borderRadius: 5,
     },
     loginButtonText: {
@@ -150,7 +101,7 @@ const styles = StyleSheet.create({
     heroSection: {
         padding: 40, // Larger padding for impact
         alignItems: 'center', // Center text for a common landing page pattern
-        backgroundColor: '#f8f9fa', // A light background to differentiate
+        backgroundColor: 'white', // A light background to differentiate
     },
     headline: {
         fontSize: 32, // Larger for web
@@ -167,7 +118,7 @@ const styles = StyleSheet.create({
         maxWidth: 600, // Constrain width for readability on wider screens
     },
     primaryCtaButton: {
-        backgroundColor: '#28a745', // Example success/CTA color
+        backgroundColor: theme.colors.secondary, // Example success/CTA color
         paddingVertical: 15,
         paddingHorizontal: 35,
         borderRadius: 8,

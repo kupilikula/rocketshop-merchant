@@ -7,6 +7,7 @@ import {
     StyleSheet,
     Pressable,
     ActivityIndicator,
+    Platform, // Added Platform for OS detection
 } from "react-native";
 import {
     Card,
@@ -32,10 +33,11 @@ import {usePushWithBackHref} from "../../../utils/usePushWithBackHref";
 export default function Dashboard ()  {
     const router = useRouter();
     const theme = useTheme();
-    const styles = makeStyles(theme);
+    const styles = makeStyles(theme); // makeStyles is now platform-aware
     const store = useSelector((state) => state.store);
     const { data: dashboardData = {}, isLoading } = useDashboard(store.storeId);
 
+    const [chartContainerWidth, setChartContainerWidth] = useState(0);
     const [chartTimeWindow, setChartTimeWindow] = useState("week");
     const [salesOrOrders, setSalesOrOrders] = useState("Sales");
     const pushWithBackHref = usePushWithBackHref();
@@ -60,7 +62,7 @@ export default function Dashboard ()  {
     // Auto-select time window based on age
     const effectiveChartTimeWindow = canShowMonthChart ? chartTimeWindow : "week";
 
-    console.log("Dashboard Data", dashboardData);
+    console.log("Dashboard Data", dashboardData); // Preserved from original
     const quickLinks = [
         {
             label: "Open Orders",
@@ -236,10 +238,11 @@ export default function Dashboard ()  {
                 <View style={styles.statsRow}>
                     {["openOrders", "newOrdersToday", "salesToday"].map((key, index) => {
                         const label = key === "openOrders" ? "Open Orders" : key === "newOrdersToday" ? "New Orders" : "Sales";
+                        const statApiValue = dashboardData?.quickStats?.[key];
                         const value =
                             key === "salesToday"
-                                ? `₹${dashboardData?.quickStats[key]}`
-                                : dashboardData?.quickStats[key]?.toString();
+                                ? `₹${statApiValue ?? ''}` // Use ?? to default only null/undefined to '', preserves 0
+                                : (statApiValue ?? '').toString();
                         return (
                             <Card key={index} style={styles.statsCard} mode="elevated">
                                 <Card.Title title={label} titleStyle={{ fontSize: 13, alignSelf: "center" }} />
@@ -307,8 +310,30 @@ export default function Dashboard ()  {
                                 )}
                             </View>
                         </View>
-                        <View style={{ justifyContent: "center", flexDirection: "row" }}>
-                            <VictoryChart theme={VictoryTheme.clean}>
+                        <View style={{ justifyContent: "center", flexDirection: "row" , width: "100%" }}
+                              onLayout={
+                                  Platform.OS === 'web'
+                                      ? (event) => {
+                                          const { width } = event.nativeEvent.layout;
+                                          if (width > 0 && width !== chartContainerWidth) {
+                                              setChartContainerWidth(width);
+                                          }
+                                      }
+                                      : undefined // No onLayout needed for mobile
+                              }
+                        >
+                            {(Platform.OS !== 'web' || (Platform.OS === 'web' && chartContainerWidth > 0)) ? (
+
+                                <VictoryChart theme={VictoryTheme.clean}
+                                              width={Platform.OS === 'web' ? chartContainerWidth : undefined}
+                                              height={Platform.OS === 'web' ? 300 : undefined} // Define a height for web or keep undefined for auto
+                                              padding={Platform.OS === 'web' ?
+                                                  { top: 20, bottom: 70, left: 50, right: 30 } : // Adjusted padding for web (tune as needed)
+                                                  undefined // Mobile uses theme default padding
+                                              }
+                                    // domainPadding allows space around the data, can also help with edge labels
+                                    // domainPadding={Platform.OS === 'web' ? { x: 20 } : undefined}
+                                >
                                 <VictoryAxis />
                                 {/*<VictoryAxis dependentAxis style={{ tickLabels: { display: "none" } }} />*/}
                                 {effectiveChartTimeWindow === "week" && salesOrOrders === "Sales" && (
@@ -331,7 +356,7 @@ export default function Dashboard ()  {
                                         data={dashboardData.chartData.orders.month.map((d) => ({ x: d.label, y: d.count, label: d.count.toString() }))}
                                     />
                                 )}
-                            </VictoryChart>
+                            </VictoryChart>) : null}
                         </View>
                     </Card>
                 </>
@@ -378,74 +403,72 @@ export default function Dashboard ()  {
 };
 
 const makeStyles = (theme) =>
-  StyleSheet.create({
-    container: {
-      // flex: 1,
-      padding: 10,
-      backgroundColor: theme.colors.surface,
-    },
-    scrollContent: {
-      // paddingBottom: 20,
-    },
-      statsRow: {
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          gap: 8, // if you're on RN 0.71+; else use marginRight on all but last card
-          marginVertical: 8,
-      },
-
-      statsCard: {
-          flex: 1,
-          aspectRatio: 1, // Ensures square layout
-          padding: 0,
-          borderRadius: 12,
-          maxWidth: 120,
-          maxHeight: 120,
-          backgroundColor: 'white',
-      },
-
-      cardContent: {
-          // flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          // backgroundColor: 'red'
-      },
-
-      statLabel: {
-          color: 'black',
-          backgroundColor: 'green',
-          width: '100%',
-          // marginBottom: 6,
-      },
-
-      statValue: {
-        color: 'black',
-          fontWeight: 'bold',
-      },
-    card: {
-      // marginBottom: 10,
-      padding: 10,
-      backgroundColor: "white",
-    },
-    row: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      marginVertical: 10,
-    },
-    chart: {
-      marginVertical: 8,
-      borderRadius: 8,
-    },
-    radioRow: {
-      flexDirection: "row", // Arrange items in a row
-      justifyContent: "flex-start",
-      alignItems: "center",
-    },
-    radioButton: {
-      // flex: 1, // Each button occupies equal space
-      width: 120,
-      marginVertical: 0,
-      padding: 0,
-    },
-  });
-
+    StyleSheet.create({
+        container: {
+            // Base styles applicable to mobile and serves as foundation for web
+            padding: 10,
+            backgroundColor: theme.colors.surface,
+            // Conditional styles for web are spread in, ensuring no direct modification to mobile styles
+            ...(Platform.OS === 'web' && {
+                width: '100%', // Important for allowing centering mechanisms to work
+                maxWidth: 760, // Apply a maximum width for web layout
+                alignSelf: 'center', // Center the content block if the parent ScrollView is wider
+            }),
+        },
+        scrollContent: { // Preserved as commented from original
+            // paddingBottom: 20,
+        },
+        statsRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            gap: 8,
+            marginVertical: 8,
+        },
+        statsCard: {
+            flex: 1,
+            aspectRatio: 1,
+            padding: 0,
+            borderRadius: 12,
+            maxWidth: 120,
+            maxHeight: 120,
+            backgroundColor: 'white',
+        },
+        cardContent: {
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        statLabel: { // Preserved as commented from original
+            // color: 'black',
+            // backgroundColor: 'green',
+            // width: '100%',
+            // marginBottom: 6,
+        },
+        statValue: { // Preserved as commented from original
+            // color: 'black',
+            // fontWeight: 'bold',
+        },
+        card: { // Style for the chart card
+            // marginBottom: 10, // Preserved as commented from original
+            padding: 10,
+            backgroundColor: "white",
+        },
+        row: { // Generic row style from original
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginVertical: 10,
+        },
+        chart: { // Generic chart style from original (may or may not be actively used by VictoryChart directly)
+            marginVertical: 8,
+            borderRadius: 8,
+        },
+        radioRow: {
+            flexDirection: "row",
+            justifyContent: "flex-start",
+            alignItems: "center",
+        },
+        radioButton: {
+            width: 120,
+            marginVertical: 0,
+            padding: 0,
+        },
+    });

@@ -13,6 +13,7 @@ import {
     // Removed setAuthenticationStatus and setPhone as AuthFormMerchant handles its UI steps
     // and sets the final 'AUTHENTICATED' status.
 } from '../../store/authSlice';
+import {getStoreSelectorPath} from "../../utils/getPathUtils";
 // Removed store-specific clear actions as AuthFormMerchant/parent can handle if needed
 // upon explicit logout trigger rather than during auth flow cancellation within the form.
 
@@ -53,7 +54,7 @@ const Authentication = () => {
                 router.replace(redirectAfterAuth);
                 dispatch(clearRedirectAfterAuth());
             } else {
-                router.replace('/StoreSelector?exitToLogout=true'); // exitToLogout might prompt relogin if they exit selector
+                router.replace(getStoreSelectorPath() + '?exitToLogout=true'); // exitToLogout might prompt relogin if they exit selector
             }
         }, 1500); // Adjust delay as needed for the success message visibility in AuthFormMerchant
     };

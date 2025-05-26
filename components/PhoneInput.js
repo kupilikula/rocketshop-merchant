@@ -8,7 +8,7 @@ const PhoneInput = ({ initialValue, value, setPhone, style }) => {
             mode="outlined"
             // dense
             defaultValue={initialValue}
-            // value={value}
+            value={undefined}
             onChangeText={setPhone}
             inputMode="numeric"
             style={[styles.input, style]}

@@ -4,6 +4,7 @@ import Fuse from "fuse.js";
 import { FlatList, View } from "react-native";
 import { SearchResultProduct } from "./SearchResultProduct";
 import { useRouter } from "expo-router";
+import {getStoreProductsSearchPath} from "../utils/getPathUtils";
 
 export default function ProductSearch(props) {
   const router = useRouter();
@@ -11,15 +12,6 @@ export default function ProductSearch(props) {
     props.initialSearchQuery || "",
   );
   const [filteredProducts, setFilteredProducts] = useState([]);
-
-  useEffect(() => {
-    if (searchQuery === "") {
-      setFilteredProducts(props.uniqueProducts);
-    } else {
-      const result = fuse.search(searchQuery).map(({ item }) => item);
-      setFilteredProducts(result);
-    }
-  }, [searchQuery, props.uniqueProducts, fuse]);
 
   const onSearchQueryChange = (query) => {
     setSearchQuery(query);
@@ -39,6 +31,15 @@ export default function ProductSearch(props) {
       ignoreLocation: true,
     });
   }, [props.uniqueProducts]);
+
+    useEffect(() => {
+        if (searchQuery === "") {
+            setFilteredProducts(props.uniqueProducts);
+        } else {
+            const result = fuse.search(searchQuery).map(({ item }) => item);
+            setFilteredProducts(result);
+        }
+    }, [searchQuery, props.uniqueProducts, fuse]);
 
   const flatListHeightStyle = props.limitedResults
     ? {
@@ -72,10 +73,10 @@ export default function ProductSearch(props) {
       />
 
       {searchQuery !== "" && filteredProducts.length > 0 && (
-        <View style={{ flex: 1, width: "100%", ...flatListHeightStyle }}>
+        <View style={{ flex: props.limitedResults ? undefined : 1, width: "100%", ...flatListHeightStyle }}>
           <FlatList
               keyboardShouldPersistTaps={"handled"}
-            style={{ width: "100%" }}
+            style={{ width: "100%", flex: props.limitedResults ? undefined : 1 }}
             scrollEnabled={!props.limitedResults}
             data={filteredProducts}
             renderItem={({ item }) => (
@@ -106,7 +107,7 @@ export default function ProductSearch(props) {
               textColor={"white"}
               onPress={() =>
                 router.push({
-                  pathname: "/Main/(tabs)/Store/StoreProductsSearch",
+                  pathname: getStoreProductsSearchPath(),
                   params: { initialSearchQuery: searchQuery },
                 })
               }

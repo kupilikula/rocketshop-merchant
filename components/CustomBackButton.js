@@ -4,6 +4,7 @@ import { TouchableOpacity, Platform, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Or your preferred icon library
 import { useRouter, useLocalSearchParams, usePathname } from 'expo-router';
 import { useNavigationContainerRef } from 'expo-router';
+import {getDashboardPath} from "@/utils/getPathUtils";
 
 // No interface needed in JS. Props are accessed directly or destructured.
 export function CustomBackButton({ style }) {
@@ -32,7 +33,7 @@ export function CustomBackButton({ style }) {
             router.back();
         } else {
             console.log('CustomBackButton: Cannot go back and no backHref provided.');
-            router.push('/Main/(tabs)/Dashboard');
+            router.push(getDashboardPath());
         }
         // console.log('NAVIGATION STACK AFTER GOING BACK', JSON.stringify(navRef.getRootState(), null, 4));
     };

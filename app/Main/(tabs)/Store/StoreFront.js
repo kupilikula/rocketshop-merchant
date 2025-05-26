@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from "react";
-import {Pressable, ScrollView, View, StyleSheet } from "react-native";
+import {Pressable, ScrollView, View, StyleSheet, Platform} from "react-native";
 import { Image } from "expo-image";
 import {Button, Card, Divider, Surface, Text, useTheme, ActivityIndicator} from "react-native-paper";
 import { foregroundColor } from "../../../../utils/foregroundColor";
@@ -19,10 +19,12 @@ import {useApplicableOffers} from "../../../../api/hooks/useApplicableOffers";
 import OfferBar from "../../../../components/OfferBar";
 import MaterialCommunityIcon from "react-native-paper/src/components/MaterialCommunityIcon";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
+import {getFollowersListPath, getProductPath, getStoreSettingsPath} from "../../../../utils/getPathUtils";
 
 const getUniqueProducts = (products) => {
     return [...new Set(products)];
 };
+const IS_WEB = Platform.OS === 'web';
 
 export default function StoreFront(props) {
     const { storeId } = useSelector((state) => state.store);
@@ -64,6 +66,198 @@ export default function StoreFront(props) {
 
     const notInAnyActiveCollectionProducts = useMemo(() => storeProductsData?.filter(p => p.collections.filter(c => c.isActive).length===0), [storeProductsData]);
 
+    const renderActualStoreContent = useMemo(() => {
+
+        if (!storeFrontData || !storeProductsData?.length) {
+            return null;
+        }
+
+        return <View
+            style={{
+                flex: 1,
+                alignItems: 'stretch',
+                width: "100%",
+                display: "flex",
+                flexDirection: "column",
+                backgroundColor: 'white'
+            }}
+        >
+            <Card
+                style={styles.storeHeaderCard_platform}
+                mode={IS_WEB ? 'elevated' : 'contained'}
+            >
+                <Card.Content>
+                <View style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    // margin: 16,
+                    width: '100%',
+                    alignSelf: 'stretch',
+                }}>
+                    <View
+                        style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: 'center',
+                            alignSelf: 'stretch',
+                            // width: "100%",
+                            height: "auto",
+                            // backgroundColor: 'green'
+                        }}
+                    >
+                        <Image
+                            source={storeFrontData.storeLogoImage}
+                            style={{
+                                height: 80,
+                                width: 80,
+                                borderRadius: 40,
+                                borderStyle: "solid",
+                                borderWidth: 1,
+                                borderColor: 'black',
+                                margin: 0,
+                                padding: 0,
+                            }}
+                        />
+                        <View style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start',
+                            marginLeft: 8,
+                            flex: 1
+                        }}>
+                            <Text
+                                // variant={"displaySmall"}
+                                style={{color: 'black', fontSize: 20}}
+                                // adjustsFontSizeToFit={true}
+                                numberOfLines={2}
+                            >
+                                {storeFrontData.storeName}
+                            </Text>
+                            <View>
+                                <Text variant={"titleMedium"} style={{color: 'black'}}>
+                                    {storeProductsData.length.toString() + " Products " + storeFrontData.totalNumberOfCollections + " Collection" + (storeFrontData.totalNumberOfCollections > 1 ? 's' : '')}
+                                </Text>
+                            </View>
+                            <View>
+                                <Pressable onPress={() => router.push('./FollowersList')}>
+                                    <Text variant={"titleMedium"} style={{ color: 'black' }}>
+                                        {storeFrontData.followerCount +
+                                            " Followers"}
+                                    </Text>
+                                </Pressable>
+                            </View>
+                            <View style={styles.rating}>
+                                <Rating
+                                    disabled={true}
+                                    variant={"stars-outline"}
+                                    fillColor={"#faaf00"}
+                                    baseColor={"black"}
+                                    size={18}
+                                    rating={storeFrontData.rating || 0}
+                                    onChange={() => {
+                                    }}
+                                />
+                                <Text style={styles.ratingText} variant={"bodyLarge"}>
+                                    {storeFrontData.rating.toString() + "/5 " + "(" + storeFrontData.numberOfRatings.toString() + ")"}
+                                </Text>
+                            </View>
+                        </View>
+
+                    </View>
+                    <View style={{ width:'100%', marginTop: 10}}>
+                        <Text variant={"bodyLarge"} style={{color: 'black'}}>
+                            {storeFrontData.storeDescription}
+                        </Text>
+                    </View>
+                    <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginTop: 10, alignSelf: 'center'}}>
+                        {store.merchantRole==='Admin' &&
+                            <View style={{ marginTop: 10, alignSelf: 'center'}}>
+                                <Button
+                                    mode={"elevated"}
+                                    elevation={5}
+                                    buttonColor={theme.colors.primary}
+                                    textColor={"white"}
+                                    style={{borderRadius: 8}}
+                                    icon={({size, color}) => <MaterialIcons name={'settings'} size={size} color={'white'}/>}
+                                    onPress={() => {
+                                        router.push({
+                                            pathname: getStoreSettingsPath(),
+                                            params: {
+                                                backHref: currentPath, // Pass the path of the current screen (StoreFront)
+                                                // Add any other params needed by the destination screen
+                                            }
+                                        })}}
+                                >
+                                    Settings
+                                </Button>
+                            </View>
+                        }
+                        <View style={{ marginTop: 10, alignSelf: 'center'}}>
+                            <Button
+                                mode={"elevated"}
+                                elevation={5}
+                                buttonColor={theme.colors.primary}
+                                textColor={"white"}
+                                style={{borderRadius: 8}}
+                                icon={({size, color}) => <MaterialCommunityIcons name={'account-check'} size={size} color={'white'}/>}
+                                onPress={() => {
+                                    router.push({
+                                        pathname: getFollowersListPath(),
+                                        params: {
+                                            backHref: currentPath, // Pass the path of the current screen (StoreFront)
+                                            // Add any other params needed by the destination screen
+                                        }
+                                    })}}
+                            >
+                                Followers
+                            </Button>
+                        </View>
+                    </View>
+                </View>
+                </Card.Content>
+            </Card>
+            {offersData?.offers.length > 0 &&
+                <Card style={{padding: 8, backgroundColor: 'white', marginVertical: 0, borderRadius: 0}} mode={'contained'}>
+                    <Text variant={'titleMedium'}>Store Wide Offers</Text>
+                    {offersData.offers.map( (o) => !o.requireCode ? <OfferBar key = {o.offerId} offer={o} showCheckmark={false} fullWidth={true}/> : null)}
+                </Card>
+            }
+            <Divider style={{marginVertical: 2}}/>
+            <ProductSearch
+                uniqueProducts={uniqueProducts}
+                onSearchResultPressHandler={(product) =>
+                    pushWithBackHref(getProductPath(product.productId))}
+                limitedResults={true}
+                resultsLimit={5}
+                initialSearchQuery={""}
+                style={{ paddingHorizontal: 10, marginVertical: 10, alignSelf: 'stretch'}}
+            />
+            <Divider style={{marginVertical: 2}}/>
+            {storeFrontData?.displayCollections.length > 0 &&
+                <View
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        width: "100%",
+                        alignSelf: 'stretch',
+                    }}
+                >
+                    {storeFrontData.displayCollections.map((c) => (
+                        <View  key={c.collectionId} style={{width: '100%', alignSelf: 'stretch',}}>
+                            <StoreFrontCollectionCard storeId={storeId} collection={c}/>
+                            <Divider style={{marginVertical: 10}}/>
+                        </View>
+                    ))}
+                </View>
+            }
+            {notInAnyActiveCollectionProducts.length > 0 &&
+                <StoreFrontCollectionCard storeId={storeId} fallback={true} products={notInAnyActiveCollectionProducts} showFallbackName={storeFrontData?.displayCollections?.length>0} collection={undefined}/>
+            }
+        </View>
+    }, [storeFrontData, storeProductsData, offersData]);
+
     if (storeFrontQuery.isLoading || storeProductsQuery.isLoading) {
         return (
             <View
@@ -98,215 +292,67 @@ export default function StoreFront(props) {
         );
     }
 
-    return (
-        storeFrontData &&
-        storeProductsData && (
-            <KeyboardAwareScrollableScreen
-                backgroundColor={theme.colors.surface}
-                innerStyle={{
-                    backgroundColor: theme.colors.surface,
-                    flexGrow: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    width: '100%'
-                }}
-                contentContainerStyle={{ width: '100%', padding: 0, alignSelf: 'stretch', paddingBottom: 100}}
-                keyboardVerticalOffset={insets.top + 60}
-            >
-                    <View
-                        style={{
-                            flex: 1,
-                            alignItems: 'stretch',
-                            width: "100%",
-                            display: "flex",
-                            flexDirection: "column",
-                        }}
-                    >
-                        <Card
-                            style={{
-                                flex: 1,
-                                height: "auto",
-                                // paddingVertical: 16,
-                                padding: 16,
-                                backgroundColor: theme.colors.white,
-                                borderRadius: 0
-                            }}
-                            mode={'contained'}
-                        >
-                            <View style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                // margin: 16,
-                                width: '100%',
-                                alignSelf: 'stretch',
-                            }}>
-                                <View
-                                    style={{
-                                        display: "flex",
-                                        flexDirection: "row",
-                                        alignItems: "center",
-                                        justifyContent: 'center',
-                                        alignSelf: 'stretch',
-                                        // width: "100%",
-                                        height: "auto",
-                                        // backgroundColor: 'green'
-                                    }}
-                                >
-                                    <Image
-                                        source={storeFrontData.storeLogoImage}
-                                        style={{
-                                            height: 80,
-                                            width: 80,
-                                            borderRadius: 40,
-                                            borderStyle: "solid",
-                                            borderWidth: 1,
-                                            borderColor: 'black',
-                                            margin: 0,
-                                            padding: 0,
-                                        }}
-                                    />
-                                    <View style={{
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'flex-start',
-                                        marginLeft: 8,
-                                        flex: 1
-                                    }}>
-                                        <Text
-                                            // variant={"displaySmall"}
-                                            style={{color: 'black', fontSize: 20}}
-                                            // adjustsFontSizeToFit={true}
-                                            numberOfLines={2}
-                                        >
-                                            {storeFrontData.storeName}
-                                        </Text>
-                                        <View>
-                                            <Text variant={"titleMedium"} style={{color: 'black'}}>
-                                                {storeProductsData.length.toString() + " Products " + storeFrontData.totalNumberOfCollections + " Collection" + (storeFrontData.totalNumberOfCollections > 1 ? 's' : '')}
-                                            </Text>
-                                        </View>
-                                        <View>
-                                            <Pressable onPress={() => router.push('./FollowersList')}>
-                                                <Text variant={"titleMedium"} style={{ color: 'black' }}>
-                                                    {storeFrontData.followerCount +
-                                                        " Followers"}
-                                                </Text>
-                                            </Pressable>
-                                        </View>
-                                        <View style={styles.rating}>
-                                            <Rating
-                                                disabled={true}
-                                                variant={"stars-outline"}
-                                                fillColor={"#faaf00"}
-                                                baseColor={"black"}
-                                                size={18}
-                                                rating={storeFrontData.rating || 0}
-                                                onChange={() => {
-                                                }}
-                                            />
-                                            <Text style={styles.ratingText} variant={"bodyLarge"}>
-                                                {storeFrontData.rating.toString() + "/5 " + "(" + storeFrontData.numberOfRatings.toString() + ")"}
-                                            </Text>
-                                        </View>
-                                    </View>
+    const pageContent = renderActualStoreContent;
 
-                                </View>
-                                <View style={{ width:'100%', marginTop: 10}}>
-                                    <Text variant={"bodyLarge"} style={{color: 'black'}}>
-                                        {storeFrontData.storeDescription}
-                                    </Text>
-                                </View>
-                                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginTop: 10, alignSelf: 'center'}}>
-                                {store.merchantRole==='Admin' &&
-                                <View style={{ marginTop: 10, alignSelf: 'center'}}>
-                                    <Button
-                                        mode={"elevated"}
-                                        elevation={5}
-                                        buttonColor={theme.colors.primary}
-                                        textColor={"white"}
-                                        style={{borderRadius: 8}}
-                                        icon={({size, color}) => <MaterialIcons name={'settings'} size={size} color={'white'}/>}
-                                        onPress={() => {
-                                            router.push({
-                                                pathname: `/Main/(tabs)/StoreSettings`,
-                                                params: {
-                                                    backHref: currentPath, // Pass the path of the current screen (StoreFront)
-                                                    // Add any other params needed by the destination screen
-                                                }
-                                            })}}
-                                    >
-                                        Settings
-                                    </Button>
-                                </View>
-                                }
-                                <View style={{ marginTop: 10, alignSelf: 'center'}}>
-                                    <Button
-                                        mode={"elevated"}
-                                        elevation={5}
-                                        buttonColor={theme.colors.primary}
-                                        textColor={"white"}
-                                        style={{borderRadius: 8}}
-                                        icon={({size, color}) => <MaterialCommunityIcons name={'account-check'} size={size} color={'white'}/>}
-                                        onPress={() => {
-                                            router.push({
-                                                pathname: `/Main/(tabs)/Store/FollowersList`,
-                                                params: {
-                                                    backHref: currentPath, // Pass the path of the current screen (StoreFront)
-                                                    // Add any other params needed by the destination screen
-                                                }
-                                            })}}
-                                    >
-                                        Followers
-                                    </Button>
-                                </View>
-                                </View>
-                            </View>
-                        </Card>
-                        {offersData?.offers.length > 0 &&
-                            <Card style={{padding: 8, backgroundColor: 'white', marginVertical: 0, borderRadius: 0}} mode={'contained'}>
-                                <Text variant={'titleMedium'}>Store Wide Offers</Text>
-                                {offersData.offers.map( (o) => !o.requireCode ? <OfferBar key = {o.offerId} offer={o} showCheckmark={false} fullWidth={true}/> : null)}
-                            </Card>
-                        }
-                        <Divider style={{marginVertical: 2}}/>
-                        <ProductSearch
-                            uniqueProducts={uniqueProducts}
-                            onSearchResultPressHandler={(product) =>
-                                pushWithBackHref(`/Main/(tabs)/Products/${product.productId}`)}
-                            limitedResults={true}
-                            resultsLimit={5}
-                            initialSearchQuery={""}
-                            style={{ paddingHorizontal: 10, marginVertical: 10, alignSelf: 'stretch'}}
-                        />
-                        <Divider style={{marginVertical: 2}}/>
-                        {storeFrontData?.displayCollections.length > 0 &&
-                        <View
-                            style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                                width: "100%",
-                            }}
-                        >
-                            {storeFrontData.displayCollections.map((c) => (
-                                <View  key={c.collectionId}>
-                                    <StoreFrontCollectionCard storeId={storeId} collection={c}/>
-                                    <Divider style={{marginVertical: 10}}/>
-                                </View>
-                            ))}
-                        </View>
-                        }
-                        {notInAnyActiveCollectionProducts.length > 0 &&
-                            <StoreFrontCollectionCard storeId={storeId} fallback={true} products={notInAnyActiveCollectionProducts} showFallbackName={storeFrontData?.displayCollections?.length>0} collection={undefined}/>
-                        }
-                    </View>
-            </KeyboardAwareScrollableScreen>
-        )
-    );
+    return (storeFrontData && storeProductsData && (
+        <View style={{backgroundColor: 'white', flex: 1}}>
+            {IS_WEB ? (
+                <View style={styles.webPageContainer}>
+                    <ScrollView
+                        style={styles.webScrollView}
+                        contentContainerStyle={styles.webScrollViewContentContainer}
+                        keyboardShouldPersistTaps="handled" // Good for web forms too
+                    >
+                        {pageContent}
+                    </ScrollView>
+                </View>
+            ) : (
+                <KeyboardAwareScrollableScreen
+                    backgroundColor={theme.colors.surface} // Original prop
+                    innerStyle={{ // Original innerStyle, can be moved to makeStyles
+                        backgroundColor: theme.colors.surface,
+                        flexGrow: 1, display: "flex", flexDirection: "column",
+                        width: '100%', paddingBottom: 100, // Original paddingBottom
+                    }}
+                    contentContainerStyle={{ // Original contentContainerStyle
+                        width: '100%', padding: 0, alignSelf: 'stretch'
+                    }}
+                    keyboardVerticalOffset={insets.top + 60} // Original prop
+                    scrollEnabled={true} // Original prop
+                >
+                    {pageContent}
+                </KeyboardAwareScrollableScreen>
+            )}
+            </View>))
+
 }
 
 const makeStyles = (theme) => StyleSheet.create({
-
+    storeHeaderCard_platform: {
+        backgroundColor: theme.colors.surface,
+        borderRadius: IS_WEB ? 8 : 0,
+        marginBottom: IS_WEB ? 20 : 10,
+        elevation: IS_WEB ? 2 : 1, // Keep some elevation if desired
+        overflow: IS_WEB ? 'hidden' : undefined, // Clip content on web if card has borderRadius
+    },
+    webPageContainer: { // Outermost container for the web page
+        flex: 1,
+        backgroundColor: 'white', // Web page background
+        paddingTop: 0, // Header from _layout handles top spacing
+        alignItems: 'center', // Centers the webScrollView
+    },
+    webScrollView: { // The ScrollView itself on web
+        width: '100%',
+        flex: 1,
+    },
+    webScrollViewContentContainer: { // Content container for web's ScrollView
+        width: '100%',
+        maxWidth: 1200, // Max width for the content area
+        alignSelf: 'center',
+        paddingVertical: 20,
+        paddingHorizontal: 20, // Horizontal padding for the centered content block
+        flexGrow: 1,
+    },
     followButton: {
         borderRadius: 5,
     },

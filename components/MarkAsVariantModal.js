@@ -10,6 +10,7 @@ export default function MarkAsVariantModal({
                                                visible,
                                                onClose,
                                                onProductSelect,
+                                                contentContainerStyle,
                                            }) {
     const theme = useTheme();
     const {storeId} = useSelector((state) => state.store);
@@ -29,7 +30,7 @@ export default function MarkAsVariantModal({
             <Modal
                 visible={visible}
                 onDismiss={onClose}
-                contentContainerStyle={styles.modalContainer}
+                contentContainerStyle={[styles.modalContainer, contentContainerStyle]}
             >
                 <Text style={styles.title}>Select a Product to Mark as Variant</Text>
                 {
@@ -78,6 +79,7 @@ const styles = StyleSheet.create({
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        alignSelf: "center",
         // paddingHorizontal: 10,
         flex: 1,
         // height: "100%",
@@ -95,7 +97,7 @@ const styles = StyleSheet.create({
         marginTop: 16,
     },
     button: {
-        flex: 1,
+        // flex: 1,
         marginHorizontal: 8,
     },
 });

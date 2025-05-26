@@ -5,6 +5,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setNewStoreName, setIsPlatformOwned as setNewStoreIsPlatformOwned } from '../../store/newStoreSlice';
 import { useRouter } from 'expo-router';
 import LogoIconWithName from "../../components/LogoIconWithName";
+import {getCreateStorePath} from "../../utils/getPathUtils";
+
+const IS_WEB = Platform.OS === 'web';
 
 export default function StoreNameScreen() {
     const theme = useTheme();
@@ -24,17 +27,17 @@ export default function StoreNameScreen() {
         }
         dispatch(setNewStoreName(localStoreName.trim()));
         dispatch(setNewStoreIsPlatformOwned(isPlatformOwned));
-        router.push('/CreateStore/StoreHandle'); // Move to next step
+        router.push(getCreateStorePath() + (IS_WEB ? '/store_handle' : '/StoreHandle')); // Move to next step
     };
 
-    return (
-        <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-            style={{ flex: 1, backgroundColor: 'white'}}
-        >
-            <ScrollView contentContainerStyle={styles.container}  keyboardShouldPersistTaps="handled">
-                <View style={{ flex: 1, justifyContent: 'center' }}>
-                    <LogoIconWithName style={{alignSelf: 'center', marginBottom: 24}}/>
+    // Common style for the outermost wrapper on all platforms
+    const commonWrapperStyle = { flex: 1, backgroundColor: 'white' };
+
+    // The content (ScrollView and its children) is the same for all platforms
+    const screenContent = (
+        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+            <View style={{ flex: 1, justifyContent: 'center' }}>
+                <LogoIconWithName style={{alignSelf: 'center', marginBottom: 24}}/>
                 <Text variant="titleLarge" style={styles.heading}>
                     Enter Store Name
                 </Text>
@@ -49,32 +52,44 @@ export default function StoreNameScreen() {
                     style={styles.input}
                     // error={!!error}
                 />
-                    {isPlatformMerchant &&
+                {isPlatformMerchant &&
                     <View style={styles.checkboxContainer}>
                         <Checkbox.Android
                             status={isPlatformOwned ? 'checked' : 'unchecked'}
                             onPress={() => setIsPlatformOwned(!isPlatformOwned)}
-
                         />
                         <Text style={styles.checkboxLabel}>
                             Is this a RocketShop Platform Owned Store?
                         </Text>
                     </View>}
 
-                    {/*{error ? (*/}
-                {/*    <Text style={{ color: theme.colors.error, marginBottom: 8 }}>*/}
-                {/*        {error}*/}
-                {/*    </Text>*/}
-                {/*) : null}*/}
                 <View style={{display: 'flex', alignSelf: 'center', justifyContent: 'center'}}>
-                <Button mode="contained" onPress={handleNext} style={{ borderRadius: 8 }}>
-                    Next
-                </Button>
+                    <Button mode="contained" onPress={handleNext} style={{ borderRadius: 8 }}>
+                        Next
+                    </Button>
                 </View>
-                </View>
-            </ScrollView>
-        </KeyboardAvoidingView>
+            </View>
+        </ScrollView>
     );
+
+    if (Platform.OS === 'web') {
+        // On web, use a simple View as the main container
+        return (
+            <View style={commonWrapperStyle}>
+                {screenContent}
+            </View>
+        );
+    } else {
+        // On mobile (iOS, Android), use KeyboardAvoidingView
+        return (
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined} // Specific behavior for iOS
+                style={commonWrapperStyle}
+            >
+                {screenContent}
+            </KeyboardAvoidingView>
+        );
+    }
 }
 
 const styles = StyleSheet.create({
@@ -82,6 +97,12 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         padding: 20,
         justifyContent: 'center',
+        // Web-specific styles for a centered, max-width layout
+        ...(Platform.OS === 'web' && {
+            width: '100%',
+            maxWidth: 500, // Max width for the form content on web
+            alignSelf: 'center',
+        }),
     },
     heading: {
         marginBottom: 16,
@@ -97,6 +118,6 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     checkboxLabel: {
+        // marginLeft: 8, // As per original
     },
-
 });

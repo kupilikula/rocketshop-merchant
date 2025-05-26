@@ -19,6 +19,7 @@ import {ShippingRuleSummary} from "../../../../components/ShippingRuleSummary";
 import {useAddShippingRule} from "../../../../api/hooks/useAddShippingRule";
 import {useAssignShippingRule} from "../../../../api/hooks/useAssignShippingRule";
 import {resetShipping} from "../../../../store/shippingRuleSlice";
+import {getDashboardPath} from "../../../../utils/getPathUtils";
 
 const convertHeicToJpg = async (uri) => {
     try {
@@ -196,7 +197,7 @@ export default function Preview(props) {
                 setPublishFailure(true);
                 setTimeout(() => {
                     resetWorkflow();
-                    router.replace('/Main/(tabs)/Dashboard');
+                    router.replace(getDashboardPath());
                 }, 2000);
             } else {
                 setTimeout(async () => {

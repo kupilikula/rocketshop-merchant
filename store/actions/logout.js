@@ -4,9 +4,10 @@ import axios from "axios";
 import {persistor} from "../store";
 import {RESET_ALL} from "./resetAll";
 import Constants from 'expo-constants';
+import {Platform} from "react-native";
 
 const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl;
-
+const IS_WEB = Platform.OS === 'web';
 export const logout =  (router) => async (dispatch, getState) => {
         try {
                 console.log('logging out. Calling /auth/logout');
@@ -30,7 +31,7 @@ export const logout =  (router) => async (dispatch, getState) => {
                 disconnectAllSockets();
 
                 dispatch({ type: RESET_ALL });
-                router.replace('/Authentication');
+                router.replace(IS_WEB ? '/(web_merchant)/landing_page': '/Authentication');
 
 
                 // ✅ Purge persisted Redux storage

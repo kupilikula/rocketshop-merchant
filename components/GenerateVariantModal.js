@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, FlatList, StyleSheet } from "react-native";
 import { Modal, Text, TextInput, Button, Checkbox, useTheme, Portal } from "react-native-paper";
 
-export default function GenerateVariantModal({ visible, onClose, product, onGenerate }) {
+export default function GenerateVariantModal({ visible, onClose, product, onGenerate, contentContainerStyle }) {
     const theme = useTheme();
     const [errorMessage, setErrorMessage] = useState("");
     const [selectedAttributes, setSelectedAttributes] = useState([]);
@@ -62,7 +62,7 @@ export default function GenerateVariantModal({ visible, onClose, product, onGene
             <Modal
                 visible={visible}
                 onDismiss={onClose}
-                contentContainerStyle={styles.modalContainer}
+                contentContainerStyle={[styles.modalContainer, contentContainerStyle]}
             >
                 <Text style={styles.header}>Specify Variant Attributes</Text>
                 {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
@@ -124,6 +124,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
         borderRadius: 8,
         elevation: 5,
+        alignSelf: "center",
     },
     header: {
         fontSize: 18,
