@@ -7,10 +7,11 @@ import OtpInput from "../components/OtpInput";
 import { useQueryClient } from "react-query";
 import {setStore} from "../store/storeSlice";
 
-export default function ConfirmDeactivateStoreModal({ visible, onDismiss, storeId, storeName }) {
+export default function ConfirmDeactivateStoreModal({ visible, onDismiss, storeId, storeName, modalStyle }) {
     const theme = useTheme();
     const queryClient = useQueryClient();
     const dispatch = useDispatch();
+    const axiosClient = getAxiosClient()
     const store = useSelector((state) => state.store);
     const { phone } = useSelector((state) => state.merchant);
 
@@ -74,7 +75,7 @@ export default function ConfirmDeactivateStoreModal({ visible, onDismiss, storeI
 
     return (
         <Portal>
-            <Modal visible={visible} onDismiss={handleCancel} contentContainerStyle={styles.modal}>
+            <Modal visible={visible} onDismiss={handleCancel} contentContainerStyle={[styles.modal, modalStyle]}>
                 <Text variant="titleMedium" style={{ marginBottom: 16, textAlign: "center" }}>
                     Are you sure you want to deactivate this store?
                 </Text>

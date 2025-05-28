@@ -140,11 +140,20 @@ export const getNewOfferPath = () => {
 
 export const getMessagingPath = () => {
     if (Platform.OS === 'web') {
-        return '/(web_merchant)/messaging';
+        return '/(web_merchant)/(protected)/messaging';
     } else {
         return '/Main/(tabs)/Messaging'
     }
 }
+
+export const getChatPath = () => {
+    if (Platform.OS === 'web') {
+        return '/(web_merchant)/(protected)/messaging/chat';
+    } else {
+        return '/Main/(tabs)/Messaging/chat';
+    }
+}
+
 
 export const getStoreSettingsPath = () => {
     if (Platform.OS === 'web') {

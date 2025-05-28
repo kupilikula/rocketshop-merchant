@@ -8,10 +8,11 @@ import { useQueryClient } from "react-query";
 import {clearStore, setStore} from "../store/storeSlice";
 import {useRouter} from "expo-router";
 
-export default function ConfirmDeleteStoreModal({ visible, onDismiss, storeId, storeName }) {
+export default function ConfirmDeleteStoreModal({ visible, onDismiss, storeId, storeName, modalStyle}) {
     const theme = useTheme();
     const queryClient = useQueryClient();
     const dispatch = useDispatch();
+    const axiosClient = getAxiosClient();
     const router = useRouter();
     const store = useSelector((state) => state.store);
     const { phone } = useSelector((state) => state.merchant);
@@ -78,7 +79,7 @@ export default function ConfirmDeleteStoreModal({ visible, onDismiss, storeId, s
 
     return (
         <Portal>
-            <Modal visible={visible} onDismiss={handleCancel} contentContainerStyle={styles.modal}>
+            <Modal visible={visible} onDismiss={handleCancel} contentContainerStyle={[styles.modal, modalStyle]}>
                 <Text variant="titleMedium" style={{ marginBottom: 16, textAlign: "center" , color: theme.colors.error}}>
                     Are you sure you want to delete this store? This action cannot be undone.
                 </Text>

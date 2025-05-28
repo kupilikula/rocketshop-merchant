@@ -9,23 +9,9 @@ const fetchChatMessages = async (chatId) => {
 };
 
 export const useChatMessages = (chatId) => {
-    const queryClient = useQueryClient();
 
     return useQuery(['messages', chatId], () => fetchChatMessages(chatId), {
         enabled: !!chatId,
         staleTime: 0,
-        onSuccess: (fetchedMessages) => {
-            queryClient.setQueryData(['messages', chatId], (oldMessages) => {
-                if (!oldMessages) return fetchedMessages;
-
-                return fetchedMessages.map((fetched) => {
-                    const existing = oldMessages.find(m => m.messageId === fetched.messageId);
-                    return {
-                        ...fetched,
-                        read_at: fetched.read_at ?? existing?.read_at ?? null,
-                    };
-                });
-            });
-        },
     });
 };
