@@ -62,7 +62,7 @@ const WebHeader = () => {
         <>
             <View style={styles.headerContainer}>
                 <View style={styles.leftSection}>
-                    <Pressable onPress={() => router.push("/(web_marketplace)/")}>
+                    <Pressable onPress={() => router.push("/(web_merchant)/(protected)/dashboard")}>
                         <LogoIconWithName/>
                     </Pressable>
                 </View>

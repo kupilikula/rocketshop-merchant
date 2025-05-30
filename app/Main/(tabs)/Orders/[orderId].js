@@ -110,7 +110,7 @@ const OrderDetails = () => {
                 <Card style={styles.card}>
                     <Card.Title
                         title="Order Summary"
-                        left={(props) => <Avatar.Icon {...props} icon="clipboard-list" backgroundColor={theme.colors.primaryContainer} color={theme.colors.white}/>}
+                        left={(props) => <Avatar.Icon {...props} icon="clipboard-list" backgroundColor={theme.colors.primary} color={theme.colors.white}/>}
                         titleStyle={{fontWeight: 'bold'}}
                     />
                     <Card.Content>
@@ -151,7 +151,14 @@ const OrderDetails = () => {
                                         textStyle={{
                                             color: selectedUpdateStatus === status ? theme.colors.onPrimary : theme.colors.onSurfaceVariant,
                                         }}
-                                        onPress={() => setSelectedUpdateStatus(status)}
+                                        onPress={() => {
+                                            if (status===selectedUpdateStatus) {
+                                                setSelectedUpdateStatus(null);
+                                            } else {
+                                                setSelectedUpdateStatus(status)
+                                            }
+
+                                        }}
                                         selected={selectedUpdateStatus === status}
                                     >
                                         {status}
@@ -187,7 +194,7 @@ const OrderDetails = () => {
                 <Card style={styles.card} onPress={() => router.push(getCustomerPath(order.customer.customerId))}>
                     <Card.Title
                         title="Customer Information"
-                        left={(props) => <Avatar.Icon {...props} icon="account" backgroundColor={theme.colors.primaryContainer} color={theme.colors.white}/>}
+                        left={(props) => <Avatar.Icon {...props} icon="account" backgroundColor={theme.colors.primary} color={theme.colors.white}/>}
                         titleStyle={{fontWeight: 'bold'}}
                     />
                     <Card.Content>
@@ -203,7 +210,7 @@ const OrderDetails = () => {
                 <Card style={styles.card}>
                     <Card.Title
                         title="Order Items"
-                        left={(props) => <Avatar.Icon {...props} icon="package-variant" backgroundColor={theme.colors.primaryContainer} color={theme.colors.white}/>}
+                        left={(props) => <Avatar.Icon {...props} icon="package-variant" backgroundColor={theme.colors.primary} color={theme.colors.white}/>}
                         titleStyle={{fontWeight: 'bold'}}
                     />
                     <Card.Content>
