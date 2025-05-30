@@ -20,6 +20,51 @@ import {useSafeAreaInsets} from "react-native-safe-area-context";
 import GstRateDropdown from "./GstRateDropdown";
 import KeyboardAwareScrollableScreen from "./KeyboardAwareScrollableScreen";
 
+// Place this outside your component or at the top of the file
+const PREDEFINED_ATTRIBUTES = [
+    {
+        id: "color", // Unique ID for the key
+        label: "Color",
+        values: ["Red", "Blue", "Green", "Black", "White", "Yellow", "Purple", "Orange", "Pink", "Brown", "Gray"],
+    },
+    {
+        id: "size",
+        label: "Size",
+        values: ["XS", "S", "M", "L", "XL", "XXL", "Free Size"],
+    },
+    {
+        id: "length",
+        label: "Length",
+        values: ["0.5m", "0.8m", "1m", "1.1m", "1.5m", "2m"],
+    },
+    {
+        id: "material",
+        label: "Material",
+        values: ["Cotton", "Silk", "Wool", "Polyester", "Leather", "Denim", "Linen", "Nylon", "Organza", "Tissue"],
+    },
+    {
+        id: "quantity_type", // e.g., for "Pack of 2", "Set of 3"
+        label: "Pack/Set",
+        values: ["Single", "Pack of 2", "Pack of 3", "Set of 2", "Set of 3", "Set of 4"],
+    },
+    {
+        id: "weight",
+        label: "Weight",
+        values: [], // Values are usually custom, so text input is primary
+        placeholder: "e.g., 100g, 0.5kg", // Placeholder for text input
+    },
+    {
+        id: "dimensions",
+        label: "Dimensions",
+        values: [],
+        placeholder: "e.g., 10x5x2 cm",
+    },
+    // Add more common attributes as needed
+];
+
+// A simpler list of just keys for initial selection
+const PREDEFINED_ATTRIBUTE_KEYS = PREDEFINED_ATTRIBUTES.map(attr => ({ id: attr.id, label: attr.label }));
+
 const ProductInfoScreen = (props) => {
     const dispatch = useDispatch();
     const {isNewProduct, productInfoFormRef} = useContext(ProductWorkflowContext);
@@ -38,7 +83,12 @@ const ProductInfoScreen = (props) => {
     //   { key: "Material", values: ["Cotton", "Leather", "Plastic"] },
     //   { key: "Size", values: ["Small", "Medium", "Large"] },
     // ]);
+    const [tempCustomKeyValues, setTempCustomKeyValues] = useState({});
 
+// Function to update the temporary custom key value for a specific attribute index
+    const handleTempCustomKeyChange = (index, text) => {
+        setTempCustomKeyValues(prev => ({ ...prev, [index]: text }));
+    };
     const {data: existingCollections = [], isLoading, isError} = useCollections(storeId);
     const [tagSuggestions, setTagSuggestions] = useState(["Best Sellers", "Featured", "HandMade", "New Arrival", "Discount", "Popular",]); // Existing tags
     const [filteredTagSuggestions, setFilteredTagSuggestions] = useState([]);
@@ -174,150 +224,262 @@ const ProductInfoScreen = (props) => {
         appendFormAttribute({key: "", value: ""});
     };
 
-    // const updateAttributeSuggestions = (index, field, value) => {
-    //   const currentAttribute = attributeFormFields[index] || null;
-    //
-    //   // Handle suggestions for key and value fields
-    //   if (field === "key") {
-    //     const suggestions = attributeSuggestions.filter((item) =>
-    //       item.key.toLowerCase().startsWith(value.toLowerCase()),
-    //     );
-    //     setFilteredSuggestions(suggestions);
-    //     setCurrentFocusedIndex(index);
-    //   }
-    //   console.log("238");
-    //   if (field === "value") {
-    //     // const currentAttribute = currentAttributes[index];
-    //     const values =
-    //       attributeSuggestions.find((item) => item.key === currentAttribute?.key)
-    //         ?.values || [];
-    //     const suggestions = values.filter((val) =>
-    //       val.toLowerCase().startsWith(value.toLowerCase()),
-    //     );
-    //     setFilteredValueSuggestions(suggestions);
-    //     setCurrentFocusedValueIndex(index);
-    //   }
-    // };
 
     const removeAttribute = (index) => {
         deleteFormAttribute(index);
     };
 
-    const applySuggestion = (index, suggestion) => {
-        // updateAttribute(index, {attributeFields[index]['value'], key: suggestion})
-        setFilteredSuggestions([]);
-        setCurrentFocusedIndex(null);
-    };
+
+    // const renderAttributeInput = (index, attr) => {
+    //     return (<View key={attributeFormFields[index]?.id} style={styles.attributeRow}>
+    //             {/* Attribute Name */}
+    //             <Controller
+    //                 name={`attributes.${index}.key`}
+    //                 control={control}
+    //                 rules={{
+    //                     required: `Attribute Name is required for row ${index + 1}.`,
+    //                 }}
+    //                 render={({field: {value, onChange}, fieldState: {error}}) => (<TextInput
+    //                         style={styles.attributeInput}
+    //                         mode="outlined"
+    //                         label="Name"
+    //                         value={value}
+    //                         onChangeText={(value) => {
+    //                             onChange(value);
+    //                             // updateAttributeSuggestions(index, "key", value); // Optional for suggestions
+    //                         }}
+    //                         onFocus={() => setCurrentFocusedIndex(index)}
+    //                         onBlur={handleInputBlur}
+    //                         onLayout={(event) => handleInputLayout(index, event)}
+    //                         dense
+    //                         error={!!error}
+    //                     />)}
+    //             />
     //
-    const applyValueSuggestion = (index, suggestion) => {
-        // updateAttribute(index, {attributeFields[index]['key'], value: suggestion})
-        setFilteredValueSuggestions([]);
-        setCurrentFocusedValueIndex(null);
-    };
+    //             {/* Attribute Value */}
+    //             <Controller
+    //                 name={`attributes.${index}.value`}
+    //                 control={control}
+    //                 rules={{
+    //                     required: `Attribute Value is required for row ${index + 1}.`,
+    //                 }}
+    //                 render={({field: {value, onChange}, fieldState: {error}}) => (<TextInput
+    //                         style={styles.attributeInput}
+    //                         mode="outlined"
+    //                         label="Value"
+    //                         value={value}
+    //                         onChangeText={(value) => {
+    //                             onChange(value);
+    //                             // updateAttributeSuggestions(index, "value", value); // Optional for suggestions
+    //                         }}
+    //                         onFocus={() => setCurrentFocusedValueIndex(index)}
+    //                         onBlur={handleInputBlur}
+    //                         onLayout={(event) => handleInputLayout(`value-${index}`, event)}
+    //                         dense
+    //                         error={!!error}
+    //                     />)}
+    //             />
+    //
+    //             {/* Remove Button */}
+    //             <IconButton
+    //                 icon="delete"
+    //                 onPress={() => removeAttribute(index)} // Remove the row using useFieldArray
+    //                 style={styles.removeButton}
+    //             />
+    //
+    //             {/* Suggestions for Attribute Name */}
+    //             {currentFocusedIndex === index && filteredSuggestions.length > 0 && (<View
+    //                     style={[styles.suggestionsContainer, {
+    //                         width: inputWidths[index] || "100%", // Match Name input width
+    //                         left: 0, // Align below Name input
+    //                         top: 50, // Position below the Name input
+    //                     },]}
+    //                 >
+    //                     {filteredSuggestions.map((item) => (<TouchableOpacity
+    //                             key={item.key}
+    //                             onPress={() => {
+    //                                 applySuggestion(index, item.key);
+    //                             }}
+    //                             style={styles.suggestionItem}
+    //                         >
+    //                             <Text>{item.key}</Text>
+    //                         </TouchableOpacity>))}
+    //                 </View>)}
+    //
+    //             {/*/!* Suggestions for Attribute Value *!/*/}
+    //             {currentFocusedValueIndex === index && filteredValueSuggestions.length > 0 && (<View
+    //                     style={[styles.suggestionsContainer, {
+    //                         width: inputWidths[`value-${index}`] || "100%", left: inputWidths[index] + 4 || 0, top: 50,
+    //                     },]}
+    //                 >
+    //                     {filteredValueSuggestions.map((item, idx) => (<TouchableOpacity
+    //                             key={idx}
+    //                             onPress={() => {
+    //                                 applyValueSuggestion(index, item);
+    //                             }}
+    //                             style={styles.suggestionItem}
+    //                         >
+    //                             <Text>{item}</Text>
+    //                         </TouchableOpacity>))}
+    //                 </View>)}
+    //         </View>);
+    // };
 
-    const handleInputLayout = (index, event) => {
-        const {width} = event.nativeEvent.layout;
-        setInputWidths((prev) => ({...prev, [index]: width}));
-    };
+    // Inside your ProductInfoScreen component
 
-    const handleInputBlur = () => {
-        setFilteredSuggestions([]);
-        setCurrentFocusedIndex(null);
-    };
+    const renderAttributeInput = (index, formField) => {
+        const currentAttributeKey = watch(`attributes.${index}.key`);
+        const currentAttributeDefinition = PREDEFINED_ATTRIBUTES.find(attr => attr.label === currentAttributeKey);
 
-    const renderAttributeInput = (index, attr) => {
-        return (<View key={attributeFormFields[index]?.id} style={styles.attributeRow}>
-                {/* Attribute Name */}
-                <Controller
-                    name={`attributes.${index}.key`}
-                    control={control}
-                    rules={{
-                        required: `Attribute Name is required for row ${index + 1}.`,
-                    }}
-                    render={({field: {value, onChange}, fieldState: {error}}) => (<TextInput
-                            style={styles.attributeInput}
-                            mode="outlined"
-                            label="Name"
-                            value={value}
-                            onChangeText={(value) => {
-                                onChange(value);
-                                // updateAttributeSuggestions(index, "key", value); // Optional for suggestions
+        return (
+            <View key={formField.id} style={styles.attributeRowContainer}>
+                <View style={styles.attributeKeySection}>
+                    <Controller
+                        name={`attributes.${index}.key`}
+                        control={control}
+                        rules={{ required: `Attribute name is required.` }}
+                        render={({ field: { onChange: rhfOnChangeKey, value: currentKeyFieldValue }, fieldState: { error } }) => {
+                            // This function handles the submission of the custom key
+                            const handleCustomKeySubmit = () => {
+                                const customKeyToSubmit = tempCustomKeyValues[index]?.trim();
+                                if (customKeyToSubmit) {
+                                    rhfOnChangeKey(customKeyToSubmit); // Update react-hook-form state
+                                    setValue(`attributes.${index}.value`, ""); // Reset corresponding value field
+                                    // Optionally clear the temp value after submission,
+                                    // though it will be hidden once currentKeyFieldValue is set.
+                                    // handleTempCustomKeyChange(index, "");
+                                }
+                            };
+
+                            return (
+                                <>
+                                    {!currentKeyFieldValue ? (
+                                        // Show chips and custom input when no key is formally set
+                                        <>
+                                            <Text style={styles.chipSelectionPrompt}>Select or Type Attribute:</Text>
+                                            <View style={styles.chipsContainer}>
+                                                {PREDEFINED_ATTRIBUTE_KEYS.map((keyDef) => (
+                                                    <Chip
+                                                        key={keyDef.id}
+                                                        style={styles.chip}
+                                                        mode="outlined"
+                                                        onPress={() => {
+                                                            rhfOnChangeKey(keyDef.label); // Set key in RHF
+                                                            setValue(`attributes.${index}.value`, ""); // Reset value
+                                                            handleTempCustomKeyChange(index, ""); // Clear any temp custom input
+                                                        }}
+                                                    >
+                                                        {keyDef.label}
+                                                    </Chip>
+                                                ))}
+                                            </View>
+
+                                            {/* Custom Key Input Section */}
+                                            <View style={styles.customKeyInputRow}>
+                                                <TextInput
+                                                    mode={'outlined'}
+                                                    label="Or type custom attribute"
+                                                    value={tempCustomKeyValues[index] || ''}
+                                                    onChangeText={(text) => handleTempCustomKeyChange(index, text)}
+                                                    onSubmitEditing={handleCustomKeySubmit} // Submit on "Enter"
+                                                    style={styles.customKeyTextInput}
+                                                    dense
+                                                />
+                                                {/* Optional: Explicit submit button for custom key */}
+                                                {tempCustomKeyValues[index]?.trim() && (
+                                                    <IconButton
+                                                        icon="check-circle-outline"
+                                                        size={24} // Adjusted for visibility
+                                                        onPress={handleCustomKeySubmit}
+                                                        style={styles.customKeySubmitButton}
+                                                        color={theme.colors.primary} // Use theme color
+                                                    />
+                                                )}
+                                            </View>
+                                        </>
+                                    ) : (
+                                        // Show selected key chip when a key is set in RHF
+                                        <View style={styles.selectedKeyContainer}>
+                                            <Chip
+                                                style={styles.selectedKeyChip}
+                                                textStyle={styles.selectedKeyChipText}
+                                                onClose={() => {
+                                                    rhfOnChangeKey(""); // Clear key in RHF
+                                                    setValue(`attributes.${index}.value`, ""); // Clear value
+                                                    handleTempCustomKeyChange(index, ""); // Also clear temp state
+                                                }}
+                                                selectedColor={'black'}
+                                                // selected // `selected` prop usually enough for styling with mode
+                                                // selectedColor prop might not be standard, check Paper docs
+                                            >
+                                                {currentKeyFieldValue}
+                                            </Chip>
+                                        </View>
+                                    )}
+                                    {error && <Text style={styles.errorTextSmall}>{error.message}</Text>}
+                                </>
+                            );
+                        }}
+                    />
+                </View>
+
+                {/* Attribute Value Selection (conditionally rendered) */}
+                {currentAttributeKey && (
+                    <View style={styles.attributeValueSection}>
+                        <Text style={styles.chipSelectionPrompt}>Set Value for {currentAttributeKey}:</Text>
+                        {currentAttributeDefinition && currentAttributeDefinition.values && currentAttributeDefinition.values.length > 0 && (
+                            <View style={styles.chipsContainer}>
+                                {currentAttributeDefinition.values.map((val, valIdx) => (
+                                    <Chip
+                                        key={valIdx}
+                                        style={styles.chip}
+                                        mode="outlined"
+                                        onPress={() => setValue(`attributes.${index}.value`, val)}
+                                    >
+                                        {val}
+                                    </Chip>
+                                ))}
+                            </View>
+                        )}
+
+                        <Controller
+                            name={`attributes.${index}.value`}
+                            control={control}
+                            rules={{
+                                validate: (value) => {
+                                    if (!currentAttributeKey) return true;
+                                    return !!value || `${currentAttributeKey} value is required.`;
+                                }
                             }}
-                            onFocus={() => setCurrentFocusedIndex(index)}
-                            onBlur={handleInputBlur}
-                            onLayout={(event) => handleInputLayout(index, event)}
-                            dense
-                            error={!!error}
-                        />)}
-                />
+                            render={({ field: { onChange, onBlur, value: currentValueFieldValue }, fieldState: { error } }) => (
+                                <>
+                                    <TextInput
+                                        style={styles.attributeValueInput}
+                                        mode="outlined"
+                                        label={`Value for ${currentAttributeKey}`}
+                                        placeholder={currentAttributeDefinition?.placeholder || "Enter value"}
+                                        value={currentValueFieldValue || ""} // Ensure value is not undefined/null for TextInput
+                                        onChangeText={onChange}
+                                        onBlur={onBlur}
+                                        error={!!error}
+                                        dense
+                                    />
+                                    {error && <Text style={styles.errorTextSmall}>{error.message}</Text>}
+                                </>
+                            )}
+                        />
+                    </View>
+                )}
 
-                {/* Attribute Value */}
-                <Controller
-                    name={`attributes.${index}.value`}
-                    control={control}
-                    rules={{
-                        required: `Attribute Value is required for row ${index + 1}.`,
-                    }}
-                    render={({field: {value, onChange}, fieldState: {error}}) => (<TextInput
-                            style={styles.attributeInput}
-                            mode="outlined"
-                            label="Value"
-                            value={value}
-                            onChangeText={(value) => {
-                                onChange(value);
-                                // updateAttributeSuggestions(index, "value", value); // Optional for suggestions
-                            }}
-                            onFocus={() => setCurrentFocusedValueIndex(index)}
-                            onBlur={handleInputBlur}
-                            onLayout={(event) => handleInputLayout(`value-${index}`, event)}
-                            dense
-                            error={!!error}
-                        />)}
-                />
-
-                {/* Remove Button */}
                 <IconButton
-                    icon="delete"
-                    onPress={() => removeAttribute(index)} // Remove the row using useFieldArray
-                    style={styles.removeButton}
+                    icon="delete-outline"
+                    size={24}
+                    onPress={() => removeAttribute(index)}
+                    style={styles.removeAttributeButton}
+                    iconColor={theme.colors.error}
                 />
-
-                {/* Suggestions for Attribute Name */}
-                {currentFocusedIndex === index && filteredSuggestions.length > 0 && (<View
-                        style={[styles.suggestionsContainer, {
-                            width: inputWidths[index] || "100%", // Match Name input width
-                            left: 0, // Align below Name input
-                            top: 50, // Position below the Name input
-                        },]}
-                    >
-                        {filteredSuggestions.map((item) => (<TouchableOpacity
-                                key={item.key}
-                                onPress={() => {
-                                    applySuggestion(index, item.key);
-                                }}
-                                style={styles.suggestionItem}
-                            >
-                                <Text>{item.key}</Text>
-                            </TouchableOpacity>))}
-                    </View>)}
-
-                {/*/!* Suggestions for Attribute Value *!/*/}
-                {currentFocusedValueIndex === index && filteredValueSuggestions.length > 0 && (<View
-                        style={[styles.suggestionsContainer, {
-                            width: inputWidths[`value-${index}`] || "100%", left: inputWidths[index] + 4 || 0, top: 50,
-                        },]}
-                    >
-                        {filteredValueSuggestions.map((item, idx) => (<TouchableOpacity
-                                key={idx}
-                                onPress={() => {
-                                    applyValueSuggestion(index, item);
-                                }}
-                                style={styles.suggestionItem}
-                            >
-                                <Text>{item}</Text>
-                            </TouchableOpacity>))}
-                    </View>)}
-            </View>);
+            </View>
+        );
     };
 
     const onSubmit = (data) => {
@@ -554,8 +716,10 @@ const ProductInfoScreen = (props) => {
 
                 <View style={styles.section}>
                     <Text style={styles.header}>Attributes</Text>
-                    {attributeFormFields && attributeFormFields?.map((field, index) => (
-                        <View key={field.id}>{renderAttributeInput(index, field)}</View>))}
+                    {attributeFormFields.map((field, index) => (
+                        // Pass the whole field object as it contains the RHF `id`
+                        renderAttributeInput(index, field)
+                    ))}
 
                     <View
                         style={{
@@ -678,11 +842,8 @@ const makeStyles = ({colors}) => StyleSheet.create({
         padding: 0,
     }, header: {
         fontSize: 18, fontWeight: "bold", marginBottom: 8,
-    }, attributeRow: {
-        flexDirection: "row", alignItems: "center", marginBottom: 16,
-    }, attributeInput: {
-        flex: 1, marginRight: 4,
-    }, suggestionsContainer: {
+    },
+    suggestionsContainer: {
         position: "absolute",
         top: 50,
         left: 0,
@@ -733,6 +894,96 @@ const makeStyles = ({colors}) => StyleSheet.create({
         backgroundColor: "white",
     }, errorText: {
         color: "red", fontSize: 12, marginBottom: 8,
+    },
+    attributeRowContainer: {
+        backgroundColor: colors.softSecondary, // Or a light background to group them
+        padding: 12,
+        borderRadius: 8,
+        marginBottom: 16,
+        position: 'relative', // For absolute positioning of remove button if needed
+    },
+    attributeKeySection: {
+        marginBottom: 10,
+    },
+    attributeValueSection: {
+        marginTop: 10,
+        marginBottom: 10,
+    },
+    chipsContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        alignItems: "center",
+        marginBottom: 8,
+    },
+    chip: {
+        marginRight: 8,
+        marginBottom: 8,
+        backgroundColor: colors.softPrimary,
+        // backgroundColor: colors.background, // Optional: if you want chips to have a specific bg
+    },
+    chipSelectionPrompt: {
+        fontSize: 14,
+        color: colors.onSurfaceVariant,
+        margin: 8,
+        fontWeight: '600',
+    },
+    selectedKeyContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    selectedKeyChip: {
+        backgroundColor: colors.softPrimary, // Or your theme's primary color
+        // color: colors.onPrimaryContainer,
+    },
+    selectedKeyChipText: {
+        color: 'black', // Ensure text is visible on the chip
+        fontWeight: 'bold',
+    },
+    // customKeyInput: { // If you add custom key input
+    //     flex: 1,
+    //     minWidth: 150,
+    //     backgroundColor: colors.background, // Match theme
+    //     // Add more styling as needed
+    // },
+    attributeValueInput: {
+        backgroundColor: colors.background, // Use a contrasting background
+        // marginTop: 8, // If there are value chips, add some space
+    },
+    removeAttributeButton: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        margin: 0, // Adjust as needed
+    },
+    errorTextSmall: { // For errors specific to attribute fields
+        color: colors.error,
+        fontSize: 12,
+        marginTop: 2,
+    },
+    // --- Modify existing attributeRow ---
+    attributeRow: { // This style might be replaced by attributeRowContainer or adapted
+        // flexDirection: "row", // If you keep it, now it's more vertical
+        alignItems: "center",
+        marginBottom: 16,
+    },
+    attributeInput: { // This style might be reused for attributeValueInput or removed
+        flex: 1,
+        marginRight: 4,
+    },
+    customKeyInputRow: { // New style for the TextInput and its optional submit button
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 10, // Add some space above it
+        marginBottom: 8,
+    },
+    customKeyTextInput: {
+        flex: 1,
+        backgroundColor: colors.white, // Or theme.colors.surface
+    },
+    customKeySubmitButton: {
+        marginLeft: 8,
+        // React Native Paper IconButtons are fairly compact by default.
+        // Ensure the icon is clearly visible and tappable.
     },
 });
 
