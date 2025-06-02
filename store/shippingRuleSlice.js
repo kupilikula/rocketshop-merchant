@@ -6,6 +6,7 @@ const initialState = {
   newShippingRule: {
     ruleName: 'Clothing Shipping',
     groupingEnabled: true,
+    is_international_shipping_enabled: false,
     isActive: true,
     conditions: []
   },

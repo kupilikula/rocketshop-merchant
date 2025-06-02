@@ -13,13 +13,14 @@ import { v4 as uuidv4 } from 'uuid';
 import ShippingCostParameters from './ShippingCostParameters';
 import LocationConditionEditor from './LocationConditionEditor';
 import {DefaultTheme as theme} from "@react-navigation/native";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const IS_WEB = Platform.OS === 'web';
 
 const initialCostModifiers = () => ({
-    extraPerItemEnabled: false,
+    extraPerItemEnabled: true,
     extraPerItemCost: '',
-    freeItemCount: '',
+    freeItemCount: '1',
     discountEnabled: false,
     discountPercentage: '',
     discountThreshold: '',
@@ -40,7 +41,7 @@ const formatLocationConditionSummary = (locationCondition) => {
 };
 
 const formatCostParametersSummary = (baseCost, modifiers) => {
-    const parts = [`Base ₹${baseCost}`];
+    const parts = [`Cost for First Item: ₹${baseCost}`];
     if (modifiers?.extraPerItemEnabled && modifiers.extraPerItemCost && modifiers.freeItemCount) {
         parts.push(`\n+ ₹${modifiers.extraPerItemCost} per extra item after ${modifiers.freeItemCount}`);
     }
@@ -55,7 +56,7 @@ const formatCostParametersSummary = (baseCost, modifiers) => {
 
 const ShippingRuleEditor = ({ initialData, onSave, onCancel, saveButtonLabel, mode: editorModeProp }) => {
     const theme = useTheme(); // useTheme is available if needed
-    const styles = makeStyles(); // Using makeStyles as originally provided (without theme param)
+    const styles = makeStyles(theme); // Using makeStyles as originally provided (without theme param)
 
     const [ruleName, setRuleName] = useState('');
     const [baseCost, setBaseCost] = useState('');
@@ -64,11 +65,13 @@ const ShippingRuleEditor = ({ initialData, onSave, onCancel, saveButtonLabel, mo
     const [conditions, setConditions] = useState([]);
     const [editingConditionId, setEditingConditionId] = useState(null);
     const [unsavedCondition, setUnsavedCondition] = useState(null);
+    const [isInternationalEnabled, setIsInternationalEnabled] = useState(false);
 
     useEffect(() => {
         if (initialData) {
             setRuleName(initialData.ruleName || '');
             setGroupingEnabled(initialData.groupingEnabled || false);
+            setIsInternationalEnabled(initialData.is_international_shipping_enabled || false); // Load existing setting
             const defaultCondition = initialData.conditions?.find(c => c.when.length === 0);
             const locationConditions = initialData.conditions?.filter(c => c.when.length > 0)
                 .map(c => ({ ...c, id: c.id || uuidv4() })) || [];
@@ -87,10 +90,19 @@ const ShippingRuleEditor = ({ initialData, onSave, onCancel, saveButtonLabel, mo
             setBaseCost('');
             setDefaultCostModifiers(initialCostModifiers());
             setConditions([]);
+            setIsInternationalEnabled(false); // International shipping is DISABLED by default for new rules
         }
         setEditingConditionId(null);
         setUnsavedCondition(null);
     }, [initialData, editorModeProp]);
+
+
+    const setBaseCostWithDefaultBehavior = (baseCostValue, costModifiers) => {
+        setBaseCost(baseCostValue);
+        if (costModifiers.extraPerItemEnabled && costModifiers.freeItemCount==='1') {
+            setDefaultCostModifiers({ ...costModifiers, extraPerItemCost: baseCostValue });
+        }
+    }
 
     const handleAddCondition = () => {
         // Original logic didn't explicitly prevent adding if unsaved, but good to have a single editor active.
@@ -196,6 +208,7 @@ const ShippingRuleEditor = ({ initialData, onSave, onCancel, saveButtonLabel, mo
         onSave({
             ruleName: ruleName.trim(),
             groupingEnabled,
+            is_international_shipping_enabled: isInternationalEnabled, // <-- ADD THIS
             isActive: true,
             conditions: [
                 { when: [], baseCost: Number(baseCost), costModifiers: defaultCostModifiers },
@@ -232,16 +245,38 @@ const ShippingRuleEditor = ({ initialData, onSave, onCancel, saveButtonLabel, mo
             <ShippingCostParameters
                 title="Default Cost"
                 baseCost={baseCost}
-                onBaseCostChange={setBaseCost}
+                onBaseCostChange={(baseCostValue, costModifiers) => setBaseCostWithDefaultBehavior(baseCostValue, costModifiers)}
                 costModifiers={defaultCostModifiers}
                 onCostModifiersChange={setDefaultCostModifiers}
             />
 
+            <Card style={styles.internationalCard}>
+                <Card.Content>
+                    <View style={styles.switchRow}>
+                        <Text style={styles.explanatoryTextBold}>{!isInternationalEnabled ? 'Enable Shipping Outside India?' : 'International Shipping Enabled'}</Text>
+                        <Switch value={isInternationalEnabled} onValueChange={setIsInternationalEnabled} />
+                    </View>
+                    {!isInternationalEnabled && (
+                        <Text style={[styles.helperText, styles.helperTextDisabled]}>
+                            Currently, only shipping within India is enabled with this rule. Products using this rule cannot be shipped to international addresses.
+                        </Text>
+                    )}
+                    {isInternationalEnabled && (
+                        <View>
+                            <Text style={[styles.warningTextSmall, {marginTop: 8}]}>Please add location cost rules for specific international countries, or a general "International" country rule with appropriate international rates. If no specific international location rule below matches an international order, your "Standard Shipping Cost (for India)" will be used as a fallback. This is usually NOT desired and can lead to significant undercharging.
+                            </Text>
+                        </View>
+                    )}
+                </Card.Content>
+            </Card>
+
             <View style={styles.sectionHeader}>
-                <Text variant="titleMedium">Location-Specific Costs</Text>
+                <Text variant="titleMedium">Delivery Location Specific Costs</Text>
                 <IconButton icon="plus-circle" onPress={handleAddCondition} />
             </View>
-
+            <Text style={styles.helperText}>
+                Set different rates for specific states/cities within India, or for specific international countries if international shipping is enabled.
+            </Text>
             {conditions.length === 0 && !editingConditionId && (
                 <Text style={{ textAlign: 'center', marginVertical: 20, color: theme.colors.onSurfaceVariant }}>
                     No location-specific costs added yet. The default cost will apply to all locations including international deliveries.
@@ -292,13 +327,55 @@ const ShippingRuleEditor = ({ initialData, onSave, onCancel, saveButtonLabel, mo
 };
 
 // Using the makeStyles function as provided in the user's original ShippingRuleEditor code
-const makeStyles = () => StyleSheet.create({
+const makeStyles = (theme) => StyleSheet.create({
     container: { flex: 1, backgroundColor: 'white' },
     input: { marginVertical: 8, backgroundColor: 'white' },
     switchRow: { flexDirection: 'row', alignItems: 'center', marginVertical: 8 },
     buttonRow: { flexDirection: 'row', justifyContent: 'space-around', marginVertical: 24 },
     sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    conditionCard: { marginBottom: 12, backgroundColor: 'white', padding: 8 },
+    conditionCard: { marginBottom: 12, backgroundColor: 'white', padding: 16, marginVertical: 8 },
+    explanatoryText: {
+        marginRight: 8,
+        flexShrink: 1,
+        fontSize: 15,
+        // color: theme.colors.onSurfaceVariant, // If theme is passed to makeStyles
+    },
+    explanatoryTextBold: {
+        marginRight: 8,
+        flexShrink: 1,
+        fontSize: 15,
+        fontWeight: 'bold',
+        // color: theme.colors.onSurface,
+    },
+    internationalCard: {
+        marginVertical: 20,
+        backgroundColor: theme.colors.softPrimary,
+        // backgroundColor: theme.colors.surfaceVariant, // Use theme
+        // borderColor: theme.colors.outline, // Use theme
+        borderWidth: 1,
+        borderRadius: 8,
+    },
+    helperText: {
+        fontSize: 13,
+        lineHeight: 18,
+        // color: theme.colors.onSurfaceVariant,
+        marginVertical: 4,
+    },
+    helperTextDisabled: {
+        // color: theme.colors.onSurfaceDisabled // Example or specific color
+        // fontStyle: 'italic',
+    },
+    helperTextEnabled: {
+        // color: theme.colors.primary // Example for emphasis
+    },
+    warningTextSmall: {
+        fontSize: 13,
+        lineHeight: 18,
+        // color: theme.colors.warning, // Use theme
+        // backgroundColor: theme.colors.warningContainer, // Use theme if available
+        // padding: 8,
+        // borderRadius: 4,
+    },
 });
 
 export default ShippingRuleEditor;

@@ -50,6 +50,7 @@ export default function EditShippingRuleScreen() {
         const normalize = (rule) => ({
             ruleName: rule.ruleName,
             groupingEnabled: rule.groupingEnabled,
+            is_international_shipping_enabled: rule.is_international_shipping_enabled,
             isActive: rule.isActive !== false,
             conditions: rule.conditions?.map(cond => ({
                 when: cond.when,

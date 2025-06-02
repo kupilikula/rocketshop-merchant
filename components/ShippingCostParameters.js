@@ -13,9 +13,9 @@ const ShippingCostParameters = ({ title, baseCost, onBaseCostChange, costModifie
                 {title}
             </Text>
             <TextInput
-                label="Base Shipping Cost (₹)"
+                label="Cost for First Item (₹)"
                 value={baseCost}
-                onChangeText={onBaseCostChange}
+                onChangeText={(v) => onBaseCostChange(v, costModifiers)}
                 // inputMode="numeric"
                 keyboardType="decimal-pad"
                 mode="outlined"

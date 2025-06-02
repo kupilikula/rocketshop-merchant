@@ -11,7 +11,7 @@ export const formatShippingRuleSummary = (rule) => {
     // 1. Handle default (no condition)
     const defaultCondition = rule.conditions.find(c => c.when.length === 0);
     if (defaultCondition) {
-        lines.push(`Default: ₹${defaultCondition.baseCost}. ${summarizeCostModifiers(defaultCondition.costModifiers).join(', ')}`);
+        lines.push(`Default: ₹${defaultCondition.baseCost} ${summarizeCostModifiers(defaultCondition.costModifiers).join(', ')}`);
     }
 
     // 2. Handle conditional ones
@@ -27,7 +27,7 @@ export const formatShippingRuleSummary = (rule) => {
             conditionText = `${location.operator === 'inside' ? 'Inside' : 'Outside'} ${location.country}`;
         }
 
-        lines.push(`${conditionText}: ₹${cond.baseCost}. ${summarizeCostModifiers(cond.costModifiers).join(', ')}`);
+        lines.push(`${conditionText}: ₹${cond.baseCost} ${summarizeCostModifiers(cond.costModifiers).join(', ')}`);
     }
 
     return lines.join('\n'); // Multi-line subtitle
@@ -39,7 +39,7 @@ const summarizeCostModifiers = (modifiers) => {
     const lines = [];
 
     if (modifiers.extraPerItemEnabled && modifiers.extraPerItemCost && modifiers.freeItemCount !== undefined) {
-        lines.push(`+ ₹${modifiers.extraPerItemCost}/item after ${modifiers.freeItemCount}`);
+        lines.push(`+ ₹${modifiers.extraPerItemCost}/item after ${modifiers.freeItemCount} item(s)`);
     }
 
     if (modifiers.discountEnabled && modifiers.discountPercentage && modifiers.discountThreshold) {

@@ -51,6 +51,7 @@ export default function CloneExistingRuleSelector() {
         const clonedRule = {
             ruleName: `${selected.ruleName} (Copy)`,
             groupingEnabled: false, // clones are always ungrouped
+            is_international_shipping_enabled: selected.is_international_shipping_enabled,
             isActive: true,
             conditions: selected.conditions.map(c => ({
                 ...c,

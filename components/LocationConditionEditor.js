@@ -119,7 +119,7 @@ const LocationConditionEditor = ({ condition, onSave, onCancel }) => {
                             style={styles.input}
                         />
                         <TextInput
-                            label="Country"
+                            label="Country (or 'International')"
                             value={locationCondition.country}
                             onChangeText={(text) =>
                                 setLocationCondition(prev => ({ ...prev, country: text }))

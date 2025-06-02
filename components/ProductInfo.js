@@ -68,9 +68,9 @@ const ProductInfoScreen = (props) => {
         price: yup.number().typeError("Price must be a valid number.").positive("Price must be greater than zero.").required("Price is required."),
         stock: yup.number().typeError("Stock must be a valid number.").min(0, "Stock cannot be negative.").required("Stock is required."),
         description: yup.string().required("Description is required."),
-        collections: yup // Added validation for collections as per original
-            .array()
-            .min(1, "At least one collection must be selected."),
+        // collections: yup // Added validation for collections as per original
+        //     .array()
+        //     .min(1, "At least one collection must be selected."),
     });
 
     const {
