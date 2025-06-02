@@ -2,7 +2,7 @@ import {Stack, useRouter} from "expo-router";
 import ProductInfoHeader from '../../../../components/ProductInfoHeader';
 import MediaHeader from '@/components/MediaHeader';
 import PreviewHeader from '@/components/PreviewHeader';
-import {ProductWorkflowProvider} from '@/components/ProductWorkflowContext';
+import {ProductWorkflowProvider} from '../../../../components/ProductWorkflowContext';
 import GenericHeader from "@/components/GenericHeader";
 import {Pressable} from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -17,14 +17,14 @@ export default function EditProductStack() {
     <Stack initialRouteName={"index"}>
       <Stack.Screen name={"index"} options={{ header: () => null }} />
       <Stack.Screen
-        name={"EditProductInfo"}
+        name={"product_info"}
         options={{
           title: "Product Info",
             header: () => <ProductInfoHeader/>
         }}
       />
         <Stack.Screen
-            name={"EditShipping"}
+            name={"shipping"}
             options={{
                 title: "Edit Shipping",
                 header: () => <GenericHeader title={'Edit Shipping'} right={null}/>
@@ -32,14 +32,14 @@ export default function EditProductStack() {
             }}
         />
         <Stack.Screen
-            name={"SelectExistingShippingRule"}
+            name={"select_shipping_rule"}
             options={{
-                title: "Select Shipping Rule",
+                title: "Preview",
                 header: () => <GenericHeader title={'Select Shipping Rule'} right={null}/>
             }}
         />
         <Stack.Screen
-            name={"EditPreview"}
+            name={"preview"}
             options={{
                 title: "Preview",
                 header: () => <PreviewHeader/>

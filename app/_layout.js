@@ -16,6 +16,7 @@ import AppShell from "@/components/AppShell";
 import * as Linking from 'expo-linking';
 import {PersistGate} from "redux-persist/integration/react";
 import {initializeNotificationChannels, initializeNotificationHandler} from "../utils/initializeNotificationHandler";
+import {ProductWorkflowProvider} from "../components/ProductWorkflowContext";
 
 const queryClient = new QueryClient();
 // const isLoggedIn = true;
@@ -106,10 +107,12 @@ export default function RootLayout() {
           <GestureHandlerRootView style={{ flex: 1 }}>
             <Provider store={store}>
               <PersistGate loading={null} persistor={persistor}>
+                <ProductWorkflowProvider>
               <PaperProvider theme={customTheme}>
                 <StatusBar style="dark" />
                 <AppShell/>
               </PaperProvider>
+                </ProductWorkflowProvider>
               </PersistGate>
             </Provider>
           </GestureHandlerRootView>

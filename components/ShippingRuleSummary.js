@@ -12,7 +12,7 @@ export const ShippingRuleSummary = ({shippingRule, style}) => {
         style={{alignSelf: 'stretch', marginBottom: 16, padding: 0, borderRadius: 0, backgroundColor: 'white', ...style}}
     >
         <Card.Content>
-        <Text variant={'titleMedium'}>{shippingRule.ruleName}</Text>
+        <Text variant={'titleMedium'}>{shippingRule?.ruleName}</Text>
         <Text variant={'bodyLarge'}>{formatShippingRuleSummary(shippingRule)}</Text>
         </Card.Content>
     </Card>

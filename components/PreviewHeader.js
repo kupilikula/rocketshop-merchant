@@ -26,6 +26,8 @@ const PreviewHeader = () => {
     const insets = useSafeAreaInsets();
     const theme = useTheme();
 
+    console.log('isNewProduct', isNewProduct);
+
     const onPublish = () => {
         if (productPreviewPublishRef.current) {
             productPreviewPublishRef.current.publish(); // Call the exposed method

@@ -6,28 +6,33 @@ import {useContext, useEffect, useState} from "react";
 import {useStoreProduct} from "../../../../api/hooks/useStoreProduct";
 import {ProductWorkflowContext} from "../../../../components/ProductWorkflowContext";
 import _ from "lodash";
+import {Platform} from "react-native";
 
+const IS_WEB = Platform.OS === 'web';
 
 const EditProduct = () => {
 
-  const {setIsNewProduct} = useContext(ProductWorkflowContext);
+  const {setIsNewProduct, isNewProduct} = useContext(ProductWorkflowContext);
   const dispatch = useDispatch();
   const router = useRouter();
   const {storeId} = useSelector( (state) => state.store);
   const {productId} = useLocalSearchParams();
+  console.log("productId", productId);
   const {data: productData} = useStoreProduct(storeId, productId);
-  console.log('pr:', productData);
+  console.log('line 22, isNewProduct:', isNewProduct);
 
   useEffect(() => {
+    console.log('pr:', productData);
     setIsNewProduct(false);
     if (productId) {
+      console.log('prId:', productId);
       let modifiedData  = _.cloneDeep(productData);
       modifiedData.collections = modifiedData.collections.map((c) => c.collectionId);
       delete modifiedData.variants;
       console.log('mod:', modifiedData);
       dispatch(updateEditProductField({field: "all", value: modifiedData}));
       router.replace(
-          `/Main/(tabs)/EditProduct/EditProductInfo`,
+          IS_WEB ? '/(web_merchant)/(protected)/edit_product/product_info' : `/Main/(tabs)/EditProduct/EditProductInfo`,
       );
 
     }

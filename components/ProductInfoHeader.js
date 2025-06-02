@@ -8,6 +8,7 @@ import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {ProductWorkflowContext} from "@/components/ProductWorkflowContext";
 import {resetEditProduct} from "@/store/editProductSlice";
 import {useDispatch, useSelector} from "react-redux";
+import {getProductPath} from "@/utils/getPathUtils";
 
 const headerTitle = (isNewProduct, isNewVariant, isClone) => {
 
@@ -71,7 +72,7 @@ const ProductInfoHeader = (props) => {
                                 // reset redux new product to empty
                                 dispatch(resetEditProduct());
                                 resetWorkflow();
-                                router.replace(`/Main/(tabs)/Products/${editingProductId}`);
+                                router.replace(getProductPath(editingProductId));
                         }}
                         mode={'outlined'}
                         style={{borderColor: theme.colors.error, color: theme.colors.error}}

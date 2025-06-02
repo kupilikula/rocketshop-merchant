@@ -8,7 +8,7 @@ export default function AddNewProductStack() {
 
 
     return (
-        <ProductWorkflowProvider>
+        // <ProductWorkflowProvider>
     <Stack initialRouteName={"index"}>
       <Stack.Screen name={"index"} options={{ header: () => null }} />
       <Stack.Screen
@@ -41,6 +41,6 @@ export default function AddNewProductStack() {
             }}
         />
     </Stack>
-        </ProductWorkflowProvider>
+        // </ProductWorkflowProvider>
   );
 }

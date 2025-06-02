@@ -125,9 +125,9 @@ export default function ProductScreenMerchant(props) {
     };
 
 
-    const renderPageContent = () => ( // This content goes inside the scrollable area
+    const renderPageContent = () => (
         <>
-            <Card mode={"contained"} style={styles.card}> {/* Use styles.card */}
+            <Card mode={"contained"} style={styles.card}>
                 <FlatListSlider
                     data={props.product.mediaItems}
                     local={false}
@@ -267,7 +267,7 @@ export default function ProductScreenMerchant(props) {
                 <IconButton
                     icon="pencil"
                     size={28}
-                    onPress={() => router.push({pathname: '/Main/(tabs)/EditProduct', params: { productId: props.product.productId, backHref: `/Main/(tabs)/Products/${props.product.productId}`} } )}
+                    onPress={() => router.push({pathname: IS_WEB ? '/(web_merchant)/(protected)/edit_product' : '/Main/(tabs)/EditProduct', params: { productId: props.product.productId, backHref: `/Main/(tabs)/Products/${props.product.productId}`} } )}
                     style={styles.actionButton}
                     iconColor={theme.colors.black}
                 />

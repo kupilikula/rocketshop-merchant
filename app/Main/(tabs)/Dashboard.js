@@ -29,6 +29,7 @@ import { TopCustomerListItem } from "../../../components/TopCustomerListItem";
 import ScrollableScreen from "../../../components/ScrollableScreen";
 import { AutoSizeText, ResizeTextMode } from "react-native-auto-size-text";
 import {usePushWithBackHref} from "../../../utils/usePushWithBackHref";
+import {getProductPath} from "../../../utils/getPathUtils";
 
 export default function Dashboard ()  {
     const router = useRouter();
@@ -372,7 +373,7 @@ export default function Dashboard ()  {
                     </View>
                     {dashboardData.topProducts.map((p) => (
                         <View key={p.productId}>
-                            <Pressable onPress={() => pushWithBackHref('/Main/(tabs)/Products/' + p.productId)}>
+                            <Pressable onPress={() => pushWithBackHref(getProductPath(p.productId))}>
                                 <ProductDisplayCompactMerchant product={p} />
                             </Pressable>
                             <Divider style={{ marginVertical: 8 }} />

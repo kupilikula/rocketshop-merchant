@@ -71,7 +71,7 @@ const WebHeader = () => {
                     {!isAuthenticated && <TouchableOpacity onPress={() => handleLoginPress()} style={styles.loginButton}>
                         <Text style={styles.loginButtonText}>Login / Register</Text>
                     </TouchableOpacity>}
-                    {IS_WEB && (
+                    {IS_WEB && isAuthenticated && (
                         <IconButton
                             icon="menu"
                             size={28}
