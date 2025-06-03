@@ -30,6 +30,7 @@ export const formatShippingRuleSummary = (rule) => {
         lines.push(`${conditionText}: ₹${cond.baseCost} ${summarizeCostModifiers(cond.costModifiers).join(', ')}`);
     }
 
+    lines.push('International Shipping ' + (rule.is_international_shipping_enabled ? 'Enabled' : 'Disabled'));
     return lines.join('\n'); // Multi-line subtitle
 };
 

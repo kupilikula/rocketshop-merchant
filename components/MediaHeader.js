@@ -1,4 +1,4 @@
-import {Pressable, View} from "react-native";
+import {Platform, Pressable, View} from "react-native";
 import {generateBoxShadowStyle} from "@/styles/generateShadow";
 import {resetNewProduct} from "@/store/newProductSlice";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -20,6 +20,8 @@ const headerTitle = (isNewProduct, isNewVariant, isClone) => {
         return 'New Product Media';
     }
 }
+
+const IS_WEB = Platform.OS === 'web';
 
 const MediaHeader = () => {
 
@@ -91,7 +93,7 @@ const MediaHeader = () => {
                     onPressIn={() => {
                         console.log("press");
                         if (isMediaSelected) {
-                            router.push("./AddProductInfo");
+                            router.push(IS_WEB ? './product_info' : "./AddProductInfo");
                         }
                     }}
                     style={{ flex: 1, alignItems: "flex-end" }}

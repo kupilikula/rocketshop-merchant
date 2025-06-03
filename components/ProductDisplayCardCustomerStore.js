@@ -40,6 +40,7 @@ export default function ProductDisplayCardCustomerStore(props) {
         }}
         allowPanZoom={false}
         component={<MediaItem />}
+        size={{width: 400, height: 300}}
       />
       <Card.Content style={styles.cardContent}>
         <Text variant={"titleLarge"} style={styles.titleTextStyle}>

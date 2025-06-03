@@ -57,6 +57,8 @@ const FlatListSlider = forwardRef((props, ref) => {
     }
   }, []);
 
+  console.log('line60, size:', size.width, size.height);
+
   const scrollToIndex = useCallback((index, animated = true) => {
     if (slider.current && data && data.length > 0 && index >= 0 && index < data.length) {
       slider.current.scrollToIndex({ index, animated });

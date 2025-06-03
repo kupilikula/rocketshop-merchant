@@ -73,6 +73,16 @@ const WebHeader = () => {
                     </TouchableOpacity>}
                     {IS_WEB && isAuthenticated && (
                         <IconButton
+                            icon="plus"
+                            size={28}
+                            onPress={() => router.push('/(web_merchant)/(protected)/add_new_product')}
+                            color={theme.colors.onSurface} // Or your desired color
+                            style={{ marginLeft: -8 }} // Adjust spacing if needed
+                        />
+                    )}
+
+                    {IS_WEB && isAuthenticated && (
+                        <IconButton
                             icon="menu"
                             size={28}
                             onPress={openWebDrawer}
