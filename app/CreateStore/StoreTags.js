@@ -35,7 +35,7 @@ export default function StoreTags() {
 
     const screenContent = (
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-            <View style={{ flex: 1, justifyContent: 'center' }}> {/* Inner centering view */}
+            <View style={{ flex: 1, justifyContent: 'center' }}> 
                 <LogoIconWithName style={{alignSelf: 'center', marginBottom: 24}}/>
                 <Text variant="titleLarge" style={styles.heading}>Add Store Tags</Text>
 

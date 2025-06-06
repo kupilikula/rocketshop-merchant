@@ -29,7 +29,8 @@ import PhoneInput from "../../../../components/PhoneInput"; // Assuming path is 
 import KeyboardAwareScrollableScreen from "../../../../components/KeyboardAwareScrollableScreen"; // For mobile modal
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import {useSelector} from "react-redux"; // For error icon
+import {useSelector} from "react-redux";
+import {formatPhone} from "../../../../utils/identifierUtils"; // For error icon
 
 const IS_WEB = Platform.OS === 'web';
 
@@ -117,7 +118,7 @@ export default function MerchantManagementScreen() {
             return;
         }
         addMerchantMutation.mutate({
-            phone: newPhone,
+            phone: formatPhone(newPhone),
             fullName: newFullName,
             merchantRole: newMerchantRole,
             canReceiveMessages: newCanReceiveMessages,
@@ -273,7 +274,7 @@ export default function MerchantManagementScreen() {
             <Text variant="titleMedium" style={{ marginBottom: 16, textAlign: 'center' }}>
                 Add New Merchant
             </Text>
-            <PhoneInput setPhone={setNewPhone} defaultCountryCode="IN" />
+            <PhoneInput setPhone={setNewPhone}/>
             <TextInput
                 label="Full Name"
                 value={newFullName} // Controlled component

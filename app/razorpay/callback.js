@@ -1,154 +1,153 @@
 // app/razorpay/authCallback.js
-import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, Alert, StyleSheet } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, ActivityIndicator, Alert, StyleSheet, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useSelector, useDispatch } from 'react-redux'; // Added useDispatch
+import { useSelector, useDispatch } from 'react-redux';
 import { getAxiosClient } from '../../api/client'; // Adjust path as needed
-import * as WebBrowser from 'expo-web-browser'; // Needed for dismissBrowser
-import { setOAuthState } from '../../store/razorpaySlice';
-import {useQueryClient} from "react-query"; // Import action to store/clear state (ADJUST PATH)
+import * as WebBrowser from 'expo-web-browser';
+import { setOAuthState } from '../../store/razorpaySlice'; // Adjust path as needed
+import { useQueryClient } from "react-query";
 
 export default function RazorpayAuthCallback() {
-    // Get query params passed via the deep link (e.g., from rocketshopmerchant://oauth/callback?code=...)
     const params = useLocalSearchParams();
     const router = useRouter();
     const dispatch = useDispatch();
     const queryClient = useQueryClient();
-    const {storeId} = useSelector((state) => state.store);
-    // Retrieve original state stored *before* opening browser
-    const { oauthState: originalState } = useSelector((state) => state.razorpay); // Ensure 'razorpay.oauthState' is correct path
+    const axiosClient = getAxiosClient();
+    const { storeId } = useSelector((state) => state.store);
+    const { oauthState: originalStateFromMobileRedux } = useSelector((state) => state.razorpay); // Used by mobile path
 
-    // --- Component State ---
-    const [isLoading, setIsLoading] = useState(true); // Assume loading initially
-    const [message, setMessage] = useState('Processing Razorpay connection...');
-    const [error, setError] = useState('');
-    const [hasProcessedCallback, setHasProcessedCallback] = useState(false); // Prevent double processing
+    const [isLoading, setIsLoading] = useState(true);
+    const [message, setMessage] = useState('Processing Razorpay connection...'); // For mobile/non-popup UI
+    const [error, setError] = useState(''); // For mobile/non-popup UI
+    const [hasProcessedCallback, setHasProcessedCallback] = useState(false);
 
-    // Extract potential parameters from the deep link URL
-    const code = params?.code;
-    const receivedState = params?.state;
-    const callbackError = params?.error; // Check if Razorpay sent back an error via backend redirect
-    const callbackErrorDesc = params?.error_description;
+    const codeFromParams = params?.code;
+    const receivedStateFromParams = params?.state;
+    const callbackErrorFromParams = params?.error;
+    const callbackErrorDescFromParams = params?.error_description;
+
+    const isWebPopup = Platform.OS === 'web' && typeof window !== 'undefined' && window.opener && window.opener !== window && window.opener.origin === window.location.origin;
 
     useEffect(() => {
-        // Core logic function
-        const handleCallback = async (authCode, authState) => {
-            setIsLoading(true); // Ensure loading is true
-            setError('');
-            setMessage('Verifying connection details...');
-            console.log('[DeepLink Callback] Handling callback...', { authCode, authState });
+        if (hasProcessedCallback) return;
+        setHasProcessedCallback(true); // Process only once
 
-            // --- Verify State ---
-            if (!originalState) {
+        // --- Web Popup Logic: Just pass data to opener and close ---
+        if (isWebPopup) {
+            setIsLoading(true); // Keep loading until closed
+            if (callbackErrorFromParams) {
+                console.log("[AuthCallback Web Popup] Posting error to opener:", { callbackErrorFromParams, callbackErrorDescFromParams });
+                window.opener.postMessage({
+                    type: 'RAZORPAY_OAUTH_POPUP_DATA',
+                    error: callbackErrorFromParams,
+                    error_description: callbackErrorDescFromParams
+                }, window.location.origin);
+            } else if (codeFromParams && receivedStateFromParams) {
+                console.log("[AuthCallback Web Popup] Posting code and state to opener:", { codeFromParams, receivedStateFromParams });
+                window.opener.postMessage({
+                    type: 'RAZORPAY_OAUTH_POPUP_DATA',
+                    code: codeFromParams,
+                    receivedStateFromPopup: receivedStateFromParams,
+                    storeId: storeId // Pass storeId along if opener needs it directly
+                }, window.location.origin);
+            } else {
+                console.log("[AuthCallback Web Popup] Missing critical params, posting error to opener.");
+                window.opener.postMessage({
+                    type: 'RAZORPAY_OAUTH_POPUP_DATA',
+                    error: 'missing_parameters',
+                    error_description: 'Code or state missing in callback to popup.'
+                }, window.location.origin);
+            }
+            window.close(); // Close the popup
+            return; // End processing for web popup
+        }
+
+        // --- Mobile App Deep Link Logic (or non-popup web, though less common for this flow) ---
+        const processMobileCallback = async (authCode, authState) => {
+            setIsLoading(true);
+            setMessage('Verifying connection details...');
+
+            if (!originalStateFromMobileRedux) {
                 setError("Error: Could not retrieve original session state. Please try initiating the connection again.");
                 Alert.alert("Security Error", "Your connection session could not be verified or has expired.");
                 setIsLoading(false);
                 return;
             }
-            if (authState !== originalState) {
-                console.error("[DeepLink Callback] State mismatch!", { received: authState, expected: originalState });
-                dispatch(setOAuthState(null)); // Clear potentially invalid state
+            if (authState !== originalStateFromMobileRedux) {
+                dispatch(setOAuthState(null));
                 setError("Error: State verification failed. Possible security issue. Please restart the connection process.");
                 Alert.alert("Security Error", "State mismatch detected. Please try connecting again.");
                 setIsLoading(false);
                 return;
             }
-            console.log("[DeepLink Callback] State verified successfully.");
-            dispatch(setOAuthState(null)); // --- Clear state after successful verification ---
+            dispatch(setOAuthState(null));
             setMessage('State verified. Finalizing connection...');
-            // --- End State Verification ---
 
             try {
-                // --- Exchange Code for Tokens ---
-                console.log("[DeepLink Callback] Sending code and state to backend...");
-                // *** NOTE: Removed storeId from the payload ***
                 const exchangeResponse = await axiosClient.post(`/razorpay/exchangeCodeForTokens`, {
                     code: authCode,
-                    state: authState, // Send state for backend lookup/verification
+                    state: authState,
+                    storeId
                 });
 
                 if (!exchangeResponse?.data?.success) {
-                    throw new Error(exchangeResponse?.data?.error || `Server error ${exchangeResponse?.status || ''} during token exchange.`);
+                    throw new Error(exchangeResponse?.data?.error || `Server error during token exchange.`);
                 }
-                // --- End Exchange ---
 
-                console.log("[DeepLink Callback] Token exchange successful.");
                 setMessage("Razorpay Account Connected!");
                 setError('');
                 Alert.alert("Success", "Razorpay account connected successfully!");
+                queryClient.invalidateQueries(["razorpayConnection", storeId]);
 
-                // --- Attempt to dismiss browser AFTER success ---
-                try {
-                    console.log("[DeepLink Callback] Attempting to dismiss browser...");
-                    await WebBrowser.dismissBrowser();
-                    console.log("[DeepLink Callback] Dismiss browser call finished.");
-                } catch (dismissError) {
-                    console.warn("[DeepLink Callback] Could not dismiss browser:", dismissError);
+                if (Platform.OS !== 'web') { // Only dismiss for actual mobile
+                    try { await WebBrowser.dismissBrowser(); } catch (e) { console.warn("Could not dismiss browser", e); }
                 }
-                // --- End dismiss attempt ---
-
-                // Navigate away after a short delay
-                setTimeout(() => {
-                        // Navigate to a relevant screen, e.g., back to settings or dashboard
-                    router.replace('/Main/(tabs)/StoreSettings'); // Example
-                }, 1000); // Short delay
+                setTimeout(() => router.replace('/Main/(tabs)/StoreSettings'), 1000);
 
             } catch (exchangeError) {
-                console.error("[DeepLink Callback] Token exchange failed:", exchangeError);
-                const errorMsg = `Failed to finalize connection: ${exchangeError.message}`;
-                setError(errorMsg);
+                setError(`Failed to finalize connection: ${exchangeError.message}`);
                 setMessage('');
-                Alert.alert("Connection Error", errorMsg);
-                // Stay on this screen to show error, don't navigate away
+                Alert.alert("Connection Error", `Failed to finalize connection: ${exchangeError.message}`);
             } finally {
-                setIsLoading(false); // Stop loading indicator
-                queryClient.invalidateQueries(["razorpayConnection", storeId])
+                setIsLoading(false);
             }
-        }; // --- End handleCallback ---
+        };
 
-        // --- Effect Execution Logic ---
-        // Check for direct errors first, only run once
-        if (callbackError && !hasProcessedCallback) {
-            setHasProcessedCallback(true); // Mark as processed
-            console.error(`[DeepLink Callback] Error received from redirect: ${callbackError} - ${callbackErrorDesc}`);
-            setError(`Connection failed: ${callbackErrorDesc || callbackError}`);
-            Alert.alert("Connection Failed", `Razorpay reported an error: ${callbackErrorDesc || callbackError}`);
+        if (callbackErrorFromParams) {
+            // Mobile error handling (popup version already returned)
+            setError(`Connection failed: ${callbackErrorDescFromParams || callbackErrorFromParams}`);
+            Alert.alert("Connection Failed", `Razorpay reported an error: ${callbackErrorDescFromParams || callbackErrorFromParams}`);
+            setIsLoading(false);
+        } else if (codeFromParams && receivedStateFromParams) {
+            // Mobile processing (popup version already returned)
+            processMobileCallback(codeFromParams, receivedStateFromParams);
+        } else {
+            // Mobile - missing params (popup version already returned)
+            setError("Error: Callback parameters were not received correctly.");
+            Alert.alert("Error", "Could not complete connection due to missing parameters.");
             setIsLoading(false);
         }
-        // If no error and we have code/state and haven't processed yet
-        else if (code && receivedState && !hasProcessedCallback) {
-            setHasProcessedCallback(true); // Mark as processed
-            handleCallback(code, receivedState);
-        }
-        // Handle case where component mounts but params are missing without an error reported
-        else if (!hasProcessedCallback && (!code || !receivedState)) {
-            console.warn("[DeepLink Callback] Code or state missing on mount/render.");
-            // If still loading, wait briefly, otherwise show error
-            if (!isLoading) {
-                setError("Error: Callback parameters were not received correctly.");
-                Alert.alert("Error", "Could not complete connection due to missing parameters.");
-            }
-            // Optionally add a timeout to stop loading if params never arrive
-            // setTimeout(() => { if(isLoading) setIsLoading(false); }, 3000);
-        }
-        // --- End Effect Execution Logic ---
+    }, [
+        codeFromParams, receivedStateFromParams, originalStateFromMobileRedux, callbackErrorFromParams, callbackErrorDescFromParams,
+        dispatch, queryClient, axiosClient, router, hasProcessedCallback, storeId, isWebPopup // Added isWebPopup
+    ]);
 
-        // Dependencies: React to changes in the extracted params or the original state from redux
-        // Adding storeId shouldn't be necessary unless used elsewhere in component
-    }, [code, receivedState, originalState, router, hasProcessedCallback, dispatch, callbackError, callbackErrorDesc]);
-
-    // --- Render ---
+    // Render for non-popup or while popup is processing (before close)
     return (
         <View style={styles.container}>
             {isLoading && <ActivityIndicator size="large" style={styles.loading} />}
-            {!isLoading && message && <Text style={styles.messageText}>{message}</Text>}
-            {!isLoading && error && <Text style={styles.errorText}>{error}</Text>}
-            {/* This screen usually just shows status, no interactive elements */}
+            {/* Only show these messages if NOT a web popup that will close immediately */}
+            {!isWebPopup && !isLoading && message && <Text style={styles.messageText}>{message}</Text>}
+            {!isWebPopup && !isLoading && error && <Text style={styles.errorText}>{error}</Text>}
+            {isWebPopup && isLoading && (
+                <Text style={styles.messageText}>Finalizing Razorpay connection... This window will close automatically.</Text>
+            )}
         </View>
     );
 }
 
-// --- Styles ---
+// --- Styles --- (Keep your existing styles)
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -167,7 +166,7 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     errorText: {
-        color: 'red', // Use theme.colors.error if available
+        color: 'red',
         textAlign: 'center',
         marginVertical: 10,
         fontSize: 14,

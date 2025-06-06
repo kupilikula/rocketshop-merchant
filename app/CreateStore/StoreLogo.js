@@ -41,7 +41,7 @@ export default function StoreLogo() {
         console.log('localImage:', localImage); // Kept original console.log
         if (!localImage) return; // Guard in case button was somehow enabled
         dispatch(setNewStoreLogoImage(localImage));
-        router.push(IS_WEB ? '/create_store/store_tags' : '/CreateStore/StoreTags');
+        router.push(IS_WEB ? '/create_store/store_profile' : '/CreateStore/StoreProfile');
     };
 
     return (

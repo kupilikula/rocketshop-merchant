@@ -28,6 +28,13 @@ export default function StoreSummary() {
         storeTags,
         firstCollectionName,
         storeSettings,
+        legalBusinessName,
+        storeEmail,
+        storePhone,
+        businessType,
+        category,
+        subcategory,
+        registeredAddress,
         isPlatformOwned,
     } = useSelector((state) => state.newStore);
 
@@ -49,6 +56,13 @@ export default function StoreSummary() {
                 storeDescription,
                 storeTags,
                 storeSettings, // Ensure this object is structured as the backend expects
+                legalBusinessName,
+                storeEmail,
+                storePhone,
+                businessType,
+                category,
+                subcategory,
+                registeredAddress,
                 isPlatformOwned
             };
             const createStoreResponse = await axiosClient.post('/stores/createStore', storeData);
@@ -147,13 +161,13 @@ export default function StoreSummary() {
                     </View>
                 </View>
 
-                {isPlatformOwned && (
+                {Boolean(isPlatformOwned) && (
                     <Text variant={"titleMedium"} style={styles.platformStoreText}>
                         RocketShop Platform Store
                     </Text>
                 )}
 
-                {storeDescription && (
+                {Boolean(storeDescription) && (
                     <View style={styles.sectionContainer}>
                         <Text variant={"bodyLarge"} style={styles.descriptionText}>
                             {storeDescription}

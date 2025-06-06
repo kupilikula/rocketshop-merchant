@@ -29,7 +29,7 @@ export default function StoreDescription() {
 
     const screenContent = (
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-            <View style={{ flex: 1, justifyContent: 'center' }}> {/* Inner centering view */}
+            <View style={{ flex: 1, justifyContent: 'center' }}>
                 <LogoIconWithName style={{alignSelf: 'center', marginBottom: 24}}/>
                 <GstSettingsComponent
                     rate={gstRate}

@@ -14,7 +14,7 @@ export const formatPhone = (phone) => {
 
     // If it's not empty and doesn't start with '+', prepend '+'
     if (!trimmedNumber.startsWith('+')) {
-        return `+${trimmedNumber}`;
+        return `+91${trimmedNumber}`;
     }
 
     // If it already starts with '+', or is just '+', return the trimmed version

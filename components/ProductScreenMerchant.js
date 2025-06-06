@@ -44,8 +44,8 @@ export default function ProductScreenMerchant(props) {
     const [isCloneModalVisible, setIsCloneModalVisible] = useState(false);
     const [fabOpen, setFabOpen] = useState(false);
     const [deleteProductModal, setDeleteProductModal] = useState(false);
-    const {data: shippingRule} = useGetShippingRuleForProduct(props.product.productId, storeId);
-    const [isActive, setIsActive] = useState(props.product.isActive);
+    const {data: shippingRule} = useGetShippingRuleForProduct(props.product?.productId || '', storeId);
+    const [isActive, setIsActive] = useState(props.product?.isActive);
 
     const handleFabToggle = () => setFabOpen(!fabOpen);
 
@@ -125,139 +125,190 @@ export default function ProductScreenMerchant(props) {
     };
 
 
-    const renderPageContent = () => (
-        <>
-            <Card mode={"contained"} style={styles.card}>
-                <FlatListSlider
-                    data={props.product.mediaItems}
-                    local={false}
-                    orientation={"landscape"}
-                    separator={0}
-                    currentIndexCallback={(index) => console.log("Index", index)}
-                    keyExtractor={(item) => item.mediaId}
-                    indicator
-                    indicatorStyle={{}}
-                    indicatorContainerStyle={{ position: "absolute", bottom: 10 }}
-                    indicatorActiveColor="#3498db"
-                    indicatorInActiveColor="#bdc3c7"
-                    indicatorActiveWidth={6}
-                    flatListWrapperStyle={{ backgroundColor: "black", width: "100%", aspectRatio: (props.orientation === "portrait" ? "0.8" : "1.33") || "1.33" }}
-                    allowPanZoom={false}
-                    component={<MediaItem />}
-                />
-                <Card.Content style={styles.cardContent}>
-                    <Text variant={"titleLarge"} style={styles.titleTextStyle}>
-                        {props.product.productName}
-                    </Text>
-                    <View style={styles.cardContentView}>
-                        <View style={styles.actionContainer}>
-                            <View style={{display: "flex", flexDirection: "row", justifyContent: "flex-end", alignItems: "center"}}>
-                                <IconButton
-                                    icon="delete"
-                                    size={28}
-                                    onPress={() => setDeleteProductModal(true)}
-                                    style={styles.actionButton}
-                                    iconColor={theme.colors.error}
-                                />
-                            </View>
-                            <View style={styles.statusContainer}>
-                                <Switch value={isActive} onValueChange={handleStatusChange} />
-                                <Chip
-                                    textStyle={{ color: "black", textAlign: "center" }}
-                                    style={{ marginLeft: 10, backgroundColor: isActive ? theme.colors.active : theme.colors.inactive }}
-                                >
-                                    {isActive ? "Active" : "Inactive"}
-                                </Chip>
-                            </View>
-                        </View>
-                        <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", width: "100%", alignItems: "flex-start" }}>
-                            <View>
-                                <Text variant="titleMedium">{"Price: ₹" + props.product.price.toString()}</Text>
-                                <Text variant="titleMedium">{"Stock: " + props.product.stock.toString()}</Text>
-                            </View>
-                        </View>
-                        <View style={styles.gstContainer}>
-                            <Text>{"GST Rate: " + props.product.gstRate + "%"}</Text>
-                        </View>
-                        <View style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", marginTop: 10 }}>
-                            {props.product.attributes.map((a, i) => (
-                                <View style={{ display: "flex", flexDirection: "row", alignItems: "center" }} key={i.toString()}>
-                                    <Text variant={"titleMedium"}>{a.key + ": "}</Text>
-                                    <Text variant={"titleMedium"}>{a.value}</Text>
+    const renderPageContent = () => {
+        console.log('props.product: ', props.product);
+        if (props.product) {
+            return <>
+                <Card mode={"contained"} style={styles.card}>
+                    <FlatListSlider
+                        data={props.product?.mediaItems || []}
+                        local={false}
+                        orientation={"landscape"}
+                        separator={0}
+                        currentIndexCallback={(index) => console.log("Index", index)}
+                        keyExtractor={(item) => item.mediaId}
+                        indicator
+                        indicatorStyle={{}}
+                        indicatorContainerStyle={{position: "absolute", bottom: 10}}
+                        indicatorActiveColor="#3498db"
+                        indicatorInActiveColor="#bdc3c7"
+                        indicatorActiveWidth={6}
+                        flatListWrapperStyle={{
+                            backgroundColor: "black",
+                            width: "100%",
+                            aspectRatio: (props.orientation === "portrait" ? "0.8" : "1.33") || "1.33"
+                        }}
+                        allowPanZoom={false}
+                        component={<MediaItem/>}
+                    />
+                    <Card.Content style={styles.cardContent}>
+                        <Text variant={"titleLarge"} style={styles.titleTextStyle}>
+                            {props.product?.productName || ''}
+                        </Text>
+                        <View style={styles.cardContentView}>
+                            <View style={styles.actionContainer}>
+                                <View style={{
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    justifyContent: "flex-end",
+                                    alignItems: "center"
+                                }}>
+                                    <IconButton
+                                        icon="delete"
+                                        size={28}
+                                        onPress={() => setDeleteProductModal(true)}
+                                        style={styles.actionButton}
+                                        iconColor={theme.colors.error}
+                                    />
                                 </View>
-                            ))}
-                        </View>
-                    </View>
-                    {props.product.numberOfRatings > 0 && (
-                        <View style={styles.rating}>
-                            <Rating disabled={true} variant={"stars-outline"} fillColor={"#faaf00"} baseColor={"black"} size={18} rating={props.product.rating} onChange={() => {}}/>
-                            <Text style={styles.ratingText} variant={"bodyLarge"}>
-                                {props.product.rating.toString() + "/5 " + "(" + props.product.numberOfRatings.toString() + ")"}
-                            </Text>
-                        </View>
-                    )}
-                    {props.product.variants?.length > 0 && (
-                        <>
-                            <Text variant="titleMedium" style={{marginVertical: 8}}>Variants</Text>
-                            <View style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "flex-start", flexWrap: "wrap" }}>
-                                {props.product.variants.map((v) => (
-                                    <Pressable
-                                        key={v.productId}
-                                        style={{ alignSelf: "flex-start", marginRight: 8, marginVertical: 4 }}
-                                        onPress={() => router.push(getProductPath(v.productId))}
+                                <View style={styles.statusContainer}>
+                                    <Switch value={isActive} onValueChange={handleStatusChange}/>
+                                    <Chip
+                                        textStyle={{color: "black", textAlign: "center"}}
+                                        style={{
+                                            marginLeft: 10,
+                                            backgroundColor: isActive ? theme.colors.active : theme.colors.inactive
+                                        }}
                                     >
-                                        <View style={{ display: "flex", alignItems: "center", padding: 8, borderRadius: 8, backgroundColor: theme.colors.softPrimary, borderWidth: 1 }}>
-                                            {v.differingAttributes.map((a, index) => (
-                                                <View key={index} style={{ display: "flex", flexDirection: "row", justifyContent: "flex-start", alignItems: "center" }}>
-                                                    <Text variant="titleSmall">{a.key + ": "}</Text>
-                                                    <Text variant="titleSmall">{a.value}</Text>
-                                                </View>
-                                            ))}
-                                        </View>
-                                    </Pressable>
-                                ))}
-                            </View>
-                        </>
-                    )}
-                    <View style={{ marginTop: 10 }}>
-                        <Text variant={"bodyLarge"} style={{ color: "black" }}>{props.product.description}</Text>
-                    </View>
-                    <View style={{ marginTop: 15 }}>
-                        <Text variant={"titleMedium"} style={{ marginBottom: 10 }}>Collections:</Text>
-                        <View style={styles.collectionsContainer}>
-                            {props.product.collections.map((c) => (
-                                <View style={{ display: "flex", flexDirection: "row", margin: 5 }} key={c.collectionId}>
-                                    <Chip textStyle={{ color: "white" }} style={{ backgroundColor: theme.colors.primary }}>
-                                        {c.collectionName}
+                                        {isActive ? "Active" : "Inactive"}
                                     </Chip>
                                 </View>
+                            </View>
+                            <View style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                width: "100%",
+                                alignItems: "flex-start"
+                            }}>
+                                <View>
+                                    <Text variant="titleMedium">{"Price: ₹" + props.product.price.toString()}</Text>
+                                    <Text variant="titleMedium">{"Stock: " + props.product.stock.toString()}</Text>
+                                </View>
+                            </View>
+                            <View style={styles.gstContainer}>
+                                <Text>{"GST Rate: " + props.product.gstRate + "%"}</Text>
+                            </View>
+                            <View style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "flex-start",
+                                marginTop: 10
+                            }}>
+                                {props.product.attributes.map((a, i) => (
+                                    <View style={{display: "flex", flexDirection: "row", alignItems: "center"}}
+                                          key={i.toString()}>
+                                        <Text variant={"titleMedium"}>{a.key + ": "}</Text>
+                                        <Text variant={"titleMedium"}>{a.value}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+                        {props.product.numberOfRatings > 0 && (
+                            <View style={styles.rating}>
+                                <Rating disabled={true} variant={"stars-outline"} fillColor={"#faaf00"}
+                                        baseColor={"black"} size={18} rating={props.product.rating} onChange={() => {
+                                }}/>
+                                <Text style={styles.ratingText} variant={"bodyLarge"}>
+                                    {props.product.rating.toString() + "/5 " + "(" + props.product.numberOfRatings.toString() + ")"}
+                                </Text>
+                            </View>
+                        )}
+                        {props.product.variants?.length > 0 && (
+                            <>
+                                <Text variant="titleMedium" style={{marginVertical: 8}}>Variants</Text>
+                                <View style={{
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    justifyContent: "flex-start",
+                                    flexWrap: "wrap"
+                                }}>
+                                    {props.product.variants.map((v) => (
+                                        <Pressable
+                                            key={v.productId}
+                                            style={{alignSelf: "flex-start", marginRight: 8, marginVertical: 4}}
+                                            onPress={() => router.push(getProductPath(v.productId))}
+                                        >
+                                            <View style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                padding: 8,
+                                                borderRadius: 8,
+                                                backgroundColor: theme.colors.softPrimary,
+                                                borderWidth: 1
+                                            }}>
+                                                {v.differingAttributes.map((a, index) => (
+                                                    <View key={index} style={{
+                                                        display: "flex",
+                                                        flexDirection: "row",
+                                                        justifyContent: "flex-start",
+                                                        alignItems: "center"
+                                                    }}>
+                                                        <Text variant="titleSmall">{a.key + ": "}</Text>
+                                                        <Text variant="titleSmall">{a.value}</Text>
+                                                    </View>
+                                                ))}
+                                            </View>
+                                        </Pressable>
+                                    ))}
+                                </View>
+                            </>
+                        )}
+                        <View style={{marginTop: 10}}>
+                            <Text variant={"bodyLarge"} style={{color: "black"}}>{props.product.description}</Text>
+                        </View>
+                        <View style={{marginTop: 15}}>
+                            <Text variant={"titleMedium"} style={{marginBottom: 10}}>Collections:</Text>
+                            <View style={styles.collectionsContainer}>
+                                {props.product.collections.map((c) => (
+                                    <View style={{display: "flex", flexDirection: "row", margin: 5}}
+                                          key={c.collectionId}>
+                                        <Chip textStyle={{color: "white"}}
+                                              style={{backgroundColor: theme.colors.primary}}>
+                                            {c.collectionName}
+                                        </Chip>
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+                        <Text variant={"titleMedium"} style={{marginTop: 10}}>Tags:</Text>
+                        <View style={styles.tagsContainer}>
+                            {props.product.productTags.map((tag) => (
+                                <Chip key={tag} style={styles.tagChipSelected} textStyle={{color: theme.colors.white}}>
+                                    {tag}
+                                </Chip>
                             ))}
                         </View>
-                    </View>
-                    <Text variant={"titleMedium"} style={{ marginTop: 10 }}>Tags:</Text>
-                    <View style={styles.tagsContainer}>
-                        {props.product.productTags.map((tag) => (
-                            <Chip key={tag} style={styles.tagChipSelected} textStyle={{ color: theme.colors.white }}>
-                                {tag}
-                            </Chip>
-                        ))}
-                    </View>
-                    <ProductReviewsList productId={props.product.productId} />
-                    {shippingRule && (
-                        <View>
-                            <Text variant={"titleMedium"} style={{ marginVertical: 10 }}>Shipping Cost Rule</Text>
-                            <ShippingRuleSummary shippingRule={shippingRule}/>
-                        </View>
-                    )}
-                </Card.Content>
-            </Card>
-            <ConfirmDeleteProductModal
-                visible={deleteProductModal}
-                onDismiss={() => setDeleteProductModal(false)}
-                productId={props.product.productId}
-            />
-        </>
-    );
+                        <ProductReviewsList productId={props.product.productId}/>
+                        {shippingRule && (
+                            <View>
+                                <Text variant={"titleMedium"} style={{marginVertical: 10}}>Shipping Cost Rule</Text>
+                                <ShippingRuleSummary shippingRule={shippingRule}/>
+                            </View>
+                        )}
+                    </Card.Content>
+                </Card>
+                <ConfirmDeleteProductModal
+                    visible={deleteProductModal}
+                    onDismiss={() => setDeleteProductModal(false)}
+                    productId={props.product.productId}
+                />
+            </>
+        } else {
+            return null;
+        }
+    };
 
 
     const headerComponent = (

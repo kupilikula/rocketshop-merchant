@@ -3,7 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start --dev-client",
+    "start": "expo start -c --port 8081",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "expo run:ios",
@@ -29,6 +29,7 @@
     "@reduxjs/toolkit": "2.6.1",
     "axios": "1.8.4",
     "color-contrast": "1.0.0",
+    "country-state-city": "^3.2.1",
     "date-fns": "4.1.0",
     "deprecated-react-native-prop-types": "5.0.0",
     "expo": "52.0.44",

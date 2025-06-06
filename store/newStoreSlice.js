@@ -12,6 +12,13 @@ const initialState = {
         defaultGstRate: null,
         defaultGstInclusive: null,
     },
+    legalBusinessName: '',
+    storeEmail: '',
+    storePhone: '',
+    businessType: '',
+    category: '',
+    subcategory: '',
+    registeredAddress: {},
     isPlatformOwned: false,
 };
 
@@ -19,6 +26,9 @@ const newStoreSlice = createSlice({
     name: 'newStore',
     initialState,
     reducers: {
+        setNewStoreField: (state, action) => {
+          state[action.payload.field] = action.payload.value;
+        },
         setNewStoreName: (state, action) => {
             state.storeName = action.payload;
         },
@@ -57,6 +67,7 @@ const newStoreSlice = createSlice({
 });
 
 export const {
+    setNewStoreField,
     setNewStoreName,
     setIsPlatformOwned,
     setNewStoreHandle,
