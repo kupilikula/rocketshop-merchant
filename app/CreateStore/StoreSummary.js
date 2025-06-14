@@ -28,6 +28,7 @@ export default function StoreSummary() {
         storeTags,
         firstCollectionName,
         storeSettings,
+        storePolicy,
         legalBusinessName,
         storeEmail,
         storePhone,
@@ -56,6 +57,7 @@ export default function StoreSummary() {
                 storeDescription,
                 storeTags,
                 storeSettings, // Ensure this object is structured as the backend expects
+                storePolicy,
                 legalBusinessName,
                 storeEmail,
                 storePhone,

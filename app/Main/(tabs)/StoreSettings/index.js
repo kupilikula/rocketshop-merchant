@@ -65,6 +65,14 @@ export default function StoreSettingsScreen() {
                 left={props => <List.Icon {...props} icon="receipt" />}
             />
             <Divider />
+            <List.Item
+                title="Store Policy"
+                titleStyle={styles.sectionTitle} // Original style
+                style={styles.listItem} // Original style
+                onPress={() => router.push(IS_WEB ? '/(web_merchant)/(protected)/store_settings/store_policy' : '/Main/(tabs)/StoreSettings/StorePolicy')}
+                left={props => <List.Icon {...props} icon="gavel" />}
+            />
+            <Divider />
             { store.isActive ? (
                 <List.Item
                     title="Deactivate Store"

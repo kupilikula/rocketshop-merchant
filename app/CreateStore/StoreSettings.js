@@ -22,7 +22,7 @@ export default function StoreDescription() {
 
     const handleNext = () => {
         dispatch(setNewStoreSettings({defaultGstRate: gstRate, defaultGstInclusive: gstInclusive}));
-        router.push(IS_WEB ? '/create_store/store_summary' : '/CreateStore/StoreSummary');
+        router.push(IS_WEB ? '/create_store/store_policy' : '/CreateStore/StorePolicy');
     };
 
     const commonWrapperStyle = { flex: 1, backgroundColor: 'white' };

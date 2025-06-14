@@ -12,6 +12,13 @@ const initialState = {
         defaultGstRate: null,
         defaultGstInclusive: null,
     },
+    storePolicy: {
+        handlingTimeDays: 2,
+        cancellationWindowHours: 12,
+        returnsAccepted: true,
+        returnWindowDays: 7,
+        refundProcessingTimeDays: 5,
+    },
     legalBusinessName: '',
     storeEmail: '',
     storePhone: '',
@@ -58,6 +65,9 @@ const newStoreSlice = createSlice({
         setNewStoreSettings: (state, action) => {
             state.storeSettings = action.payload;
         },
+        setNewStorePolicy: (state, action) => {
+          state.storePolicy = action.payload;
+        },
         resetNewStore: () => initialState,
 
     },
@@ -77,6 +87,7 @@ export const {
     removeNewStoreTag,
     setNewStoreFirstCollectionName,
     setNewStoreSettings,
+    setNewStorePolicy,
     resetNewStore,
 } = newStoreSlice.actions;
 

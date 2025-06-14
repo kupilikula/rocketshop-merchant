@@ -8,6 +8,7 @@ import { useQueryClient } from "react-query";
 import {setStore} from "../store/storeSlice";
 import {useDeleteProduct} from "../api/hooks/useDeleteProduct";
 import {useRouter} from "expo-router";
+import {getProductsPath} from "../utils/getPathUtils";
 
 export default function ConfirmDeleteProductModal({ visible, onDismiss, productId }) {
     const theme = useTheme();
@@ -26,7 +27,7 @@ export default function ConfirmDeleteProductModal({ visible, onDismiss, productI
             onDismiss();
 
             // 🚨 First navigate
-            router.replace('/Main/(tabs)/Products');
+            router.replace(getProductsPath());
 
             // 🚨 Then after small delay, invalidate
             setTimeout(() => {

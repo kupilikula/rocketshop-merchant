@@ -33,7 +33,7 @@ const DrawerItemsContent = ({ onItemPress }) => {
     const pathName = usePathname(); // Not used in JSX, but kept from original
     const theme = useTheme();
     const styles = makeStyles(theme); // Use the same makeStyles as original DrawerMenu
-    const {storeLogoImage, canReceiveMessages, merchantRole} = useSelector(state => state.store);
+    const {storeName, storeLogoImage, canReceiveMessages, merchantRole} = useSelector(state => state.store);
     const isAuthenticated = useSelector(state => state.auth.authenticationStatus==='AUTHENTICATED');
     const unreadCount = useSelector((state) => {
         const unread = state.badges.unreadMessages;
@@ -90,7 +90,7 @@ const DrawerItemsContent = ({ onItemPress }) => {
             >
                 <StoreLogo logoImage={storeLogoImage} size={40} />
                 <Text variant={"titleLarge"} style={{ marginLeft: 15 }}>
-                    Store Name
+                    {storeName}
                 </Text>
             </View>
             {IS_WEB && <Drawer.Item

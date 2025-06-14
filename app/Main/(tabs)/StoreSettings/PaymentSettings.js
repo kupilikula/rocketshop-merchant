@@ -186,7 +186,7 @@ export default function PaymentSettingsScreen() {
             [{ text: "Cancel", style: "cancel" }, { text: "Disconnect", style: "destructive", onPress: async () => {
                     setIsConnecting(true); setConnectError('');
                     try {
-                        await axiosClient.delete(`/stores/${storeId}/razorpay/connection`);
+                        await axiosClient.post(`/razorpay/disconnect`, {storeId});
                         refetchStatus();
                         Alert.alert("Success", "Razorpay account disconnected.");
                     } catch (error) {
@@ -348,7 +348,7 @@ const makeStyles = (theme, isWeb, windowWidth) => {
         detailErrorContainer: { marginVertical: 10, padding: 10, backgroundColor: theme.colors.errorContainer, borderRadius: theme.roundness, alignItems: 'center' },
         webPageContainer_Root: { flex: 1, backgroundColor: 'white', alignItems: 'center', paddingVertical: IS_WEB ? 20 : 0, },
         webMaxContentContainer_Shell: { width: '100%', maxWidth: 768, flex: 1, backgroundColor: 'white', padding: 16, borderRadius: IS_WEB ? 8 : 0, },
-        loadingOrErrorContentWrapper: { flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%', padding: 20, },
+        loadingOrErrorContentWrapper: { flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%', padding: 10, },
         formSectionTitle: { fontSize: 18, fontWeight: 'bold', color: theme.colors.primary, marginBottom: 12, },
         input: { width: '100%', marginBottom: 8, }
     });

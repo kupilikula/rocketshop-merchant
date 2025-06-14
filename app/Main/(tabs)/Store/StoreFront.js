@@ -20,6 +20,7 @@ import OfferBar from "../../../../components/OfferBar";
 import MaterialCommunityIcon from "react-native-paper/src/components/MaterialCommunityIcon";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
 import {getFollowersListPath, getProductPath, getStoreSettingsPath} from "../../../../utils/getPathUtils";
+import StorePolicyLink from "../../../../components/StorePolicyModal";
 
 const getUniqueProducts = (products) => {
     return [...new Set(products)];
@@ -37,6 +38,7 @@ export default function StoreFront(props) {
     const pushWithBackHref = usePushWithBackHref();
     console.log('store:', store);
     console.log('merchant:', merchant);
+    const [storePolicyVisible, setStorePolicyVisible] = useState(false);
 
     // Parallel queries using useQueries
     const [storeFrontQuery, storeProductsQuery] = useQueries([
@@ -68,7 +70,7 @@ export default function StoreFront(props) {
 
     const renderActualStoreContent = useMemo(() => {
 
-        if (!storeFrontData || !storeProductsData?.length) {
+        if (!storeFrontData) {
             return null;
         }
 
@@ -162,8 +164,8 @@ export default function StoreFront(props) {
                                     {storeFrontData.rating.toString() + "/5 " + "(" + storeFrontData.numberOfRatings.toString() + ")"}
                                 </Text>
                             </View>
+                            <Text variant={'titleMedium'} style={{color: theme.colors.secondary, marginBottom: 16}} onPress={() => {setStorePolicyVisible(true)}}>{'View Store Policy'}</Text>
                         </View>
-
                     </View>
                     <View style={{ width:'100%', marginTop: 10}}>
                         <Text variant={"bodyLarge"} style={{color: 'black'}}>
@@ -323,6 +325,7 @@ export default function StoreFront(props) {
                     {pageContent}
                 </KeyboardAwareScrollableScreen>
             )}
+            <StorePolicyLink visible={storePolicyVisible} setVisible={setStorePolicyVisible} policy={storeFrontData.storePolicy} />
             </View>))
 
 }

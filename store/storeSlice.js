@@ -8,6 +8,7 @@ const initialState = {
     storeDescription: null,
     storeHandle: null,
     storeTags: null,
+    storePolicy: {},
     merchantRole: null,
     canReceiveMessages: null,
     isActive: null,
