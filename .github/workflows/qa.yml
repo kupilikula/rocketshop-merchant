@@ -1,0 +1,82 @@
+#
+# GitHub Action using SSH to clean the directory and SCP to copy files.
+#
+name: Deploy Marketplace Web App to QA
+
+on:
+  push:
+    branches:
+      - qa
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy Web App to QA
+    runs-on: ubuntu-latest
+
+    steps:
+      # Steps 1-3: No changes here
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      # Step 4: Build the static web app
+      # UPDATED: Changed the build command to use 'expo export --platform web' for the Metro bundler.
+      # This will output files to a 'dist' directory.
+      - name: Build Expo Web App
+        run: npx expo export --platform web
+
+      # Step 5: Clean remote directory before deployment
+      # No changes here
+      - name: Clean remote directory
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.QA_HOST }}
+          username: ${{ secrets.QA_DEPLOYER_USER }}
+          key: ${{ secrets.QA_DEPLOYMENT_SSH_PRIVATE_KEY }}
+          script: |
+            echo "Cleaning up target directory ${{ secrets.QA_TARGET_PATH }}"
+            mkdir -p ${{ secrets.QA_TARGET_PATH }}
+            rm -rf ${{ secrets.QA_TARGET_PATH }}/*
+
+      # Step 6: Copy new build files to the server
+      - name: Copy files via scp
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.QA_HOST }}
+          username: ${{ secrets.QA_DEPLOYER_USER }}
+          key: ${{ secrets.QA_DEPLOYMENT_SSH_PRIVATE_KEY }}
+          # UPDATED: The source directory is now 'dist' instead of 'web-build'.
+          source: "dist/*"
+          target: ${{ secrets.QA_TARGET_PATH }}
+
+      # Step 7: Fix permissions on the server
+      # NEW: This step ensures the web server user can read the files deployed by your 'deployer' user.
+      - name: Fix Permissions
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.QA_HOST }}
+          username: ${{ secrets.QA_DEPLOYER_USER }}
+          key: ${{ secrets.QA_DEPLOYMENT_SSH_PRIVATE_KEY }}
+          script: |
+            echo "Applying permissions for web server access..."
+            # First, allow the web server to enter the deployer's home directory.
+            # This is a common requirement when serving files from a user's home folder.
+            chmod o+x /home/${{ secrets.QA_DEPLOYER_USER }}
+
+            # Recursively set directory permissions to 755 (drwxr-xr-x).
+            # This allows the server to enter the directories.
+            find ${{ secrets.QA_TARGET_PATH }} -type d -exec chmod 755 {} +
+
+            # Recursively set file permissions to 644 (-rw-r--r--).
+            # This allows the server to read the files.
+            find ${{ secrets.QA_TARGET_PATH }} -type f -exec chmod 644 {} +
+
+            echo "Permissions updated successfully."
