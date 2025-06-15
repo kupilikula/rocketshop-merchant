@@ -32,6 +32,8 @@ jobs:
       # This will output files to a 'dist' directory.
       - name: Build Expo Web App
         run: npx expo export --platform web
+        env:
+          APP_ENV: development
 
       # Step 5: Clean remote directory before deployment
       # No changes here
