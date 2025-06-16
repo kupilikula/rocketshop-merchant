@@ -9,6 +9,7 @@ import { useQueryClient } from "react-query";
 import { getAxiosClient } from "../api/client";
 import OtpInput from "../components/OtpInput";
 import { setStore } from "../store/storeSlice";
+import * as Linking from 'expo-linking'; // --- NEW: Import Linking API ---
 
 // Helper functions to mask identifiers for display
 const maskPhone = (phone) => {
@@ -37,6 +38,7 @@ export default function ConfirmActivateStoreModal({ visible, onDismiss, storeId,
     const [otp, setOtp] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [manageUrl, setManageUrl] = useState(null); // --- NEW: State to hold the redirect URL ---
 
     // Reset state when modal is dismissed or reopened
     useEffect(() => {
@@ -49,6 +51,7 @@ export default function ConfirmActivateStoreModal({ visible, onDismiss, storeId,
                 setStep('CHOICE');
                 setOtp("");
                 setError('');
+                setManageUrl(null);
                 setIsLoading(false);
             }, 300);
         }
@@ -125,12 +128,29 @@ export default function ConfirmActivateStoreModal({ visible, onDismiss, storeId,
             dispatch(setStore({ ...store, isActive: true }));
             Alert.alert("Success", "Store has been Activated.");
             queryClient.invalidateQueries(["merchantStores"]);
+            queryClient.invalidateQueries(["subscriptionStatus", storeId]); // Invalidate status too
             onDismiss();
         } catch (err) {
             console.error(err);
+            if (err.response && err.response.status === 402) {
+                // Set the state to show the new UI
+                setError(err.response.data.message || "An active subscription is required.");
+                setManageUrl(err.response.data.manageSubscriptionUrl);
+                setStep('PAYMENT_REQUIRED');
+            } else {
+                // For all other errors, show a generic message
+                setError("Failed to activate store. Please try again.");
+            }
             setError("Failed to activate store. Please try again.");
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleRedirectToWeb = () => {
+        if (manageUrl) {
+            Linking.openURL(manageUrl);
+            onDismiss(); // Close the modal after redirecting
         }
     };
 
@@ -203,6 +223,24 @@ export default function ConfirmActivateStoreModal({ visible, onDismiss, storeId,
                     </>
                 );
 
+            case 'PAYMENT_REQUIRED':
+                return (
+                    <>
+                        <Text variant="titleMedium" style={styles.title}>
+                            Subscription Required
+                        </Text>
+                        <Text style={styles.subtitle}>
+                            {error}
+                        </Text>
+                        <Button
+                            mode="contained"
+                            onPress={handleRedirectToWeb}
+                            style={styles.button}
+                        >
+                            Go to Billing Page
+                        </Button>
+                    </>
+                );
             default:
                 return null;
         }
@@ -212,14 +250,14 @@ export default function ConfirmActivateStoreModal({ visible, onDismiss, storeId,
         <Portal>
             <Modal visible={visible} onDismiss={onDismiss} contentContainerStyle={[styles.modal, modalStyle]}>
                 {renderStepContent()}
-                {error && <Text style={styles.errorText}>{error}</Text>}
+                {error && step !== 'PAYMENT_REQUIRED' && <Text style={styles.errorText}>{error}</Text>}
                 <Button
                     mode="outlined"
                     onPress={onDismiss}
                     style={styles.button}
                     disabled={isLoading}
                 >
-                    Cancel
+                    {step === 'PAYMENT_REQUIRED' ? 'Close' : 'Cancel'}
                 </Button>
             </Modal>
         </Portal>
