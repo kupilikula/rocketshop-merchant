@@ -49,6 +49,17 @@ export default function StoreSettingsScreen() {
                     <Divider />
                 </>
             )}
+            {!store.isPlatformOwned && (
+                <>
+                    <List.Item
+                    title="Manage Subscription"
+                    titleStyle={styles.sectionTitle} // Original style
+                    style={styles.listItem} // Original style
+                    onPress={() => router.push(IS_WEB ? '/(web_merchant)/(protected)/store_settings/subscription' : '/Main/(tabs)/StoreSettings/Subscription')}
+                    left={props => <List.Icon {...props} icon="wallet-membership" />}
+                />
+                    <Divider />
+                </>)}
             <List.Item
                 title="Manage Merchants"
                 titleStyle={{fontSize: 20}} // Original inline style

@@ -10,8 +10,8 @@ export const useCancelSubscription = (options) => {
     const axiosClient = getAxiosClient();
     const queryClient = useQueryClient(); // Get the query client instance
 
-    const cancelSubscription = async (storeId) => {
-        const { data } = await axiosClient.post(`/stores/${storeId}/cancelSubscription`);
+    const cancelSubscription = async ({storeId, subscriptionId}) => {
+        const { data } = await axiosClient.post(`/stores/${storeId}/cancelSubscription`, {subscriptionId});
         return data;
     };
 

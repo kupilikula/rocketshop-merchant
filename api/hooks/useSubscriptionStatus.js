@@ -11,7 +11,7 @@ export const useSubscriptionStatus = (storeId) => {
     const axiosClient = getAxiosClient();
 
     return useQuery(
-        ['subscriptionStatus'],
+        ['subscriptionStatus', storeId],
         async () => {
             const { data } = await axiosClient.get(`/stores/${storeId}/getSubscriptionStatus`);
             return data;

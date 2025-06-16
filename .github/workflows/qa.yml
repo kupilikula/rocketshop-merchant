@@ -34,6 +34,8 @@ jobs:
         run: npx expo export --platform web
         env:
           APP_ENV: development
+          EXPO_PUBLIC_APP_ENV: development
+          EXPO_PUBLIC_RAZORPAY_KEY_ID: rzp_test_tPCFqry9Gq2Csg
 
       # Step 5: Clean remote directory before deployment
       # No changes here

@@ -150,7 +150,7 @@ export default function PaymentSettingsScreen() {
             const platform = IS_WEB ? 'web' : 'mobile';
             let env = 'production';
             if (__DEV__) { env = 'local'; }
-            else { const buildEnv = process.env.APP_ENV || 'production'; if (buildEnv === 'development') { env = 'qa'; } }
+            else { const buildEnv = process.env.EXPO_PUBLIC_APP_ENV || 'production'; if (buildEnv === 'development') { env = 'qa'; } }
 
             const queryParams = new URLSearchParams({ storeId, platform, env }).toString();
             const requestBody = {

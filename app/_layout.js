@@ -17,6 +17,7 @@ import * as Linking from 'expo-linking';
 import {PersistGate} from "redux-persist/integration/react";
 import {initializeNotificationChannels, initializeNotificationHandler} from "../utils/initializeNotificationHandler";
 import {ProductWorkflowProvider} from "../components/ProductWorkflowContext";
+import Head from "expo-router/head";
 
 const queryClient = new QueryClient();
 // const isLoggedIn = true;
@@ -109,6 +110,12 @@ export default function RootLayout() {
               <PersistGate loading={null} persistor={persistor}>
                 <ProductWorkflowProvider>
               <PaperProvider theme={customTheme}>
+                {Platform.OS === 'web' && (
+                    <Head>
+                      {/* This adds the Razorpay script tag to the <head> of your web page */}
+                      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+                    </Head>
+                )}
                 <StatusBar style="dark" />
                 <AppShell/>
               </PaperProvider>
