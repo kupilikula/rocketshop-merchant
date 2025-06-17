@@ -6,13 +6,14 @@ import { useTheme } from "react-native-paper";
 import {useSelector} from "react-redux";
 import AppHeader from "../../../components/AppHeader";
 import GenericHeader from "../../../components/GenericHeader";
+import {RequireAuth} from "../../../components/RequireAuth";
 
 export default function TabsComponent() {
   const theme = useTheme();
     const router = useRouter();
     const pathname = usePathname();
 
-  return (
+  return (<RequireAuth>
     <Tabs
       backBehavior={"history"}
       initialRouteName={"Dashboard"}
@@ -173,5 +174,6 @@ export default function TabsComponent() {
             }}
         />
     </Tabs>
+      </RequireAuth>
   );
 }

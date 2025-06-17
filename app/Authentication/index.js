@@ -30,7 +30,7 @@ const Authentication = () => {
     const initialIdentifier = useSelector((state) => state.auth.phone); // Last used identifier (phone/email)
     const selectedStoreId = useSelector((state) => state.store.storeId); // Current selected store from Redux
 
-    const handleAuthSuccess = async ({ merchant, stores /*, accessToken */ }) => {
+    const handleAuthSuccess = async ({ merchant }) => {
         // This logic was previously in the useEffect reacting to 'AUTHENTICATED' status
         console.log('Merchant Authentication Successful from Authentication/index.js. Welcome,', merchant.fullName);
 

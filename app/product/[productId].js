@@ -1,6 +1,7 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
 import { InteractionManager } from 'react-native';
+import {getProductPath} from "../../utils/getPathUtils";
 
 export default function ProductRedirect() {
     const { productId } = useLocalSearchParams();
@@ -9,7 +10,7 @@ export default function ProductRedirect() {
     useEffect(() => {
         if (productId) {
             InteractionManager.runAfterInteractions(() => {
-                router.replace(`/Main/(tabs)/Products/${productId}`);
+                router.replace(getProductPath(productId));
             });
         }
     }, [productId]);

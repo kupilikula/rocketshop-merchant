@@ -159,7 +159,7 @@ export default function StoreProfile() {
                 contentStyle={{justifyContent: 'space-between', flexDirection: 'row-reverse'}}
                 icon="menu-down"
             >
-                {selectedValueToDisplay ? selectedValueToDisplay : `Select ${label}`}
+                {Boolean(selectedValueToDisplay) ? selectedValueToDisplay : `Select ${label}`}
             </Button>
             {error && <HelperText type="error" visible={!!error}>{error}</HelperText>}
         </View>
@@ -180,7 +180,7 @@ export default function StoreProfile() {
                     mode="outlined"
                     error={!!errors.legalBusinessName}
                 />
-                {errors.legalBusinessName && <HelperText type="error">{errors.legalBusinessName}</HelperText>}
+                {Boolean(errors.legalBusinessName) && <HelperText type="error">{errors.legalBusinessName}</HelperText>}
 
                 <TextInput
                     label="Business Email"
@@ -192,10 +192,10 @@ export default function StoreProfile() {
                     autoCapitalize="none"
                     error={!!errors.storeEmail}
                 />
-                {errors.storeEmail && <HelperText type="error">{errors.storeEmail}</HelperText>}
+                {Boolean(errors.storeEmail) && <HelperText type="error">{errors.storeEmail}</HelperText>}
 
                 <PhoneInput label={"Business Phone Number"} setPhone={setStorePhone} style={styles.input} error={!!errors.storePhone}/>
-                {errors.storePhone && <HelperText type="error">{errors.storePhone}</HelperText>}
+                {Boolean(errors.storePhone) && <HelperText type="error">{errors.storePhone}</HelperText>}
 
                 <Text variant="titleSmall" style={styles.dropdownGroupTitle}>Business Type</Text>
                 <Menu
@@ -234,7 +234,7 @@ export default function StoreProfile() {
                     ))}
                 </Menu>
 
-                {selectedCategory && currentSubCategoryOptions.length > 0 && (
+                {Boolean(selectedCategory) && currentSubCategoryOptions.length > 0 && (
                     <Menu
                         visible={subcategoryMenuVisible}
                         onDismiss={() => setSubcategoryMenuVisible(false)}
@@ -253,14 +253,14 @@ export default function StoreProfile() {
                         ))}
                     </Menu>
                 )}
-                {selectedCategory && currentSubCategoryOptions.length === 0 && (
+                {Boolean(selectedCategory) && currentSubCategoryOptions.length === 0 && (
                     <Text style={styles.noSubCategoryText}>No sub-categories for selected category.</Text>
                 )}
 
 
                 <Divider style={styles.divider} />
                 <Text variant="titleMedium" style={styles.sectionTitle}>Registered Business Address</Text>
-                {errors.registeredAddress && <HelperText type="error" style={{textAlign: 'center'}}>{errors.registeredAddress}</HelperText>}
+                {Boolean(errors.registeredAddress) && <HelperText type="error" style={{textAlign: 'center'}}>{errors.registeredAddress}</HelperText>}
 
                 <View style={styles.addressFormContainer}>
                     <NewAddressForm

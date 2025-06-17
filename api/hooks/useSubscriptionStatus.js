@@ -17,7 +17,7 @@ export const useSubscriptionStatus = (storeId) => {
             return data;
         },
         {
-            staleTime: 5 * 60 * 1000,
+            staleTime: 0,
             refetchOnWindowFocus: false,
             retry: 1,
             enabled: !!storeId,

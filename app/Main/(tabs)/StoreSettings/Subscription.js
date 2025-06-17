@@ -4,7 +4,9 @@ import React from 'react';
 import {View, Text, StyleSheet, Pressable, ActivityIndicator, SafeAreaView, Platform} from 'react-native';
 import { useSelector } from 'react-redux';
 import * as Linking from 'expo-linking';
-import { useSubscriptionStatus } from '../../../../api/hooks/useSubscriptionStatus'; // Adjust path
+import { useSubscriptionStatus } from '../../../../api/hooks/useSubscriptionStatus';
+import {getAxiosClient} from "../../../../api/client";
+import {useRouter} from "expo-router"; // Adjust path
 
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -15,23 +17,29 @@ const formatDate = (dateString) => {
     } catch (e) { return 'Invalid Date'; }
 };
 
+const IS_WEB = Platform.OS === 'web';
+
 export default function SubscriptionScreen() {
+    const axiosClient = getAxiosClient();
+    const router = useRouter();
     const { storeId } = useSelector((state) => state.store);
     const { data: statusData, isLoading, isError, error } = useSubscriptionStatus(storeId);
 
-    const handleManage = () => {
-        // --- CORRECTED: Using Expo's public environment variable prefix ---
+    const handleManage = async () => {
+
+        let token = null;
+        if (!IS_WEB) {
+            const {data} = await axiosClient.post('/auth/autoLogin/generate');
+            token = data.token;
+        }
+
         let billingUrl;
 
-        // Note: For local dev with Expo Go, you need a way to open the web app.
-        // Using your computer's local IP is a common method.
-        if (__DEV__) {
-            if (Platform.OS === 'web') {
-                billingUrl = 'http://localhost:8081/billing'; // Or your local web dev URL
-            }
+        if (IS_WEB) {
+            router.replace('/(web_merchant)/billing')
         } else {
             const subdomain = process.env.EXPO_PUBLIC_APP_ENV === 'production' ? 'subscription' : 'subscription.qa';
-            billingUrl = `https://${subdomain}.rocketshop.in/billing`;
+            billingUrl = `https://${subdomain}.rocketshop.in/billing?storeId=${storeId}&token=${token}`;
         }
 
         Linking.openURL(billingUrl);
@@ -83,7 +91,7 @@ export default function SubscriptionScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.card}>
-                <Text style={styles.header}>My Subscription</Text>
+                {IS_WEB && <Text style={styles.header}>My Subscription</Text>}
                 {renderContent()}
                 <Pressable style={styles.button} onPress={handleManage}>
                     <Text style={styles.buttonText}>Manage</Text>
