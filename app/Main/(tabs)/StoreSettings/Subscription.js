@@ -32,7 +32,7 @@ export default function SubscriptionScreen() {
             const {data} = await axiosClient.post('/auth/autoLogin/generate');
             token = data.token;
         }
-
+        console.log('token', token);
         let billingUrl;
 
         if (IS_WEB) {
@@ -41,8 +41,8 @@ export default function SubscriptionScreen() {
             const subdomain = process.env.EXPO_PUBLIC_APP_ENV === 'production' ? 'subscription' : 'subscription.qa';
             billingUrl = `https://${subdomain}.rocketshop.in/billing?storeId=${storeId}&token=${token}`;
         }
-
-        Linking.openURL(billingUrl);
+        console.log('billingUrl:', billingUrl);
+        // Linking.openURL(billingUrl);
     };
 
     const renderContent = () => {

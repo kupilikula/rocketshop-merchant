@@ -93,7 +93,6 @@ export default function BillingPage() {
     const queryClient = useQueryClient();
     const dispatch = useDispatch();
     const router = useRouter();
-    const [targetStoreId, setTargetStoreId] = useState(null);
     const [isVerifying, setIsVerifying] = useState(false);
     const [isCancelDialogVisible, setIsCancelDialogVisible] = useState(false);
     const [subToCancel, setSubToCancel] = useState(null); // Store which sub to cancel
@@ -137,14 +136,17 @@ export default function BillingPage() {
 
     const { mutate: verifyToken } = useVerifyAutoLoginToken({
         onSuccess: async (data) => {
-            const {accessToken, merchant, stores} = data;
+            const {accessToken, merchant, stores, targetStoreId} = data;
+            console.log('stores: ', stores);
+            console.log('targetStoreId: ', targetStoreId);
             await AsyncStorage.setItem('accessToken', accessToken);
             dispatch(setMerchant(merchant));
             dispatch(setAllStores({stores}));
             dispatch(setGlobalAuthProcessStatus('AUTHENTICATED'));
-            selectStoreMutation.mutate(stores.find(s => s.storeId === targetStoreId));
+            selectStoreMutation.mutate( {store: stores.find(s => s.storeId === targetStoreId), noRedirect: true});
         },
         onError: (err) => {
+            console.log(err);
             alert(err.response?.data?.message || "The login link is invalid or has expired.");
         }
     });
@@ -153,12 +155,13 @@ export default function BillingPage() {
         // When the component loads, check the URL for a token
         const params = new URLSearchParams(window.location.search);
         const token = params.get('token');
-        const targetStoreId = params.get('storeId');
-        setTargetStoreId(targetStoreId);
+        const targetStoreIdParam = params.get('storeId');
+        console.log('useEffect targetStoreIdParam: ', targetStoreIdParam);
 
-        if (token) {
+
+        if (token && targetStoreIdParam) {
             // If a token is found, call the mutation
-            verifyToken(token);
+            verifyToken({token, targetStoreId: targetStoreIdParam});
             // Clean the token from the URL for security
             window.history.replaceState({}, document.title, window.location.pathname);
         }
