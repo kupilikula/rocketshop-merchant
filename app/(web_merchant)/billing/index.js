@@ -234,7 +234,7 @@ export default function BillingPage() {
         const hasActiveOrPendingSub = subscriptions.some(s => s.subscriptionStatus === 'active' || s.subscriptionStatus === 'authenticated');
 
         return (
-            <ScrollView>
+            <View>
                 {subscriptions.length > 0 && <Text style={styles.subHeader}>Your Subscriptions</Text>}
                 {subscriptions.map(sub => (
                     <SubscriptionCard
@@ -252,12 +252,12 @@ export default function BillingPage() {
                         <PlanSelectionView onSubscribe={handleSubscribe} isSubscribing={isSubscribing} />
                     </View>
                 )}
-            </ScrollView>
+            </View>
         );
     };
 
     return (
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.header}>Subscription Management</Text>
             {isLoading ? <ActivityIndicator size="large" color="#3A86FF" /> : renderContent()}
             {isError && <Text style={styles.errorText}>Error fetching status: {error.message}</Text>}
@@ -285,7 +285,7 @@ export default function BillingPage() {
             >
                 {snackbar.message}
             </Snackbar>
-        </View>
+        </ScrollView>
     );
 }
 
