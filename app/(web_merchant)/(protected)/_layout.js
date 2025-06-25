@@ -5,6 +5,6 @@ export default function Layout() {
 
 
     return <RequireAuth>
-        <Stack screenOptions={{headerShown: true}} initialRouteName={'index'}/>
+        <Stack screenOptions={{headerShown: false}} initialRouteName={'index'}/>
    </RequireAuth>
 }

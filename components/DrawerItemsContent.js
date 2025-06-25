@@ -162,7 +162,7 @@ const DrawerItemsContent = ({ onItemPress }) => {
                                  </View>
                              )}
                 />}
-            {(merchantRole === 'Admin' || merchantRole === 'Manager') &&
+            {(['Owner', 'Admin', 'Manager'].includes(merchantRole)) &&
                 <Drawer.Item
                     label={<Text variant={MENU_LABEL_VARIANT}>Store Settings</Text>}
                     style={{ padding: 0, borderRadius: 5, marginLeft: 0 }}

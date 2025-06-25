@@ -15,6 +15,7 @@ export default function StoreSettingsScreen() {
     const theme = useTheme();
     const router = useRouter();
     const store = useSelector((state) => state.store);
+
     const { width: windowWidth } = useWindowDimensions(); // For makeStyles if needed
     const styles = makeStyles(theme, IS_WEB, windowWidth); // Pass theme & IS_WEB
 
@@ -25,19 +26,23 @@ export default function StoreSettingsScreen() {
     // Loading/Error states for 'store' from Redux are not explicitly handled here,
     // assuming 'store' is always populated when this screen is reached.
     // If 'store' could be null/undefined initially, add checks before accessing store.isActive, etc.
-
+    const merchantRole = store.merchantRole;
+    console.log('merchantRole: ', merchantRole);
     const pageContent = useMemo(() => (
         <>
             {IS_WEB && <Text variant={'titleLarge'} style={{alignSelf: 'center'}}>Store Settings</Text>}
-            <List.Item
-                title="Store Details"
-                titleStyle={{fontSize: 20}} // Original inline style
-                onPress={() => router.push(IS_WEB ? '/(web_merchant)/(protected)/store_settings/store_details' : '/Main/(tabs)/StoreSettings/EditStoreDetails')}
-                style={styles.listItem} // Original style
-                left={props => <List.Icon {...props} icon="store-edit-outline" />}
-            />
-            <Divider />
-            {!store.isPlatformOwned && (
+            {['Owner', 'Admin'].includes(merchantRole) &&
+                <>
+                    <List.Item
+                    title="Store Details"
+                    titleStyle={{fontSize: 20}} // Original inline style
+                    onPress={() => router.push(IS_WEB ? '/(web_merchant)/(protected)/store_settings/store_details' : '/Main/(tabs)/StoreSettings/EditStoreDetails')}
+                    style={styles.listItem} // Original style
+                    left={props => <List.Icon {...props} icon="store-edit-outline" />}
+                    />
+                    <Divider />
+                </>}
+            {!store.isPlatformOwned && ['Owner'].includes(merchantRole) && (
                 <>
                     <List.Item
                         title="Payment Settings"
@@ -49,7 +54,7 @@ export default function StoreSettingsScreen() {
                     <Divider />
                 </>
             )}
-            {!store.isPlatformOwned && (
+            {!store.isPlatformOwned && ['Owner'].includes(merchantRole) &&(
                 <>
                     <List.Item
                     title="Manage Subscription"
@@ -60,31 +65,41 @@ export default function StoreSettingsScreen() {
                 />
                     <Divider />
                 </>)}
-            <List.Item
-                title="Manage Merchants"
-                titleStyle={{fontSize: 20}} // Original inline style
-                onPress={() => router.push(IS_WEB ? '/(web_merchant)/(protected)/store_settings/merchant_management' :'/Main/(tabs)/StoreSettings/MerchantManagement')}
-                style={styles.listItem} // Original style
-                left={props => <List.Icon {...props} icon="account-group-outline" />}
-            />
-            <Divider />
-            <List.Item
-                title="GST Settings"
-                titleStyle={styles.sectionTitle} // Original style
-                style={styles.listItem} // Original style
-                onPress={() => router.push(IS_WEB ? '/(web_merchant)/(protected)/store_settings/gst_settings' : '/Main/(tabs)/StoreSettings/GstSettings')}
-                left={props => <List.Icon {...props} icon="receipt" />}
-            />
-            <Divider />
-            <List.Item
-                title="Store Policy"
-                titleStyle={styles.sectionTitle} // Original style
-                style={styles.listItem} // Original style
-                onPress={() => router.push(IS_WEB ? '/(web_merchant)/(protected)/store_settings/store_policy' : '/Main/(tabs)/StoreSettings/StorePolicy')}
-                left={props => <List.Icon {...props} icon="gavel" />}
-            />
-            <Divider />
-            { store.isActive ? (
+                <>
+                    <List.Item
+                        title="Manage Merchants"
+                        titleStyle={{fontSize: 20}} // Original inline style
+                        onPress={() => router.push(IS_WEB ? '/(web_merchant)/(protected)/store_settings/merchant_management' :'/Main/(tabs)/StoreSettings/MerchantManagement')}
+                        style={styles.listItem} // Original style
+                        left={props => <List.Icon {...props} icon="account-group-outline" />}
+                    />
+                    <Divider />
+                </>
+            {['Owner', 'Admin'].includes(merchantRole) &&
+                <>
+                    <List.Item
+                        title="GST Settings"
+                        titleStyle={styles.sectionTitle} // Original style
+                        style={styles.listItem} // Original style
+                        onPress={() => router.push(IS_WEB ? '/(web_merchant)/(protected)/store_settings/gst_settings' : '/Main/(tabs)/StoreSettings/GstSettings')}
+                        left={props => <List.Icon {...props} icon="receipt" />}
+                    />
+                    <Divider />
+                </>
+            }
+            {['Owner', 'Admin'].includes(merchantRole) &&
+                <>
+                    <List.Item
+                        title="Store Policy"
+                        titleStyle={styles.sectionTitle} // Original style
+                        style={styles.listItem} // Original style
+                        onPress={() => router.push(IS_WEB ? '/(web_merchant)/(protected)/store_settings/store_policy' : '/Main/(tabs)/StoreSettings/StorePolicy')}
+                        left={props => <List.Icon {...props} icon="gavel" />}
+                    />
+                    <Divider />
+                </>
+            }
+            {['Owner', 'Admin'].includes(merchantRole) && ( store.isActive ? (
                 <List.Item
                     title="Deactivate Store"
                     titleStyle={{fontSize: 20}} // Original inline style
@@ -100,9 +115,9 @@ export default function StoreSettingsScreen() {
                     style={styles.listItem} // Original style
                     left={props => <List.Icon {...props} icon="store-plus-outline" color={theme.colors.success}/>}
                 />
-            )}
+            ))}
             <Divider />
-            { !store.isActive && (
+            {merchantRole==='Owner' && !store.isActive && (
                 <List.Item
                     title="Delete Store"
                     titleStyle={{ color: theme.colors.error, fontSize: 20}} // Original inline style

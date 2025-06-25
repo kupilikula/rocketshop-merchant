@@ -39,22 +39,16 @@ export default function StoreProfile() {
     const styles = makeStyles(theme);
     const newStoreState = useSelector((state) => state.newStore);
 
-    const [legalBusinessName, setLegalBusinessName] = useState(newStoreState.legalBusinessName || '');
     const [storeEmail, setStoreEmail] = useState(newStoreState.storeEmail || '');
     const [storePhone, setStorePhone] = useState(newStoreState.storePhone || '');
 
-    const [selectedBusinessType, setSelectedBusinessType] = useState(newStoreState.businessType || '');
     const [selectedCategory, setSelectedCategory] = useState(newStoreState.category || '');
     const [selectedSubCategory, setSelectedSubCategory] = useState(newStoreState.subcategory || '');
 
     const [currentSubCategoryOptions, setCurrentSubCategoryOptions] = useState([]);
 
-    const [businessTypeMenuVisible, setBusinessTypeMenuVisible] = useState(false);
     const [categoryMenuVisible, setCategoryMenuVisible] = useState(false);
     const [subcategoryMenuVisible, setSubcategoryMenuVisible] = useState(false);
-
-    const [registeredAddress, setRegisteredAddress] = useState(newStoreState.registeredAddress || {});
-    const [addressSaved, setAddressSaved] = useState(Object.keys(newStoreState.registeredAddress || {}).length > 0);
 
     const [errors, setErrors] = useState({});
 
@@ -89,7 +83,6 @@ export default function StoreProfile() {
 
     const validate = () => {
         const newErrors = {};
-        if (!legalBusinessName.trim()) newErrors.legalBusinessName = "Legal business name is required.";
         if (!storeEmail.trim()) {
             newErrors.storeEmail = "Store email is required.";
         } else if (!/\S+@\S+\.\S+/.test(storeEmail)) {
@@ -98,43 +91,23 @@ export default function StoreProfile() {
         if (!storePhone.trim()) {
             newErrors.storePhone = "Store phone is required.";
         }
-        if (!selectedBusinessType) newErrors.businessType = "Business type is required.";
         if (!selectedCategory) newErrors.category = "Category is required.";
         // Sub-category might be optional if the list is empty
         if (currentSubCategoryOptions.length > 0 && !selectedSubCategory) {
             newErrors.subcategory = "Sub-category is required.";
         }
 
-        if (!addressSaved || Object.keys(registeredAddress).length === 0 || !registeredAddress.street1) {
-            newErrors.registeredAddress = "Registered address is required. Please fill and save the address form.";
-        }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
-    };
-
-    const handleAddressSave = (addressData) => {
-        setRegisteredAddress(addressData);
-        setAddressSaved(true);
-        setErrors(prev => ({...prev, registeredAddress: null}));
-        // Alert.alert("Address Saved", "Registered address has been updated locally.");
-    };
-
-    const handleAddressDiscard = () => {
-        setRegisteredAddress({});
-        // Alert.alert("Address Discarded", "Address changes were not saved locally.");
     };
 
 
     const handleNext = () => {
         if (validate()) {
-            dispatch(setNewStoreField({ field: 'legalBusinessName', value: legalBusinessName.trim() }));
             dispatch(setNewStoreField({ field: 'storeEmail', value: storeEmail.trim() }));
             dispatch(setNewStoreField({ field: 'storePhone', value: formatPhone(storePhone.trim()) }));
-            dispatch(setNewStoreField({ field: 'businessType', value: selectedBusinessType }));
             dispatch(setNewStoreField({ field: 'category', value: selectedCategory }));
             dispatch(setNewStoreField({ field: 'subcategory', value: selectedSubCategory })); // Will be empty string if no subcategories or not selected
-            dispatch(setNewStoreField({ field: 'registeredAddress', value: registeredAddress }));
 
             router.push(IS_WEB ? '/create_store/store_tags' : '/CreateStore/StoreTags');
         } else {
@@ -173,16 +146,6 @@ export default function StoreProfile() {
                 <Text variant="titleMedium" style={styles.sectionTitle}>Business & Contact Details</Text>
 
                 <TextInput
-                    label="Legal Business Name"
-                    value={legalBusinessName}
-                    onChangeText={setLegalBusinessName}
-                    style={styles.input}
-                    mode="outlined"
-                    error={!!errors.legalBusinessName}
-                />
-                {Boolean(errors.legalBusinessName) && <HelperText type="error">{errors.legalBusinessName}</HelperText>}
-
-                <TextInput
                     label="Business Email"
                     value={storeEmail}
                     onChangeText={setStoreEmail}
@@ -196,25 +159,6 @@ export default function StoreProfile() {
 
                 <PhoneInput label={"Business Phone Number"} setPhone={setStorePhone} style={styles.input} error={!!errors.storePhone}/>
                 {Boolean(errors.storePhone) && <HelperText type="error">{errors.storePhone}</HelperText>}
-
-                <Text variant="titleSmall" style={styles.dropdownGroupTitle}>Business Type</Text>
-                <Menu
-                    visible={businessTypeMenuVisible}
-                    onDismiss={() => setBusinessTypeMenuVisible(false)}
-                    anchor={renderDropdownAnchor("Business Type", getSelectedLabel(selectedBusinessType, businessTypeOptions), () => setBusinessTypeMenuVisible(true), errors.businessType)}
-                    style={styles.menuStyle}
-                >
-                    {businessTypeOptions.map(option => (
-                        <Menu.Item
-                            key={option.value}
-                            onPress={() => {
-                                setSelectedBusinessType(option.value);
-                                setBusinessTypeMenuVisible(false);
-                            }}
-                            title={option.label}
-                        />
-                    ))}
-                </Menu>
 
                 <Menu
                     visible={categoryMenuVisible}
@@ -256,22 +200,6 @@ export default function StoreProfile() {
                 {Boolean(selectedCategory) && currentSubCategoryOptions.length === 0 && (
                     <Text style={styles.noSubCategoryText}>No sub-categories for selected category.</Text>
                 )}
-
-
-                <Divider style={styles.divider} />
-                <Text variant="titleMedium" style={styles.sectionTitle}>Registered Business Address</Text>
-                {Boolean(errors.registeredAddress) && <HelperText type="error" style={{textAlign: 'center'}}>{errors.registeredAddress}</HelperText>}
-
-                <View style={styles.addressFormContainer}>
-                    <NewAddressForm
-                        initialValues={registeredAddress}
-                        onSaveHandler={handleAddressSave}
-                        discard={handleAddressDiscard}
-                        buttonLabel="Save Address"
-                        showDefaultCheckbox={false}
-                    />
-                </View>
-
 
                 <View style={{display: 'flex', alignSelf: 'center', justifyContent: 'center', marginTop: 32 }}>
                     <Button

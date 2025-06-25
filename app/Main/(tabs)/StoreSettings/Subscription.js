@@ -41,8 +41,10 @@ export default function SubscriptionScreen() {
             const subdomain = process.env.EXPO_PUBLIC_APP_ENV === 'production' ? 'subscription' : 'subscription.qa';
             billingUrl = `https://${subdomain}.rocketshop.in/billing?storeId=${storeId}&token=${token}`;
         }
-        console.log('billingUrl:', billingUrl);
-        // Linking.openURL(billingUrl);
+        if (billingUrl) {
+            Linking.openURL(billingUrl);
+        }
+
     };
 
     const renderContent = () => {

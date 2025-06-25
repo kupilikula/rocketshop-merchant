@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import { View, Text, StyleSheet, Pressable, ActivityIndicator, Alert } from 'react-native';
+import {View, Text, StyleSheet, Pressable, ActivityIndicator, Alert, ScrollView} from 'react-native';
 import {useDispatch, useSelector} from "react-redux";
 import { useQueryClient } from "react-query";
 import { useSubscriptionStatus } from "../../../api/hooks/useSubscriptionStatus";
@@ -234,7 +234,7 @@ export default function BillingPage() {
         const hasActiveOrPendingSub = subscriptions.some(s => s.subscriptionStatus === 'active' || s.subscriptionStatus === 'authenticated');
 
         return (
-            <View>
+            <ScrollView>
                 {subscriptions.length > 0 && <Text style={styles.subHeader}>Your Subscriptions</Text>}
                 {subscriptions.map(sub => (
                     <SubscriptionCard
@@ -252,7 +252,7 @@ export default function BillingPage() {
                         <PlanSelectionView onSubscribe={handleSubscribe} isSubscribing={isSubscribing} />
                     </View>
                 )}
-            </View>
+            </ScrollView>
         );
     };
 
