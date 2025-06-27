@@ -43,7 +43,7 @@ const TagPickerModal = ({
     const theme = useTheme();
     const insets = useSafeAreaInsets();
     const { height: windowHeight } = useWindowDimensions();
-    const styles = makeStyles(theme, insets, IS_WEB, windowHeight);
+    const styles = useMemo(() => makeStyles(theme, insets, IS_WEB, windowHeight), [theme, insets, windowHeight]);
 
     const { storeId } = useSelector((state) => state.store);
     const { data: fetchedStoreTags = [] } = useProductTags(storeId);
@@ -128,7 +128,7 @@ const TagPickerModal = ({
 
             <TextInput
                 label="Search existing or Add New Tag"
-                // value={searchInput}
+                value={searchInput}
                 onChangeText={setSearchInput}
                 onSubmitEditing={handleAddOrSelectTagFromInput}
                 style={styles.input}

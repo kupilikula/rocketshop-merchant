@@ -5,31 +5,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'expo-router';
 import LogoIconWithName from "../../components/LogoIconWithName"; // Adjust path as needed
 import { setNewStoreField } from "../../store/newStoreSlice"; // Adjust path as needed
-import { NewAddressForm } from "../../components/NewAddressForm"; // Adjust path as needed
-
-// Import data from your file
-import { business_types, categories as razorpayCategoriesData } from '../../utils/razorpayBusinessData';
 import PhoneInput from "../../components/PhoneInput";
 import {formatPhone} from "../../utils/identifierUtils"; // Adjust path as needed
 
 const IS_WEB = Platform.OS === 'web';
-
-// Helper function to format snake_case or camelCase to Title Case for display
-const formatLabel = (str) => {
-    if (!str) return '';
-    const spaced = str.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1');
-    return spaced.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
-};
-
-const businessTypeOptions = business_types.map(type => ({
-    label: formatLabel(type),
-    value: type,
-}));
-
-const categoryOptions = Object.keys(razorpayCategoriesData).map(key => ({
-    label: formatLabel(key), // Or use a predefined label if available in your data structure
-    value: key,
-}));
 
 
 export default function StoreProfile() {
@@ -42,43 +21,7 @@ export default function StoreProfile() {
     const [storeEmail, setStoreEmail] = useState(newStoreState.storeEmail || '');
     const [storePhone, setStorePhone] = useState(newStoreState.storePhone || '');
 
-    const [selectedCategory, setSelectedCategory] = useState(newStoreState.category || '');
-    const [selectedSubCategory, setSelectedSubCategory] = useState(newStoreState.subcategory || '');
-
-    const [currentSubCategoryOptions, setCurrentSubCategoryOptions] = useState([]);
-
-    const [categoryMenuVisible, setCategoryMenuVisible] = useState(false);
-    const [subcategoryMenuVisible, setSubcategoryMenuVisible] = useState(false);
-
     const [errors, setErrors] = useState({});
-
-    // Update sub-category options when category changes
-    useEffect(() => {
-        if (selectedCategory && razorpayCategoriesData[selectedCategory]) {
-            // Handle potential nested array issue if present in data like for 'transport'
-            const subcategoriesArray = razorpayCategoriesData[selectedCategory].subcategories;
-            let flatSubcategories = [];
-            if (Array.isArray(subcategoriesArray)) {
-                subcategoriesArray.forEach(item => {
-                    if (Array.isArray(item)) { // Handles cases like [['sub1', 'sub2']]
-                        flatSubcategories.push(...item);
-                    } else {
-                        flatSubcategories.push(item);
-                    }
-                });
-            }
-
-            setCurrentSubCategoryOptions(
-                flatSubcategories.map(subCat => ({
-                    label: formatLabel(subCat),
-                    value: subCat,
-                }))
-            );
-        } else {
-            setCurrentSubCategoryOptions([]);
-        }
-        setSelectedSubCategory(''); // Reset sub-category when category changes
-    }, [selectedCategory]);
 
 
     const validate = () => {
@@ -91,12 +34,6 @@ export default function StoreProfile() {
         if (!storePhone.trim()) {
             newErrors.storePhone = "Store phone is required.";
         }
-        if (!selectedCategory) newErrors.category = "Category is required.";
-        // Sub-category might be optional if the list is empty
-        if (currentSubCategoryOptions.length > 0 && !selectedSubCategory) {
-            newErrors.subcategory = "Sub-category is required.";
-        }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -106,8 +43,6 @@ export default function StoreProfile() {
         if (validate()) {
             dispatch(setNewStoreField({ field: 'storeEmail', value: storeEmail.trim() }));
             dispatch(setNewStoreField({ field: 'storePhone', value: formatPhone(storePhone.trim()) }));
-            dispatch(setNewStoreField({ field: 'category', value: selectedCategory }));
-            dispatch(setNewStoreField({ field: 'subcategory', value: selectedSubCategory })); // Will be empty string if no subcategories or not selected
 
             router.push(IS_WEB ? '/create_store/store_tags' : '/CreateStore/StoreTags');
         } else {
@@ -116,28 +51,6 @@ export default function StoreProfile() {
     };
 
     const commonWrapperStyle = { flex: 1, backgroundColor: 'white' };
-
-    const getSelectedLabel = (value, optionsArray) => {
-        const selected = optionsArray.find(opt => opt.value === value);
-        return selected ? selected.label : '';
-    };
-
-    const renderDropdownAnchor = (label, selectedValueToDisplay, onPress, error) => (
-        <View>
-            <Button
-                mode="outlined"
-                onPress={onPress}
-                style={[styles.dropdownAnchor, error ? { borderColor: theme.colors.error } : {}]}
-                labelStyle={styles.dropdownLabel}
-                contentStyle={{justifyContent: 'space-between', flexDirection: 'row-reverse'}}
-                icon="menu-down"
-            >
-                {Boolean(selectedValueToDisplay) ? selectedValueToDisplay : `Select ${label}`}
-            </Button>
-            {error && <HelperText type="error" visible={!!error}>{error}</HelperText>}
-        </View>
-    );
-
 
     const screenContent = (
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
@@ -159,47 +72,6 @@ export default function StoreProfile() {
 
                 <PhoneInput label={"Business Phone Number"} setPhone={setStorePhone} style={styles.input} error={!!errors.storePhone}/>
                 {Boolean(errors.storePhone) && <HelperText type="error">{errors.storePhone}</HelperText>}
-
-                <Menu
-                    visible={categoryMenuVisible}
-                    onDismiss={() => setCategoryMenuVisible(false)}
-                    anchor={renderDropdownAnchor("Category", getSelectedLabel(selectedCategory, categoryOptions), () => setCategoryMenuVisible(true), errors.category)}
-                    style={styles.menuStyle}
-                >
-                    {categoryOptions.map(option => (
-                        <Menu.Item
-                            key={option.value}
-                            onPress={() => {
-                                setSelectedCategory(option.value);
-                                setCategoryMenuVisible(false);
-                            }}
-                            title={option.label}
-                        />
-                    ))}
-                </Menu>
-
-                {Boolean(selectedCategory) && currentSubCategoryOptions.length > 0 && (
-                    <Menu
-                        visible={subcategoryMenuVisible}
-                        onDismiss={() => setSubcategoryMenuVisible(false)}
-                        anchor={renderDropdownAnchor("Sub-Category", getSelectedLabel(selectedSubCategory, currentSubCategoryOptions), () => setSubcategoryMenuVisible(true), errors.subcategory)}
-                        style={styles.menuStyle}
-                    >
-                        {currentSubCategoryOptions.map(option => (
-                            <Menu.Item
-                                key={option.value}
-                                onPress={() => {
-                                    setSelectedSubCategory(option.value);
-                                    setSubcategoryMenuVisible(false);
-                                }}
-                                title={option.label}
-                            />
-                        ))}
-                    </Menu>
-                )}
-                {Boolean(selectedCategory) && currentSubCategoryOptions.length === 0 && (
-                    <Text style={styles.noSubCategoryText}>No sub-categories for selected category.</Text>
-                )}
 
                 <View style={{display: 'flex', alignSelf: 'center', justifyContent: 'center', marginTop: 32 }}>
                     <Button

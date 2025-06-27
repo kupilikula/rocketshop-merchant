@@ -1,5 +1,5 @@
 // OfferDetailsScreen.js (Web-Adapted)
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect, useMemo, useRef} from "react";
 import {
     ScrollView as DefaultScrollView, // Renamed for clarity
     View,
@@ -28,6 +28,21 @@ import ScrollableScreen from "./ScrollableScreen"; // For mobile path
 
 const IS_WEB = Platform.OS === 'web';
 
+const safeParseDate = (date, fallbackDate) => {
+    // If the date from the server is null or undefined, use the fallback
+    if (!date) return fallbackDate;
+
+    const parsedDate = new Date(date);
+
+    // Check if parsing resulted in "Invalid Date". This is the most reliable check.
+    if (isNaN(parsedDate.getTime())) {
+        return fallbackDate;
+    }
+
+    return parsedDate;
+};
+
+
 const OfferDetailsScreen = ({
                                 offer,
                                 publishHandler,
@@ -38,54 +53,51 @@ const OfferDetailsScreen = ({
                                 // though for now, its root rendering is handled by the parent.
                                 // For modals, it will need to know IS_WEB.
                             }) => {
+
+    // --- DEBUGGING: Render Counter ---
+    const renderCount = useRef(0);
+    renderCount.current = renderCount.current + 1;
+    console.log(`    +++ OfferDetailsScreen: Render #${renderCount.current} +++`);
+    // --- END DEBUGGING ---
+
     const theme = useTheme();
     const { width: windowWidth } = useWindowDimensions();
-    const styles = makeStyles(theme, IS_WEB, windowWidth); // Pass IS_WEB
+    const styles = useMemo(() => makeStyles(theme, IS_WEB, windowWidth), [theme, windowWidth]);
+
+    // --- DEBUGGING: Log the props received ---
+    console.log('    OfferDetailsScreen: Received `offer` prop:', offer);
+    // --- END DEBUGGING ---
 
     // State variables are managed here as it's the form
-    const [offerType, setOfferType] = useState("");
-    const [offerName, setOfferName] = useState("");
-    const [offerDisplayText, setOfferDisplayText] = useState("");
-    const [offerCode, setOfferCode] = useState("");
-    const [requireCode, setRequireCode] = useState(false);
-    const [discountDetails, setDiscountDetails] = useState({});
-    // applicableTo is complex, ensure initial state is well-defined
-    const [applicableTo, setApplicableTo] = useState({ storeWide: false, productIds: [], collectionIds: [], productTags: [] });
-    const [conditions, setConditions] = useState({});
-    const [validityDateRange, setValidityDateRange] = useState({ validFrom: new Date(), validUntil: new Date(new Date().setDate(new Date().getDate() + 7)) }); // Default until to 7 days later
-    const [offerStatus, setOfferStatus] = useState(false);
+    const [offerType, setOfferType] = useState(offer?.offerType || "");
+    const [offerName, setOfferName] = useState(offer?.offerName || "");
+    const [offerDisplayText, setOfferDisplayText] = useState(offer?.offerDisplayText || "");
+    const [offerCode, setOfferCode] = useState(offer?.offerCode || "");
+    const [requireCode, setRequireCode] = useState(offer?.requireCode || false);
+    const [discountDetails, setDiscountDetails] = useState(offer?.discountDetails || {});
+    const [conditions, setConditions] = useState(offer?.conditions || {});
+    const [validityDateRange, setValidityDateRange] = useState(() => {
+        const defaultFrom = new Date();
+        const defaultUntil = new Date();
+        defaultUntil.setDate(defaultUntil.getDate() + 7);
+
+        // Use the safeParseDate helper for both dates
+        const fromDate = safeParseDate(offer?.validityDateRange?.validFrom, defaultFrom);
+        const untilDate = safeParseDate(offer?.validityDateRange?.validUntil, defaultUntil);
+
+        return { validFrom: fromDate, validUntil: untilDate };
+    });
+    const [offerStatus, setOfferStatus] = useState(offer?.isActive || false);
+
 
     const [productPickerVisible, setProductPickerVisible] = useState(false);
     const [collectionPickerVisible, setCollectionPickerVisible] = useState(false);
     const [tagPickerVisible, setTagPickerVisible] = useState(false);
 
-    const [storeWide, setStoreWide] = useState(false);
-    const [selectedProductIds, setSelectedProductIds] = useState([]);
-    const [selectedCollectionIds, setSelectedCollectionIds] = useState([]);
-    const [selectedProductTags, setSelectedProductTags] = useState([]);
-
-    useEffect(() => {
-        if (offer) {
-            console.log('line59 OfferDetailsScreen:', offer.discountDetails);
-            setOfferType(offer.offerType || "");
-            setOfferName(offer.offerName || "");
-            setOfferDisplayText(offer.offerDisplayText || "");
-            setOfferCode(offer.offerCode || "");
-            setRequireCode(offer.requireCode || false);
-            setDiscountDetails(offer.discountDetails || {});
-            setApplicableTo(offer.applicableTo || { storeWide: false, productIds: [], collectionIds: [], productTags: [] });
-            setConditions(offer.conditions || {});
-            setValidityDateRange(offer.validityDateRange ? {
-                validFrom: new Date(offer.validityDateRange.validFrom),
-                validUntil: new Date(offer.validityDateRange.validUntil)
-            } : { validFrom: new Date(), validUntil: new Date(new Date().setDate(new Date().getDate() + 7)) });
-            setOfferStatus(offer.isActive || false);
-            setStoreWide(offer.applicableTo?.storeWide || false);
-            setSelectedProductIds(offer.applicableTo?.productIds || []);
-            setSelectedCollectionIds(offer.applicableTo?.collectionIds || []);
-            setSelectedProductTags(offer.applicableTo?.productTags || []);
-        }
-    }, [offer]);
+    const [storeWide, setStoreWide] = useState(offer?.applicableTo?.storeWide || false);
+    const [selectedProductIds, setSelectedProductIds] = useState(offer?.applicableTo?.productIds || []);
+    const [selectedCollectionIds, setSelectedCollectionIds] = useState(offer?.applicableTo?.collectionIds || []);
+    const [selectedProductTags, setSelectedProductTags] = useState(offer?.applicableTo?.productTags || []);
 
     const handleApplyProducts = (products) => {
         setSelectedProductIds(products);
@@ -103,6 +115,9 @@ const OfferDetailsScreen = ({
     };
 
     const handlePublishOffer = () => { // Removed async as publishHandler is awaited by parent
+
+        console.log("    OfferDetailsScreen: handlePublishOffer called.");
+
         const errors = [];
         if (!offerName.trim()) errors.push("Offer Name cannot be empty.");
         if (!offerDisplayText.trim()) errors.push("Offer Display Text cannot be empty.");
@@ -151,6 +166,35 @@ const OfferDetailsScreen = ({
         setOfferStatus(!offerStatus);
     };
     console.log('OfferDetailsScreen offer prop:', offer); // Original console.log
+
+    const modals=
+    <>
+        {/* Picker Modals */}
+    <ProductPickerModal
+        visible={productPickerVisible}
+        name={offerName || offer?.offerName} // Pass current offer name
+        existingSelectedProductIds = {selectedProductIds}
+        onClose={() => setProductPickerVisible(false)}
+        onApply={handleApplyProducts}
+        contentContainerStyle={IS_WEB ? styles.webModalContentStyle : {}}
+    />
+    <CollectionPickerModal
+        visible={collectionPickerVisible}
+        onClose={() => setCollectionPickerVisible(false)}
+        existingSelectedCollectionIds={selectedCollectionIds}
+        onApply={handleApplyCollections}
+        name={offerName || offer?.offerName}
+        contentContainerStyle={IS_WEB ? styles.webModalContentStyle : {}}
+    />
+    {/*<TagPickerModal*/}
+    {/*    visible={tagPickerVisible}*/}
+    {/*    onClose={() => setTagPickerVisible(false)}*/}
+    {/*    onApply={handleApplyTags}*/}
+    {/*    existingSelectedTags={selectedProductTags}*/}
+    {/*    name={offerName || offer?.offerName}*/}
+    {/*    contentContainerStyle={IS_WEB ? styles.webModalContentStyle : {}}*/}
+    {/*/>*/}
+    </>;
 
     const formContent = (
         // All original JSX for the form sections, using styles from makeStyles
@@ -267,31 +311,8 @@ const OfferDetailsScreen = ({
                 </Button>
             </View>
 
-            {/* Picker Modals */}
-            <ProductPickerModal
-                visible={productPickerVisible}
-                name={offerName || offer?.offerName} // Pass current offer name
-                existingSelectedProductIds = {selectedProductIds}
-                onClose={() => setProductPickerVisible(false)}
-                onApply={handleApplyProducts}
-                contentContainerStyle={IS_WEB ? styles.webModalContentStyle : {}}
-            />
-            <CollectionPickerModal
-                visible={collectionPickerVisible}
-                onClose={() => setCollectionPickerVisible(false)}
-                existingSelectedCollectionIds={selectedCollectionIds}
-                onApply={handleApplyCollections}
-                name={offerName || offer?.offerName}
-                contentContainerStyle={IS_WEB ? styles.webModalContentStyle : {}}
-            />
-            <TagPickerModal
-                visible={tagPickerVisible}
-                onClose={() => setTagPickerVisible(false)}
-                onApply={handleApplyTags}
-                existingSelectedTags={selectedProductTags}
-                name={offerName || offer?.offerName}
-                contentContainerStyle={IS_WEB ? styles.webModalContentStyle : {}}
-            />
+            {modals}
+
         </>
     );
 

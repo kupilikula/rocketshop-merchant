@@ -17,15 +17,10 @@ const initialState = {
         cancellationWindowHours: 12,
         returnsAccepted: true,
         returnWindowDays: 7,
-        refundProcessingTimeDays: 5,
+        refundProcessingTimeDays: 5, // TODO: This is wrong -- needs to be removed (not a parameter)
     },
-    legalBusinessName: '',
     storeEmail: '',
     storePhone: '',
-    businessType: '',
-    category: '',
-    subcategory: '',
-    registeredAddress: {},
     isPlatformOwned: false,
 };
 
