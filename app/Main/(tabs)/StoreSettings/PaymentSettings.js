@@ -255,7 +255,7 @@ export default function PaymentSettingsScreen() {
         const isConnecting = isInitiatingOAuth || isLinkingExisting || isUnlinking;
 
         // NEW: Simplified rendering logic based on the new API response
-        switch (paymentStatus.storeStatus) {
+        switch (paymentStatus.status) {
             case 'LINKED':
                 return <StatusLinked linkedAccount={paymentStatus.linkedAccount} onDisconnect={unlinkStore} isDisconnecting={isUnlinking} />;
 
