@@ -195,6 +195,17 @@ export default function MerchantManagementScreen() {
                                     />
                                 }
                             >
+                                {currentMerchantRole === 'Owner' &&
+                                    ["Owner","Admin", "Manager", "Staff"]
+                                        .filter((role) => role !== merchant.merchantRole)
+                                        .map((role) => (
+                                            <Menu.Item
+                                                key={role}
+                                                onPress={() => handleChangeRole(merchant.merchantId, role)}
+                                                title={`Make ${role}`}
+                                                style={{ backgroundColor: 'white' }} // Original style
+                                            />
+                                        ))}
                                 {currentMerchantRole === 'Admin' &&
                                     ["Admin", "Manager", "Staff"]
                                         .filter((role) => role !== merchant.merchantRole)
@@ -213,14 +224,14 @@ export default function MerchantManagementScreen() {
                                         style={{ backgroundColor: 'white' }} // Original style
                                     />
                                 )}
-                                {(currentMerchantRole === 'Admin' || (currentMerchantRole === 'Manager' && merchant.merchantRole === 'Staff')) && (
+                                {(['Owner', 'Admin'].includes(currentMerchantRole) || (currentMerchantRole === 'Manager' && merchant.merchantRole === 'Staff')) && (
                                     <Menu.Item
                                         onPress={() => handleToggleReceiveMessages(merchant.merchantId, merchant.canReceiveMessages)}
                                         title={merchant.canReceiveMessages ? "Disable Messages" : "Enable Messages"}
                                         style={{ backgroundColor: 'white' }} // Original style
                                     />
                                 )}
-                                {(currentMerchantRole === 'Admin' || (currentMerchantRole === 'Manager' && merchant.merchantRole === 'Staff')) && (
+                                {(currentMerchantRole=== 'Owner') || (currentMerchantRole=== 'Admin' && ['Manager', 'Staff'].includes(merchant.merchantRole)) || (currentMerchantRole === 'Manager' && merchant.merchantRole === 'Staff') && (
                                     <Menu.Item
                                         onPress={() => handleRemoveMerchant(merchant.merchantId)}
                                         title="Remove Merchant"
@@ -285,10 +296,11 @@ export default function MerchantManagementScreen() {
             <Text variant="titleSmall" style={{ marginBottom: 8 }}>Role</Text>
             <RadioButton.Group onValueChange={setNewMerchantRole} value={newMerchantRole}>
                 <View style={{ flexDirection: IS_WEB ? 'row' : 'column', flexWrap: 'wrap', alignItems: 'flex-start', gap: IS_WEB ? 16 : 0 }}>
-                    {["Admin", "Manager", "Staff"]
+                    {["Owner","Admin", "Manager", "Staff"]
                         .filter((role) => {
-                            if (currentMerchantRole === 'Admin') return true;
-                            if (currentMerchantRole === 'Manager') return role !== 'Admin';
+                            if (currentMerchantRole === 'Owner') return true;
+                            if (currentMerchantRole === 'Admin') return role!== 'Owner';
+                            if (currentMerchantRole === 'Manager') return role !== 'Admin' && role !== 'Owner';
                             return false;
                         })
                         .map((role) => (

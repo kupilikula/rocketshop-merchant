@@ -2,7 +2,8 @@ import {useRouter, useSegments, usePathname, useLocalSearchParams, useFocusEffec
 import { useSelector, useDispatch } from "react-redux";
 import {useCallback, useEffect} from "react";
 import {openAuthModal, setRedirectAfterAuth} from "../store/authSlice";
-import {Platform} from "react-native";
+import {Platform, View} from "react-native";
+import {Text} from "react-native-paper";
 
 const IS_WEB = Platform.OS === 'web';
 export const RequireAuth = ({ children }) => {
@@ -33,7 +34,9 @@ export const RequireAuth = ({ children }) => {
         }, [isAuthenticated, pathname, JSON.stringify(params)])
     );
 
-    if (!isAuthenticated) return null;
+    if (!isAuthenticated) return <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <Text variant={'titleLarge'} style={{alignSelf: 'center'}}>Please Login To Continue</Text>
+    </View>;
 
     return children;
 };

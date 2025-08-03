@@ -138,7 +138,7 @@ export default function StoreFront(props) {
                             </Text>
                             <View>
                                 <Text variant={"titleMedium"} style={{color: 'black'}}>
-                                    {storeProductsData.length.toString() + " Products " + storeFrontData.totalNumberOfCollections + " Collection" + (storeFrontData.totalNumberOfCollections > 1 ? 's' : '')}
+                                    {storeProductsData?.length.toString() + " Products " + storeFrontData?.totalNumberOfCollections + " Collection" + (storeFrontData.totalNumberOfCollections > 1 ? 's' : '')}
                                 </Text>
                             </View>
                             <View>
@@ -173,7 +173,7 @@ export default function StoreFront(props) {
                         </Text>
                     </View>
                     <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-around', width: '100%', marginTop: 10, alignSelf: 'center'}}>
-                        {store.merchantRole==='Admin' &&
+                        {['Owner', 'Admin','Manager'].includes(store.merchantRole) &&
                             <View style={{ marginTop: 10, alignSelf: 'center'}}>
                                 <Button
                                     mode={"elevated"}

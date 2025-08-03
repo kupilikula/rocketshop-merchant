@@ -18,6 +18,7 @@ export default function Layout() {
             {!store.isPlatformOwned && <Stack.Screen name='PaymentSettings' options={{header: ()=> <GenericHeader title='Payment Settings'/>}}/>}
             <Stack.Screen name='MerchantManagement' options={{header: ()=> <GenericHeader title='Merchant Management'/>}}/>
             <Stack.Screen name='GstSettings' options={{header: ()=> <GenericHeader title='GST Settings'/>}}/>
+            <Stack.Screen name='Subscription' options={{header: ()=> <GenericHeader title='Subscription'/>}}/>
             <Stack.Screen name='StorePolicy' options={{header: ()=> <GenericHeader title='Store Policy'/>}}/>
         </Stack>
     );

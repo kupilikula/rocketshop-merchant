@@ -24,7 +24,7 @@ export default function StoreSelector() {
     const styles = makeStyles(theme);
 
     const handleSelect = (store) => {
-        selectStoreMutation.mutate(store);
+        selectStoreMutation.mutate({store});
     };
 
     return (<>

@@ -9,14 +9,16 @@ import {getDashboardPath} from "../../utils/getPathUtils";
 export const useSelectStore = (dispatch, router) => {
     const axiosClient = getAxiosClient();
     return useMutation({
-        mutationFn: async (store) => {
+        mutationFn: async ( { store, noRedirect = false}) => {
             const res = await axiosClient.get(`/stores/${store.storeId}/getStoreSettings`);
-            return { store, settings: res.data.settings };
+            return { store, settings: res.data.settings, noRedirect };
         },
-        onSuccess: ({ store, settings }) => {
+        onSuccess: ({ store, settings, noRedirect }) => {
             dispatch(setStore(store));
             dispatch(setStoreSettings(settings));
-            router.push(getDashboardPath());
+            if (!noRedirect) {
+                router.push(getDashboardPath());
+            }
         },
         onError: (error) => {
             console.error("Failed to select store:", error);

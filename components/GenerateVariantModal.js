@@ -66,7 +66,7 @@ export default function GenerateVariantModal({ visible, onClose, product, onGene
             >
                 <Text style={styles.header}>Specify Variant Attributes</Text>
                 {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
-                {product.attributes.length > 0 && (
+                {product?.attributes.length > 0 && (
                     <FlatList
                         data={product.attributes}
                         keyExtractor={(item) => item.key}

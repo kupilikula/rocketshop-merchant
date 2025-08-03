@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
         // flex: 1,
         backgroundColor: 'white',
         // marginLeft: 8,
-        flex: 1,
+        // flex: 1,
         // marginRight: 10,
     },
 });

@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useMemo, useRef, useState} from "react";
 import {
     StyleSheet,
     View,
@@ -19,16 +19,29 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"; 
 const IS_WEB = Platform.OS === 'web';
 
 const EditOfferScreen = () => {
+    // --- DEBUGGING: Render Counter ---
+    const renderCount = useRef(0);
+    renderCount.current = renderCount.current + 1;
+    console.log(`--- EditOfferScreen: Render #${renderCount.current} ---`);
+    // --- END DEBUGGING ---
+
     const {storeId} = useSelector((state) => state.store);
     const theme = useTheme();
     const router = useRouter();
     const { offerId } = useLocalSearchParams();
     const { width: windowWidth } = useWindowDimensions();
-    const styles = makeStyles(theme, IS_WEB, windowWidth);
+    const styles = useMemo(() => makeStyles(theme, IS_WEB, windowWidth), [theme, windowWidth]);
 
     const { data: offer, isLoading, isError } = useOffer(storeId, offerId);
     const { mutate: updateOffer } = useUpdateOffer(storeId, offerId);
     const { mutate: deleteOffer } = useDeleteOffer(storeId, offerId);
+
+    // --- DEBUGGING: Log critical data sources ---
+    console.log(`EditOfferScreen: storeId is "${storeId}", offerId is "${offerId}"`);
+    console.log('EditOfferScreen: `isLoading` is', isLoading, '`isError` is', isError);
+    // Log the offer object to see if it's changing unexpectedly
+    console.log('EditOfferScreen: `offer` object from useOffer:', offer);
+    // --- END DEBUGGING ---
 
     const [isPublishedSnackbarVisible, setIsPublishedSnackbarVisible] = useState(false);
     const [errorPublishingSnackbarVisible, setErrorPublishingSnackbarVisible] = useState(false);
@@ -86,6 +99,7 @@ const EditOfferScreen = () => {
     // Main content and overlays
     const mainOfferScreenContent = (
         <OfferDetailsScreen
+            key={offerId}
             offer={offer}
             publishHandler={publishHandler}
             publishButtonLabel={'Save Changes'}
