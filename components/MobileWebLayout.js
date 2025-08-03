@@ -5,11 +5,11 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import InstallAppScreen from './InstallAppScreen';
 
 // The single route allowed for mobile web users
-const ALLOWED_MOBILE_WEB_PATH = '/(web_merchant)/billing';
+const ALLOWED_MOBILE_WEB_PATH = '/billing';
 
 export default function MobileWebLayout({ theme }) {
     const pathname = usePathname();
-
+    console.log('pathname:',pathname);
     // Check if the current URL path starts with the allowed path
     const isPathAllowed = pathname.startsWith(ALLOWED_MOBILE_WEB_PATH);
 
