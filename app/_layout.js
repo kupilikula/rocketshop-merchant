@@ -18,6 +18,8 @@ import {PersistGate} from "redux-persist/integration/react";
 import {initializeNotificationChannels, initializeNotificationHandler} from "../utils/initializeNotificationHandler";
 import {ProductWorkflowProvider} from "../components/ProductWorkflowContext";
 import Head from "expo-router/head";
+import * as Device from "expo-device";
+import MobileWebLayout from "../components/MobileWebLayout";
 
 const queryClient = new QueryClient();
 // const isLoggedIn = true;
@@ -58,6 +60,14 @@ export default function RootLayout() {
     },
     dark: false, // Set to true if creating a dark theme
   };
+
+  const isMobileBrowser = Platform.OS === 'web' && Device.deviceType !== Device.DeviceType.DESKTOP;
+
+  if (isMobileBrowser) {
+    // On mobile web, render the restricted layout and stop.
+    // This is efficient because none of the full app's providers or hooks are loaded.
+    return <MobileWebLayout theme={customTheme} />;
+  }
 
   AppState.addEventListener('change', (status) => {
     focusManager.setFocused(status === 'active');
