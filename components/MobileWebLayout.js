@@ -2,7 +2,7 @@ import React from 'react';
 import { Stack, usePathname } from 'expo-router';
 import { PaperProvider } from 'react-native-paper';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import InstallAppScreen from 'InstallAppScreen';
+import InstallAppScreen from './InstallAppScreen';
 
 // The single route allowed for mobile web users
 const ALLOWED_MOBILE_WEB_PATH = '/(web_merchant)/billing';
