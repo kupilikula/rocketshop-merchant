@@ -13,7 +13,7 @@ export const useSubscriptionStatus = (storeId) => {
     return useQuery(
         ['subscriptionStatus', storeId],
         async () => {
-            const { data } = await axiosClient.get(`/stores/${storeId}/getSubscriptionStatus`);
+            const { data } = await axiosClient.get(`/stores/${storeId}/subscriptions`);
             return data;
         },
         {

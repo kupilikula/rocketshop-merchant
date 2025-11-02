@@ -67,7 +67,7 @@ export default function StoreSummary() {
                 registeredAddress,
                 isPlatformOwned
             };
-            const createStoreResponse = await axiosClient.post('/stores/createStore', storeData);
+            const createStoreResponse = await axiosClient.post('/stores', storeData);
             console.log('Store created:', createStoreResponse);
 
             let finalStoreLogoImageUri = null;
@@ -77,7 +77,7 @@ export default function StoreSummary() {
                 console.log('Fetching presigned URL for logo upload...');
                 const fileKey = `stores/${storeId}/logo.jpg`; // Added extension for clarity, backend might not need it
                 const contentType = 'image/jpeg'; // Assuming JPEG, adjust if picker allows other types or conversion
-                const { data: [presigned] } = await axiosClient.post(`/stores/${storeId}/mediaUploadPresignedUrls`, {
+                const { data: [presigned] } = await axiosClient.post(`/stores/${storeId}/media-upload-presigned-urls`, {
                     fileKeysWithContentTypes: [{ fileKey, contentType }]
                 });
                 console.log('Presigned URL data:', presigned);
@@ -107,7 +107,7 @@ export default function StoreSummary() {
 
                 // 3. Update storeLogoImage in DB
                 console.log('Updating storeLogoImage in DB with URI:', finalStoreLogoImageUri);
-                await axiosClient.post(`/stores/${storeId}/updateLogoImage`, {
+                await axiosClient.post(`/stores/${storeId}/logo`, {
                     storeLogoImage: finalStoreLogoImageUri,
                 });
                 console.log('StoreLogoImage updated in DB.');
@@ -119,7 +119,7 @@ export default function StoreSummary() {
 
             // 4. Create First Collection
             console.log('Creating first collection:', firstCollectionName);
-            await axiosClient.post(`/stores/${storeId}/collections/addNewCollection`, {
+            await axiosClient.post(`/stores/${storeId}/collections`, {
                 collectionName: firstCollectionName || 'Featured', // Ensure a default collection name
             });
             console.log('First collection created.');

@@ -8,7 +8,7 @@ export function useUpdateMerchantStoreNotificationPreferences(storeId, merchantI
     const axiosClient = getAxiosClient();
     return useMutation(
         async (preferences) => {
-            const response = await axiosClient.patch(`/stores/${storeId}/updateNotificationPreferences`, preferences);
+            const response = await axiosClient.patch(`/stores/${storeId}/notification-preferences`, preferences);
             return response.data;
         },
         {

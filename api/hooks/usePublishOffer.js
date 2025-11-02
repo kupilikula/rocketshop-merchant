@@ -6,7 +6,7 @@ export const usePublishOffer = (storeId) => {
     const axiosClient = getAxiosClient();
     return useMutation({
         mutationFn: async (newOffer) => {
-            const { data } = await axiosClient.post(`/stores/${storeId}/offers/createNewOffer`, newOffer);
+            const { data } = await axiosClient.post(`/stores/${storeId}/offers`, newOffer);
             console.log('data:', data);
             return data;
         },

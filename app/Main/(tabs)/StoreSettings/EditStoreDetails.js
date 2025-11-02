@@ -96,7 +96,7 @@ export default function EditStoreDetails() {
         try {
             const fileKey = `stores/${store.storeId}/logo.jpg`; // Assuming jpg, adjust if needed
             const contentType = 'image/jpeg'; // Match extension
-            const presignedRes = await axiosClient.post(`/stores/${store.storeId}/mediaUploadPresignedUrls`, {
+            const presignedRes = await axiosClient.post(`/stores/${store.storeId}/media-upload-presigned-urls`, {
                 fileKeysWithContentTypes: [{ fileKey, contentType }]
             });
 
@@ -112,7 +112,7 @@ export default function EditStoreDetails() {
                 body: blob,
             });
 
-            await axiosClient.post(`/stores/${store.storeId}/updateLogoImage`, { storeLogoImage: fileUri });
+            await axiosClient.post(`/stores/${store.storeId}/logo`, { storeLogoImage: fileUri });
 
             // --- START: Update displayLogoUri and Redux store ---
             const cacheBustedUri = `${fileUri}?v=${new Date().getTime()}`;
@@ -132,7 +132,7 @@ export default function EditStoreDetails() {
     const handleSave = async () => {
         // ... (handleSave function as in original)
         try {
-            await axiosClient.patch(`/stores/${store.storeId}/updateStoreDetails`, {
+            await axiosClient.patch(`/stores/${store.storeId}`, {
                 storeName: name,
                 storeHandle: handle,
                 storeDescription: description,

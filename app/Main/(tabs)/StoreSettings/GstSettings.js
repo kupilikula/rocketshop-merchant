@@ -32,7 +32,7 @@ export default function GstSettingsScreen() {
 
     const handleSave = async () => {
         try {
-            const res = await axiosClient.patch(`/stores/${storeId}/updateGstSettings`, {
+            const res = await axiosClient.patch(`/stores/${storeId}/gst`, {
                 defaultGstInclusive: inclusive,
                 defaultGstRate: rate,
             });

@@ -7,7 +7,7 @@ export const useAddNewCollection = (storeId) => {
 
     return useMutation(
         async (newCollection) => {
-            await axiosClient.post(`/stores/${storeId}/collections/addNewCollection`, newCollection);
+            await axiosClient.post(`/stores/${storeId}/collections`, newCollection);
         },
         {
             onSuccess: () => {

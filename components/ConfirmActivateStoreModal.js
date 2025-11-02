@@ -94,7 +94,7 @@ export default function ConfirmActivateStoreModal({ visible, onDismiss, storeId,
         }
 
         try {
-            await axiosClient.post(`/sendOtp`, {
+            await axiosClient.post(`/auth/send-otp`, {
                 identifier,
                 type: authMethod,
                 context: 'ACTIVATE_STORE',
@@ -116,7 +116,7 @@ export default function ConfirmActivateStoreModal({ visible, onDismiss, storeId,
         const identifier = authMethod === 'phone' ? phone : email;
 
         try {
-            await axiosClient.post(`/verifyOtp`, {
+            await axiosClient.post(`/auth/verify-otp`, {
                 identifier,
                 type: authMethod,
                 otp: submittedOtp,
@@ -137,7 +137,7 @@ export default function ConfirmActivateStoreModal({ visible, onDismiss, storeId,
         setIsLoading(true);
         setError('');
         try {
-            await axiosClient.patch(`/stores/${storeId}/activateStore`, {
+            await axiosClient.patch(`/stores/${storeId}/activate`, {
                 identifier: authMethod === 'phone' ? phone : email,
                 type: authMethod,
                 otp
@@ -160,7 +160,7 @@ export default function ConfirmActivateStoreModal({ visible, onDismiss, storeId,
 
         let token = null;
         if (!IS_WEB) {
-            const {data} = await axiosClient.post('/auth/autoLogin/generate');
+            const {data} = await axiosClient.post('/auth/auto-login/generate');
             token = data.token;
         }
         let billingUrl;

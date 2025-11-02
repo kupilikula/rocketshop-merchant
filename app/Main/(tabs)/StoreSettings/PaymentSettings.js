@@ -176,7 +176,7 @@ export default function PaymentSettingsScreen() {
             const env = __DEV__ ? 'local' : (process.env.EXPO_PUBLIC_APP_ENV === 'development' ? 'qa' : 'production');
             const queryParams = new URLSearchParams({ storeId, platform, env }).toString();
             // IMPORTANT: Changed to axiosClient.get
-            const { data } = await axiosClient.get(`/razorpay/initiateOAuth?${queryParams}`);
+            const { data } = await axiosClient.get(`/razorpay/initiate-oauth?${queryParams}`);
             return data;
         }, {
             onSuccess: (authParams) => {
@@ -194,7 +194,7 @@ export default function PaymentSettingsScreen() {
 
     // NEW: Mutation to link a store to an existing credential
     const { mutate: linkToExisting, isLoading: isLinkingExisting } = useSimpleMutation(
-        (credentialId) => axiosClient.post(`/stores/${storeId}/linkPaymentAccount`, { credentialId }),
+        (credentialId) => axiosClient.post(`/razorpay/link-payment-account`, { storeId, credentialId }),
         { successMsg: "Store linked successfully!", errorMsg: "Failed to link store" }
     );
 
@@ -224,7 +224,7 @@ export default function PaymentSettingsScreen() {
         dispatch(setOAuthState(null));
 
         try {
-            await axiosClient.post(`/razorpay/exchangeCodeForTokens`, { code, state: receivedStateFromPopup, storeId });
+            await axiosClient.post(`/razorpay/exchange-code-for-tokens`, { code, state: receivedStateFromPopup, storeId });
             Alert.alert("Success", "Account connected! Your store is now linked.");
             queryClient.invalidateQueries(['razorpayStatus', storeId]);
         } catch (exchangeError) {

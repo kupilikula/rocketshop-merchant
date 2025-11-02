@@ -7,7 +7,7 @@ export const useDeleteOffer = (storeId, offerId) => {
 
     return useMutation({
         mutationFn: async (updatedFields) => {
-            const { data } = await axiosClient.delete(`/stores/${storeId}/offers/${offerId}/deleteOffer`);
+            const { data } = await axiosClient.delete(`/stores/${storeId}/offers/${offerId}`);
             console.log('data:', data);
             return data;
         },

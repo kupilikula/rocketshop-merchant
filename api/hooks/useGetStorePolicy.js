@@ -10,7 +10,7 @@ import { getAxiosClient } from "../client";
 
 const fetchStorePolicy = async storeId => {
     const axiosClient = getAxiosClient();
-    const { data } = await axiosClient.get(`/stores/${storeId}/storePolicy/getPolicy`);
+    const { data } = await axiosClient.get(`/stores/${storeId}/policy`);
     return data;
 };
 

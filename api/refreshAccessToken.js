@@ -8,7 +8,7 @@ export const refreshAccessToken = async () => {
     try {
         console.log("Attempting to refresh access token...");
         const response = await axios.post(
-            `${API_BASE_URL}/auth/refreshToken`,
+            `${API_BASE_URL}/auth/refresh-token`,
             {},
             { withCredentials: true }
         );

@@ -120,7 +120,7 @@ const ChatScreen = () => {
 
     const sendMessageViaApi = useCallback(async (apiMessage) => {
         try {
-            await axiosClient.post(`/chats/${chatId}/newMessage`, apiMessage);
+            await axiosClient.post(`/chats/${chatId}`, apiMessage);
         } catch (err) {
             console.error('API fallback failed:', err);
         }
@@ -266,7 +266,7 @@ const ChatScreen = () => {
 
         if (newReadMessageIds.length > 0) {
             newReadMessageIds.forEach((id) => processedMessagesRef.current.add(id));
-            axiosClient.post(`/chats/${chatId}/messages/read`, {messageIds: newReadMessageIds});
+            axiosClient.patch(`/chats/${chatId}/messages/read`, {messageIds: newReadMessageIds});
             if (socket) {
                 socket.emit("messagesRead", {chatId, messageIds: newReadMessageIds, readerId: merchantId});
             }

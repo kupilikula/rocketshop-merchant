@@ -6,7 +6,7 @@ export function useDeleteProduct() {
     const axiosClient = getAxiosClient();
 
     return useMutation(async ({ storeId, productId }) => {
-        const response = await axiosClient.delete(`/stores/${storeId}/products/${productId}/deleteProduct`);
+        const response = await axiosClient.delete(`/stores/${storeId}/products/${productId}`);
         return response.data;
     })
 }

@@ -23,7 +23,7 @@ const fetchRazorpayConnectionStatus = async (storeId) => {
     try {
         console.log(`Workspaceing Razorpay status for store: ${storeId}`);
         // Call the backend endpoint you created
-        const { data } = await axiosClient.get(`/stores/${storeId}/getRazorpayStatus`);
+        const { data } = await axiosClient.get(`/razorpay/status?storeId=${storeId}`);
         // Expecting backend to return { isConnected: boolean, accountId?: string | null }
         console.log(`Received status for store ${storeId}:`, data);
         return data;

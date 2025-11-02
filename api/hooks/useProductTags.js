@@ -9,7 +9,7 @@ export const useProductTags = (storeId) => {
     return useQuery(
         "productTags",
         async () => {
-            const response = await axiosClient.get(`/stores/${storeId}/productTags`);
+            const response = await axiosClient.get(`/stores/${storeId}/product-tags`);
             return response.data;
         },
         {

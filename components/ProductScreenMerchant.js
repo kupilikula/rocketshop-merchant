@@ -51,7 +51,7 @@ export default function ProductScreenMerchant(props) {
 
     const handleStatusChange = async (status) => {
         setIsActive(status);
-        await axiosClient.put(`/stores/${storeId}/products/${props.product.productId}/editProduct`, {isActive: status});
+        await axiosClient.patch(`/stores/${storeId}/products/${props.product.productId}`, {isActive: status});
         await queryClient.invalidateQueries(["merchantProduct", storeId, props.product.productId]);
     };
 
@@ -89,7 +89,7 @@ export default function ProductScreenMerchant(props) {
     };
     const submitMarkAsVariant = async (productId, parentProductId, differingAttributes) => {
         try {
-            await axiosClient.post(`/stores/${storeId}/products/markAsVariant`, {productId, parentProductId, differingAttributes})
+            await axiosClient.patch(`/stores/${storeId}/products/${productId}/variant`, {parentProductId, differingAttributes})
             await Promise.all([queryClient.invalidateQueries(["merchantProduct", storeId, productId]), queryClient.invalidateQueries(["merchantProduct", storeId, parentProductId]) ])
         } catch (err) { console.error(err); alert("An error occurred while marking the product as a variant."); }
     };

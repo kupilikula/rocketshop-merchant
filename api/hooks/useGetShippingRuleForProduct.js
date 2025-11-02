@@ -5,7 +5,7 @@ const fetchShippingRuleForProduct = async (productId, storeId) => {
     const axiosClient = getAxiosClient();
     if (!productId) throw new Error('Missing productId');
 
-    const response = await axiosClient.get(`/stores/${storeId}/shipping/getRuleForProduct?productId=${productId}`);
+    const response = await axiosClient.get(`/stores/${storeId}/shipping/rules/products/${productId}`);
     return response.data;
 };
 

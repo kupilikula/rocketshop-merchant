@@ -108,7 +108,7 @@ export default function Preview(props) {
                 console.log('Requesting presigned URLs for:', fileKeysWithContentTypes);
 
                 const { data: presignedUrlsData } = await axiosClient.post(
-                    `/stores/${storeId}/mediaUploadPresignedUrls`,
+                    `/stores/${storeId}/media-upload-presigned-urls`,
                     { fileKeysWithContentTypes }
                 );
                 // User's original code implies presignedUrlsData is the array.
@@ -224,7 +224,7 @@ export default function Preview(props) {
             };
 
             console.log('Inserting product data into DB:', productDataForBackend);
-            await axiosClient.post(`/stores/${storeId}/products/addNewProduct`, productDataForBackend);
+            await axiosClient.post(`/stores/${storeId}/products`, productDataForBackend);
             queryClient.invalidateQueries(["groupingShippingRules", storeId]);
             console.log('Product published successfully!');
             return true;

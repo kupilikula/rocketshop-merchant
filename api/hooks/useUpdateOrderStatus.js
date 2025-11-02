@@ -7,7 +7,7 @@ export const useUpdateOrderStatus = (storeId, orderId) => {
     return useMutation({
         mutationFn: async (newStatus) => {
             const response = await axiosClient.patch(
-                `/stores/${storeId}/orders/${orderId}/updateStatus`,
+                `/stores/${storeId}/orders/${orderId}/status`,
                 { newStatus }
             );
             return response.data;

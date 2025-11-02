@@ -4,7 +4,7 @@ import { getAxiosClient } from '../client'; // your pre-configured Axios instanc
 export const useCreateShippingRule = (storeId) => {
     const axiosClient = getAxiosClient();
     return useMutation(async (shippingRuleData) => {
-        const response = await axiosClient.post(`/stores/${storeId}/shipping/addNewRule`, shippingRuleData);
+        const response = await axiosClient.post(`/stores/${storeId}/shipping/rules`, shippingRuleData);
         return response.data;
     });
 };

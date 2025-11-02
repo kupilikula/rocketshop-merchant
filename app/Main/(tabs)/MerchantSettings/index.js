@@ -96,7 +96,7 @@ export default function MerchantProfileScreen() {
 
         if (phone !== currentPhone) {
             try {
-                await axiosClient.post('/sendOtp', { phone, context: 'UPDATE_PHONE' });
+                await axiosClient.post('/auth/send-otp', { phone, context: 'UPDATE_PHONE' });
                 setPendingPhone(phone);
                 setMode('VERIFY_OTP');
             } catch (err) {
@@ -106,7 +106,7 @@ export default function MerchantProfileScreen() {
             }
         } else {
             try {
-                const res = await axiosClient.post(`/merchants/${merchantId}/updateProfile`, updatePayload);
+                const res = await axiosClient.patch(`/merchants/${merchantId}`, updatePayload);
                 dispatch(setMerchant(res.data.merchant));
                 Alert.alert('Success', 'Profile updated successfully.');
                 setMode('VIEW');
@@ -122,7 +122,7 @@ export default function MerchantProfileScreen() {
         try {
             setLoading(true);
             setOtpError(null);
-            await axiosClient.post('/verifyOtp', { phone: pendingPhone, otp, context: 'UPDATE_PHONE' });
+            await axiosClient.post('/auth/verify-otp', { phone: pendingPhone, otp, context: 'UPDATE_PHONE' });
 
             const updatePayload = {
                 fullName,
@@ -131,7 +131,7 @@ export default function MerchantProfileScreen() {
                 businessType: isFinancialProfileLocked ? undefined : selectedBusinessType
             };
 
-            const res = await axiosClient.post(`/merchants/${merchantId}/updateProfile`, updatePayload);
+            const res = await axiosClient.patch(`/merchants/${merchantId}`, updatePayload);
             dispatch(setMerchant(res.data.merchant));
             Alert.alert('Success', 'Profile updated successfully!');
             setPendingPhone(null);

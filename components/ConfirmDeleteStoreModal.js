@@ -69,7 +69,7 @@ export default function ConfirmDeleteStoreModal({ visible, onDismiss, storeId, s
         const identifier = authMethod === 'phone' ? phone : email;
 
         try {
-            await axiosClient.post(`/sendOtp`, {
+            await axiosClient.post(`/auth/send-otp`, {
                 identifier,
                 type: authMethod,
                 context: 'DELETE_STORE',
@@ -91,7 +91,7 @@ export default function ConfirmDeleteStoreModal({ visible, onDismiss, storeId, s
         const identifier = authMethod === 'phone' ? phone : email;
 
         try {
-            await axiosClient.post(`/verifyOtp`, {
+            await axiosClient.post(`/auth/verify-otp`, {
                 identifier,
                 type: authMethod,
                 otp: submittedOtp,
@@ -118,7 +118,7 @@ export default function ConfirmDeleteStoreModal({ visible, onDismiss, storeId, s
         const identifier = authMethod === 'phone' ? phone : email;
 
         try {
-            await axiosClient.post(`/stores/${storeId}/deleteStore`, {
+            await axiosClient.delete(`/stores/${storeId}`, {
                 identifier,
                 type: authMethod,
                 otp

@@ -128,7 +128,7 @@ export default function AppShell() {
                 if (pushToken) {
                     try {
                         console.log('2 registering push token');
-                        await axiosClient.post('/registerPushToken', {
+                        await axiosClient.post(`/merchants/${merchantId}/push-token`, {
                             expoPushToken: pushToken,
                             deviceInfo: {
                                 platform: Platform.OS,

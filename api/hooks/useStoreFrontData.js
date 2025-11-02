@@ -3,7 +3,7 @@ import { getAxiosClient } from "../client";
 
 export const fetchStoreFrontData = async (storeId) => {
     const axiosClient = getAxiosClient();
-    const response = await axiosClient.get(`/stores/${storeId}/storeFront`);
+    const response = await axiosClient.get(`/stores/${storeId}/front`);
     return response.data;
 };
 

@@ -10,7 +10,7 @@ import {getAxiosClient} from '../client'; // ← same wrapper as above
 
 const postStorePolicy = async ({ storeId, values }) => {
     const axiosClient = getAxiosClient();
-    await axiosClient.post(`/stores/${storeId}/storePolicy/changePolicy`, values);
+    await axiosClient.patch(`/stores/${storeId}/policy`, values);
 };
 
 export default function useUpdateStorePolicy(storeId, options = {}) {

@@ -7,7 +7,7 @@ export const useUpdateShippingRule = (storeId) => {
     return useMutation(
         async ({ shippingRuleId, updatedRule }) => {
             const response = await axiosClient.patch(
-                `/stores/${storeId}/shipping/updateRule?shippingRuleId=${shippingRuleId}`,
+                `/stores/${storeId}/shipping/rules/${shippingRuleId}`,
                 updatedRule
             );
             return response.data;

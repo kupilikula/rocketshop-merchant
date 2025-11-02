@@ -29,7 +29,7 @@ export default function SubscriptionScreen() {
 
         let token = null;
         if (!IS_WEB) {
-            const {data} = await axiosClient.post('/auth/autoLogin/generate');
+            const {data} = await axiosClient.post('/auth/auto-login/generate');
             token = data.token;
         }
         console.log('token', token);

@@ -4,7 +4,7 @@ import { getAxiosClient } from "../client";
 // Fetch storefront data API
 export const fetchStoreDetails = async (storeId) => {
     const axiosClient = getAxiosClient();
-    const { data } = await axiosClient.get(`/stores/${storeId}/storeDetails`);
+    const { data } = await axiosClient.get(`/stores/${storeId}`);
     return data;
 };
 

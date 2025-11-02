@@ -10,7 +10,7 @@ export const useReorderCollectionProducts = (storeId, collectionId) => {
                 productId: product.productId,
                 displayOrder: index + 1, // 1-based order
             }));
-            await axiosClient.patch(`/stores/${storeId}/collections/${collectionId}/reorderProducts`, {
+            await axiosClient.patch(`/stores/${storeId}/collections/${collectionId}/reorder-products`, {
                 productOrders,
             });
         },

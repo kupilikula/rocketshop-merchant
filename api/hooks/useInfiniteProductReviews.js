@@ -18,7 +18,7 @@ export function useInfiniteProductReviews(
     return useInfiniteQuery({
         queryKey: ["product_reviews", storeId, productId, sort, rating, hasTextOnly],
         queryFn: async ({ pageParam = 0 }) => {
-            const res = await axiosClient.get(`/stores/${storeId}/products/${productId}/getAllReviews`, {
+            const res = await axiosClient.get(`/stores/${storeId}/products/${productId}/reviews`, {
                 params: {
                     limit,
                     offset: pageParam,

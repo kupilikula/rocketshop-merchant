@@ -11,7 +11,7 @@ export const useCreateSubscription = (options) => {
     const axiosClient = getAxiosClient();
 
     const createSubscription = async ({ planType, storeId }) => {
-        const { data } = await axiosClient.post(`/stores/${storeId}/createSubscription`, {
+        const { data } = await axiosClient.post(`/stores/${storeId}/subscriptions`, {
             planType,
             storeId,
         });

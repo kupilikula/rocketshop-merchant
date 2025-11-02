@@ -117,7 +117,7 @@ const AuthFormMerchant = ({
             app: 'merchant'
         };
         try {
-            const res = await axiosClient.post('/sendOtp', requestBody);
+            const res = await axiosClient.post('/auth/send-otp', requestBody);
             setIsRegisteredUser(res.data.isRegistered);
             // dispatch(setGlobalAuthIdentifier(formattedIdentifier));
             setCurrentStep(AUTH_STEPS.OTP_INPUT);
@@ -146,7 +146,7 @@ const AuthFormMerchant = ({
             app: 'merchant'
         };
         try {
-            await axiosClient.post('/verifyOtp', verifyRequestBody);
+            await axiosClient.post('/auth/verify-otp', verifyRequestBody);
             setOtp(submittedOtpValue);
             if (isRegisteredUser) {
                 const loginRequestBody = {
@@ -154,7 +154,7 @@ const AuthFormMerchant = ({
                     type: authMethod === AUTH_METHODS.PHONE ? 'phone' : 'email',
                     otp: submittedOtpValue
                 };
-                const res = await axiosClient.post('/auth/merchantLogin', loginRequestBody);
+                const res = await axiosClient.post('/auth/login', loginRequestBody);
                 const { accessToken, merchant, stores } = res.data;
                 await AsyncStorage.setItem('accessToken', accessToken);
                 dispatch(setMerchant(merchant));

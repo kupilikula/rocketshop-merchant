@@ -85,7 +85,7 @@ export default function RazorpayAuthCallback() {
             setMessage('State verified. Finalizing connection...');
 
             try {
-                const exchangeResponse = await axiosClient.post(`/razorpay/exchangeCodeForTokens`, {
+                const exchangeResponse = await axiosClient.post(`/razorpay/exchange-code-for-tokens`, {
                     code: authCode,
                     state: authState,
                     storeId

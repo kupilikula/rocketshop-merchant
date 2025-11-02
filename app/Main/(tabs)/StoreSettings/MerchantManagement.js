@@ -55,14 +55,14 @@ export default function MerchantManagementScreen() {
     const { data: merchants = [], isLoading, isError } = useQuery({
         queryKey: ["storeMerchants", storeId],
         queryFn: async () => {
-            const res = await axiosClient.get(`/stores/${storeId}/getMerchants`);
+            const res = await axiosClient.get(`/stores/${storeId}/merchants`);
             return res.data.merchants;
         },
         enabled: !!storeId,
     });
 
     const addMerchantMutation = useMutation(
-        (newMerchantData) => axiosClient.post(`/stores/${storeId}/addMerchantToStore`, newMerchantData),
+        (newMerchantData) => axiosClient.post(`/stores/${storeId}/merchants`, newMerchantData),
         {
             onSuccess: () => {
                 queryClient.invalidateQueries(["storeMerchants", storeId]);
@@ -79,7 +79,7 @@ export default function MerchantManagementScreen() {
     );
 
     const updateMerchantRoleMutation = useMutation(
-        ({ merchantIdToUpdate, newRole }) => axiosClient.patch(`/stores/${storeId}/updateMerchantRole/${merchantIdToUpdate}`, { newMerchantRole: newRole }),
+        ({ merchantIdToUpdate, newRole }) => axiosClient.patch(`/stores/${storeId}/merchants/${merchantIdToUpdate}/role`, { newMerchantRole: newRole }),
         {
             onSuccess: () => {
                 queryClient.invalidateQueries(["storeMerchants", storeId]);
@@ -90,7 +90,7 @@ export default function MerchantManagementScreen() {
     );
 
     const toggleMessagesMutation = useMutation(
-        ({ merchantIdToToggle, canReceive }) => axiosClient.patch(`/stores/${storeId}/updateMerchantCanReceiveMessages/${merchantIdToToggle}`, { canReceiveMessages: canReceive }),
+        ({ merchantIdToToggle, canReceive }) => axiosClient.patch(`/stores/${storeId}/merchants/${merchantIdToToggle}/can-receive-messages`, { canReceiveMessages: canReceive }),
         {
             onSuccess: () => {
                 queryClient.invalidateQueries(["storeMerchants", storeId]);
@@ -101,7 +101,7 @@ export default function MerchantManagementScreen() {
     );
 
     const removeMerchantMutation = useMutation(
-        (merchantIdToRemove) => axiosClient.delete(`/stores/${storeId}/removeMerchantFromStore/${merchantIdToRemove}`),
+        (merchantIdToRemove) => axiosClient.delete(`/stores/${storeId}/merchants/${merchantIdToRemove}`),
         {
             onSuccess: () => {
                 queryClient.invalidateQueries(["storeMerchants", storeId]);

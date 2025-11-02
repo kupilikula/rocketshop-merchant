@@ -67,7 +67,7 @@ export default function ConfirmDeactivateStoreModal({ visible, onDismiss, storeI
         const identifier = authMethod === 'phone' ? phone : email;
 
         try {
-            await axiosClient.post(`/sendOtp`, {
+            await axiosClient.post(`/auth/send-otp`, {
                 identifier,
                 type: authMethod,
                 context: 'DEACTIVATE_STORE',
@@ -89,7 +89,7 @@ export default function ConfirmDeactivateStoreModal({ visible, onDismiss, storeI
         const identifier = authMethod === 'phone' ? phone : email;
 
         try {
-            await axiosClient.post(`/verifyOtp`, {
+            await axiosClient.post(`/auth/verify-otp`, {
                 identifier,
                 type: authMethod,
                 otp: submittedOtp,
@@ -116,7 +116,7 @@ export default function ConfirmDeactivateStoreModal({ visible, onDismiss, storeI
         const identifier = authMethod === 'phone' ? phone : email;
 
         try {
-            await axiosClient.patch(`/stores/${storeId}/deactivateStore`, {
+            await axiosClient.patch(`/stores/${storeId}/deactivate`, {
                 identifier,
                 type: authMethod,
                 otp

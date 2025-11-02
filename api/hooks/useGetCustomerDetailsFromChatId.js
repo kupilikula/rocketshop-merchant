@@ -12,7 +12,7 @@ export const useGetCustomerDetailsFromChatId = (chatId) => {
     return useQuery(
         ['customerDetailsFromChatId', chatId],
         async () => {
-            const response = await axiosClient.get(`/getCustomerDetailsFromChatId`, {
+            const response = await axiosClient.get(`/chats/${chatId}/customer`, {
                 params: { chatId }
             });
             return response.data;

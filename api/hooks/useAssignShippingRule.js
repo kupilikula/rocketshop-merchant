@@ -7,10 +7,7 @@ export const useAssignShippingRule = (storeId) => {
 
     return useMutation({
         mutationFn: async ({ productId, shippingRuleId }) => {
-            const res = await axiosClient.post(`/stores/${storeId}/shipping/associateRuleWithProduct`, {
-                productId,
-                shippingRuleId
-            });
+            const res = await axiosClient.patch(`/stores/${storeId}/shipping/rules/${shippingRuleId}/products/${productId}/associate`);
             return res.data;
         },
     });

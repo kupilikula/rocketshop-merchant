@@ -7,7 +7,7 @@ export const useGetShippingRules = (storeId) => {
     return useQuery(
         ['shippingRules', storeId],
         async () => {
-            const response = await axiosClient.get(`/stores/${storeId}/shipping/getRules`);
+            const response = await axiosClient.get(`/stores/${storeId}/shipping/rules`);
             return response.data;
         },
         {

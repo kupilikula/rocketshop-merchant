@@ -6,7 +6,7 @@ export const useUpdateOffer = (storeId, offerId) => {
     const axiosClient = getAxiosClient();
     return useMutation({
         mutationFn: async (updatedFields) => {
-            const { data } = await axiosClient.patch(`/stores/${storeId}/offers/${offerId}/updateOffer`, updatedFields);
+            const { data } = await axiosClient.patch(`/stores/${storeId}/offers/${offerId}`, updatedFields);
             console.log('data:', data);
             return data;
         },

@@ -8,7 +8,7 @@ export const useAddShippingRule = (storeId) => {
 
     return useMutation(
         async (data) => {
-            const response = await axiosClient.post(`/stores/${storeId}/shipping/addNewRule`, data);
+            const response = await axiosClient.post(`/stores/${storeId}/shipping/rules`, data);
             return response.data;
         },
         {

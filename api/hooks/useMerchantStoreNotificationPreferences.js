@@ -12,7 +12,7 @@ export const useMerchantStoreNotificationPreferences = (storeId, merchantId) => 
     return useQuery(
         ['merchantStoreNotificationPreferences', storeId, merchantId],
         async () => {
-            const response = await axiosClient.get(`/stores/${storeId}/getNotificationPreferences`);
+            const response = await axiosClient.get(`/stores/${storeId}/notification-preferences`);
             return response.data;
         },
         {
